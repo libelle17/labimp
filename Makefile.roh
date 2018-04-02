@@ -161,6 +161,7 @@ slc::=$(SUDC)/sbin/ldconfig
 # si_unins=$(SPR)$(1)>$(KR)||{ $(call i_unins,$(1),$(2))};
 # GROFFCHECK::=$(call i1siund,$(PGROFF)):
 
+# nach: http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
 DEPDIR ::= .d
 $(shell mkdir -p $(DEPDIR)>$(KR))
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
@@ -599,4 +600,4 @@ neuproj:
 		echo Weiter mit/Go on with: \"cd ../"$$Z"\";
 
 
-# -include $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS)))
+-include $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS)))

@@ -238,9 +238,8 @@ inline char dne(DBSTyp DBS)
   } //   switch(DBS)
 } // inline char dne(DBSTyp DBS) 
 
-class Feld 
+struct Feld 
 {
-  public:
     const string name;
     const string typ;
     string lenge;
@@ -255,17 +254,33 @@ class Feld
     Feld(const string& name, string typ=string(), const string& lenge=string(), const string& prec=string(), 
          const string& comment=string(), bool obind=0, bool obauto=0, bool nnull=0, const string& defa=string(), bool unsig=0);
 //		Feld(Feld const& copy);
-}; // class Feld 
+}; // struct Feld 
 
-class Index 
+struct Index 
 {
-	public:
 		const string name;
-    unsigned feldzahl;
     Feld *const felder;
+    const unsigned feldzahl;
 		uchar unique;
-    Index(const string& vname, Feld *const vfelder, const int vfeldzahl, const uchar unique=0);
-}; // class Index 
+    Index(const string& vname, Feld *const vfelder, const unsigned vfeldzahl, const uchar unique=0);
+}; // struct Index 
+
+enum refact:uchar {cascade,set_null,restrict,no_action,set_default};
+
+
+struct Constraint
+{
+	const string name;
+	Feld *const felder1;
+	const unsigned feldz1;
+	const string reftab;
+	Feld *const felder2;
+	const unsigned feldz2;
+	const refact onupdate;
+	const refact ondelete;
+	Constraint(const string& name, Feld *const felder1, const unsigned feldz1, const string& reftab, 
+			Feld *const felder2, const unsigned feldz2, const refact onupdate=restrict, const refact ondelete=restrict);
+};
 
 class RS;
 
@@ -368,16 +383,20 @@ class Tabelle
     unsigned feldzahl;
     Index *indices;
     unsigned indexzahl;
+		Constraint *constraints;
+		unsigned constrzahl;
     const string engine;
     const string charset;
     const string collate;
     const string rowformat;
-    Tabelle(const DB* dbp,const string& tbname, Feld *felder, int feldzahl, Index *indices, unsigned vindexzahl, string comment=string(),
-        const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
+    Tabelle(const DB* dbp,const string& tbname, Feld *felder, const int feldzahl, Index *const indices=0, const unsigned vindexzahl=0, 
+				Constraint *const constraints=0, const unsigned constrzahl=0,
+				const string comment=string(), const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
 				const string& rowformat=DB::defmyrowform);
 		Tabelle(const DB* dbp,const string& name,const size_t aktc/*=0*/,int obverb/*=0*/,int oblog/*=0*/);
 		void lesespalten(const size_t aktc/*=0*/,int obverb/*=0*/,int oblog/*=0*/);
 		int machind(const size_t aktc,int obverb=0, int oblog=0);
+		int machconstr(const size_t aktc,int obverb=0, int oblog=0);
     int prueftab(const size_t aktc,int obverb=0,int oblog=0);
 }; // class Tabelle 
 

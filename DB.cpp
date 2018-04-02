@@ -226,21 +226,37 @@ Feld::Feld(const string& name, string typ/*=string()*/, const string& lenge/*=st
 // Feld::Feld(Feld const& copy) { }
 
 
-Index::Index(const string& name, Feld *const felder, const int feldzahl, const uchar unique/*=0*/):
+Index::Index(const string& name, Feld *const felder, const unsigned feldzahl, const uchar unique/*=0*/):
   name(name),
-  feldzahl(feldzahl),
   felder(felder),
+  feldzahl(feldzahl),
 	unique(unique)
 {}
 
-Tabelle::Tabelle(const DB* dbp,const std::string& tbname, Feld *vfelder, int vfeldzahl, Index *vindices, unsigned vindexzahl, string comment/*string()*/, 
+
+Constraint::Constraint(const string& name, Feld *const felder1, const unsigned feldz1, const string& reftab, 
+		                   Feld *const felder2, const unsigned feldz2, const refact onupdate/*=restrict*/, const refact ondelete/*=restrict*/):
+	name(name),
+	felder1(felder1),
+	feldz1(feldz1),
+	reftab(reftab),
+	felder2(felder2),
+	feldz2(feldz2),
+	onupdate(onupdate),
+	ondelete(ondelete)
+{}
+
+Tabelle::Tabelle(const DB* dbp,const std::string& tbname, Feld *vfelder, const int feldzahl, Index *vindices, const unsigned vindexzahl, 
+		Constraint *const constraints, const unsigned constrzahl, const string comment/*string()*/, 
 		const string& engine/*DB::defmyengine*/, const string& charset/*DB::defmycharset*/, const string& collate/*DB::defmycollat*/, const string& rowformat/*DB::defmyrowform*/)
 :   dbp(dbp),tbname(tbname),
 	comment(comment),
 	felder(vfelder),
-	feldzahl(vfeldzahl),
+	feldzahl(feldzahl),
 	indices(vindices),
 	indexzahl(vindexzahl),
+	constraints(constraints),
+	constrzahl(constrzahl),
 	engine(engine),
 	charset(charset),
 	collate(collate),
@@ -824,11 +840,50 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
   fLog(violetts+Txk[T_Ende]+Txd[T_Lesespalten]+blau+": "+tbname+"'"+schwarz,obverb,oblog);
 } // lesespalten
 
+// enum refact:uchar {cascade,set_null,restrict,no_action,set_default};
+const string refacts[]={"CASCADE","SET NULL","RESTRICT","NO ACTION","SET DEFAULT"};
+
+int Tabelle::machconstr(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
+{
+	for(unsigned i=0;i<constrzahl;i++) {
+		const Constraint* const cons=&constraints[i];
+		uchar obneu=0;
+		RS rcon(dbp,"SELECT 0 FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA='"+dbp->dbname+"' AND TABLE_NAME='"+tbname+"' AND REFERENCED_TABLE_NAME='"+cons->reftab+"' AND REFERENCED_COLUMN_NAME IS NOT NULL AND COLUMN_NAME='"+cons->felder1->name+"' AND REFERENCED_COLUMN_NAME='"+cons->felder2->name+"'",aktc,obverb);
+		if (rcon.obfehl) {
+			obneu=1;
+		} else {
+			 if (!rcon.result->row_count) {
+				 obneu=1;
+			 }
+		}
+		if (obneu) {
+			// Wenn Referenztabelle auf dem aktuellen Server fehlt, dann darueber hinweggehen
+			MYSQL_RES *dbres = mysql_list_tables(dbp->conn[aktc],cons->reftab.c_str());
+			if (dbres && dbres->row_count) {
+				string machcon="ALTER TABLE `"+tbname+"` ADD CONSTRAINT `"+cons->name+"` FOREIGN KEY (";
+				for(unsigned j=0;j<cons->feldz1;j++) {
+					machcon+="`"+cons->felder1[j].name+"`";
+					if (j<cons->feldz1-1) machcon+=",";
+				}
+				machcon+=") REFERENCES `"+cons->reftab+"` (";
+				for(unsigned j=0;j<cons->feldz2;j++) {
+					machcon+="`"+cons->felder2[j].name+"`";
+					if (j<cons->feldz2-1) machcon+=",";
+				}
+				machcon+=") ON UPDATE "+refacts[cons->onupdate]+" ON DELETE "+refacts[cons->ondelete];
+				RS rconsins(dbp);
+				rconsins.Abfrage(machcon,aktc,obverb);
+			} // if (dbres && dbres->row_count)
+		}
+	} // 	for(unsigned i=0;i<constrzahl;i++)
+	return 0;
+} // int Tabelle::machconstr
+
 // aufgerufen in prueftab
 int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 {
 	for(unsigned i=0;i<indexzahl;i++) {
-		Index* indx=&indices[i];
+		const Index* const indx=&indices[i];
 		// steht aus: Namen nicht beruecksichtigen, nur Feldreihenfolge und ggf. -laenge
 		uchar obneu=0;
 		RS rind(dbp,"SHOW INDEX FROM `"+tbname+"` WHERE KEY_NAME = '"+indx->name+"'",aktc,obverb);
@@ -902,7 +957,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 			sql<<")";
 			rindins.Abfrage(sql.str(),aktc,obverb);
 		} // if (!rind.obfehl) 
-	}
+	} // 	for(unsigned i=0;i<indexzahl;i++)
 	return 0;
 } // int DB::machind(const string& tbname, Index* indx,int obverb/*=0*/, int oblog/*=0*/)
 
@@ -1060,6 +1115,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
           } // if (verschieb || aendere)
         } // for(int gspn=0;gspn<feldzahl;gspn++) 
 				machind(aktc,obverb,oblog);
+				machconstr(aktc,obverb,oblog);
 			} // case Mysql
       break;
     case Postgres:
