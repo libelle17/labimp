@@ -15,14 +15,52 @@
 .SH OPTIONEN 
 .SH VORAUSSETZUNGEN
 .br
-lind: 0
+\fBwhich rpm 2>/dev/null\fR:
 .br
-lind: 1
+\fBwhich "rpm" 2>/dev/null ||env "PATH=$PATH" which "rpm" 2>/dev/null\fR:
 .br
-lind: 2
+\fBOptionen, die nicht gespeichert werden: \fR
 .br
-Stelle 0
+\fB -sqlw, --sql-wortreich\fR: Bildschirmausgabe mit SQL-Befehlen (\fB0\fR)
 .br
-Stelle 1
+\fB -w, --wortreich\fR: Bildschirmausgabe gespraechiger\fB oder nicht\fR (\fB0\fR)
 .br
-fname: /etc/default/locale
+\fB -ldn, --logdateineu\fR: logdatei vorher loeschen\fB oder nicht\fR (\fB0\fR)
+.br
+\fB -kd, --konfdatei <string>\fR: verwendet Konfigurationsdatei <string> anstatt ('\fB\fR')
+.br
+\fB -h, --hilfe\fR: Erklaerung haeufiger Optionen\fB oder nicht\fR (\fB3\fR)
+.br
+\fB -lh, --langhilfe\fR: Erklaerung aller Optionen\fB oder nicht\fR (\fB3\fR)
+.br
+\fB -vi, --vi\fR: Konfigurationsdatei , Logdatei usw. bearbeiten/sehen (beenden mit ':qa')\fB oder nicht\fR (\fB0\fR)
+.br
+\fB -vs, --vs\fR: Quelldateien in \fB/root/labimp\fR bearbeiten/sehen (beenden mit ':qa')\fB oder nicht\fR (\fB0\fR)
+.br
+\fB -rf, --rueckfragen\fR: alle Parameter werden abgefragt (darunter einige hier nicht gezeigte)\fB oder nicht\fR (\fB0\fR)
+.br
+\fB -krf, --keinerueckfragen\fR: keine Rueckfragen, z.B. fuer Aufruf aus cron\fB oder nicht\fR (\fB0\fR)
+.br
+\fB -info, --version\fR: Zeigt die Programmversion an\fB oder nicht\fR (\fB0\fR)
+.br
+\fBOptionen z.Speich. i.Konfigur'datei (vorausg. '1'=doch nicht speichern, 'no'=Gegenteil, z.B. '-noocra','-1noocri'):\fR
+.br
+\fB -host, --host <string>\fR: verwendet die Datenbank auf Host <string> anstatt auf ('\fBlocalhost\fR')
+.br
+\fB -muser, --muser <string>\fR: verwendet fuer MySQL/MariaDB den Benutzer <string> anstatt ('\fB\fR')
+.br
+\fB -mpwd, --mpwd <string>\fR: verwendet fuer MySQL/MariaDB das Passwort <string>
+.br
+\fB -db, --datenbank <string>\fR: verwendet die Datenbank <string> anstatt ('\fBquelle\fR')
+.br
+\fB -sp, --sprache <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBd\fR')
+.br
+\fB -lvz, --logvz <pfad>\fR: waehlt als Logverzeichnis <pfad>, derzeit ('\fB/var/log\fR')
+.br
+\fB -ld, --logdname <string>\fR: logdatei <string> (im Pfad '\fB/var/log\fR') wird verwendet anstatt ('\fBlabimp.log\fR')
+.br
+\fB -l, --log <zahl>\fR: protokolliert ausfuehrlich in Datei '\fB/var/log/labimp.log\fR' (sonst knapper)\fB oder nicht\fR (\fB0\fR)
+.br
+\fB -cm, --cronminuten <string>\fR: alle wieviel Minuten soll \fBlabimp\fR ueber crontab aufgerufen werden (0=gar nicht), anstatt  ('\fB0\fR')
+.br
+\fB -autoakt, --autoaktual <zahl>\fR: Programm automatisch aktualisieren\fB oder nicht\fR (\fB1\fR)

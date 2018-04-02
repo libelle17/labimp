@@ -42,8 +42,8 @@ extern const int sfeh[]; // T_Dienst_laeuft, T_Dienst_inexistent, ...
 extern const double& versnr; // Programmversion
 extern const string& spath; // PATH-Variable für root
 string* loeschefarbenaus(string *zwi);
-int Log(const short screen,const short file, const bool oberr,const short klobverb, const char *format, ...);
-int Log(const string& text,const short screen=1,const short file=1,const bool oberr=0,const short klobverb=0);
+int yLog(const short screen,const short file, const bool oberr,const short klobverb, const char *format, ...);
+int fLog(const string& text,const short screen=1,const short file=1,const bool oberr=0,const short klobverb=0);
 
 #ifdef _MSC_VER
 #define fileno _fileno // sonst Warnung posix deprecated
@@ -1283,7 +1283,7 @@ class hcl
 		hcl(const int argc, const char *const *const argv,const char* const DPROG);
 		~hcl();
 		void lauf();
-		int Log(const string& text,const bool oberr=0,const short klobverb=0) const;
+		int hLog(const string& text,const bool oberr=0,const short klobverb=0) const;
 		void pruefsamba(const vector<const string*>& vzn,const svec& abschni,const svec& suchs,const char* DPROG,const string& cuser);
 		int holvomnetz(const string& datei,const string& vors=defvors,const string& nachs=defnachs);
 		int kompilbase(const string& was,const string& endg);

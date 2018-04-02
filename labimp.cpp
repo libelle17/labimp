@@ -252,7 +252,7 @@ hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) 
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaboryeingel]+schwarz);
+	hLog(violetts+Tx[T_prueflaboryeingel]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -267,7 +267,7 @@ void hhcl::prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obve
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryeingel,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_LaborEinlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryeingel,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryeingel,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -276,7 +276,7 @@ void hhcl::prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obve
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaboryleist]+schwarz);
+	hLog(violetts+Tx[T_prueflaboryleist]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -296,7 +296,7 @@ void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryleist,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_LaborLeistungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryleist,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryleist,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -305,7 +305,7 @@ void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaborypgl]+schwarz);
+	hLog(violetts+Tx[T_prueflaborypgl]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -320,7 +320,7 @@ void hhcl::prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, co
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborypgl,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_Laborpgl]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypgl,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypgl,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -329,7 +329,7 @@ void hhcl::prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, co
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaboryplab]+schwarz);
+	hLog(violetts+Tx[T_prueflaboryplab]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -341,7 +341,7 @@ void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, 
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryplab,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_Laborplab]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryplab,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryplab,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -350,7 +350,7 @@ void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, 
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaborypnb(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaborypnb]+schwarz);
+	hLog(violetts+Tx[T_prueflaborypnb]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -369,7 +369,7 @@ void hhcl::prueflaborypnb(DB *My, const string& tlaborypnb, const int obverb, co
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborypnb,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_Labornb]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypnb,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypnb,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -378,7 +378,7 @@ void hhcl::prueflaborypnb(DB *My, const string& tlaborypnb, const int obverb, co
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaborypneu]+schwarz);
+	hLog(violetts+Tx[T_prueflaborypneu]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -394,7 +394,7 @@ void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, c
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborypneu,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_Laborneu]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypneu,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypneu,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -404,7 +404,7 @@ void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, c
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaborysaetze]+schwarz);
+	hLog(violetts+Tx[T_prueflaborysaetze]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -436,7 +436,7 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborysaetze,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborysaetze,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborysaetze,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -446,7 +446,7 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaboryus]+schwarz);
+	hLog(violetts+Tx[T_prueflaboryus]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -492,7 +492,7 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryus,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_Laborus]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryus,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryus,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -502,7 +502,7 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaborywert]+schwarz);
+	hLog(violetts+Tx[T_prueflaborywert]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -529,7 +529,7 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborywert,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_Laborwert]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborywert,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborywert,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -540,7 +540,7 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	Log(violetts+Tx[T_prueflaborybakt]+schwarz);
+	hLog(violetts+Tx[T_prueflaborybakt]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -560,7 +560,7 @@ void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, 
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborybakt,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, Tx[T_Laborbakt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			::Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborybakt,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborybakt,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -571,14 +571,14 @@ void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, 
 // wird aufgerufen in lauf
 void hhcl::virtVorgbAllg()
 {
-	Log(violetts+Tx[T_virtVorgbAllg]+schwarz); //ω
+	hLog(violetts+Tx[T_virtVorgbAllg]+schwarz); //ω
 	dhcl::virtVorgbAllg(); //α
 } // void hhcl::virtVorgbAllg
 
 // wird aufgerufen in lauf
 void hhcl::pvirtVorgbSpeziell()
 {
-	Log(violetts+Tx[T_pvirtVorgbSpeziell]+schwarz); //ω
+	hLog(violetts+Tx[T_pvirtVorgbSpeziell]+schwarz); //ω
 	dbq="quelle";
 	dhcl::pvirtVorgbSpeziell(); //α
 	virtMusterVorgb();
@@ -600,7 +600,7 @@ void hhcl::pvirtmacherkl()
 // wird aufgerufen in lauf
 void hhcl::virtMusterVorgb()
 {
-	Log(violetts+Tx[T_virtMusterVorgb]+schwarz); //ω
+	hLog(violetts+Tx[T_virtMusterVorgb]+schwarz); //ω
 	dhcl::virtMusterVorgb(); //α
 } // void hhcl::MusterVorgb
 
@@ -613,7 +613,7 @@ void hhcl::virtzeigversion(const string& ltiffv/*=nix*/)
 // wird aufgerufen in lauf
 void hhcl::pvirtvorrueckfragen()
 {
-	Log(violetts+Tx[T_pvirtvorrueckfragen]+schwarz);
+	hLog(violetts+Tx[T_pvirtvorrueckfragen]+schwarz);
 	if (rzf) { //ω
   } //α
 } // void hhcl::pvirtvorrueckfragen
@@ -622,7 +622,7 @@ void hhcl::pvirtvorrueckfragen()
 // wird aufgerufen in lauf
 void hhcl::virtrueckfragen()
 {
-	Log(violetts+Tx[T_virtrueckfragen]+schwarz);
+	hLog(violetts+Tx[T_virtrueckfragen]+schwarz);
 	if (rzf) { //ω
 	} //α
 	dhcl::virtrueckfragen();
@@ -668,18 +668,18 @@ void hhcl::virtautokonfschreib()
 {
 // int altobverb=obverb;
 // obverb=1;
-	Log(violetts+Txk[T_autokonfschreib]+schwarz+", "+Txk[T_zu_schreiben]+((rzf||hccd.obzuschreib)?Txk[T_ja]:Txk[T_nein]));
+	hLog(violetts+Txk[T_autokonfschreib]+schwarz+", "+Txk[T_zu_schreiben]+((rzf||hccd.obzuschreib)?Txk[T_ja]:Txk[T_nein]));
 	/*//
 		capizukonf und hylazukonf hier immer 0
 		char buf[200];
 		sprintf(buf,"rzf: %d, capizukonf: %d, hylazukonf: %d, obkschreib: %d",(int)rzf, (int)capizukonf, (int)hylazukonf, (int)obkschreib);
-		Log(blaus+buf+schwarz);
+		hLog(blaus+buf+schwarz);
 	 */
 	struct stat kstat={0};
 	if (lstat(akonfdt.c_str(),&kstat))
 		hccd.obzuschreib=1;
 	if (rzf||hccd.obzuschreib) {
-		Log(gruens+Tx[T_schreibe_Konfiguration]+schwarz,/*oberr*/obverb);
+		hLog(gruens+Tx[T_schreibe_Konfiguration]+schwarz,/*oberr*/obverb);
 		// restliche Erklaerungen festlegen
 		////    agcnfA.setzbem("language",sprachstr);
 		hcl::virtautokonfschreib(); //ω
@@ -695,9 +695,9 @@ void hhcl::virtlieskonfein()
 {
 	const int altobverb=obverb;
 	//	obverb=1;
-	Log(violetts+Txk[T_virtlieskonfein]+schwarz);
+	hLog(violetts+Txk[T_virtlieskonfein]+schwarz);
 	hcl::virtlieskonfein(); //ω
-	Log(violetts+Txk[T_Ende]+Txk[T_virtlieskonfein]+schwarz); //α
+	hLog(violetts+Txk[T_Ende]+Txk[T_virtlieskonfein]+schwarz); //α
 	obverb=altobverb;
 } // void hhcl::virtlieskonfein()
 
