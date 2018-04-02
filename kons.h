@@ -940,9 +940,9 @@ int systemrueck(const string& cmd, char obverb=0, int oblog=0, vector<string> *r
 void pruefplatte();
 void pruefmehrfach(const string& wen=nix,int obverb=0,uchar obstumm=0);
 void setfaclggf(const string& datei,int obverb=0,int oblog=0,const binaer obunter=falsch,int mod=4,uchar obimmer=0,
-                uchar faclbak=0,const string& user=nix,uchar fake=0,stringstream *ausgp=0);
+                uchar faclbak=0,const string& user=string(),uchar fake=0,stringstream *ausgp=0,const uchar obprot=1);
 int pruefverz(const string& verz,int obverb=0,int oblog=0, uchar obmitfacl=0, uchar obmitcon=0,
-              const string& besitzer=nix, const string& benutzer=nix, const uchar obmachen=1);
+              const string& besitzer=string(), const string& benutzer=string(), const uchar obmachen=1,const uchar obprot=1);
 string aktprogverz();
 char Tippbuchst(const string& frage, const string& moegl,const char *berkl[], const char* erlaubt=0, const char *vorgabe=0);
 // vorgabe fur vorgabe = T_j_k; alternativ='n'

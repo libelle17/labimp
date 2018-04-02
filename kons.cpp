@@ -1021,6 +1021,7 @@ int getcols()
 // Achtung: Wegen der Notwendigkeit der Existenz der Datei zum Aufruf von setfacl kann die Datei erstellt werden!
 mdatei::mdatei(const string& name, ios_base::openmode modus/*=ios_base::in|ios_base::out*/,uchar faclbak/*=1*/,int obverb/*=0*/, int oblog/*=0*/)
 {
+	if (obverb||oblog) Log(violetts+"mdatei("+blau+name+schwarz+","+blau+ltoan(modus)+schwarz+","+blau+(faclbak?"1":"0")+schwarz+")",oblog,obverb);
   uchar mehralslesen=(modus&ios_base::out||modus&ios_base::app||modus&ios_base::trunc||modus&ios_base::app);
   for(int iru=0;iru<3;iru++) {
     open(name,modus);
@@ -1031,13 +1032,14 @@ mdatei::mdatei(const string& name, ios_base::openmode modus/*=ios_base::in|ios_b
     ////    int erg __attribute__((unused));
 		////    if (name!=unindt)  // sonst vielleicht Endlosschleife
 		if (mehralslesen) {
-			pruefverz(dir_name(name),obverb,oblog,/*obmitfacl=*/1,/*obmitcon=*/0);
+			pruefverz(dir_name(name),obverb,oblog,/*obmitfacl=*/1,/*obmitcon=*/0,/*besitzer*/string(),/*benutzer*/string(),/*obmachen*/1,/*obprot*/name!=unindt);
 			////    if (!systemrueck(sudc+"test -f '"+name+"' || "+sudc+"touch '"+name+"'",obverb,oblog)) KLA
 			if (!touch(name,obverb,oblog)) {
 				setfaclggf(name,obverb>1?obverb-1:0,oblog,/*obunter=*/falsch,/*mod=*/modus&ios::out||modus&ios::app?6:4,/*obimmer=*/falsch,faclbak);
 			} // if (!systemrueck(sudc+"test -f '"+name+"' || "+sudc+"touch '"+name+"'",obverb,oblog)) 
 		} // 		if (mehralslesen)
 	} // for(int iru=0;iru<3;iru++) 
+	if (obverb||oblog) Log(violetts+Txk[T_Ende]+"mdatei("+blau+name+schwarz+","+blau+ltoan(modus)+schwarz+","+blau+(faclbak?"1":"0")+schwarz+")",oblog,obverb);
 } // mdatei::mdatei (const string& name, ios_base::openmode modus)
 
 #ifdef oeffalsch
@@ -1239,7 +1241,7 @@ int Log(const short screen,const short file, const bool oberr,const short klobve
 		char buf[groe];
 #endif // vagenau	else
 		vsnprintf(buf,groe,format,args);
-		erg=Log(buf,screen,file);
+		erg=Log(buf,screen,file,oberr,klobverb);
 #ifdef vagenau
 		delete buf;
 		buf=0;
@@ -1880,7 +1882,7 @@ void confdcl::Abschn_auswert(int obverb/*=0*/, const char tz/*='='*/)
 // setzt die Werte aus der Datei in der Optionenschaar *sA
 template <typename SCL> void confdcl::kauswert(schAcl<SCL> *sA, int obverb, const char tz,const uchar mitclear/*=1*/)
 {
-	Log(violetts+Txk[T_kauswert]+schwarz+": "+fname,obverb);
+	Log(violetts+Txk[T_kauswert]+schwarz+": "+fname,obverb,0);
 	richtige=0;
 	if (mitclear) {
 		sA->frisch();
@@ -1916,7 +1918,7 @@ template <typename SCL> void confdcl::kauswert(schAcl<SCL> *sA, int obverb, cons
 			ltrim(zeile);
 ////			if (obverb) caus<<zni<<". "<<blau<<"Zeile: "<<schwarz<<*zeile<<endl;
 			if (!zeile->empty()) {
-				if (obverb>1) Log(Txk[T_stern_zeile]+*zeile,obverb);
+				if (obverb>1) Log(Txk[T_stern_zeile]+*zeile,obverb,0);
 				pos=zeile->find(tz);
 				if (pos!=string::npos && pos>0) { 
 					string pname=zeile->substr(0,pos);
@@ -1963,7 +1965,7 @@ template <typename SCL> void confdcl::kauswert(schAcl<SCL> *sA, int obverb, cons
 		KLZ
 		KLZ
 	 */
-	Log(violetts+Txk[T_Ende]+Txk[T_kauswert]+schwarz,obverb);
+	Log(violetts+Txk[T_Ende]+Txk[T_kauswert]+schwarz,obverb,0);
 } // void sAdat::kauswert
 
 void wpgcl::virtfrisch()
@@ -2297,6 +2299,7 @@ int systemrueck(const string& cmd, char obverb/*=0*/, int oblog/*=0*/, vector<st
 		stringstream *ausgp/*=0*/,uchar obdirekt/*=0*/)
 {
 // verbergen: 0 = nichts, 1= '2>/dev/null' anhaengen + true zurueckliefern, 2='>/dev/null 2>&1' anhaengen + Ergebnis zurueckliefern
+	// die 'if (obverb||oblog)' sind zur Vermeidung von Rekursionen mit Endlosschleifen
   binaer ob0heissterfolg=wahr;
   uchar neurueck=0;
   uchar weiter=0;
@@ -2339,7 +2342,7 @@ int systemrueck(const string& cmd, char obverb/*=0*/, int oblog/*=0*/, vector<st
 		(obdirekt?hcmd:"env PATH='"+spath+"' "+"sh -c '"+ersetzAllezu(hcmd,"'","'\\''")+"'");
 	string hsubs=bef.substr(0,getcols()-7-aktues.length());
 	string meld=aktues+": "+blau+hsubs+schwarz+" ...";
-	if (ausgp&&obverb>0) *ausgp<<meld<<endl; else Log(meld,obverb>0?-1:0,oblog);
+	if (ausgp&&obverb>0) *ausgp<<meld<<endl; else { if (obverb||oblog) Log(meld,obverb>0?-1:0,oblog); }
 	if (!rueck) if (obergebnisanzeig) {neurueck=1;rueck=new vector<string>;}
 	// #define systemrueckprofiler
 #ifdef systemrueckprofiler
@@ -2394,8 +2397,8 @@ int systemrueck(const string& cmd, char obverb/*=0*/, int oblog/*=0*/, vector<st
         } //         for(unsigned i=0;i<rueck->size();i++)
       } //       if (obverb>1 || oblog || obergebnisanzeig) if (rueck->size())
 #ifdef systemrueckprofiler
-      Log(rots+"Rueck.size: "+ltoan(rueck->size())+", obergebnisanzeig: "+(obergebnisanzeig?"ja":"nein"),1,oblog);
-			if (ausgp) *ausp<<bef<<endl; else Log(bef,1,oblog);
+      if (oberb||oblog) Log(rots+"Rueck.size: "+ltoan(rueck->size())+", obergebnisanzeig: "+(obergebnisanzeig?"ja":"nein"),1,oblog);
+			if (ausgp) *ausp<<bef<<endl; else { if (obverb||oblog) Log(bef,1,oblog); }
 			prf.ausgab1000("vor pclose");
 #endif
 			erg = pclose(pipe);
@@ -2463,11 +2466,11 @@ int systemrueck(const string& cmd, char obverb/*=0*/, int oblog/*=0*/, vector<st
     prf.ausgab1000("vor log");
 #endif
 		meld=aktues+": "+blau+bef+schwarz+Txk[T_komma_Ergebnis]+blau+ergebnis+schwarz;
-		if (ausgp&&obverb>0) *ausgp<<meld<<endl; else Log(meld,obverb>0?obverb:0,oblog);
+		if (ausgp&&obverb>0) *ausgp<<meld<<endl; else { if (obverb||oblog) Log(meld,obverb>0?obverb:0,oblog); }
 	} // if (obverb>0 || oblog)
 	if (rueck) {
 		if (obergebnisanzeig && rueck->size()) {
-			if (ausgp&&obverb>0) *ausgp<<smeld<<endl; else Log(smeld,obverb>1||(ob0heissterfolg && erg && obergebnisanzeig>1),oblog);
+			if (ausgp&&obverb>0) *ausgp<<smeld<<endl; else { if (obverb||oblog) Log(smeld,obverb>1||(ob0heissterfolg && erg && obergebnisanzeig>1),oblog); }
 		} // 	if (obergebnisanzeig && rueck->size())
 		if (obverb==-1) {
 			cout<<blau<<cmd<<schwarz<<":"<<endl;
@@ -2610,7 +2613,7 @@ int untersuser(const string& uname,__uid_t *uidp/*=0*/, __gid_t *gidp/*=0*/,vect
 // obunter = mit allen Unterverzeichnissen
 // obimmer = immer setzen, sonst nur, falls mit getfacl fuer datei Berechtigung fehlt (wichtig fuer Unterverzeichnisse)
 void setfaclggf(const string& datei,int obverb/*=0*/,int oblog/*=0*/,const binaer obunter/*=falsch*/,int mod/*=4*/,uchar obimmer/*=0*/,
-		uchar faclbak/*=1*/,const string& user/*=nix*/,uchar fake/*=0*/,stringstream *ausgp/*=0*/)
+		uchar faclbak/*=1*/,const string& user/*=nix*/,uchar fake/*=0*/,stringstream *ausgp/*=0*/,const uchar obprot/*=1*/)
 {
 	if (obverb && !ausgp) {
 		Log(violetts+"setfaclggf()"+blau+Txk[T_Datei]+blau+datei+schwarz+Txk[T_obunter]+blau+(obunter?"1":"0")+schwarz+", mod: "+
@@ -2633,7 +2636,7 @@ void setfaclggf(const string& datei,int obverb/*=0*/,int oblog/*=0*/,const binae
 	} // 	if (user.empty())
 	// fuer root braucht's es ned
 	if (cuid) {
-		static int obsetfacl=obprogda("setfacl",obverb-1,/*obprog=*/0);
+		static int obsetfacl=obprogda("setfacl",obverb?obverb-1:0,/*obprog=*/0);
 		if (obsetfacl) {
 			string aktdat=datei;
 			svec pfade;
@@ -2687,13 +2690,17 @@ void setfaclggf(const string& datei,int obverb/*=0*/,int oblog/*=0*/,const binae
 							if (lstat(sich.c_str(),&st) || !st.st_size) {
 								para=string(sudc+"setfacl -")+(!i && obunter?"R":"")+"b \""+pfade[i]+"\"";
 							}
-							anfgg(unindt,sudc+"sh -c 'cd \""+dir_name(pfade[i])+"\";"+para+"'",bef,obverb,oblog);
+							if (obprot) anfgg(unindt,sudc+"sh -c 'cd \""+dir_name(pfade[i])+"\";"+para+"'",bef,obverb,oblog);
 						} // 					if (faclbak)
 						if (obverb>1) systemrueck("ls -ld \""+pfade[i]+"\"",2,0,/*rueck=*/0,/*obsudc=*/1);
 						if (pfade[i]=="uvz/uuvz/uuuvz") exit(20);
 						const string cmd=string("setfacl --mask -")+(!i && obunter?"R":"")+"m 'u:"+cuser+":"+ltoan(ergmod)+"' '"+pfade[i]+"'";
-						if (fake) Log(rots+cmd+schwarz,obverb,oblog);
-						else systemrueck(cmd,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
+						if (fake) { 
+							if (obverb||oblog) 
+								Log(rots+cmd+schwarz,obverb,oblog); 
+						} else {
+							systemrueck(cmd,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
+						}
 						if (obverb) systemrueck("ls -ld \""+pfade[i]+"\"",2,0,/*rueck=*/0,/*obsudc=*/1);
 					} //        if (obhier)
 				} // 				if (ergmod)
@@ -2802,8 +2809,9 @@ int pruefberecht(const string& datei,const string& benutzer,const mode_t mod/*=0
 // falls Benutzer root
 // wenn !besitzer.empty(), dann wird das letzte und alle neu zu erstellenden Verzeichnisse diesem zugeordnet 
 int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfacl/*=0*/,uchar obmitcon/*=0*/, 
-		const string& besitzer/*=nix*/, const string& benutzer/*=nix*/,const uchar obmachen/*=1*/)
+		const string& besitzer/*=nix*/, const string& benutzer/*=nix*/,const uchar obmachen/*=1*/,const uchar obprot/*=1*/)
 {
+	if (obverb||oblog) Log(violetts+"pruefverz("+blau+verz+schwarz+")",obverb,oblog);
 	static int obselinux=-1; // -1=ununtersucht, 0=kein Selinux da, 1=Selinux da
 	int fehlt=1;
 	// wenn nicht root, dann alten Modus merken
@@ -2844,7 +2852,7 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 					}
 					string bef="mkdir -m "+modstr+" '"+stack[i]+"'";
 					if (!besitzer.empty()) bef+=";chown -R "+besitzer+":"+ltoan(gid)+" '"+stack[i]+"' 2>/dev/null";
-					if (obverb) Log(blaus+"mkdir("+stack[i]+","+ltoan(mod,8)+")"+schwarz,obverb,oblog);
+					if (obverb||oblog) Log(blaus+"mkdir("+stack[i]+","+ltoan(mod,8)+")"+schwarz,obverb,oblog);
 					fehlt=mkdir(stack[i].c_str(),mod);
 					if (!fehlt && !besitzer.empty()) {
 						fehlt=chown(stack[i].c_str(),uid,gid);
@@ -2853,8 +2861,9 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 						fehlt=systemrueck(bef,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
 					}
 					if (!fehlt) {
-						if (unindt.find(stack[i])) // wenn der Anfang nicht identisch ist, also nicht das Verzeichnis von unindt geprueft werden soll
+						if (unindt.find(stack[i])) { // wenn der Anfang nicht identisch ist, also nicht das Verzeichnis von unindt geprueft werden soll
 							anfgg(unindt,sudc+"rmdir '"+stack[i]+"'",bef,obverb,oblog);
+						}
 					}
 				} // 					if (fehlt)
 				// folgendes mindestens notwendig fuer sverz.st_mode
@@ -2863,7 +2872,7 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 				if (int prueferg=pruefberecht(/*datei=*/stack[i],aktben,/*mod=*/i?1:7,obverb)) {
 					// .. und korrigiert werden sollen
 					if (obmitfacl) {
-						setfaclggf(stack[i],obverb>1?obverb-1:0,oblog, /*obunter=*/wahr, /*mod=*/i?1:7, /*obimmer=*/1,/*faclbak=*/1,/*user=*/aktben);
+						setfaclggf(stack[i],obverb>1?obverb-1:0,oblog, /*obunter=*/wahr, /*mod=*/i?1:7, /*obimmer=*/1,/*faclbak=*/1,/*user=*/aktben,/*fake*/0,/*ausgp*/0,obprot);
 					} else {
 						// dann Rechte in der notwendigen Spezifitaet erweitern
 						// 0=Berechtigung vorhanden, 1= benutzer=Besitzer, 2= benutzer gehoert zur Besitzergruppe, 3= nichts davon
@@ -2882,7 +2891,7 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 								modstr=i?"o+x":"o+rwx";
 								break;
 						}
-						if (obverb) Log(Txk[T_datei]+blaus+stack[i].c_str()+schwarz+", mode: "+blau+altmod+schwarz+" -> "+blau+
+						if (obverb||oblog) Log(Txk[T_datei]+blaus+stack[i].c_str()+schwarz+", mode: "+blau+altmod+schwarz+" -> "+blau+
 								ltoan(sverz.st_mode,8)+schwarz,obverb,oblog);
 						if (chmod(stack[i].c_str(),sverz.st_mode)) {
 							//             if (1) 
@@ -2898,13 +2907,15 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 				break;
 			}
 		} // 		for(int i=stack.size()-1;i>=0;i--) 
-		if (!besitzer.empty())
+		if (!besitzer.empty()) {
 			umask(altmod);
+		}
 		if (obmitcon) {
 			if (obselinux==-1) 
 				obselinux=obprogda("sestatus",obverb,oblog);
-			if (obselinux)
+			if (obselinux) {
 				systemrueck("chcon -R -t samba_share_t '"+verz+"'",obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
+			}
 		} // 		if (obmitcon)
 	} // 	if (!verz.empty())
 	return fehlt;
@@ -3571,7 +3582,8 @@ void anfgw(const string& datei, const string& udpr, const string& inhalt, const 
 // anfuegen nach gemeinsamer Pruefung, ob schon enthalten
 void anfgg(const string& datei, const string& inhalt, const string& comment, int obverb/*=0*/, int oblog/*=0*/)
 {
-	Log(violetts+"anfgg: '"+inhalt+"'"+schwarz,obverb,oblog);
+	// 'if (obverb||oblog)' zur Vermeidung von Redundanzen mit Endlosschleife
+	if (obverb||oblog) Log(violetts+"anfgg: '"+inhalt+"'"+schwarz,obverb,oblog);
 	uchar obda=0;
 	mdatei uni0(datei,ios::in,0);
 	if (uni0.is_open()) {
@@ -3586,6 +3598,7 @@ void anfgg(const string& datei, const string& inhalt, const string& comment, int
 	if (!obda) {
 		doanfg(datei,inhalt,comment);
 	} // 			if (!obda)
+	if (obverb||oblog) Log(violetts+Txk[T_Ende]+"anfgg: '"+inhalt+"'"+schwarz,obverb,oblog);
 } // void anfgggf(string datei, string inhalt)
 
 void doanfg(const string& datei, const string& inhalt, const string& comment)
@@ -4811,7 +4824,7 @@ void hcl::lauf()
 	}
 	else if (zeigvers) {
 		virtzeigversion();
-		Log(violetts+Txk[T_Ende]+Tx[T_zeigvers]+schwarz,obverb,oblog);
+		Log(violetts+Txk[T_Ende]+Tx[T_zeigvers]+schwarz);
 		exit(7);
 	} // if (zeigvers)
 	else if (!keineverarbeitung) {
@@ -4836,7 +4849,7 @@ void hcl::lauf()
 		schreibzaehler();
 	} // 	if (obsetz)
 	virtschlussanzeige();
-	Log(violetts+Txk[T_Ende]+schwarz,obverb,oblog);
+	Log(violetts+Txk[T_Ende]+schwarz);
 	delete linstp;
 	linstp=0;
 } // hcl::hcl()
@@ -5360,9 +5373,9 @@ void hcl::virtzeigueberschrift()
 // wird aufgerufen in lauf
 void hcl::virtautokonfschreib()
 {
-	Log(violetts+Txk[T_autokonfschreib]+schwarz+", "+Txk[T_rueckzufragen]+blau+(rzf?Txk[T_ja]:Txk[T_nein])+schwarz+", "+Txk[T_zu_schreiben]+blau+(hccd.obzuschreib?Txk[T_ja]:Txk[T_nein])+schwarz,obverb);
+	Log(violetts+Txk[T_autokonfschreib]+schwarz+", "+Txk[T_rueckzufragen]+blau+(rzf?Txk[T_ja]:Txk[T_nein])+schwarz+", "+Txk[T_zu_schreiben]+blau+(hccd.obzuschreib?Txk[T_ja]:Txk[T_nein])+schwarz);
 	if (rzf||hccd.obzuschreib) {
-		Log(gruens+Txk[T_schreibe_Konfiguration]+schwarz,obverb);
+		Log(gruens+Txk[T_schreibe_Konfiguration]+schwarz);
 		opn.confschreib(akonfdt,ios::out,mpfad,0);
 	} // if (rzf||obzuschreib)
 	return;
@@ -6019,7 +6032,7 @@ void hcl::pruefsamba(const vector<const string*>& vzn,const svec& abschni,const 
 			struct stat sstat={0};
 			if (!(conffehlt=lstat(smbdt,&sstat))) break;
 			if (iru) break;
-			pruefverz("/etc/samba",obverb,oblog,/*obmitfacl=*/1,/*obmitcon=*/0,/*besitzer=*/"",/*benutzer=*/"",/*obmachen=*/0);
+			pruefverz("/etc/samba",obverb,oblog,/*obmitfacl=*/1,/*obmitcon=*/0,/*besitzer=*/string(),/*benutzer=*/string(),/*obmachen=*/0);
 			kopier(smbquelle,smbdt,obverb,oblog);
 		} //   for(uchar iru=0;iru<2;iru++)
 		if (smb.obsvfeh(obverb-1,oblog)) if (smbd.obsvfeh(obverb-1,oblog)) dienstzahl--;
@@ -6370,12 +6383,12 @@ template<typename SCL> void schAcl<SCL>::omapzuw()
 // wird aufgerufen in parsecl, lauf
 void hcl::optausg(const char *farbe)
 {
-	Log(violetts+Txk[T_optausg]+schwarz,obverb);
+	Log(violetts+Txk[T_optausg]+schwarz);
 	for(size_t iru=0;iru<opn.size();iru++) {
 			cout<<farbe<<setw(3)<<iru<<schwarz<<" ";
 			opn[iru]->virtoausgeb();
 	}
-	Log(violetts+Txk[T_Ende]+Txk[T_optausg]+schwarz,obverb);
+	Log(violetts+Txk[T_Ende]+Txk[T_optausg]+schwarz);
 } // void hcl::optausg
 
 confdcl::confdcl():obgelesen(0),obzuschreib(0)
@@ -6391,7 +6404,7 @@ confdcl::confdcl(const string& fname, int obverb):obgelesen(0),obzuschreib(0)
 // Achtung: Wegen der Notwendigkeit zur Existenz der Datei zum Aufruf von setfacl kann die Datei erstellt werden!
 int confdcl::lies(const string& vfname, int obverb)
 {
-	Log(violetts+Txk[T_lies]+blau+": "+vfname+schwarz,obverb);
+	Log(violetts+Txk[T_lies]+blau+": "+vfname+schwarz,obverb,/*oblog*/0);
   fname=vfname;
 	int erg=0;
 	if (fname.empty()) {
@@ -6415,7 +6428,7 @@ int confdcl::lies(const string& vfname, int obverb)
 		else
 			cout<<Txk[T_confdat_lies_Erfolg]<<endl;
 	} // 	if (obverb>0)
-	Log(violetts+Txk[T_Ende]+Txk[T_lies]+schwarz,obverb);
+	Log(violetts+Txk[T_Ende]+Txk[T_lies]+schwarz,obverb,/*oblog*/0);
 	return erg;
 } // confdcl::lies
 
@@ -6449,18 +6462,18 @@ const uchar optcl::virteinzutragen(/*schAcl<optcl>**/void* schlp,int obverb)
 ////	caus<<violett<<">)"; caus<<omit->first<<endl;caus<<omit->second->pname<<endl;omit->second->virtoausgeb(); caus<<schwarz;
 	if (omit!=((schAcl<optcl>*)schlp)->omap.end()) {
 		if (omit->second->eingetragen) {
-			Log(ltoan(nr)+" "+violetts+Txk[T_einzutragen]+Txk[T_schon_eingetragen]+blaus+omit->first+schwarz+"' = '"+blau+omit->second->pname+schwarz+"'",obverb);
+			Log(ltoan(nr)+" "+violetts+Txk[T_einzutragen]+Txk[T_schon_eingetragen]+blaus+omit->first+schwarz+"' = '"+blau+omit->second->pname+schwarz+"'",obverb,0);
 ////			obverb=altobverb;
 			return 0;
 		}
 //		optcl* trick=(optcl*)omit->second;
 //		trick->eingetragen=1;
-		Log(ltoan(nr)+" "+violetts+Txk[T_einzutragen]+blaus+Txk[T_wird_jetzt_eingetragen]+blaus+omit->first+schwarz+"' = '"+blau+omit->second->pname+schwarz+"'",obverb);
+		Log(ltoan(nr)+" "+violetts+Txk[T_einzutragen]+blaus+Txk[T_wird_jetzt_eingetragen]+blaus+omit->first+schwarz+"' = '"+blau+omit->second->pname+schwarz+"'",obverb,0);
 		omit->second->eingetragen=1;
 ////		obverb=altobverb;
 		return 1;
 	}
-	Log(ltoan(nr)+" "+violetts+Txk[T_einzutragen]+blaus+Txk[T_nicht_gefunden]+": "+blaus+pname+schwarz+"'",obverb);
+	Log(ltoan(nr)+" "+violetts+Txk[T_einzutragen]+blaus+Txk[T_nicht_gefunden]+": "+blaus+pname+schwarz+"'",obverb,0);
 ////	obverb=altobverb;
 	return 0;
 } // const uchar optcl::virteinzutragen

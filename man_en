@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "01.04.18" "Version 0.10105" "\fB²DPROG²\fR man page"
+.TH man 1 "02.04.18" "Version 0.10105" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -15,48 +15,14 @@
 .SH OPTIONS 
 .SH PRECONDITIONS
 .br
-\fBOptions which are not saved: \fR
+lind: 0
 .br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
+lind: 1
 .br
-\fB -v, --verbose\fR: screen output more verbose\fB or not\fR (\fB0\fR)
+lind: 2
 .br
-\fB -lfn, --logfilenew\fR: delete log file afore\fB or not\fR (\fB0\fR)
+Stelle 0
 .br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
+Stelle 1
 .br
-\fB -h, --help\fR: Explanation of frequent options\fB or not\fR (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options\fB or not\fR (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa')\fB or not\fR (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/labimp\fR(finish with ':qa')\fB or not\fR (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here)\fB or not\fR (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron\fB or not\fR (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version\fB or not\fR (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBquelle\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBlabimp.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/labimp.log\fR' (otherwise shorter)\fB or not\fR (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBlabimp\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically\fB or not\fR (\fB1\fR)
+fname: /etc/default/locale
