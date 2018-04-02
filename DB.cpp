@@ -873,6 +873,8 @@ int Tabelle::machconstr(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 				machcon+=") ON UPDATE "+refacts[cons->onupdate]+" ON DELETE "+refacts[cons->ondelete];
 				RS rconsins(dbp);
 				rconsins.Abfrage(machcon,aktc,obverb);
+			} else {
+				fLog("Constraint `"+blaus+cons->name+schwarz+"` nicht erstellt, da Tabelle `"+blau+cons->reftab+schwarz+"` nicht da!",1,oblog);
 			} // if (dbres && dbres->row_count)
 		}
 	} // 	for(unsigned i=0;i<constrzahl;i++)

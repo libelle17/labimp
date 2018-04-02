@@ -274,70 +274,6 @@ void hhcl::prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obve
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb, const int oblog, const uchar direkt/*=0*/)
-{
-	hLog(violetts+Tx[T_prueflaboryleist]+schwarz);
-	const size_t aktc=0;
-	if (!direkt) {
-		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,"",/*unsigned*/1),
-			Feld("Abkü","varchar","1","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
-			Feld("Verf","varchar","1","",Tx[T_8434],0,0,1),
-			Feld("EBM","varchar","1","",Tx[T_5001_GNR_Turbomed],0,0,1),
-			Feld("goä","varchar","1","",Tx[T_8406],0,0,1),
-			Feld("Anzahl","varchar","1","",Tx[T_5005],0,0,1),
-			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
-		};
-////		Feld ifelder0[] = {Feld("RefNr")};   Index i0("RefNr",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-////		Index indices[]={i0};
-////		Feld ifelder0[] = {};
-////		Index indices[]={};
-		  Feld ifd0[]{Feld("RefNr")};
-			Constraint c0("LaborXUSLaborXLeist",ifd0,1,"laboryus",ifd0,1,cascade,cascade);
-			Constraint csts[]{c0};
-		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaboryleist,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_LaborLeistungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
-		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryleist,1,1);
-			exit(11);
-		}
-	} // if (!direkt)
-} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
-
-// wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, const int oblog, const uchar direkt/*=0*/)
-{
-	hLog(violetts+Tx[T_prueflaborypgl]+schwarz);
-	const size_t aktc=0;
-	if (!direkt) {
-		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("idxpneu","int","10","",Tx[T_laborxpneu],1,0,1,"",1),
-			Feld("idpara","int","10","",Tx[T_laborparameter],1,0,1,"",1),
-			Feld("idxpbez","int","10","",Tx[T_ist_identisch_mit_laborxpneu],1,0,1,"",1),
-			Feld("ergänzt","datetime","0","0",Tx[T_Zeitpunkt_der_Ergaenzung],0,0,1),
-		};
-		  Feld ifd0[]{Feld("idxpneu")};
-		  Feld ifd0a[]{Feld("id")};
-		  Feld ifd1[]{Feld("idpara")};
-		  Feld ifd1a[]{Feld("id")};
-		  Feld ifd2[]{Feld("idxpbez")};
-		  Feld ifd2a[]{Feld("id")};
-			Constraint c0("laborxpgl_1",ifd0,1,"laborypneu",ifd0a,1);
-			Constraint c1("laborxpgl_2",ifd1,1,"laborparameter",ifd1a,1);
-			Constraint c2("laborxpgl_3",ifd2,1,"laborypneu",ifd2a,1,cascade,cascade);
-			Constraint csts[]{c0,c1,c2};
-		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborypgl,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_Laborpgl]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
-		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypgl,1,1);
-			exit(11);
-		}
-	} // if (!direkt)
-} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
-
-// wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflaboryplab]+schwarz);
@@ -355,6 +291,35 @@ void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, 
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryplab,1,1);
 			exit(11);
 		}
+	} // if (!direkt)
+} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
+
+// wird aufgerufen in: virtpruefweiteres
+void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflaborypneu]+schwarz);
+	const size_t aktc=0;
+	if (!direkt) {
+		Feld felder[] = {
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
+			Feld("Abkü","varchar","1","",Tx[T_8410_maximale_Laenge_8],1,0,1),
+			Feld("Langtext","varchar","1","",Tx[T_8411_maximale_Laenge_40],0,0,1),
+			Feld("Einheit","varchar","1","",Tx[T_8421_maximale_Laenge_12],0,0,1),
+			Feld("lid","int","10","",Tx[T_Bezug_auf_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
+			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
+		};
+		Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit"),Feld("lid")};   Index i0("Abkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
+		Index indices[]={i0};
+		Constraint csts[]{Constraint("Gruppe",new Feld{Feld("Gruppe")},1,"laborgruppen",new Feld{Feld("Laborgruppe")},1),
+			// geht beides!:
+			//			  								Constraint("Labore",new Feld[1]{Feld("lid")},1,"laboryplab",new Feld[1]{Feld("id")},1)};
+							 Constraint("Labore",new Feld{Feld("lid")},1,"laboryplab",new Feld{Feld("id")},1)};
+	// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+	Tabelle taba(My,tlaborypneu,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborneu]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+	if (taba.prueftab(aktc,obverb)) {
+		fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypneu,1,1);
+		exit(11);
+	}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
@@ -389,40 +354,6 @@ void hhcl::prueflaborypnb(DB *My, const string& tlaborypnb, const int obverb, co
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
-{
-	hLog(violetts+Tx[T_prueflaborypneu]+schwarz);
-	const size_t aktc=0;
-	if (!direkt) {
-		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("Abkü","varchar","1","",Tx[T_8410_maximale_Laenge_8],1,0,1),
-			Feld("Langtext","varchar","1","",Tx[T_8411_maximale_Laenge_40],0,0,1),
-			Feld("Einheit","varchar","1","",Tx[T_8421_maximale_Laenge_12],0,0,1),
-			Feld("lid","int","10","",Tx[T_Bezug_auf_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
-			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
-		};
-		Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit"),Feld("lid")};   Index i0("Abkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-		Index indices[]={i0};
-		  Feld ifd0[]{Feld("Gruppe")};
-		  Feld ifd0a[]{Feld("Laborgruppe")};
-		  Feld ifd1[]{Feld("lid")};
-		  Feld ifd1a[]{Feld("id")};
-			Constraint csts[]{Constraint("Gruppe",new Feld{Feld("Gruppe")},1,"laborgruppen",new Feld{Feld("Laborgruppe")},1),
-				// geht beides!:
-//			  								Constraint("Labore",new Feld[1]{Feld("lid")},1,"laboryplab",new Feld[1]{Feld("id")},1)};
-			  								Constraint("Labore",new Feld{Feld("lid")},1,"laboryplab",new Feld{Feld("id")},1)};
-		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborypneu,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborneu]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
-		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypneu,1,1);
-			exit(11);
-		}
-	} // if (!direkt)
-} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
-
-
-// wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflaborysaetze]+schwarz);
@@ -454,8 +385,9 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 		};
 		Feld ifelder0[] = {Feld("PLZLabor"),Feld("OrtLabor")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
-		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborysaetze,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices, 0,0,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Constraint csts[]{Constraint("laborsaetzedateien",new Feld{Feld("datid")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade)};
+			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+		Tabelle taba(My,tlaborysaetze,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborysaetze,1,1);
 			exit(11);
@@ -510,8 +442,10 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 		};
 		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
+		Constraint csts[]{Constraint("Laboryeingellaboryus",new Feld{Feld("DatID")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade),
+		                	Constraint("Laborysaetzelaboryus",new Feld{Feld("satzid")},1,"laborysaetze",new Feld{Feld("satzid")},1,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaboryus,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Laborus]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlaboryus,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborus]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryus,1,1);
 			exit(11);
@@ -519,6 +453,66 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
+// wird aufgerufen in: virtpruefweiteres
+void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflaborybakt]+schwarz);
+	const size_t aktc=0;
+	if (!direkt) {
+		Feld felder[] = {
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
+			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,"",1),
+			Feld("Verf","varchar","1","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
+			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
+			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
+			Feld("QSpez","varchar","1","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
+			Feld("AbnDat","datetime","0","0",Tx[T_8432_Abnahmedatum_Turbomed],0,0,1),
+			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
+			Feld("Erklärung","LONGTEXT","","","",0,0,1),
+			Feld("Keimzahl","varchar","1","","",0,0,1),
+		};
+		Constraint csts[]{Constraint("Laboryuslaborybakt",new Feld{Feld("refnr")},1,"laboryus",new Feld{Feld("refnr")},1,cascade,cascade)};
+		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+		Tabelle taba(My,tlaborybakt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborbakt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborybakt,1,1);
+			exit(11);
+		}
+	} // if (!direkt)
+} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
+
+
+// wird aufgerufen in: virtpruefweiteres
+void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflaboryleist]+schwarz);
+	const size_t aktc=0;
+	if (!direkt) {
+		Feld felder[] = {
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
+			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,"",/*unsigned*/1),
+			Feld("Abkü","varchar","1","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
+			Feld("Verf","varchar","1","",Tx[T_8434],0,0,1),
+			Feld("EBM","varchar","1","",Tx[T_5001_GNR_Turbomed],0,0,1),
+			Feld("goä","varchar","1","",Tx[T_8406],0,0,1),
+			Feld("Anzahl","varchar","1","",Tx[T_5005],0,0,1),
+			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
+		};
+////		Feld ifelder0[] = {Feld("RefNr")};   Index i0("RefNr",ifelder0,sizeof ifelder0/sizeof* ifelder0);
+////		Index indices[]={i0};
+////		Feld ifelder0[] = {};
+////		Index indices[]={};
+		  Feld ifd0[]{Feld("RefNr")};
+			Constraint c0("LaborXUSLaborXLeist",ifd0,1,"laboryus",ifd0,1,cascade,cascade);
+			Constraint csts[]{c0};
+		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+		Tabelle taba(My,tlaboryleist,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_LaborLeistungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryleist,1,1);
+			exit(11);
+		}
+	} // if (!direkt)
+} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, const int oblog, const uchar direkt/*=0*/)
@@ -557,29 +551,33 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 
-
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaborybakt]+schwarz);
+	hLog(violetts+Tx[T_prueflaborypgl]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,"",1),
-			Feld("Verf","varchar","1","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
-			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
-			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
-			Feld("QSpez","varchar","1","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
-			Feld("AbnDat","datetime","0","0",Tx[T_8432_Abnahmedatum_Turbomed],0,0,1),
-			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
-			Feld("Erklärung","LONGTEXT","","","",0,0,1),
-			Feld("Keimzahl","varchar","1","","",0,0,1),
+			Feld("idxpneu","int","10","",Tx[T_laborxpneu],1,0,1,"",1),
+			Feld("idpara","int","10","",Tx[T_laborparameter],1,0,1,"",1),
+			Feld("idxpbez","int","10","",Tx[T_ist_identisch_mit_laborxpneu],1,0,1,"",1),
+			Feld("ergänzt","datetime","0","0",Tx[T_Zeitpunkt_der_Ergaenzung],0,0,1),
 		};
+		  Feld ifd0[]{Feld("idxpneu")};
+		  Feld ifd0a[]{Feld("id")};
+		  Feld ifd1[]{Feld("idpara")};
+		  Feld ifd1a[]{Feld("id")};
+		  Feld ifd2[]{Feld("idxpbez")};
+		  Feld ifd2a[]{Feld("id")};
+			Constraint c0("laborxpgl_1",ifd0,1,"laborypneu",ifd0a,1);
+			Constraint c1("laborxpgl_2",ifd1,1,"laborparameter",ifd1a,1);
+			Constraint c2("laborxpgl_3",ifd2,1,"laborypneu",ifd2a,1,cascade,cascade);
+			Constraint csts[]{c0,c1,c2};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborybakt,felder,sizeof felder/sizeof* felder,0,0,0,0,Tx[T_Laborbakt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlaborypgl,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_Laborpgl]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborybakt,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypgl,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -652,15 +650,15 @@ void hhcl::virtpruefweiteres()
 { //ω
 	initDB();
 	prueflaboryeingel(My, tlaboryeingel, obverb, oblog, /*direkt*/0);
-	prueflaboryleist(My, tlaboryleist, obverb, oblog, /*direkt*/0);
-	prueflaborypgl(My, tlaborypgl, obverb, oblog, /*direkt*/0);
 	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
-	prueflaborypnb(My, tlaborypnb, obverb, oblog, /*direkt*/0);
 	prueflaborypneu(My, tlaborypnb, obverb, oblog, /*direkt*/0);
-	prueflaborybakt(My, tlaborybakt, obverb, oblog, /*direkt*/0);
+	prueflaborypnb(My, tlaborypnb, obverb, oblog, /*direkt*/0);
 	prueflaborysaetze(My, tlaborysaetze, obverb, oblog, /*direkt*/0);
 	prueflaboryus(My, tlaboryus, obverb, oblog, /*direkt*/0);
+	prueflaborybakt(My, tlaborybakt, obverb, oblog, /*direkt*/0);
+	prueflaboryleist(My, tlaboryleist, obverb, oblog, /*direkt*/0);
 	prueflaborywert(My, tlaborywert, obverb, oblog, /*direkt*/0);
+	prueflaborypgl(My, tlaborypgl, obverb, oblog, /*direkt*/0);
 	hcl::virtpruefweiteres(); // z.Zt. leer //α
 } // void hhcl::virtpruefweiteres
 
