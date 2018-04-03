@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "02.04.18" "Version 0.10165" "\fB²DPROG²\fR man page"
+.TH man 1 "03.04.18" "Version 0.10179" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -15,9 +15,7 @@
 .SH OPTIONS 
 .SH PRECONDITIONS
 .br
-\fBwhich rpm 2>/dev/null\fR:
-.br
-\fBwhich "rpm" 2>/dev/null ||env "PATH=$PATH" which "rpm" 2>/dev/null\fR:
+\fRProgramm: \fB/home/schade/labimp/labimp\fR, V: \fB0.10175\fR (Laborimport) 
 .br
 \fBOptions which are not saved: \fR
 .br
@@ -44,6 +42,8 @@
 \fB -info, --version\fR: shows the program version\fB or not\fR (\fB0\fR)
 .br
 \fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
+.br
+\fB -lddir, --laboratoryfiledir <path>\fR: directory of the fax files ('\fB\fR')
 .br
 \fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
 .br

@@ -108,6 +108,9 @@ enum Txdb_
 	T_Passwort_fuer_MySQL_MariaDB,
 	T_Datenbankname_fuer_MySQL_MariaDB_auf,
 	T_Tabellenname_in,
+	T_Referenz,
+	T_auf_Tabelle,
+	T_nicht_erstellt_da_Referenztabelle,
 	T_dbMAX,
 }; // enum Txdb_ 
 

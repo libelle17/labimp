@@ -236,6 +236,12 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Bezug zu laborxplab.id","reference to laborxplab.id"},
 	// T_8411_Testbezeichnung_Turbomed
 	{"8411 Testbezeichnung Turbomed","8411 Testbezeichnung Turbomed"},
+	// T_ldvz_k
+	{"ldvz","lddir"},
+	// T_ldvz_l
+	{"labordatenvz","laboratoryfiledir"},
+	// T_Verzeichnis_der_Faxdateien
+	{"Verzeichnis der Faxdateien","directory of the fax files"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -604,6 +610,7 @@ void hhcl::pvirtVorgbSpeziell()
 // wird aufgerufen in lauf
 void hhcl::virtinitopt()
 { //ω
+	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Faxdateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty());
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
 
@@ -641,6 +648,7 @@ void hhcl::virtrueckfragen()
 {
 	hLog(violetts+Tx[T_virtrueckfragen]+schwarz);
 	if (rzf) { //ω
+		ldatvz=Tippverz(Tx[T_Verzeichnis_der_Faxdateien],&ldatvz);
 	} //α
 	dhcl::virtrueckfragen();
 } // void hhcl::virtrueckfragen()
@@ -666,12 +674,25 @@ void hhcl::virtpruefweiteres()
 void hhcl::virtzeigueberschrift()
 { //ω
   // hier ggf. noch etwas an 'uebers' anhaengen //α
+	uebers<<" (Laborimport) ";
 	hcl::virtzeigueberschrift();
 } // void hhcl::virtzeigueberschrift
 
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
+	svec lrue;
+	systemrueck("find "+ldatvz+" -type f "+string(obverb?"":"2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
+	for(size_t i=0;i<lrue.size();i++) {
+		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+		mdatei blacki(lrue[i],ios::in);
+		if (blacki.is_open()) {
+			string zeile;
+			while(getline(blacki,zeile)) {
+				caus<<"   "<<zeile<<endl;
+			}
+		}
+	}
 } // void hhcl::pvirtfuehraus  //α
 
 // wird aufgerufen in lauf

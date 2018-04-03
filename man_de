@@ -2,7 +2,7 @@
 .\" Manual-Seite für ²DPROG²
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH man 1 "02.04.18" "Version 0.10165" "Manual-Seite für ²DPROG²"
+.TH man 1 "03.04.18" "Version 0.10179" "Manual-Seite für ²DPROG²"
 .SH NAME
 \fB²DPROG² \- FaxServer-Funktionalität\fR: veranlasst automatischen Faxversand von Dateien, Benennung empfangener Faxe und Protokollierung aller Faxe in einer Datenbank 
 .br
@@ -15,9 +15,7 @@
 .SH OPTIONEN 
 .SH VORAUSSETZUNGEN
 .br
-\fBwhich rpm 2>/dev/null\fR:
-.br
-\fBwhich "rpm" 2>/dev/null ||env "PATH=$PATH" which "rpm" 2>/dev/null\fR:
+\fRProgramm: \fB/home/schade/labimp/labimp\fR, V: \fB0.10175\fR (Laborimport) 
 .br
 \fBOptionen, die nicht gespeichert werden: \fR
 .br
@@ -44,6 +42,8 @@
 \fB -info, --version\fR: Zeigt die Programmversion an\fB oder nicht\fR (\fB0\fR)
 .br
 \fBOptionen z.Speich. i.Konfigur'datei (vorausg. '1'=doch nicht speichern, 'no'=Gegenteil, z.B. '-noocra','-1noocri'):\fR
+.br
+\fB -ldvz, --labordatenvz <pfad>\fR: Verzeichnis der Faxdateien ('\fB\fR')
 .br
 \fB -host, --host <string>\fR: verwendet die Datenbank auf Host <string> anstatt auf ('\fBlocalhost\fR')
 .br

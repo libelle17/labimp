@@ -1732,11 +1732,11 @@ int obprogda(const string& prog, int obverb/*=0*/, int oblog/*=0*/, string *pfad
 linst_cl::linst_cl(int obverb,int oblog)
 {
 // inhaltlich parallel getIPR() in install.sh
-		if (obprogda("rpm",obverb-1,oblog)) {
+		if (obprogda("rpm",obverb>0?obverb-1:0,oblog)) {
 			dev="devel";
 			schau="rpm -q";
 			udpr=sudc+"rpm -e --nodeps ";
-			if (obprogda("zypper",obverb-1,oblog)) { // opensuse
+			if (obprogda("zypper",obverb>0?obverb-1:0,oblog)) { // opensuse
 				// heruntergeladene Dateien behalten
 				ipr=zypper;
 				instp=sudc+"zypper -n --gpg-auto-import-keys in ";
@@ -1749,31 +1749,31 @@ linst_cl::linst_cl(int obverb,int oblog)
 							"grep ^NAME= | cut -d'\"' -f2 | sed 's/ /_/'`_`cat /etc/*-release | grep ^VERSION_ID= | cut -d'\"' -f2`/devel:gcc.repo;";
 				compil="gcc gcc-c++ gcc6-c++";
 			} else { // dann fedora oder mageia
-				if (obprogda("dnf",obverb-1,oblog)) {
+				if (obprogda("dnf",obverb>0?obverb-1:0,oblog)) {
 					ipr=dnf;
 					instp=sudc+"dnf install ";
 					instyp=sudc+"dnf -y install ";
 					upr="dnf remove ";
 					uypr="dnf -y remove ";
 					upd=sudc+"dnf update";
-				} else if (obprogda("yum",obverb-1,oblog)) {
+				} else if (obprogda("yum",obverb>0?obverb-1:0,oblog)) {
 					ipr=yum;
 					instp=sudc+"yum install ";
 					instyp=sudc+"yum -y install ";
 					upr="yum remove ";
 					uypr="yum -y remove ";
 					upd=sudc+"yum update";
-				} else if (obprogda("urpmi.update",obverb-1,oblog)) {
+				} else if (obprogda("urpmi.update",obverb>0?obverb-1:0,oblog)) {
 					ipr=urp;
 					instp="urpmi --auto ";
 					instyp="urpmi --auto --force ";
 					upr="urpme ";
 					uypr="urpme --auto --force ";
 					upd=sudc+"urpmi.update -a";
-				} // 				if (obprogda("dnf",obverb-1,oblog))
+				} // 				if (obprogda("dnf",obverb>0?obverb-1:0,oblog))
 				compil="make automake gcc-c++ kernel-devel";
-			} // 			if (obprogda("zypper",obverb-1,oblog)) KLZ // opensuse
-		} else if (obprogda("apt-get",obverb-1,oblog)) {
+			} // 			if (obprogda("zypper",obverb>0?obverb-1:0,oblog)) KLZ // opensuse
+		} else if (obprogda("apt-get",obverb>0?obverb-1:0,oblog)) {
 			// Repositories: Frage nach cdrom ausschalten
 			// genauso in: configure
 			// wenn cdrom-Zeile vorkommt, vor ftp.-debian-Zeile steht und www.debian.org erreichbar ist, dann alle cdrom-Zeilen hinten anhaengen
@@ -1792,7 +1792,7 @@ linst_cl::linst_cl(int obverb,int oblog)
 			upd=sudc+"apt update;"+sudc+"apt upgrade;";
 			compil="install build-essential linux-headers-`uname -r`";
 			dev="dev";
-		} else if (obprogda("pacman",obverb-1,oblog)) {
+		} else if (obprogda("pacman",obverb>0?obverb-1:0,oblog)) {
 			ipr=pac;
 			schau="pacman -Qi";
 			instp=sudc+"pacman -S ";
@@ -1804,7 +1804,7 @@ linst_cl::linst_cl(int obverb,int oblog)
 			compil="gcc linux-headers-`uname -r`";
 		} else {
 			cerr<<Txk[T_Weder_zypper_noch_apt_get_noch_dnf_noch_yum_als_Installationspgrogramm_gefunden]<<endl;
-		} // 		if (obprogda("rpm",obverb-1,oblog))
+		} // 		if (obprogda("rpm",obverb>0?obverb-1:0,oblog))
     svec qrueck;
 		if (findv==1) {
 			systemrueck("find /usr -maxdepth 1 -type d -name 'lib*'",obverb,oblog,&qrueck,/*obsudc=*/0);
@@ -2638,7 +2638,7 @@ void setfaclggf(const string& datei,int obverb/*=0*/,int oblog/*=0*/,const binae
 	} // 	if (user.empty())
 	// fuer root braucht's es ned
 	if (cuid) {
-		static int obsetfacl=obprogda("setfacl",obverb?obverb-1:0,/*obprog=*/0);
+		static int obsetfacl=obprogda("setfacl",obverb>0?obverb-1:0,/*obprog=*/0);
 		if (obsetfacl) {
 			string aktdat=datei;
 			svec pfade;
@@ -3793,7 +3793,7 @@ uchar servc::spruef(const string& sbez, uchar obfork, const string& parent, cons
 		linst_cl *linstp,int obverb/*=0*/,int oblog/*=0*/, uchar mitstarten/*=1*/)
 {
 	fLog(violetts+Txk[T_spruef_sname]+schwarz+sname,obverb,oblog);
-	if (!obsvfeh(obverb-1,oblog)) {
+	if (!obsvfeh(obverb>0?obverb-1:0,oblog)) {
 		fLog(("Service ")+blaus+sname+schwarz+Txk[T_lief_schon],obverb,oblog);
 	} else {
 		/*//
@@ -3811,7 +3811,7 @@ uchar servc::spruef(const string& sbez, uchar obfork, const string& parent, cons
 				break;
 			} // 			if (!svfeh)
 			////          <<dblau<<"svfeh else: "<<schwarz<<sname<<endl;
-			////  if (systemrueck("systemctl list-units faxq.service --no-legend | grep 'active running'",obverb-1,oblog)) KLA
+			////  if (systemrueck("systemctl list-units faxq.service --no-legend | grep 'active running'",obverb>0?obverb-1:0,oblog)) KLA
 			//// string systemd="/usr/lib/systemd/system/"+sname+".service"; // ausserhalb Opensuse: /lib/systemd/system/ ...
 			fLog(blaus+systemd+Txk[T_nicht_gefunden_versuche_ihn_einzurichten]+schwarz,1,0);
 			mdatei syst(systemd,ios::out);
@@ -3843,12 +3843,12 @@ uchar servc::spruef(const string& sbez, uchar obfork, const string& parent, cons
 				syst<<"[Install]"<<endl;
 				syst<<"WantedBy=multi-user.target "<<endl;
 				syst.close();
-				daemon_reload(obverb-1,oblog);
+				daemon_reload(obverb>0?obverb-1:0,oblog);
 				anfgg(unindt,"N="+sname+";C=\""+sudc+"systemctl\";$C stop $N;$C disable $N;rm -r '"+systemd+"';$C daemon-reload;$C reset-failed;",systemd,
 						obverb,oblog);
 				syst.close();
-				restart(obverb-1,oblog);
-				obsvfeh(obverb-1,oblog);
+				restart(obverb>0?obverb-1:0,oblog);
+				obsvfeh(obverb>0?obverb-1:0,oblog);
 				semodpruef(linstp,obverb,oblog);
 				semanpruef(obverb,oblog);
 			} // if (syst.is_open()) 
@@ -4051,7 +4051,7 @@ int servc::obsvfeh(int obverb/*=0*/,int oblog/*=0*/) // ob service einrichtungs 
 
 void servc::pkill(int obverb/*=0*/,int oblog/*=0*/)
 {
-	systemrueck("pkill '"+ename+"'",obverb-1,oblog,0,/*obsudc=*/1,1);
+	systemrueck("pkill '"+ename+"'",obverb>0?obverb-1:0,oblog,0,/*obsudc=*/1,1);
 } // void servc::pkill(int obverb/*=0*/,int oblog/*=0*/)
 
 int servc::restart(int obverb/*=0*/,int oblog/*=0*/)
@@ -4799,6 +4799,7 @@ hcl::hcl(const int argc, const char *const *const argv,const char* const DPROG):
 // zum Aufruf virtueller Funktionen aus dem Konstruktur verschoben
 void hcl::lauf()
 {
+	virtzeigueberschrift();
 	virtVorgbAllg();
 	pvirtVorgbSpeziell(); // die Vorgaben, die in einer zusaetzlichen Datei mit einer weiteren Funktion "void hhcl::pvirtVorgbSpeziell()" ueberladbar sind
 	virtinitopt();
@@ -4839,7 +4840,6 @@ void hcl::lauf()
 	} // 	if (!keineverarbeitung)
 	if (mitcron) pruefcron(nix); // soll vor Log(Tx[T_Verwende ... stehen
 	if (!keineverarbeitung) {
-		virtzeigueberschrift();
 		pvirtfuehraus();
 	} //  if (!keineverarbeitung)
 	virtautokonfschreib();
@@ -5274,7 +5274,7 @@ uchar hcl::pruefcron(const string& cm)
 		cronzuplanen=(cmhier!="0");
 		hLog(violetts+Txk[T_pruefcron]+schwarz+Txk[T_cronzuplanen]+violetts+(cronzuplanen?"1":"0")+schwarz);
 		for (uchar runde=0;runde<2;runde++) {
-			cronda=obprogda("crontab",obverb-1,0);
+			cronda=obprogda("crontab",obverb>0?obverb-1:0,0);
 			if (cronda) break;
 			//// systemrueck("which zypper 2>/dev/null && zypper -n in cron || 
 			////              KLA which apt-get 2>/dev/null && apt-get -y install cron; KLZ",1,1);
@@ -5283,7 +5283,7 @@ uchar hcl::pruefcron(const string& cm)
 		} //   for (uchar runde=0;runde<2;runde++) 
 		if (cronda) {
 			////		string vorcm; // Vor-Cron-Minuten
-			nochkeincron = systemrueck("crontab -l",obverb-1,0,0,/*obsudc=*/1,2);
+			nochkeincron = systemrueck("crontab -l",obverb>0?obverb-1:0,0,0,/*obsudc=*/1,2);
 			setztmpcron();
 			const string vaufr=mpfad+" -noia"; // /usr/bin/<DPROG> -noia // (vollaufruf) z.B. '/usr/bin/<DPROG> -noia >/dev/null 2>&1'
 			const string zsaufr=base_name(vaufr); // ersetzAllezu(cbef,"/","\\/"); // Suchstring zum Loeschen
@@ -6037,8 +6037,8 @@ void hcl::pruefsamba(const vector<const string*>& vzn,const svec& abschni,const 
 			pruefverz("/etc/samba",obverb,oblog,/*obmitfacl=*/1,/*obmitcon=*/0,/*besitzer=*/string(),/*benutzer=*/string(),/*obmachen=*/0);
 			kopier(smbquelle,smbdt,obverb,oblog);
 		} //   for(uchar iru=0;iru<2;iru++)
-		if (smb.obsvfeh(obverb-1,oblog)) if (smbd.obsvfeh(obverb-1,oblog)) dienstzahl--;
-		if (nmb.obsvfeh(obverb-1,oblog)) if (nmbd.obsvfeh(obverb-1,oblog)) dienstzahl--;
+		if (smb.obsvfeh(obverb>0?obverb-1:0,oblog)) if (smbd.obsvfeh(obverb>0?obverb-1:0,oblog)) dienstzahl--;
+		if (nmb.obsvfeh(obverb>0?obverb-1:0,oblog)) if (nmbd.obsvfeh(obverb>0?obverb-1:0,oblog)) dienstzahl--;
 		if (dienstzahl==2 ||(smb.svfeh!=6 && smbd.svfeh!=6 && nmb.svfeh!=6 && nmbd.svfeh!=6)) { // wenn keine exec-Datei fehlt
 			break;
 		} else {
@@ -6144,10 +6144,10 @@ void hcl::pruefsamba(const vector<const string*>& vzn,const svec& abschni,const 
 		} // if (!nrzf)
 		if (smbrestart) {
 			////		<<"smb.svfeh: "<<(int)smb.svfeh<<endl;
-			if (smb.startbar()) smb.restart(obverb-1,oblog);
-			else if (smbd.startbar()) smbd.restart(obverb-1,oblog);
-			if (nmb.startbar()) nmb.restart(obverb-1,oblog);
-			else if (nmbd.startbar()) nmbd.restart(obverb-1,oblog);
+			if (smb.startbar()) smb.restart(obverb>0?obverb-1:0,oblog);
+			else if (smbd.startbar()) smbd.restart(obverb>0?obverb-1:0,oblog);
+			if (nmb.startbar()) nmb.restart(obverb>0?obverb-1:0,oblog);
+			else if (nmbd.startbar()) nmbd.restart(obverb>0?obverb-1:0,oblog);
 		} // if (smbrestart) 
 		// VFS
 		if (linstp->ipr==apt) linstp->doggfinst("samba-vfs-modules",obverb,oblog);
@@ -6165,7 +6165,7 @@ void hcl::pruefsamba(const vector<const string*>& vzn,const svec& abschni,const 
 				svec rueck;
 				systemrueck("iptables -L -n|grep "+ports[i],obverb,oblog,&rueck,/*obsudc=*/1);
 				if (rueck.size()) {
-					if (obverb>1) fLog(rueck[0],obverb-1,oblog);
+					if (obverb>1) fLog(rueck[0],obverb>0?obverb-1:0,oblog);
 					if (rueck[0].substr(0,6)=="ACCEPT" || rueck[0].substr(0,3)=="LOG") {
 						if (obverb) hLog(Txk[T_Firewallport]+blaus+ports[i]+schwarz+Txk[T_offen]);
 						continue;

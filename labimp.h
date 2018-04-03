@@ -116,6 +116,9 @@ enum T_
 	T_8418_Teststatus_Turbomed,
 	T_Bezug_zu_laborxplab_id,
 	T_8411_Testbezeichnung_Turbomed,
+	T_ldvz_k,
+	T_ldvz_l,
+	T_Verzeichnis_der_Faxdateien,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -138,6 +141,7 @@ class hhcl:public dhcl
 	string p3;
 	uchar oblista=0;
 	long listz=30; //ω
+  string ldatvz;   // Verzeichnis der Labordateien
  public: //α //ω
  private: //α //ω
 	void prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obverb, const int oblog, const uchar direkt=0);

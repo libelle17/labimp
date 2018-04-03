@@ -143,6 +143,13 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"Datenbankname fuer MySQL/MariaDB auf '","database name for mysql/mariabd on '"},
 	// T_Tabellenname_in
 	{"Tabellenname in '","table name in '"},
+	// T_Referenz
+	{"Fremdschluessel `","Constraint `"},
+	// T_auf_Tabelle
+	{"` auf Tabelle `","` on table `"},
+	// T_nicht_erstellt_da_Tabelle
+	// T_nicht_erstellt_da_Referenztabelle
+	{"` nicht erstellt, da Referenztabelle `","` not created, because referenced table `"},
 	{"",""}
 };
 // Txdbcl::Txdbcl() {TCp=(const char* const * const * const *)&TextC;}
@@ -398,7 +405,7 @@ void DB::init(
 											datadir=zrueck[zrueck.size()-1];  
 											break;
 										} // if (zrueck.size()) 
-									} // if (!systemrueck(("cat ")+zzruck[i]+" | sed 's/#.*$//g' | grep datadir | cut -d'=' -f2",obverb-1,oblog,&zrueck)) 
+									} // if (!systemrueck(("cat ")+zzruck[i]+" | sed 's/#.*$//g' | grep datadir | cut -d'=' -f2",obverb>0?obverb-1:0,oblog,&zrueck)) 
 								} // for(size_t i=0;i<zzruck.size();i++) 
 							} // if(zzruck.size()) 
 						} // if (zrueck.size()) else
@@ -874,7 +881,7 @@ int Tabelle::machconstr(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 				RS rconsins(dbp);
 				rconsins.Abfrage(machcon,aktc,obverb);
 			} else {
-				fLog("Constraint `"+blaus+cons->name+schwarz+"` nicht erstellt, da Tabelle `"+blau+cons->reftab+schwarz+"` nicht da!",1,oblog);
+				fLog(Txd[T_Referenz]+blaus+cons->name+schwarz+Txd[T_auf_Tabelle]+blau+tbname+schwarz+Txd[T_nicht_erstellt_da_Referenztabelle]+blau+cons->reftab+schwarz+"`"+Txk[T_nicht_gefunden],1,oblog);
 			} // if (dbres && dbres->row_count)
 		}
 	} // 	for(unsigned i=0;i<constrzahl;i++)
