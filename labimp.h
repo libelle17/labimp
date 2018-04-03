@@ -157,6 +157,7 @@ class hhcl:public dhcl
 	void virttesterg(); //α
 	void virtlieskonfein();
 	void virtautokonfschreib();
+	void dverarbeit(const string& datei);
  protected: 
 	// void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, lieskonfein, hcl::hcl nach holsystemsprache
 	void virtVorgbAllg();

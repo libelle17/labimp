@@ -2296,10 +2296,11 @@ std::string dir_name(const std::string& path)
 // obergebnisanzeig: 1=falls Fehler und obverb>1, >1=falls Fehler
 // cmd soll kein "sudo " am Anfang enthalten, falls noetig soll obsudc gesetzt werden. Innenliegende sudo-Befehle duerfen fuer den Cron-Aufruf 
 //  nur den Pfad /usr/bin:/bin (fedora und ubuntu) bzw. /usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin:/root/bin (opensuse) erwarten
-int systemrueck(const string& cmd, char obverb/*=0*/, int oblog/*=0*/, vector<string> *rueck/*=0*/, const uchar obsudc/*=0*/,
+int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<string> *rueck/*=0*/, const uchar obsudc/*=0*/,
     const int verbergen/*=0*/, int obergebnisanzeig/*wahr*/, const string& ueberschr/*=nix*/,vector<errmsgcl> *errm/*=0*/,uchar obincron/*=0*/,
 		stringstream *ausgp/*=0*/,uchar obdirekt/*=0*/)
 {
+////	caus<<rot<<"cmd: "<<violett<<cmd<<schwarz<<endl;
 // verbergen: 0 = nichts, 1= '2>/dev/null' anhaengen + true zurueckliefern, 2='>/dev/null 2>&1' anhaengen + Ergebnis zurueckliefern
 	// die 'if (obverb||oblog)' sind zur Vermeidung von Rekursionen mit Endlosschleifen
   binaer ob0heissterfolg=wahr;
@@ -2307,7 +2308,7 @@ int systemrueck(const string& cmd, char obverb/*=0*/, int oblog/*=0*/, vector<st
   uchar weiter=0;
   int erg=-111;
   string hcmd=cmd;
-  uchar obfind=(cmd.substr(0,4)=="find");
+  const uchar obfind=(cmd.substr(0,4)=="find");
   if (verbergen==1 || (obfind && (obverb<1 || cus.cuid))) {
     if (obverb<=1) 
       hcmd+=" 2>/dev/null;:";
@@ -2342,6 +2343,7 @@ int systemrueck(const string& cmd, char obverb/*=0*/, int oblog/*=0*/, vector<st
   } //   if (ueberschr.empty())
 	const string bef=(obsudc?sudc+(obsudc==2&&!sudc.empty()?"-H ":""):"")+
 		(obdirekt?hcmd:"env PATH='"+spath+"' "+"sh -c '"+ersetzAllezu(hcmd,"'","'\\''")+"'");
+	const string befanz=ersetze(bef.c_str(),spath.c_str(),"...");
 	string hsubs=bef.substr(0,getcols()-7-aktues.length());
 	string meld=aktues+": "+blau+hsubs+schwarz+" ...";
 	if (ausgp&&obverb>0) *ausgp<<meld<<endl; else { if (obverb||oblog) fLog(meld,obverb>0?-1:0,oblog); }
@@ -2351,6 +2353,7 @@ int systemrueck(const string& cmd, char obverb/*=0*/, int oblog/*=0*/, vector<st
 	perfcl prf("systemrueck");
 #endif // systemrueckprofiler
 	// obsudc==0 nichts, obsudc==1: "sudo ", obsudc==2: "sudo -H "
+////	caus<<violett<<"bef: "<<blau<<bef<<schwarz<<endl;
 	if (rueck) {
 		//// <<gruen<<bef<<schwarz<<endl;
     if (FILE* pipe = popen(bef.c_str(), "r")) {
@@ -2467,7 +2470,7 @@ int systemrueck(const string& cmd, char obverb/*=0*/, int oblog/*=0*/, vector<st
 #ifdef systemrueckprofiler
     prf.ausgab1000("vor log");
 #endif
-		meld=aktues+": "+blau+bef+schwarz+Txk[T_komma_Ergebnis]+blau+ergebnis+schwarz;
+		meld=aktues+": "+blau+befanz+schwarz+Txk[T_komma_Ergebnis]+blau+ergebnis+schwarz;
 		if (ausgp&&obverb>0) *ausgp<<meld<<endl; else { if (obverb||oblog) fLog(meld,obverb>0?obverb:0,oblog); }
 	} // if (obverb>0 || oblog)
 	if (rueck) {

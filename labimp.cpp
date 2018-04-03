@@ -678,19 +678,35 @@ void hhcl::virtzeigueberschrift()
 	hcl::virtzeigueberschrift();
 } // void hhcl::virtzeigueberschrift
 
+void hhcl::dverarbeit(const string& datei)
+{
+	caus<<"verarbeite: "<<datei<<endl;
+		if (0) {
+			mdatei blacki(datei,ios::in);
+			if (blacki.is_open()) {
+				string zeile;
+				while(getline(blacki,zeile)) {
+					caus<<"   "<<zeile<<endl;
+				}
+			}
+		}
+}
+
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
+	const size_t aktc=0;
 	svec lrue;
-	systemrueck("find "+ldatvz+" -type f "+string(obverb?"":"2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
+	systemrueck("find "+ldatvz+" -type f \\( -iname '1b*.ld*' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
+	//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 	for(size_t i=0;i<lrue.size();i++) {
 		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-		mdatei blacki(lrue[i],ios::in);
-		if (blacki.is_open()) {
-			string zeile;
-			while(getline(blacki,zeile)) {
-				caus<<"   "<<zeile<<endl;
-			}
+		char ***cerg;
+		ZDB=1;
+		RS rsfertig(My,"SELECT -fertig j_fertig,l.* from laboryeingel l where name ='"+base_name(lrue[i])+"' and pfad = '"+dir_name(lrue[i])+"'",aktc,ZDB);
+		if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
+			caus<<"*cerg: "<<*cerg<<endl;
+			dverarbeit(lrue[i]);
 		}
 	}
 } // void hhcl::pvirtfuehraus  //α
@@ -700,12 +716,12 @@ void hhcl::virtschlussanzeige()
 {   //ω
 	dhcl::virtschlussanzeige(); //α
 } // void hhcl::virtschlussanzeige
- 
+
 // wird aufgerufen in: main
 void hhcl::virtautokonfschreib()
 {
-// int altobverb=obverb;
-// obverb=1;
+	// int altobverb=obverb;
+	// obverb=1;
 	hLog(violetts+Txk[T_autokonfschreib]+schwarz+", "+Txk[T_zu_schreiben]+((rzf||hccd.obzuschreib)?Txk[T_ja]:Txk[T_nein]));
 	/*//
 		capizukonf und hylazukonf hier immer 0
@@ -722,7 +738,7 @@ void hhcl::virtautokonfschreib()
 		////    agcnfA.setzbem("language",sprachstr);
 		hcl::virtautokonfschreib(); //ω
 	} // if (rzf||obkschreib) //α
-// obverb=altobverb;
+	// obverb=altobverb;
 } // void hhcl::virtautokonfschreib
 
 hhcl::~hhcl() 
