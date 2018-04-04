@@ -242,6 +242,12 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"labordatenvz","laboratoryfiledir"},
 	// T_Verzeichnis_der_Faxdateien
 	{"Verzeichnis der Faxdateien","directory of the fax files"},
+	// T_vv_k
+	{"vonvorne","fromscratch"},
+	// T_vv_l
+	{"vonvorne","fromscratch"},
+	// T_loescht_alle_Tabellen
+	{"loescht alle Tabellen","deletes all tables"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -262,7 +268,7 @@ void hhcl::prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obve
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("DatID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
+			Feld("DatID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("Pfad","varchar","1","",Tx[T_Pfadname],0,0,1),
 			Feld("Name","varchar","1","",Tx[T_Name_der_eingelesenen_Labordatei_ohne_Endung],0,0,1),
 			Feld("Zp","datetime","0","0",Tx[T_Einlesezeitpunkt],0,0,1),
@@ -286,7 +292,7 @@ void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, 
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("Labor","varchar","1","",Tx[T_8300_maximale_Laenge_36],0,0,1),
 		};
 		Feld ifelder0[] = {Feld("Labor")};   Index i0("Labor",ifelder0,sizeof ifelder0/sizeof* ifelder0,/*unique*/1);
@@ -307,12 +313,12 @@ void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, c
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("Abkü","varchar","1","",Tx[T_8410_maximale_Laenge_8],1,0,1),
 			Feld("Langtext","varchar","1","",Tx[T_8411_maximale_Laenge_40],0,0,1),
 			Feld("Einheit","varchar","1","",Tx[T_8421_maximale_Laenge_12],0,0,1),
-			Feld("lid","int","10","",Tx[T_Bezug_auf_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
-			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
+			Feld("lid","int","10","",Tx[T_Bezug_auf_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/"NULL",/*unsig*/1),
+			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 		};
 		Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit"),Feld("lid")};   Index i0("Abkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
@@ -336,15 +342,15 @@ void hhcl::prueflaborypnb(DB *My, const string& tlaborypnb, const int obverb, co
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("pid","int","10","",Tx[T_Bezug_auf_laborxpneu],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
-			Feld("Geschlecht","int","10","",Tx[T_1_Mann_2_Frau_3_unbek_4_Knabe_5_Maedchen_0_Name_fehlt_9_beide],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+			Feld("pid","int","10","",Tx[T_Bezug_auf_laborxpneu],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
+			Feld("Geschlecht","int","10","",Tx[T_1_Mann_2_Frau_3_unbek_4_Knabe_5_Maedchen_0_Name_fehlt_9_beide],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 			Feld("Eingang","datetime","0","0",Tx[T_Eingangsdatum_im_Labor],0,0,1),
 			Feld("uNg","varchar","1","",Tx[T_untere_Normgrenze],0,0,1),
 			Feld("oNg","varchar","1","",Tx[T_obere_Normgrenze],0,0,1),
 			Feld("NB","varchar","1","",Tx[T_Normbereich],0,0,1),
-			Feld("zahl","int","10","",Tx[T_Haeufigkeit_eines_Laborparameters],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
-			Feld("uid","int","10","",Tx[T_laborxus_id_des_ersten_Eintrags],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/"",/*unsig*/1),
+			Feld("zahl","int","10","",Tx[T_Haeufigkeit_eines_Laborparameters],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
+			Feld("uid","int","10","",Tx[T_laborxus_id_des_ersten_Eintrags],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 		};
 		Feld ifd0[]{Feld("pid")};
 		Feld ifd0a[]{Feld("id")};
@@ -366,8 +372,8 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("SatzID","int","10","",Tx[T_zum_Bezug_fuer_LaborUS],1,1,0,"",1),
-			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborEingelesen],1,0,0,"",1),
+			Feld("SatzID","int","10","",Tx[T_zum_Bezug_fuer_LaborUS],1,1,0,string(),1),
+			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborEingelesen],1,0,0,string(),1),
 			Feld("Satzart","varchar","1","",Tx[T_8000_Satzart_Turbomed],0,0,1),
 			Feld("Satzlänge","varchar","1","",Tx[T_8100_Satzlaenge_Turbomed],0,0,1),
 			Feld("SatzlängeSchluss","varchar","1","",Tx[T_8100_Satzlaenge_Turbomed_nach_8221_in_Feld_8000],0,0,1),
@@ -409,17 +415,17 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborWert],1,0,0,"",1),
-			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborEingelesen],1,0,1,"",1),
-			Feld("SatzID","int","10","",Tx[T_Bezug_auf_LaborXSaetze],1,0,1,"",1),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborWert],1,0,0,string(),1),
+			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborEingelesen],1,0,1,string(),1),
+			Feld("SatzID","int","10","",Tx[T_Bezug_auf_LaborXSaetze],1,0,1,string(),1),
 			Feld("Satzart","varchar","1","",Tx[T_8000_Satzart_Turbomed],0,0,0),
 			Feld("Satzlänge","varchar","1","",Tx[T_8100_Satzlaenge_Turbomed],0,0,0),
 			Feld("Auftragsnummer","varchar","1","",Tx[T_8310_Anforderungsident_Turbomed],0,0,0),
 			Feld("Auftragsschlüssel","varchar","1","",Tx[T_8311_Anforderungsnr_d_Labors_Turbomed],0,0,0),
 			Feld("Eingang","datetime","0","0",Tx[T_Eingangsdatum_im_Labor],0,0,0),
 			Feld("Berichtsdatum","varchar","1","",Tx[T_8302_Berichtsdatum],0,0,0),
-			Feld("Pat_id","int","10","","",1,0,1,"",1),
+			Feld("Pat_id","int","10","","",1,0,1,string(),1),
 			Feld("Nachname","varchar","1","","3101",0,0,0),
 			Feld("Vorname","varchar","1","","3102",0,0,0),
 			Feld("GebDat","varchar","1","","3103",0,0,0),
@@ -466,8 +472,8 @@ void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, 
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,"",1),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,1,string(),1),
+			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 			Feld("Verf","varchar","1","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
 			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
 			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
@@ -495,8 +501,8 @@ void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,"",/*unsigned*/1),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,string(),/*unsigned*/1),
 			Feld("Abkü","varchar","1","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
 			Feld("Verf","varchar","1","",Tx[T_8434],0,0,1),
 			Feld("EBM","varchar","1","",Tx[T_5001_GNR_Turbomed],0,0,1),
@@ -527,8 +533,8 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],1,0,0,"",1),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],1,0,0,string(),1),
 			Feld("Abkü","varchar","1","",Tx[T_8410_maximale_Laenge_8],0,0,1),
 			Feld("Langname","varchar","1","",Tx[T_8411_Testbezeichnung_Turbomed],0,0,1),
 			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
@@ -539,7 +545,7 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 			Feld("Grenzwerti","varchar","1","",Tx[T_8422_Grenzwertindikator_Turbomed],0,0,1),
 			Feld("Kommentar","varchar","1","",Tx[T_8480_Ergebnistest_Turbomed],0,0,1),
 			Feld("Teststatus","varchar","1","",Tx[T_8418_Teststatus_Turbomed],0,0,1),
-			Feld("Erklärung","varchar","1","","",0,0,1),
+			Feld("Erklaerung","varchar","1","","",0,0,1),
 			Feld("AuftrHinw","varchar","1","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("nbid","int","10","",Tx[T_Bezug_zu_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/0),
 		};
@@ -564,11 +570,11 @@ void hhcl::prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, co
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,"",1),
-			Feld("idxpneu","int","10","",Tx[T_laborxpneu],1,0,1,"",1),
-			Feld("idpara","int","10","",Tx[T_laborparameter],1,0,1,"",1),
-			Feld("idxpbez","int","10","",Tx[T_ist_identisch_mit_laborxpneu],1,0,1,"",1),
-			Feld("ergänzt","datetime","0","0",Tx[T_Zeitpunkt_der_Ergaenzung],0,0,1),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+			Feld("idxpneu","int","10","",Tx[T_laborxpneu],1,0,1,string(),1),
+			Feld("idpara","int","10","",Tx[T_laborparameter],1,0,1,string(),1),
+			Feld("idxpbez","int","10","",Tx[T_ist_identisch_mit_laborxpneu],1,0,1,string(),1),
+			Feld("ergaenzt","datetime","0","0",Tx[T_Zeitpunkt_der_Ergaenzung],0,0,1),
 		};
 		  Feld ifd0[]{Feld("idxpneu")};
 		  Feld ifd0a[]{Feld("id")};
@@ -611,6 +617,7 @@ void hhcl::pvirtVorgbSpeziell()
 void hhcl::virtinitopt()
 { //ω
 	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Faxdateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty());
+	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
 
@@ -657,6 +664,20 @@ void hhcl::virtrueckfragen()
 void hhcl::virtpruefweiteres()
 { //ω
 	initDB();
+	const size_t aktc=0;
+	if (vonvorne) {
+		RS d0(My,"drop table if exists laborypgl",aktc,ZDB);
+		RS d1(My,"drop table if exists laborywert",aktc,ZDB);
+		RS d2(My,"drop table if exists laboryleist",aktc,ZDB);
+		RS d3(My,"drop table if exists laborybakt",aktc,ZDB);
+		RS d4(My,"drop table if exists laboryus",aktc,ZDB);
+		RS d5(My,"drop table if exists laborysaetze",aktc,ZDB);
+		RS d6(My,"drop table if exists laborypnb",aktc,ZDB);
+		RS d7(My,"drop table if exists laborypneu",aktc,ZDB);
+		RS d8(My,"drop table if exists laboryplab",aktc,ZDB);
+		RS d9(My,"drop table if exists laboryeingel",aktc,ZDB);
+		caus<<"vonvorne"<<endl;
+	}
 	prueflaboryeingel(My, tlaboryeingel, obverb, oblog, /*direkt*/0);
 	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
 	prueflaborypneu(My, tlaborypnb, obverb, oblog, /*direkt*/0);
@@ -681,15 +702,14 @@ void hhcl::virtzeigueberschrift()
 void hhcl::dverarbeit(const string& datei)
 {
 	caus<<"verarbeite: "<<datei<<endl;
-		if (0) {
-			mdatei blacki(datei,ios::in);
-			if (blacki.is_open()) {
-				string zeile;
-				while(getline(blacki,zeile)) {
-					caus<<"   "<<zeile<<endl;
-				}
-			}
+	exit(91);
+	mdatei blacki(datei,ios::in);
+	if (blacki.is_open()) {
+		string zeile;
+		while(getline(blacki,zeile)) {
+			caus<<"   "<<zeile<<endl;
 		}
+	}
 }
 
 // wird aufgerufen in lauf
@@ -697,13 +717,13 @@ void hhcl::pvirtfuehraus()
 { //ω
 	const size_t aktc=0;
 	svec lrue;
-	systemrueck("find "+ldatvz+" -type f \\( -iname '1b*.ld*' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
+	systemrueck("find "+ldatvz+" -type f \\( -iname '1b*.ld*' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 	//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 	for(size_t i=0;i<lrue.size();i++) {
 		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 		char ***cerg;
 		ZDB=1;
-		RS rsfertig(My,"SELECT -fertig j_fertig,l.* from laboryeingel l where name ='"+base_name(lrue[i])+"' and pfad = '"+dir_name(lrue[i])+"'",aktc,ZDB);
+		RS rsfertig(My,"SELECT fertig,name from laboryeingel l where name ='"+base_name(lrue[i])+"' and pfad = '"+dir_name(lrue[i])+"'",aktc,ZDB);
 		if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 			caus<<"*cerg: "<<*cerg<<endl;
 			dverarbeit(lrue[i]);

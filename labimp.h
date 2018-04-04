@@ -119,6 +119,9 @@ enum T_
 	T_ldvz_k,
 	T_ldvz_l,
 	T_Verzeichnis_der_Faxdateien,
+	T_vv_k,
+	T_vv_l,
+	T_loescht_alle_Tabellen,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -140,6 +143,7 @@ class hhcl:public dhcl
 	int p2;
 	string p3;
 	uchar oblista=0;
+	uchar vonvorne=0;
 	long listz=30; //ω
   string ldatvz;   // Verzeichnis der Labordateien
  public: //α //ω

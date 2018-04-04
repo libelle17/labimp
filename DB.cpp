@@ -216,17 +216,21 @@ Feld::Feld(const string& name, string typ/*=string()*/, const string& lenge/*=st
   ,defa(vdefa) // Namensdifferenz hier noetig, sonst wird im Konstruktur die falsche Variable bearbeitet
   ,unsig(unsig)
 {
-  if (!obauto) if (defa.empty()) {
-	  const string utyp=boost::locale::to_upper(typ, loc);
-////    transform(typ.begin(),typ.end(),typ.begin(),::toupper);
-    if (utyp.find("INT")!=string::npos || utyp=="LONG"||utyp=="DOUBLE"||utyp=="FLOAT"||utyp=="DECIMAL")
-      defa="0";
-    else if (utyp=="DATE" || utyp=="DATETIME" || utyp=="TIME" ||utyp=="TIMESTAMP")
-      defa="0000-00-00";
-    else if (utyp=="YEAR")
-      defa="0000";
-		else
-		  defa=string(); // char- usw.Felder
+	if (defa.empty()) {
+		if (obauto) {
+			defa="0";
+		} else {
+			const string utyp=boost::locale::to_upper(typ, loc);
+			////    transform(typ.begin(),typ.end(),typ.begin(),::toupper);
+			if (utyp.find("INT")!=string::npos || utyp=="LONG"||utyp=="DOUBLE"||utyp=="FLOAT"||utyp=="DECIMAL")
+				defa="0";
+			else if (utyp=="DATE" || utyp=="DATETIME" || utyp=="TIME" ||utyp=="TIMESTAMP")
+				defa="0000-00-00";
+			else if (utyp=="YEAR")
+				defa="0000";
+			else
+				defa=string(); // char- usw.Felder
+		}
 	}
 } // Feld(const string& name, const string& typ, const string& lenge, const string& prec, string comment, bool vind, bool vobauto, bool vnnull, string vdefa):
 
@@ -1025,7 +1029,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
               +")"))
 						+(felder[i].unsig  ?  " UNSIGNED ":"")
             +(felder[i].nnull  ?  " NOT NULL ":"")
-            +(((felder[i].defa.empty()&&!felder[i].nnull)||utyp.find("LONGTEXT")!=string::npos)?"":" DEFAULT '"+felder[i].defa+"'")
+            +(felder[i].defa=="NULL"||felder[i].defa=="null"||((felder[i].defa.empty()&&!felder[i].nnull)||(felder[i].obind && felder[i].obauto)||utyp.find("LONGTEXT")!=string::npos)?"":" DEFAULT '"+felder[i].defa+"'")
             +(felder[i].obauto?" AUTO_INCREMENT":" ")
             +(felder[i].obind && felder[i].obauto?" PRIMARY KEY":" ")
             +((felder[i].comment.empty())?"":
@@ -1741,7 +1745,9 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 					if (!fehler.find("Disk full"))
 						hoerauf=115;
 				} // if (mysql_real_query(db->conn[aktc],sql.c_str(),sql.length())) else  
+        const unsigned altfnr=fnr;
 				striktzurueck(altsqlm,aktc);
+				fnr=altfnr;
 				if (hoerauf) exit(hoerauf);
 			} // if (!db->conn[aktc]) else
 			if (obfehl) {

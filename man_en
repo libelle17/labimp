@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "04.04.18" "Version 0.10196" "\fB²DPROG²\fR man page"
+.TH man 1 "04.04.18" "Version 0.10212" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -15,9 +15,11 @@
 .SH OPTIONS 
 .SH PRECONDITIONS
 .br
-\fRProgramm: \fB/home/schade/labimp/labimp\fR, V: \fB0.10185\fR (Laborimport) 
+\fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.10197\fR (Laborimport) 
 .br
 \fBOptions which are not saved: \fR
+.br
+\fB -fromscratch, --fromscratch\fR: deletes all tables\fB or not\fR (\fB0\fR)
 .br
 \fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
 .br
