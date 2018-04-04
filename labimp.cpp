@@ -248,6 +248,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"vonvorne","fromscratch"},
 	// T_loescht_alle_Tabellen
 	{"loescht alle Tabellen","deletes all tables"},
+	// T_Loesche_alle_Tabellen_und_fange_von_vorne_an
+	{"Loesche alle Tabellen und fange von vorne an","Deleting all tables and starting from scatch"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -325,7 +327,7 @@ void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, c
 		Constraint csts[]{Constraint("Gruppe",new Feld{Feld("Gruppe")},1,"laborgruppen",new Feld{Feld("Laborgruppe")},1),
 			// geht beides!:
 			//			  								Constraint("Labore",new Feld[1]{Feld("lid")},1,"laboryplab",new Feld[1]{Feld("id")},1)};
-							 Constraint("Labore",new Feld{Feld("lid")},1,"laboryplab",new Feld{Feld("id")},1)};
+							 Constraint("laborypneulaboryplab",new Feld{Feld("lid")},1,"laboryplab",new Feld{Feld("id")},1)};
 	// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 	Tabelle taba(My,tlaborypneu,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborneu]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 	if (taba.prueftab(aktc,obverb)) {
@@ -354,7 +356,7 @@ void hhcl::prueflaborypnb(DB *My, const string& tlaborypnb, const int obverb, co
 		};
 		Feld ifd0[]{Feld("pid")};
 		Feld ifd0a[]{Feld("id")};
-		Constraint c0("laborxpneu_xpnb",ifd0,1,"laborypneu",ifd0a,1,cascade,cascade);
+		Constraint c0("laborypnblaborypneu",ifd0,1,"laborypneu",ifd0a,1,cascade,cascade);
 		Constraint csts[]{c0};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborypnb,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_Labornb]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
@@ -397,7 +399,7 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 		};
 		Feld ifelder0[] = {Feld("PLZLabor"),Feld("OrtLabor")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
-		Constraint csts[]{Constraint("laborsaetzedateien",new Feld{Feld("datid")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade)};
+		Constraint csts[]{Constraint("laborysaetzelaboryeingel",new Feld{Feld("datid")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade)};
 			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborysaetze,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -666,17 +668,17 @@ void hhcl::virtpruefweiteres()
 	initDB();
 	const size_t aktc=0;
 	if (vonvorne) {
-		RS d0(My,"drop table if exists laborypgl",aktc,ZDB);
-		RS d1(My,"drop table if exists laborywert",aktc,ZDB);
-		RS d2(My,"drop table if exists laboryleist",aktc,ZDB);
-		RS d3(My,"drop table if exists laborybakt",aktc,ZDB);
-		RS d4(My,"drop table if exists laboryus",aktc,ZDB);
-		RS d5(My,"drop table if exists laborysaetze",aktc,ZDB);
-		RS d6(My,"drop table if exists laborypnb",aktc,ZDB);
-		RS d7(My,"drop table if exists laborypneu",aktc,ZDB);
-		RS d8(My,"drop table if exists laboryplab",aktc,ZDB);
-		RS d9(My,"drop table if exists laboryeingel",aktc,ZDB);
-		caus<<"vonvorne"<<endl;
+		RS d0(My,"DROP TABLE IF EXISTS laborypgl",aktc,ZDB);
+		RS d1(My,"DROP TABLE IF EXISTS laborywert",aktc,ZDB);
+		RS d2(My,"DROP TABLE IF EXISTS laboryleist",aktc,ZDB);
+		RS d3(My,"DROP TABLE IF EXISTS laborybakt",aktc,ZDB);
+		RS d4(My,"DROP TABLE IF EXISTS laboryus",aktc,ZDB);
+		RS d5(My,"DROP TABLE IF EXISTS laborysaetze",aktc,ZDB);
+		RS d6(My,"DROP TABLE IF EXISTS laborypnb",aktc,ZDB);
+		RS d7(My,"DROP TABLE IF EXISTS laborypneu",aktc,ZDB);
+		RS d8(My,"DROP TABLE IF EXISTS laboryplab",aktc,ZDB);
+		RS d9(My,"DROP TABLE IF EXISTS laboryeingel",aktc,ZDB);
+		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	}
 	prueflaboryeingel(My, tlaboryeingel, obverb, oblog, /*direkt*/0);
 	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
@@ -722,8 +724,7 @@ void hhcl::pvirtfuehraus()
 	for(size_t i=0;i<lrue.size();i++) {
 		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 		char ***cerg;
-		ZDB=1;
-		RS rsfertig(My,"SELECT fertig,name from laboryeingel l where name ='"+base_name(lrue[i])+"' and pfad = '"+dir_name(lrue[i])+"'",aktc,ZDB);
+		RS rsfertig(My,"SELECT fertig,name FROM laboryeingel l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+dir_name(lrue[i])+"'",aktc,ZDB);
 		if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 			caus<<"*cerg: "<<*cerg<<endl;
 			dverarbeit(lrue[i]);
