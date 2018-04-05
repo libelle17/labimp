@@ -1410,7 +1410,7 @@ sqlft::sqlft(DBSTyp eDBS, const time_t *tm): string(21,0)
 	druckeein(eDBS,&zt);
 } // sqlft::sqlft(DBSTyp eDBS, time_t *tm): string(21,0)
 
-sqlft::sqlft(DBSTyp eDBS, const chrono::system_clock::time_point* const tp): string(22,0)
+sqlft::sqlft(DBSTyp eDBS, const chrono::system_clock::time_point* const tp): string(21,0)
 {
 	const time_t tpt = chrono::system_clock::to_time_t(*tp);
   struct tm zt={0};

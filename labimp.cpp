@@ -712,8 +712,8 @@ void hhcl::dverarbeit(const string& datei)
 			vector<instyp> einf; // fuer alle Datenbankeinfuegungen
 			einf.push_back(/*2*/instyp(My->DBS,"name",base_name(datei)));
 			einf.push_back(/*2*/instyp(My->DBS,"pfad",datei));
-			time_t jetztt=chrono::system_clock::to_time_t(jetzt);
-			einf.push_back(/*2*/instyp(My->DBS,"zp",&jetztt)); // jetzt macht immer Fehler 1064 mit Befehl, der aber bei Direkteingabe funktioniert
+			//jitt.wert.resize(jit.wert.size()-1);
+			einf.push_back(/*2*/instyp(My->DBS,"zp",&jetzt)); // jetzt macht immer Fehler 1064 mit Befehl, der aber bei Direkteingabe funktioniert
 			svec eindfeld; eindfeld<<"id";
 			ZDB=1;
 			rins.tbins(tlaboryeingel,&einf,aktc,/*sammeln=*/0,/*obverb=*/ZDB,/*idp=*/0,/*eindeutig=*/0,eindfeld); 

@@ -166,7 +166,7 @@ class instyp
  public:
     const string feld;
     string wert;
-    unsigned char obkeinwert; // bei update wird <wert> nicht als Wert, sondern ohne Anf'z.(z.B.als Feld) verwendet (z.B. update xy set altdatum = datum)
+    uchar obkeinwert; // bei update wird <wert> nicht als Wert, sondern ohne Anf'z.(z.B.als Feld) verwendet (z.B. update xy set altdatum = datum)
   private:
     ////	char dbuf[21];
     inline string ersetze(const char *u, const char* alt, const char* neu);
@@ -182,19 +182,19 @@ class instyp
     }
 ////    void init(){feld=string();wert=string();obkeinwert=0;}
 
-    /*3*/instyp (DBSTyp eDBS, char* feld, char *vwert):feld(feld) {
+    /*3*/instyp(DBSTyp eDBS, char* feld, char *vwert):feld(feld) {
       wert=sqlft(eDBS,vwert,false);
       obkeinwert=0;
     }
-    /*4*/instyp (DBSTyp eDBS, char* feld, char *vwert,char* zs):feld(feld) {
+    /*4*/instyp(DBSTyp eDBS, char* feld, char *vwert,char* zs):feld(feld) {
       wert=sqlft(eDBS,vwert,zs);
       obkeinwert=0;
     }
-    /*5*/instyp (DBSTyp eDBS, char* feld, char *vwert,bool obzahl):feld(feld) {
+    /*5*/instyp(DBSTyp eDBS, char* feld, char *vwert,bool obzahl):feld(feld) {
       wert=sqlft(eDBS,vwert,obzahl);
       obkeinwert=0;
     }
-    /*6*/instyp (DBSTyp eDBS, const char* feld, const char *vwert,unsigned char vobkeinwert):feld(feld) {
+    /*6*/instyp(DBSTyp eDBS, const char* feld, const char *vwert,unsigned char vobkeinwert):feld(feld) {
       wert=vwert;
       obkeinwert=vobkeinwert;
     }
