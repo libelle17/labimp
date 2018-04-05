@@ -1415,9 +1415,10 @@ sqlft::sqlft(DBSTyp eDBS, const chrono::system_clock::time_point* const tp): str
 	const time_t tpt = chrono::system_clock::to_time_t(*tp);
   struct tm zt={0};
 	pthread_mutex_lock(&timemutex);
-	memcpy(&zt,localtime(&tpt),sizeof zt);
+	strftime((char*)c_str(),length(),"%Y-%m-%d %H:%M:%S",localtime(&tpt)); // 
+//	memcpy(&zt,localtime(&tpt),sizeof zt);
 	pthread_mutex_unlock(&timemutex);
-	druckeein(eDBS,&zt);
+//	druckeein(eDBS,&zt);
 //	char zwi[20];
 //	strftime((char*)c_str(),length(),"",localtime(&tpt)); // %Y%m%d%H%M%S
 	// sprintf((char*)c_str(),"%c%.20s%c",dvb(eDBS),zwi,dve(eDBS));
