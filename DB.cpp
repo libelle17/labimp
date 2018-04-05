@@ -1410,6 +1410,26 @@ sqlft::sqlft(DBSTyp eDBS, const time_t *tm): string(21,0)
 	druckeein(eDBS,&zt);
 } // sqlft::sqlft(DBSTyp eDBS, time_t *tm): string(21,0)
 
+sqlft::sqlft(DBSTyp eDBS, const chrono::system_clock::time_point* const tp): string(22,0)
+{
+	const time_t tpt = chrono::system_clock::to_time_t(*tp);
+  struct tm zt={0};
+	pthread_mutex_lock(&timemutex);
+	memcpy(&zt,localtime(&tpt),sizeof zt);
+	pthread_mutex_unlock(&timemutex);
+	druckeein(eDBS,&zt);
+//	char zwi[20];
+//	strftime((char*)c_str(),length(),"",localtime(&tpt)); // %Y%m%d%H%M%S
+	// sprintf((char*)c_str(),"%c%.20s%c",dvb(eDBS),zwi,dve(eDBS));
+//  insert(0,1,dvb(eDBS));
+//  append(1,dve(eDBS));
+	//strftime((char*)c_str(),length(),"%Y-%m-%d %X",localtime(&tpt));
+	/* geht auch nicht: 
+	struct tm *zt=localtime(&tpt);
+	druckeein(eDBS,zt);
+	*/
+}
+
 void stmax(int *zahl,int stellen=2)
 {
  int grenze=1;
@@ -1640,6 +1660,8 @@ void RS::weisezu(const DB* pdb)
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
 int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int oblog/*=0*/,string *idp/*=0*/,my_ulonglong *arowsp/*=0*/)
 {
+	int altobverb=obverb;
+//	obverb=1;
 	yLog(obverb,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
 	int obfalsch=0;
@@ -1656,7 +1678,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 			////      if (sql=="select column_name from information_schema.columns where table_schema='emails' and table_name = 'lmailbody' and extra = 'auto_increment'") {mysql_commit(dbp->conn[aktc]);} // sql="select 'ID'";
 			//// <<"sql.c_str(): "<<sql.c_str()<<endl;
 			if (obverb==1)
-				fLog("SQL: "+drots+sql+schwarz,1,1);
+				fLog("SQL: '"+drots+sql+schwarz+"'",1,1);
 			if (!dbp->conn[aktc]) {
 				fnr=9999;
 				fehler=Txd[T_Datenbank_nicht_zu_oeffnen];
@@ -1790,6 +1812,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 #endif // mitpostgres
 			break;
 	} // 	switch (db->DBS)
+	obverb=altobverb;
 	return (int)obfehl;
 } // RS::doAbfrage
 

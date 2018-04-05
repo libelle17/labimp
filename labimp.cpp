@@ -250,6 +250,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"loescht alle Tabellen","deletes all tables"},
 	// T_Loesche_alle_Tabellen_und_fange_von_vorne_an
 	{"Loesche alle Tabellen und fange von vorne an","Deleting all tables and starting from scatch"},
+	// T_Fehler_af,
+	{"Fehler ","Errror "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -704,7 +706,21 @@ void hhcl::virtzeigueberschrift()
 void hhcl::dverarbeit(const string& datei)
 {
 	caus<<"verarbeite: "<<datei<<endl;
-	exit(91);
+	const size_t aktc=0;
+			RS rins(My); 
+			/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
+			vector<instyp> einf; // fuer alle Datenbankeinfuegungen
+			einf.push_back(/*2*/instyp(My->DBS,"name",base_name(datei)));
+			einf.push_back(/*2*/instyp(My->DBS,"pfad",datei));
+			time_t jetztt=chrono::system_clock::to_time_t(jetzt);
+			einf.push_back(/*2*/instyp(My->DBS,"zp",&jetztt)); // jetzt macht immer Fehler 1064 mit Befehl, der aber bei Direkteingabe funktioniert
+			svec eindfeld; eindfeld<<"id";
+			ZDB=1;
+			rins.tbins(tlaboryeingel,&einf,aktc,/*sammeln=*/0,/*obverb=*/ZDB,/*idp=*/0,/*eindeutig=*/0,eindfeld); 
+			if (rins.fnr) {
+				fLog(Tx[T_Fehler_af]+drots+ltoan(rins.fnr)+schwarz+Txk[T_bei]+tuerkis+rins.sql+schwarz+": "+blau+rins.fehler+schwarz,1,1);
+			} //         if (runde==1)
+
 	mdatei blacki(datei,ios::in);
 	if (blacki.is_open()) {
 		string zeile;
@@ -724,7 +740,7 @@ void hhcl::pvirtfuehraus()
 	for(size_t i=0;i<lrue.size();i++) {
 		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 		char ***cerg;
-		RS rsfertig(My,"SELECT fertig,name FROM laboryeingel l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+dir_name(lrue[i])+"'",aktc,ZDB);
+		RS rsfertig(My,"SELECT fertig,name FROM laboryeingel l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
 		if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 			caus<<"*cerg: "<<*cerg<<endl;
 			dverarbeit(lrue[i]);

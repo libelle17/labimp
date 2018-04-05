@@ -123,6 +123,7 @@ enum T_
 	T_vv_l,
 	T_loescht_alle_Tabellen,
 	T_Loesche_alle_Tabellen_und_fange_von_vorne_an,
+	T_Fehler_af,
 	T_MAX //α
 }; // enum T_ //ω
 //α

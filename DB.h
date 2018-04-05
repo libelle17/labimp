@@ -152,6 +152,7 @@ class sqlft: public string
     sqlft(DBSTyp eDBS, const unsigned int i);
     sqlft(DBSTyp eDBS, const unsigned long int i);
     sqlft(DBSTyp eDBS, const long long int i);
+    sqlft(DBSTyp eDBS, const chrono::system_clock::time_point* const tp);
 }; // class sqlft: public string 
 
 
