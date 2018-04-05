@@ -1413,22 +1413,27 @@ sqlft::sqlft(DBSTyp eDBS, const time_t *tm): string(21,0)
 sqlft::sqlft(DBSTyp eDBS, const chrono::system_clock::time_point* const tp): string(21,0)
 {
 	const time_t tpt = chrono::system_clock::to_time_t(*tp);
-  struct tm zt={0};
 	pthread_mutex_lock(&timemutex);
-	strftime((char*)c_str(),length(),"%Y-%m-%d %H:%M:%S",localtime(&tpt)); // 
-//	memcpy(&zt,localtime(&tpt),sizeof zt);
+//#define altzeit
+#if not defined altzeit
+//#define schoen
+#if defined schoen
+	strftime((char*)c_str(),length(),"%Y-%m-%d %X",localtime(&tpt));
+	resize(19);
+#else // schoen
+	strftime((char*)c_str(),length(),"%Y%m%d%H%M%S",localtime(&tpt));
+	resize(14);
+#endif // schoen
+	insert(0,1,dvb(eDBS));
+	append(1,dve(eDBS));
 	pthread_mutex_unlock(&timemutex);
-//	druckeein(eDBS,&zt);
-//	char zwi[20];
-//	strftime((char*)c_str(),length(),"",localtime(&tpt)); // %Y%m%d%H%M%S
-	// sprintf((char*)c_str(),"%c%.20s%c",dvb(eDBS),zwi,dve(eDBS));
-//  insert(0,1,dvb(eDBS));
-//  append(1,dve(eDBS));
-	//strftime((char*)c_str(),length(),"%Y-%m-%d %X",localtime(&tpt));
-	/* geht auch nicht: 
-	struct tm *zt=localtime(&tpt);
-	druckeein(eDBS,zt);
-	*/
+#else // altzeit
+  struct tm zt={0};
+	memcpy(&zt,localtime(&tpt),sizeof zt);
+	pthread_mutex_unlock(&timemutex);
+	druckeein(eDBS,&zt);
+#endif // altzeit
+////	caus<<rot<<c_str()<<schwarz<<" "<<string_to_hex(c_str())<<" "<<length()<<" "<<size()<<endl;
 }
 
 void stmax(int *zahl,int stellen=2)

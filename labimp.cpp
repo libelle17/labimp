@@ -715,7 +715,7 @@ void hhcl::dverarbeit(const string& datei)
 			//jitt.wert.resize(jit.wert.size()-1);
 			einf.push_back(/*2*/instyp(My->DBS,"zp",&jetzt)); // jetzt macht immer Fehler 1064 mit Befehl, der aber bei Direkteingabe funktioniert
 			svec eindfeld; eindfeld<<"id";
-			ZDB=1;
+//			ZDB=1;
 			rins.tbins(tlaboryeingel,&einf,aktc,/*sammeln=*/0,/*obverb=*/ZDB,/*idp=*/0,/*eindeutig=*/0,eindfeld); 
 			if (rins.fnr) {
 				fLog(Tx[T_Fehler_af]+drots+ltoan(rins.fnr)+schwarz+Txk[T_bei]+tuerkis+rins.sql+schwarz+": "+blau+rins.fehler+schwarz,1,1);
