@@ -135,15 +135,15 @@ class sqlft: public string
 {
   private:
     ////	char dbuf[21];
-    string *ersetze(const char* alt, const char* neu);
-    string *sersetze( string *src, string const& target, string const& repl);
+    string *ersetze(const char* const alt, const char* const neu);
+    string *sersetze( string *const src, string const& target, string const& repl);
     void druckeein(DBSTyp eDBS, tm *const zt);
   public:
     ////	string feld;
     sqlft(DBSTyp eDBS, const string& vwert);
-    sqlft(DBSTyp eDBS, const string* vwert);
-    sqlft(DBSTyp eDBS, char* vwert,char* zs);
-    sqlft(DBSTyp eDBS, char* vwert,const bool obzahl=0);
+    sqlft(DBSTyp eDBS, const string* const vwert);
+    sqlft(DBSTyp eDBS, const char* const vwert,const char* const zs);
+    sqlft(DBSTyp eDBS, const char* const vwert,const bool obzahl=0);
     sqlft(DBSTyp eDBS, const time_t *zt);
     sqlft(DBSTyp eDBS, tm *const zt);
     sqlft(DBSTyp eDBS, const char c);
@@ -170,40 +170,32 @@ class instyp
     uchar obkeinwert; // bei update wird <wert> nicht als Wert, sondern ohne Anf'z.(z.B.als Feld) verwendet (z.B. update xy set altdatum = datum)
   private:
     ////	char dbuf[21];
-    inline string ersetze(const char *u, const char* alt, const char* neu);
-    inline string *sersetze( string *src, string const& target, string const& repl);
+    inline string ersetze(const char *const u, const char* const alt, const char* const neu);
+    inline string *sersetze( string *const src, string const& target, string const& repl);
   public:
-    /*1*/template <typename tC> explicit instyp (DBSTyp eDBS, char* const feld, tC vwert): feld(feld) {
-      wert=sqlft(eDBS,vwert);
-      obkeinwert=0;
-    }
-    /*2*/template <typename tC> explicit instyp (DBSTyp eDBS, const char* feld, tC vwert):feld(feld) {
+    /*1*/template <typename tC> explicit instyp (DBSTyp eDBS, const char* const feld, tC vwert): feld(feld) {
       wert=sqlft(eDBS,vwert);
       obkeinwert=0;
     }
 ////    void init(){feld=string();wert=string();obkeinwert=0;}
 
-    /*3*/instyp(DBSTyp eDBS, char* feld, char *vwert):feld(feld) {
+    /*3*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert):feld(feld) {
       wert=sqlft(eDBS,vwert,false);
       obkeinwert=0;
     }
-    /*4*/instyp(DBSTyp eDBS, char* feld, char *vwert,char* zs):feld(feld) {
+    /*4*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert,const char* const zs):feld(feld) {
       wert=sqlft(eDBS,vwert,zs);
       obkeinwert=0;
     }
-    /*5*/instyp(DBSTyp eDBS, char* feld, char *vwert,bool obzahl):feld(feld) {
+    /*5*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert,const bool obzahl):feld(feld) {
       wert=sqlft(eDBS,vwert,obzahl);
       obkeinwert=0;
     }
-    /*6*/instyp(DBSTyp eDBS, const char* feld, const char *vwert,unsigned char vobkeinwert):feld(feld) {
+    /*6*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert,const uchar vobkeinwert):feld(feld) {
       wert=vwert;
       obkeinwert=vobkeinwert;
     }
-    /*7*/instyp(DBSTyp eDBS, char* const feld,const string& vwert):feld(feld) {
-      wert=sqlft(eDBS,vwert);
-      obkeinwert=0;
-    }
-    /*8*/instyp(DBSTyp eDBS, const char* feld,const string& vwert):feld(feld) {
+    /*7*/instyp(DBSTyp eDBS, const char* const feld,const string& vwert):feld(feld) {
       wert=sqlft(eDBS,vwert);
       obkeinwert=0;
     }
@@ -485,21 +477,27 @@ struct insv
 
 	my_ulonglong schreib(const uchar sammeln=0,int obverb=0,string* idp=0)
 	{
-		my_ulonglong erg=rsp->tbins(*itabp,&ivec,aktc,sammeln,obverb,idp,eindeutig,eindfeld,asy,csets);
-		if (rsp->fnr) {
-			fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
-		} //         if (runde==1)
-		ivec.clear();
+		my_ulonglong erg=0;
+		if (ivec.size()) {
+			erg=rsp->tbins(*itabp,&ivec,aktc,sammeln,obverb,idp,eindeutig,eindfeld,asy,csets);
+			if (rsp->fnr) {
+				fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
+			} //         if (runde==1)
+			ivec.clear();
+		}
 		return erg;
 	}
 	void hzp(const instyp it);
 	void hz(const instyp it);
-	template<typename sT> void hzp(char* const feld, sT vwert)
+	inline void clear() {
+		ivec.clear();
+	}
+	template<typename sT> void hzp(const char* const feld, sT vwert)
 	{
 		instyp it(My->DBS,feld,vwert);
 		hzp(it);
 	}
-	template<typename sT> void hz(char* const feld, sT vwert)
+	template<typename sT> void hz(const char* const feld, sT vwert)
 	{
 		instyp it(My->DBS,feld,vwert);
 		hz(it);
@@ -507,6 +505,12 @@ struct insv
 	inline insv& operator<<(const instyp it) {
 		this->hz(it);
 		return *this;
+	}
+	void zeig(const char* const wo) {
+		caus<<"Zeige "<<blau<<*itabp<<schwarz<<" an Position: "<<blau<<wo<<schwarz<<endl;
+		for(size_t i=0;i<ivec.size();i++) {
+			caus<<violett<<"i: "<<gruen<<i<<": '"<<schwarz<<ivec[i].feld<<": '"<<blau<<ivec[i].wert<<"'"<<schwarz<<endl;
+		}
 	}
 };
 

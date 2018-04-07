@@ -1275,7 +1275,7 @@ int DB::machbinaer(const string& tabs, const size_t aktc,const string& fmeld,int
   return 7;
 } // RS::machbinaer
 
-inline string instyp::ersetze(const char *u, const char* alt, const char* neu) 
+inline string instyp::ersetze(const char *const u, const char* const alt, const char* const neu) 
 {
   string erg;
   if (alt[0]==0 || !strcmp(alt,neu)) {
@@ -1293,7 +1293,7 @@ inline string instyp::ersetze(const char *u, const char* alt, const char* neu)
   return erg;
 } // ersetze(char *u, const char* alt, const char* neu)
 
-inline string *instyp::sersetze( string *src, string const& target, string const& repl) 
+inline string *instyp::sersetze( string *const src, string const& target, string const& repl) 
 {
   if (target.length()) {
     if (src->length()) {
@@ -1336,7 +1336,7 @@ sqlft::sqlft(DBSTyp eDBS, const string& vwert):
   append(1,dve(eDBS));
 } // sqlft::sqlft(DBSTyp eDBS, const string& vwert)
 
-sqlft::sqlft(DBSTyp eDBS, const string *vwert):
+sqlft::sqlft(DBSTyp eDBS, const string *const vwert):
   string(*vwert) 
 {
   ersetze("\\","\\\\");
@@ -1345,7 +1345,7 @@ sqlft::sqlft(DBSTyp eDBS, const string *vwert):
   append(1,dve(eDBS));
 } // sqlft::sqlft(DBSTyp eDBS, const string *vwert)
 
-sqlft::sqlft(DBSTyp eDBS, char* vwert,const bool obzahl):
+sqlft::sqlft(DBSTyp eDBS, const char* const vwert,const bool obzahl):
   string(vwert) 
 {
   if (!obzahl) {
@@ -1356,7 +1356,7 @@ sqlft::sqlft(DBSTyp eDBS, char* vwert,const bool obzahl):
   }
 } // sqlft::sqlft(DBSTyp eDBS, char* vwert,bool obzahl)
 
-sqlft::sqlft(DBSTyp eDBS, char* vwert,char* zs):
+sqlft::sqlft(DBSTyp eDBS, const char* const vwert,const char* const zs):
   string(vwert) 
 {
   ersetze("\\","\\\\");
@@ -1366,7 +1366,7 @@ sqlft::sqlft(DBSTyp eDBS, char* vwert,char* zs):
   append(1,dve(eDBS));
 } // sqlft::sqlft(DBSTyp eDBS, char* vwert,char* zs)
 
-string *sqlft::ersetze(const char* alt, const char* neu) 
+string *sqlft::ersetze(const char* const alt, const char* const neu) 
 {
   if (size()){
     string erg;
@@ -1389,7 +1389,7 @@ string *sqlft::ersetze(const char* alt, const char* neu)
   return this;
 } // ersetze(char *u, const char* alt, const char* neu)
 
-string *sqlft::sersetze( string *src, string const& target, string const& repl) 
+string *sqlft::sersetze( string *const src, string const& target, string const& repl) 
 {
   if (target.length()) {
     if (src->length()) {

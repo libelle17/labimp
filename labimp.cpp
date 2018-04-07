@@ -457,8 +457,8 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 		};
 		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
-		Constraint csts[]{Constraint("Laboryeingellaboryus",new Feld{Feld("DatID")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade),
-		                	Constraint("Laborysaetzelaboryus",new Feld{Feld("satzid")},1,"laborysaetze",new Feld{Feld("satzid")},1,cascade)};
+		Constraint csts[]{Constraint("Laboryeingellaboryus",new Feld{Feld("DatID")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade),
+		                	Constraint("Laborysaetzelaboryus",new Feld{Feld("satzid")},1,"laborysaetze",new Feld{Feld("satzid")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryus,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborus]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -673,20 +673,20 @@ void hhcl::virtpruefweiteres()
 		RS d1(My,"DROP TABLE IF EXISTS laborywert",aktc,ZDB);
 		RS d2(My,"DROP TABLE IF EXISTS laboryleist",aktc,ZDB);
 		RS d3(My,"DROP TABLE IF EXISTS laborybakt",aktc,ZDB);
-		RS d4(My,"DROP TABLE IF EXISTS laboryus",aktc,ZDB);
-		RS d5(My,"DROP TABLE IF EXISTS laborysaetze",aktc,ZDB);
 		RS d6(My,"DROP TABLE IF EXISTS laborypnb",aktc,ZDB);
 		RS d7(My,"DROP TABLE IF EXISTS laborypneu",aktc,ZDB);
 		RS d8(My,"DROP TABLE IF EXISTS laboryplab",aktc,ZDB);
+		RS d4(My,"DROP TABLE IF EXISTS laboryus",aktc,ZDB);
+		RS d5(My,"DROP TABLE IF EXISTS laborysaetze",aktc,ZDB);
 		RS d9(My,"DROP TABLE IF EXISTS laboryeingel",aktc,ZDB);
 		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	}
 	prueflaboryeingel(My, tlaboryeingel, obverb, oblog, /*direkt*/0);
+	prueflaborysaetze(My, tlaborysaetze, obverb, oblog, /*direkt*/0);
+	prueflaboryus(My, tlaboryus, obverb, oblog, /*direkt*/0);
 	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
 	prueflaborypneu(My, tlaborypnb, obverb, oblog, /*direkt*/0);
 	prueflaborypnb(My, tlaborypnb, obverb, oblog, /*direkt*/0);
-	prueflaborysaetze(My, tlaborysaetze, obverb, oblog, /*direkt*/0);
-	prueflaboryus(My, tlaboryus, obverb, oblog, /*direkt*/0);
 	prueflaborybakt(My, tlaborybakt, obverb, oblog, /*direkt*/0);
 	prueflaboryleist(My, tlaboryleist, obverb, oblog, /*direkt*/0);
 	prueflaborywert(My, tlaborywert, obverb, oblog, /*direkt*/0);
@@ -705,37 +705,31 @@ void hhcl::virtzeigueberschrift()
 
 void hhcl::dverarbeit(const string& datei)
 {
-	// caus<<"verarbeite: "<<datei<<endl;
 #define speichern
 #ifdef speichern
 	const size_t aktc=0;
 #endif 
-	string reingelid;
-	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
-	vector<instyp> reingel; // fuer alle Datenbankeinfuegungen
-	reingel.push_back(/*2*/instyp(My->DBS,"name",base_name(datei)));
-	reingel.push_back(/*2*/instyp(My->DBS,"pfad",datei));
-	//jitt.wert.resize(jit.wert.size()-1);
-	reingel.push_back(/*2*/instyp(My->DBS,"zp",&jetzt)); // jetzt macht immer Fehler 1064 mit Befehl, der aber bei Direkteingabe funktioniert
+	string datid, satzid;
+	ulong refnr;
+	uchar obsondersatz,satzlaengenart;
 	svec eindfeld; eindfeld<<"id";
-
+	insv reing(My,/*itab*/tlaboryeingel,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
+	reing.hz("Name",base_name(datei));
+	reing.hz("Pfad",datei);
+	reing.hz("Zp",&jetzt);
 #ifdef speichern
-	//			ZDB=1;
-	RS rseingel(My); 
-	rseingel.tbins(tlaboryeingel,&reingel,aktc,/*sammeln=*/0,/*obverb=*/ZDB,/*idp=*/0,/*eindeutig=*/0,eindfeld); 
-	if (rseingel.fnr) {
-		fLog(Txd[T_Fehler_af]+drots+ltoan(rseingel.fnr)+schwarz+Txk[T_bei]+tuerkis+rseingel.sql+schwarz+": "+blau+rseingel.fehler+schwarz,1,1);
-	} //         if (runde==1)
-	My->LetzteID(&reingelid,aktc);
+	reing.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+	My->LetzteID(&datid,aktc);
 #endif 
-
 	insv rsaetze(My,/*itab*/tlaborysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rus(My,/*itab*/tlaboryus,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
 	caus<<rot<<datei<<schwarz<<endl;
-	mdatei blacki(datei,ios::in);
-	if (blacki.is_open()) {
+	mdatei mdat(datei,ios::in);
+	if (mdat.is_open()) {
 		string zeile,altz;
-		while(getline(blacki,zeile)) {
+		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
 			if (zeile.size()>3) cd=zeile.substr(3,4);
@@ -747,27 +741,100 @@ void hhcl::dverarbeit(const string& datei)
 #ifdef speichern
 			if (cd=="8000") {
 				if (inh.substr(0,4)=="8220") {
-					rsaetze<<(instyp(My->DBS,"Satzart",inh));
-					rsaetze.hzp(instyp(My->DBS,"DatID",reingelid));
+					rsaetze.hz("Satzart",inh);
+					rsaetze.hz("DatID",datid);
+					rus.clear();
+					refnr=0;
+					obsondersatz=1;
+					satzlaengenart=0;
 				} else if (inh.substr(0,4)=="8221") {
-					caus<<"vor schreib"<<endl;
-					rsaetze.schreib(/*sammeln*/0,/*obverb*/0,/*idp*/0);
-					caus<<"nach schreib"<<endl;
+					rsaetze.schreib(/*sammeln*/1,/*obverb*/1,/*idp*/0);
+					My->LetzteID(&satzid,aktc);
+					caus<<rot<<"Satzid: "<<satzid<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+					obsondersatz=1;
+					satzlaengenart=1;
+				} else { // 8201, 8202, 8203
+					rus.zeig("0");
+					rus.schreib(/*sammeln*/1,/*obverb*/1,/*idp*/0);
+          rus.hz("DatID",datid);
+					rus.zeig("1");
+					caus<<rot<<"1 satzid: "<<satzid<<violett<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1"<<endl;
+          rus.hz("SatzID",satzid);
+					rus.zeig("2");
+					rus.hz("SatzArt",inh);
+					rus.hz("RefNr",--refnr);
+					obsondersatz=0;
 				}
+			} else if (cd=="8100") {
+				if (obsondersatz) {
+					if (satzlaengenart) {
+					} else {
+					}
+				} else {
+					rus.hz("Satzlänge",inh);
+				}
+      } else if (cd=="8310") {
+					rus.hz("Auftragsnummer",inh);
+      } else if (cd=="8311") {
+					rus.hz("Auftragsschlüssel",inh);
+      } else if (cd=="8301") {
+					rus.hz("Eingang",inh);
       } else if (cd=="9212") {
-					rsaetze.hzp(instyp(My->DBS,"VersionSatzb",inh));
+					rsaetze.hz("VersionSatzb",inh);
       } else if (cd=="0201") {
-					rsaetze.hzp(instyp(My->DBS,"ArztNr",inh));
+					rsaetze.hz("ArztNr",inh);
       } else if (cd=="0203") {
-					rsaetze.hzp(instyp(My->DBS,"ArztName",inh));
+					rsaetze.hz("ArztName",inh);
       } else if (cd=="0205") {
-//					rsaetze.hzp(instyp(My->DBS,"StraßePraxis",inh));
-					rsaetze.hzp("StraßePraxis",inh);
+					rsaetze.hz("StraßePraxis",inh);
+      } else if (cd=="0211") {
+					rsaetze.hz("Arzt",inh);
+      } else if (cd=="0212") {
+					rsaetze.hz("Lanr",inh);
+      } else if (cd=="0215") {
+					rsaetze.hz("PLZPraxis",inh);
+      } else if (cd=="0216") {
+					rsaetze.hz("OrtPraxis",inh);
+      } else if (cd=="8300") {
+				svec labv;
+				aufSplit(&labv, inh,';');
+				if (labv.size()>0) {
+					rsaetze.hz("Labor",labv[0]);
+					if (labv.size()>1)
+						rsaetze.hz("StraßeLabor",labv[1]);
+					if (labv.size()>2) {
+						rsaetze.hz("PLZLabor",labv[2].substr(0,5));
+						if (labv[2].size()>5) rsaetze.hz("OrtLabor",labv[2].substr(6));
+					}
+				} else {
+					rsaetze.hz("Labor",inh);
+				}
+			} else if (cd=="8320") {
+					rsaetze.hz("Labor",inh);
+			} else if (cd=="8321") {
+						rsaetze.hz("StraßeLabor",inh);
+			} else if (cd=="8322") {
+						rsaetze.hz("PLZLabor",inh);
+			} else if (cd=="8323") {
+						rsaetze.hz("OrtLabor",inh);
+			} else if (cd=="0101") {
+						rsaetze.hz("KBVPrüfnr",inh);
+			} else if (cd=="9106") {
+						rsaetze.hz("Zeichensatz",inh);
+			} else if (cd=="8312") {
+						rsaetze.hz("Kundenarztnr",inh);
+			} else if (cd=="9103") {
+						rsaetze.hz("Erstellungsdatum",inh);
+			} else if (cd=="9102") {
+						rsaetze.hz("Gesamtlänge",inh);
+					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 			}
 			altz=zeile;
 #endif 
 		}
 	}
+	rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+	rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 	exit(0);
 }
 
