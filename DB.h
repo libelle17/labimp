@@ -111,6 +111,7 @@ enum Txdb_
 	T_Referenz,
 	T_auf_Tabelle,
 	T_nicht_erstellt_da_Referenztabelle,
+	T_Fehler_af,
 	T_dbMAX,
 }; // enum Txdb_ 
 
@@ -198,18 +199,16 @@ class instyp
       wert=vwert;
       obkeinwert=vobkeinwert;
     }
-}; // class instyp 
-
-struct insv
-{
-	vector<instyp> ivec; // fuer alle Datenbankeinfuegungen
-	void hzp(const instyp it);
-	void hz(const instyp it);
-    inline insv& operator<<(const instyp it) {
-      this->hz(it);
-      return *this;
+    /*7*/instyp(DBSTyp eDBS, char* const feld,const string& vwert):feld(feld) {
+      wert=sqlft(eDBS,vwert);
+      obkeinwert=0;
     }
-};
+    /*8*/instyp(DBSTyp eDBS, const char* feld,const string& vwert):feld(feld) {
+      wert=sqlft(eDBS,vwert);
+      obkeinwert=0;
+    }
+}; // class instyp 
+////string ersetze(const char *u, const char* alt, const char* neu);
 
 // delimiter value begin
 inline char dvb(DBSTyp DBS) 
@@ -467,7 +466,50 @@ class RS
     int doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int oblog/*=0*/,string *idp/*=0*/,my_ulonglong *arowsp/*=0*/);
 }; // class RS
 
-////string ersetze(const char *u, const char* alt, const char* neu);
+struct insv
+{
+	vector<instyp> ivec; // fuer alle Datenbankeinfuegungen
+	RS *rsp;
+	DB* My=0;
+	const string* const itabp;
+	const size_t aktc;
+	const uchar eindeutig;
+	const svec& eindfeld;
+	const uchar asy;
+	svec *csets;
+//	my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/, int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
+	insv(DB *My,const string& itab,const size_t aktc,const uchar eindeutig,const svec& eindfeld,const uchar asy,svec *csets):My(My),itabp(&itab),aktc(aktc),eindeutig(eindeutig),eindfeld(eindfeld),asy(asy),csets(csets)
+	{
+		rsp=new RS(My);
+	}
+
+	my_ulonglong schreib(const uchar sammeln=0,int obverb=0,string* idp=0)
+	{
+		my_ulonglong erg=rsp->tbins(*itabp,&ivec,aktc,sammeln,obverb,idp,eindeutig,eindfeld,asy,csets);
+		if (rsp->fnr) {
+			fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
+		} //         if (runde==1)
+		ivec.clear();
+		return erg;
+	}
+	void hzp(const instyp it);
+	void hz(const instyp it);
+	template<typename sT> void hzp(char* const feld, sT vwert)
+	{
+		instyp it(My->DBS,feld,vwert);
+		hzp(it);
+	}
+	template<typename sT> void hz(char* const feld, sT vwert)
+	{
+		instyp it(My->DBS,feld,vwert);
+		hz(it);
+	}
+	inline insv& operator<<(const instyp it) {
+		this->hz(it);
+		return *this;
+	}
+};
+
 #endif // DB_H_DRIN
 
 class dhcl:public hcl

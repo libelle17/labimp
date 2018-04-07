@@ -250,8 +250,6 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"loescht alle Tabellen","deletes all tables"},
 	// T_Loesche_alle_Tabellen_und_fange_von_vorne_an
 	{"Loesche alle Tabellen und fange von vorne an","Deleting all tables and starting from scatch"},
-	// T_Fehler_af,
-	{"Fehler ","Errror "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -708,7 +706,8 @@ void hhcl::virtzeigueberschrift()
 void hhcl::dverarbeit(const string& datei)
 {
 	// caus<<"verarbeite: "<<datei<<endl;
-#if speichern
+#define speichern
+#ifdef speichern
 	const size_t aktc=0;
 #endif 
 	string reingelid;
@@ -720,17 +719,17 @@ void hhcl::dverarbeit(const string& datei)
 	reingel.push_back(/*2*/instyp(My->DBS,"zp",&jetzt)); // jetzt macht immer Fehler 1064 mit Befehl, der aber bei Direkteingabe funktioniert
 	svec eindfeld; eindfeld<<"id";
 
-#if speichern
+#ifdef speichern
 	//			ZDB=1;
 	RS rseingel(My); 
 	rseingel.tbins(tlaboryeingel,&reingel,aktc,/*sammeln=*/0,/*obverb=*/ZDB,/*idp=*/0,/*eindeutig=*/0,eindfeld); 
 	if (rseingel.fnr) {
-		fLog(Tx[T_Fehler_af]+drots+ltoan(rseingel.fnr)+schwarz+Txk[T_bei]+tuerkis+rseingel.sql+schwarz+": "+blau+rseingel.fehler+schwarz,1,1);
+		fLog(Txd[T_Fehler_af]+drots+ltoan(rseingel.fnr)+schwarz+Txk[T_bei]+tuerkis+rseingel.sql+schwarz+": "+blau+rseingel.fehler+schwarz,1,1);
 	} //         if (runde==1)
 	My->LetzteID(&reingelid,aktc);
 #endif 
 
-	insv rsaetze; // fuer alle Datenbankeinfuegungen
+	insv rsaetze(My,/*itab*/tlaborysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
 	caus<<rot<<datei<<schwarz<<endl;
 	mdatei blacki(datei,ios::in);
@@ -745,17 +744,15 @@ void hhcl::dverarbeit(const string& datei)
 			// sonst keinen Fall von Zeilenumbruch gefunden
 			caus<<blau<<bzahl<<" "<<cd<<" "<<schwarz<<inh<<endl;
 //			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
-#if speichern
+#ifdef speichern
 			if (cd=="8000") {
 				if (inh.substr(0,4)=="8220") {
 					rsaetze<<(instyp(My->DBS,"Satzart",inh));
 					rsaetze.hzp(instyp(My->DBS,"DatID",reingelid));
 				} else if (inh.substr(0,4)=="8221") {
-					RS rssaetze(My);
-					rssaetze.tbins(tlaborysaetze,&rsaetze.ivec,aktc,/*sammeln=*/0,/*obverb=*/ZDB,/*idp=*/0,/*eindeutig=*/0,eindfeld); 
-					if (rseingel.fnr) {
-						fLog(Tx[T_Fehler_af]+drots+ltoan(rssaetze.fnr)+schwarz+Txk[T_bei]+tuerkis+rssaetze.sql+schwarz+": "+blau+rssaetze.fehler+schwarz,1,1);
-					} //         if (runde==1)
+					caus<<"vor schreib"<<endl;
+					rsaetze.schreib(/*sammeln*/0,/*obverb*/0,/*idp*/0);
+					caus<<"nach schreib"<<endl;
 				}
       } else if (cd=="9212") {
 					rsaetze.hzp(instyp(My->DBS,"VersionSatzb",inh));
@@ -764,7 +761,8 @@ void hhcl::dverarbeit(const string& datei)
       } else if (cd=="0203") {
 					rsaetze.hzp(instyp(My->DBS,"ArztName",inh));
       } else if (cd=="0205") {
-					rsaetze.hzp(instyp(My->DBS,"StraßePraxis",inh));
+//					rsaetze.hzp(instyp(My->DBS,"StraßePraxis",inh));
+					rsaetze.hzp("StraßePraxis",inh);
 			}
 			altz=zeile;
 #endif 

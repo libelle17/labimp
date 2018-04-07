@@ -150,6 +150,8 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	// T_nicht_erstellt_da_Tabelle
 	// T_nicht_erstellt_da_Referenztabelle
 	{"` nicht erstellt, da Referenztabelle `","` not created, because referenced table `"},
+	// T_Fehler_af,
+	{"Fehler ","Errror "},
 	{"",""}
 };
 // Txdbcl::Txdbcl() {TCp=(const char* const * const * const *)&TextC;}
