@@ -261,6 +261,7 @@ const char *logdt="/var/log/" DPROG "vorgabe.log";//darauf wird in kons.h verwie
 using namespace std; //ω
 hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) //α
 {
+	icp=new ic_cl("UTF8","ISO-8859-15");
 	// mitcron=0; //ω
 } // hhcl::hhcl //α
 // Hier neue Funktionen speichern: //ω
@@ -703,49 +704,96 @@ void hhcl::virtzeigueberschrift()
 	hcl::virtzeigueberschrift();
 } // void hhcl::virtzeigueberschrift
 
+
 void hhcl::dverarbeit(const string& datei)
 {
-	caus<<"verarbeite: "<<datei<<endl;
+	// caus<<"verarbeite: "<<datei<<endl;
+#if speichern
 	const size_t aktc=0;
-			RS rins(My); 
-			/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
-			vector<instyp> einf; // fuer alle Datenbankeinfuegungen
-			einf.push_back(/*2*/instyp(My->DBS,"name",base_name(datei)));
-			einf.push_back(/*2*/instyp(My->DBS,"pfad",datei));
-			//jitt.wert.resize(jit.wert.size()-1);
-			einf.push_back(/*2*/instyp(My->DBS,"zp",&jetzt)); // jetzt macht immer Fehler 1064 mit Befehl, der aber bei Direkteingabe funktioniert
-			svec eindfeld; eindfeld<<"id";
-//			ZDB=1;
-			rins.tbins(tlaboryeingel,&einf,aktc,/*sammeln=*/0,/*obverb=*/ZDB,/*idp=*/0,/*eindeutig=*/0,eindfeld); 
-			if (rins.fnr) {
-				fLog(Tx[T_Fehler_af]+drots+ltoan(rins.fnr)+schwarz+Txk[T_bei]+tuerkis+rins.sql+schwarz+": "+blau+rins.fehler+schwarz,1,1);
-			} //         if (runde==1)
+#endif 
+	string reingelid;
+	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
+	vector<instyp> reingel; // fuer alle Datenbankeinfuegungen
+	reingel.push_back(/*2*/instyp(My->DBS,"name",base_name(datei)));
+	reingel.push_back(/*2*/instyp(My->DBS,"pfad",datei));
+	//jitt.wert.resize(jit.wert.size()-1);
+	reingel.push_back(/*2*/instyp(My->DBS,"zp",&jetzt)); // jetzt macht immer Fehler 1064 mit Befehl, der aber bei Direkteingabe funktioniert
+	svec eindfeld; eindfeld<<"id";
 
+#if speichern
+	//			ZDB=1;
+	RS rseingel(My); 
+	rseingel.tbins(tlaboryeingel,&reingel,aktc,/*sammeln=*/0,/*obverb=*/ZDB,/*idp=*/0,/*eindeutig=*/0,eindfeld); 
+	if (rseingel.fnr) {
+		fLog(Tx[T_Fehler_af]+drots+ltoan(rseingel.fnr)+schwarz+Txk[T_bei]+tuerkis+rseingel.sql+schwarz+": "+blau+rseingel.fehler+schwarz,1,1);
+	} //         if (runde==1)
+	My->LetzteID(&reingelid,aktc);
+#endif 
+
+	insv rsaetze; // fuer alle Datenbankeinfuegungen
+
+	caus<<rot<<datei<<schwarz<<endl;
 	mdatei blacki(datei,ios::in);
 	if (blacki.is_open()) {
-		string zeile;
+		string zeile,altz;
 		while(getline(blacki,zeile)) {
-			caus<<"   "<<zeile<<endl;
+			string bzahl=zeile.substr(0,3);
+			string cd,inh;
+			if (zeile.size()>3) cd=zeile.substr(3,4);
+			if (zeile.size()>7) inh=icp->convert(zeile,7);
+			if (cd.empty()||!cd[0]) continue;
+			// sonst keinen Fall von Zeilenumbruch gefunden
+			caus<<blau<<bzahl<<" "<<cd<<" "<<schwarz<<inh<<endl;
+//			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
+#if speichern
+			if (cd=="8000") {
+				if (inh.substr(0,4)=="8220") {
+					rsaetze<<(instyp(My->DBS,"Satzart",inh));
+					rsaetze.hzp(instyp(My->DBS,"DatID",reingelid));
+				} else if (inh.substr(0,4)=="8221") {
+					RS rssaetze(My);
+					rssaetze.tbins(tlaborysaetze,&rsaetze.ivec,aktc,/*sammeln=*/0,/*obverb=*/ZDB,/*idp=*/0,/*eindeutig=*/0,eindfeld); 
+					if (rseingel.fnr) {
+						fLog(Tx[T_Fehler_af]+drots+ltoan(rssaetze.fnr)+schwarz+Txk[T_bei]+tuerkis+rssaetze.sql+schwarz+": "+blau+rssaetze.fehler+schwarz,1,1);
+					} //         if (runde==1)
+				}
+      } else if (cd=="9212") {
+					rsaetze.hzp(instyp(My->DBS,"VersionSatzb",inh));
+      } else if (cd=="0201") {
+					rsaetze.hzp(instyp(My->DBS,"ArztNr",inh));
+      } else if (cd=="0203") {
+					rsaetze.hzp(instyp(My->DBS,"ArztName",inh));
+      } else if (cd=="0205") {
+					rsaetze.hzp(instyp(My->DBS,"StraßePraxis",inh));
+			}
+			altz=zeile;
+#endif 
 		}
 	}
+	exit(0);
 }
 
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
 	const size_t aktc=0;
+	const string fertigvz=ldatvz+"/"+fertiguvz;
+	pruefverz(fertigvz,obverb,oblog);
+	systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
+	systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
 	svec lrue;
-	systemrueck("find "+ldatvz+" -type f \\( -iname '1b*.ld*' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
+	systemrueck("find "+ldatvz+" -type f -maxdepth 1 \\( -iname '1b*.ld*' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 	//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 	for(size_t i=0;i<lrue.size();i++) {
-		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+		//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 		char ***cerg;
 		RS rsfertig(My,"SELECT fertig,name FROM laboryeingel l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
 		if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
-			caus<<"*cerg: "<<*cerg<<endl;
+			// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 			dverarbeit(lrue[i]);
 		}
 	}
+	caus<<"fertig!"<<endl;
 } // void hhcl::pvirtfuehraus  //α
 
 // wird aufgerufen in lauf

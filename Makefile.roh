@@ -109,7 +109,7 @@ ifneq ($(LT),)
 	LDFLAGS::=$(LDFLAGS) -ltiff
 endif
 ifneq ($(LBOOST),)
-	LDFLAGS::=$(LDFLAGS) -lboost_iostreams -lboost_locale
+	LDFLAGS::=$(LDFLAGS) -lboost_iostreams -lboost_locale # -lboost_system -lboost_filesystem
 endif
 ifneq ($(LACL),)
 	LDFLAGS::=$(LDFLAGS) -lacl

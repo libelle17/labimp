@@ -126,6 +126,7 @@ enum T_
 	T_Fehler_af,
 	T_MAX //α
 }; // enum T_ //ω
+const string fertiguvz="fertig";
 //α
 class hhcl:public dhcl
 {
@@ -140,6 +141,7 @@ class hhcl:public dhcl
 	string tlaboryus="laboryus";
 	string tlaborywert="laborywert";
 	string tlaborybakt="laborybakt";
+	ic_cl *icp;
  protected: //α
 	string p1;
 	int p2;

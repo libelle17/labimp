@@ -200,6 +200,22 @@ svec holdbaussql(string sql)
   return erg;
 } // holdbaussql
 
+// hinzufuegen mit pruefen
+void insv::hzp(instyp it) 
+{
+	for (size_t i=0;i<ivec.size();i++) {
+		if (it.feld==ivec[i].feld)
+			return;
+	}
+	ivec.push_back(it);
+}
+
+// hinzufuegen 
+void insv::hz(instyp it) 
+{
+	ivec.push_back(it);
+}
+
 Feld::Feld()
 {}
 
@@ -1896,7 +1912,7 @@ void RS::striktzurueck(string& altsqlm,const size_t aktc/*=0*/)
 }
 
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
-void RS::tbupd(const string& utab, vector< instyp > einf,int obverb, const string& bedingung,const size_t aktc/*=0*/,uchar asy/*=0*/) 
+void RS::tbupd(const string& utab, vector<instyp> einf,int obverb, const string& bedingung,const size_t aktc/*=0*/,uchar asy/*=0*/) 
 {
 	ulong locks=0;
 	fnr=0;
@@ -1962,7 +1978,7 @@ void RS::tbupd(const string& utab, vector< instyp > einf,int obverb, const strin
 			exitp(32);
       break;
   } //   switch (dbp->DBS)
-} // void RS::update(const string& utab, vector< instyp > einf,int obverb, const string& bedingung,uchar asy) 
+} // void RS::update(const string& utab, vector<instyp> einf,int obverb, const string& bedingung,uchar asy) 
 
 /*
 	 sammeln=1 mit Puffer (isql) anfangen

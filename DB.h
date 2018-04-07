@@ -200,6 +200,16 @@ class instyp
     }
 }; // class instyp 
 
+struct insv
+{
+	vector<instyp> ivec; // fuer alle Datenbankeinfuegungen
+	void hzp(const instyp it);
+	void hz(const instyp it);
+    inline insv& operator<<(const instyp it) {
+      this->hz(it);
+      return *this;
+    }
+};
 
 // delimiter value begin
 inline char dvb(DBSTyp DBS) 

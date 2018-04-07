@@ -664,6 +664,42 @@ perfcl::perfcl(const string& vvonwo): vonwo(vvonwo)
   t0=time(NULL);
 } // perfcl::perfcl(const string& vvonwo): vonwo(vvonwo)
 
+ic_cl::ic_cl(const char* nach, const char* von) 
+	: ict(iconv_open((string(nach)+"//TRANSLIT").c_str(),von))
+		//		: ict(iconv_open(nach,von))
+{
+}
+
+ic_cl::~ic_cl() { 
+	iconv_close(ict); 
+}
+
+char *ic_cl::convert(string& eing,size_t ab/*=0*/) {
+	size_t eingpufgroe = eing.length()-ab;
+	char* inp=(char*)eing.c_str()+ab;
+	char *ergebnis=ergcont;
+	if (eingpufgroe) {
+		char* ergp;
+		size_t erggroe,urspg;
+		if (eingpufgroe<grenze) {
+			erggroe=urspg=reserve;
+			ergp=ergebnis=ergcont;
+		} else {
+			if (ergdyn) 
+				delete ergdyn;
+			erggroe=urspg=4*eingpufgroe;
+			ergp=ergebnis=ergdyn=new char[erggroe];
+		}
+		if (iconv(ict, &inp, &eingpufgroe, &ergp, &erggroe)>=0) {
+			ergebnis[urspg - erggroe] = 0;
+		} else {
+			*ergebnis=0;
+		}
+	} else {
+		*ergebnis=0;
+	}
+	return ergebnis;
+}
 ostream &ztacl::operator()(std::ostream& out) const {
 	pthread_mutex_lock(&timemutex);
 	out<<put_time(localtime(&zt),fmt);

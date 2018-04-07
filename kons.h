@@ -104,6 +104,7 @@ extern const char *_rot, *_hrot, *_schwarz, *_blau, *_gelb, *_tuerkis, *_hgrau;
 #include <regex.h> // regex_t, regex, regcomp, regexec
 #include <chrono> // fuer sleep_for 
 #include <thread> // fuer sleep_for
+#include <iconv.h> // fuer ic_cl (Konversion von Dos-Dateien in utf-8)
 
 #define neufind
 #define altfind
@@ -488,6 +489,22 @@ class argcl
  const char *argcs;  // Zeiger auf einen Commandline-Parameter
  uchar agef=0; // dieser wurde gefunden
  argcl(const int i, const char *const *const argv);
+};
+
+// Gebrauch, z.B.: ic_cl ic("UTF8","CP850");
+//			caus<<ic.convert(inh)<<endl;
+class ic_cl 
+{
+	iconv_t ict;
+	static const size_t grenze=500, 
+							 reserve=4*grenze;
+	char ergcont[reserve],
+			 *ergdyn=0;
+	public:
+	char *ergebnis;
+	ic_cl(const char* nach, const char* von); 
+	~ic_cl();
+	char *convert(string& eing,size_t ab=0);
 };
 
 class perfcl
