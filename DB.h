@@ -137,6 +137,7 @@ class sqlft: public string
     ////	char dbuf[21];
     string *ersetze(const char* const alt, const char* const neu);
     string *sersetze( string *const src, string const& target, string const& repl);
+		void ersetzalles();
     void druckeein(DBSTyp eDBS, tm *const zt);
   public:
     ////	string feld;

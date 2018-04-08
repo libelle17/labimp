@@ -702,6 +702,12 @@ void hhcl::virtzeigueberschrift()
 	hcl::virtzeigueberschrift();
 } // void hhcl::virtzeigueberschrift
 
+struct tm BDTtoDate(string& inh)
+{
+	tm tm={0};
+	strptime(inh.c_str(),"%d%m%Y",&tm);
+	return tm;
+}
 
 void hhcl::dverarbeit(const string& datei)
 {
@@ -710,8 +716,9 @@ void hhcl::dverarbeit(const string& datei)
 	const size_t aktc=0;
 #endif 
 	string datid, satzid;
-	ulong refnr;
-	uchar obsondersatz,satzlaengenart;
+	unsigned refnr;
+	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
+	uchar saetzezuschreiben;
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlaboryeingel,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
@@ -729,58 +736,99 @@ void hhcl::dverarbeit(const string& datei)
 	mdatei mdat(datei,ios::in);
 	if (mdat.is_open()) {
 		string zeile,altz;
+		struct tm berdat;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
 			if (zeile.size()>3) cd=zeile.substr(3,4);
-			if (zeile.size()>7) inh=icp->convert(zeile,7);
+			if (zeile.size()>7) {
+				inh=icp->convert(zeile,7);
+				sersetze(&inh,"\r","");
+			}
 			if (cd.empty()||!cd[0]) continue;
 			// sonst keinen Fall von Zeilenumbruch gefunden
 			caus<<blau<<bzahl<<" "<<cd<<" "<<schwarz<<inh<<endl;
 //			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
 #ifdef speichern
 			if (cd=="8000") {
-				if (inh.substr(0,4)=="8220") {
+				if (inh.substr(0,4)=="8220") { // Datenpaket-Header
+					lsatzart=1;
+					saetzezuschreiben=1;
 					rsaetze.hz("Satzart",inh);
 					rsaetze.hz("DatID",datid);
-					rus.clear();
 					refnr=0;
-					obsondersatz=1;
-					satzlaengenart=0;
-				} else if (inh.substr(0,4)=="8221") {
-					rsaetze.schreib(/*sammeln*/1,/*obverb*/1,/*idp*/0);
-					My->LetzteID(&satzid,aktc);
-					caus<<rot<<"Satzid: "<<satzid<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
-					obsondersatz=1;
-					satzlaengenart=1;
-				} else { // 8201, 8202, 8203
-					rus.zeig("0");
-					rus.schreib(/*sammeln*/1,/*obverb*/1,/*idp*/0);
+				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
+					lsatzart=2;
+//					satzid="0";
+				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
+					lsatzart=3;
+					if (saetzezuschreiben) {
+						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+						My->LetzteID(&satzid,aktc);
+						saetzezuschreiben=0;
+					}
+//					rus.zeig("0");
+					rus.clear();
           rus.hz("DatID",datid);
-					rus.zeig("1");
-					caus<<rot<<"1 satzid: "<<satzid<<violett<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1"<<endl;
           rus.hz("SatzID",satzid);
-					rus.zeig("2");
 					rus.hz("SatzArt",inh);
-					rus.hz("RefNr",--refnr);
-					obsondersatz=0;
+					rus.hz("RefNr",++refnr);
 				}
 			} else if (cd=="8100") {
-				if (obsondersatz) {
-					if (satzlaengenart) {
-					} else {
-					}
-				} else {
-					rus.hz("Satzlänge",inh);
+				switch (lsatzart) {
+					case 1:
+						rsaetze.hz("Satzlänge",inh);
+						break;
+					case 2:
+						rsaetze.hz("SatzlängeSchluss",inh);
+						break;
+					case 3:
+						rus.hz("Satzlänge",inh);
+						break;
+					default:
+						break;
 				}
-      } else if (cd=="8310") {
-					rus.hz("Auftragsnummer",inh);
-      } else if (cd=="8311") {
-					rus.hz("Auftragsschlüssel",inh);
-      } else if (cd=="8301") {
-					rus.hz("Eingang",inh);
-      } else if (cd=="9212") {
-					rsaetze.hz("VersionSatzb",inh);
+			} else if (cd=="8410" || cd=="8434") { // 8410=Test-Ident, 8434=Verfahren
+					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+			} else if (cd=="8310") {
+				rus.hz("Auftragsnummer",inh);
+			} else if (cd=="8311") {
+				rus.hz("Auftragsschlüssel",inh);
+			} else if (cd=="8301") {
+				tm tm=BDTtoDate(inh);
+				rus.hz("Eingang",&tm);
+			} else if (cd=="8302") {
+				memset(&berdat,0,sizeof berdat);
+				strptime(inh.c_str(),"%d%m%Y",&berdat);
+			} else if (cd=="8303") {
+				strptime(inh.c_str(),"%H%M",&berdat);
+				rus.hz("Berichtsdatum",&berdat);
+			} else if (cd=="8609") {
+				rus.hz("Abrechnungstyp",inh);
+			} else if (cd=="8401") {
+				rus.hz("Befart",inh); // Fertigstellungsgrad
+			} else if (cd=="8615") {
+				rus.hz("Auftraggeber",inh);
+			} else if (cd=="8403") {
+				rus.hz("GebüOrd",inh);
+			} else if (cd=="8405") {
+				rus.hz("Patienteninformation",inh);
+			} else if (cd=="8407") {
+				rus.hz("Geschlecht",inh);
+			} else if (cd=="3101") {
+				rus.hz("Nachname",inh.substr(0,3)=="zzz"?inh.substr(4):inh);
+			} else if (cd=="3102") {
+				rus.hz("Vorname",inh);
+			} else if (cd=="3103") {
+				rus.hz("GebDat",inh);
+			} else if (cd=="3110") {
+				rus.hz("Geschlecht",inh=="W"?"2":inh=="M"?"1":inh=="X"?"3":inh);
+			} else if (cd=="3104") {
+				rus.hz("Titel",inh);
+			} else if (cd=="3100") {
+				rus.hz("NVorsatz",inh);
+			} else if (cd=="9212") {
+				rsaetze.hz("VersionSatzb",inh);
       } else if (cd=="0201") {
 					rsaetze.hz("ArztNr",inh);
       } else if (cd=="0203") {
@@ -827,14 +875,11 @@ void hhcl::dverarbeit(const string& datei)
 						rsaetze.hz("Erstellungsdatum",inh);
 			} else if (cd=="9102") {
 						rsaetze.hz("Gesamtlänge",inh);
-					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 			}
 			altz=zeile;
 #endif 
 		}
 	}
-	rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-	rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 	exit(0);
 }
 

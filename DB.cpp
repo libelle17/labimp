@@ -1164,7 +1164,7 @@ uchar DB::tuerweitern(const string& tabs, const string& feld,long wlength,const 
   string lenge;
   korr<<"SELECT character_maximum_length, data_type,is_nullable,column_default,column_comment FROM information_schema.columns WHERE table_schema='"<<
     dbname<<"' AND table_name='"<<tabs<<"' AND column_name='"<<feld<<"'";
-  RS spaltlen(this,korr.str(),aktc,obverb);
+  RS spaltlen(this,korr.str(),aktc,obverb>1?obverb-1:0);
   if (!spaltlen.obfehl) {
     char*** cerg;
     while(cerg= spaltlen.HolZeile(),cerg?*cerg:0) {
@@ -1327,11 +1327,16 @@ wert=sqlft(eDBS,&zt);
 KLZ // instyp::instyp(char* vfeld,struct tm zt) KLA
  */
 
-sqlft::sqlft(DBSTyp eDBS, const string& vwert):
-  string(vwert) 
+void sqlft::ersetzalles()
 {
   ersetze("\\","\\\\");
   ersetze("\'","\\\'");
+}
+
+sqlft::sqlft(DBSTyp eDBS, const string& vwert):
+  string(vwert) 
+{
+	ersetzalles();
   insert(0,1,dvb(eDBS));
   append(1,dve(eDBS));
 } // sqlft::sqlft(DBSTyp eDBS, const string& vwert)
@@ -1339,8 +1344,7 @@ sqlft::sqlft(DBSTyp eDBS, const string& vwert):
 sqlft::sqlft(DBSTyp eDBS, const string *const vwert):
   string(*vwert) 
 {
-  ersetze("\\","\\\\");
-  ersetze("\'","\\\'");
+	ersetzalles();
   insert(0,1,dvb(eDBS));
   append(1,dve(eDBS));
 } // sqlft::sqlft(DBSTyp eDBS, const string *vwert)
@@ -1349,9 +1353,8 @@ sqlft::sqlft(DBSTyp eDBS, const char* const vwert,const bool obzahl):
   string(vwert) 
 {
   if (!obzahl) {
-    ersetze("\\","\\\\");
-    ersetze("\'","\\\'");
-    insert(0,1,dvb(eDBS));
+		ersetzalles();
+		insert(0,1,dvb(eDBS));
     append(1,dve(eDBS));
   }
 } // sqlft::sqlft(DBSTyp eDBS, char* vwert,bool obzahl)
@@ -1359,9 +1362,8 @@ sqlft::sqlft(DBSTyp eDBS, const char* const vwert,const bool obzahl):
 sqlft::sqlft(DBSTyp eDBS, const char* const vwert,const char* const zs):
   string(vwert) 
 {
-  ersetze("\\","\\\\");
-  ersetze("\'","\\\'");
-  insert(0,1,dvb(eDBS));
+	ersetzalles();
+	insert(0,1,dvb(eDBS));
   insert(0,zs);
   append(1,dve(eDBS));
 } // sqlft::sqlft(DBSTyp eDBS, char* vwert,char* zs)
@@ -2041,7 +2043,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 				case MySQL:
 					aut/*idp*/<<"SELECT column_name FROM information_schema.columns WHERE table_schema='"<<dbp->dbname<<
 						"' AND table_name = '"<<itab<<"' AND extra = 'auto_increment'";
-					Abfrage(aut.str().c_str(),aktc,obverb);
+					Abfrage(aut.str().c_str(),aktc,obverb>0?obverb-1:0);
 					obhauptfehl=obfehl;
 					if (!obfehl) {
 						autoz=*HolZeile()[0];
@@ -2052,7 +2054,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 							if (i) aut<<" AND ";
 							aut<<dbp->dnb<<einfp->at(i).feld<<dbp->dne<<"="<<einfp->at(i).wert;
 						}
-						Abfrage(aut.str(),aktc,obverb);
+						Abfrage(aut.str(),aktc,obverb>0?obverb-1:0);
 						if (!obfehl) {
 							char*** erg= HolZeile();
 							if (*erg) {
@@ -2089,7 +2091,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 				} // 			for(uint i=0;i<einfp->size();i++)
 			} // 		for(uint j=1;j<eindfeld.size();j++)
 			if (!abfr.empty()) {
-				Abfrage(abfr,aktc,obverb);
+				Abfrage(abfr,aktc,obverb>0?obverb-1:0);
 				if (!obfehl) {
 					char*** erg=HolZeile();
 					if (*erg)
@@ -2113,7 +2115,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 						if (i) isql+=',';
 						isql+=dbp->dnb+einfp->at(i).feld+dbp->dne;
 					}
-					isql+=") VALUES(";
+					isql+=")VALUES(";
 					break;
 				case Postgres:
 					caup<<"hier insert 2"<<endl;
@@ -2149,38 +2151,38 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 		} // if (obeinfuegen)
 	} // 	if (einfp)
 
-  if (!sammeln)if (zaehler) {
+	if (!sammeln)if (zaehler) {
 		switch (dbp->DBS) {
-      case MySQL:
-        {
-        string altsqlm;
-				machstrikt(altsqlm,aktc);
-           // interne Runde
-          for (int iru=0;iru<2;iru++) {
+			case MySQL:
+				{
+					string altsqlm;
+					machstrikt(altsqlm,aktc);
+					// interne Runde
+					for (int iru=0;iru<2;iru++) {
 						for(size_t iiru=0;iiru<(csets?csets->size():1);iiru++) {
-						  if (csets)
+							if (csets)
 								RS zs(dbp,"SET NAMES '"+csets->at(iiru)+"'",aktc,obverb);
 							Abfrage(isql,aktc,obverb,asy,/*oblog*/0,idp,&zl);
 							if (csets) if (iiru)
-								RS zs(dbp,"SET NAMES '"+csets->at(0)+"'",aktc,obverb);
+								RS zs(dbp,"SET NAMES '"+csets->at(0)+"'",aktc,obverb>0?obverb-1:0);
 							if (!fnr) break;
 						} // 						for(size_t iiru=0;iiru<(csets?csets->size():1);iiru++)
 						/*
 						//<<violett<<"vor idp"<<schwarz<<endl;
-            if (idp) {
+						if (idp) {
 						//<<violett<<"in idp"<<schwarz<<", aktc: "<<aktc<<endl;
-              if (obfehl) *idp="null";
-              else *idp=ltoan(mysql_insert_id(dbp->conn[aktc]));
-							//<<"idp: "<<*idp<<endl;
-            } // if (idp)
-						*/
+						if (obfehl) *idp="null";
+						else *idp=ltoan(mysql_insert_id(dbp->conn[aktc]));
+						//<<"idp: "<<*idp<<endl;
+						} // if (idp)
+						 */
 						//// <<gruen<<"zaehler: "<<(int)zaehler<<", obfehl: "<<(int)obfehl<<schwarz<<endl;
-            if (!obfehl) {
+						if (!obfehl) {
 							// nach Gebrauch loeschen
 							isql.clear();
 							break;
-            }  else {
-							fLog(tuerkiss+"SQL: "+schwarz+isql,iru||(fnr!=1213&&fnr!=1366),0);
+						}  else {
+							fLog(tuerkiss+"SQL: "+schwarz+"\n"+isql+"\n",iru||(fnr!=1213&&fnr!=1366),0);
               const string fmeld=mysql_error(dbp->conn[aktc]);
               fLog(fmeld,iru||(fnr!=1213&&fnr!=1366),0);
               if (fnr==1213){ // Deadlock found
