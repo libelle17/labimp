@@ -715,10 +715,10 @@ void hhcl::dverarbeit(const string& datei)
 #ifdef speichern
 	const size_t aktc=0;
 #endif 
-	string datid, satzid;
+	string datid,satzid,refid;
 	unsigned refnr;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
-	uchar saetzezuschreiben;
+	uchar saetzeoffen, usoffen;
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlaboryeingel,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
@@ -731,6 +731,8 @@ void hhcl::dverarbeit(const string& datei)
 #endif 
 	insv rsaetze(My,/*itab*/tlaborysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rus(My,/*itab*/tlaboryus,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rba(My,/*itab*/tlaborybakt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rwe(My,/*itab*/tlaborywert,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
 	caus<<rot<<datei<<schwarz<<endl;
 	mdatei mdat(datei,ios::in);
@@ -753,19 +755,22 @@ void hhcl::dverarbeit(const string& datei)
 			if (cd=="8000") {
 				if (inh.substr(0,4)=="8220") { // Datenpaket-Header
 					lsatzart=1;
-					saetzezuschreiben=1;
+					saetzeoffen=1;
 					rsaetze.hz("Satzart",inh);
 					rsaetze.hz("DatID",datid);
 					refnr=0;
 				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
 					lsatzart=2;
+						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+						rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+						rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 //					satzid="0";
 				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
 					lsatzart=3;
-					if (saetzezuschreiben) {
+					if (saetzeoffen) {
 						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 						My->LetzteID(&satzid,aktc);
-						saetzezuschreiben=0;
+						saetzeoffen=0;
 					}
 //					rus.zeig("0");
 					rus.clear();
@@ -773,6 +778,7 @@ void hhcl::dverarbeit(const string& datei)
           rus.hz("SatzID",satzid);
 					rus.hz("SatzArt",inh);
 					rus.hz("RefNr",++refnr);
+					usoffen=1;
 				}
 			} else if (cd=="8100") {
 				switch (lsatzart) {
@@ -781,6 +787,7 @@ void hhcl::dverarbeit(const string& datei)
 						break;
 					case 2:
 						rsaetze.hz("SatzlängeSchluss",inh);
+						// update rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 						break;
 					case 3:
 						rus.hz("Satzlänge",inh);
@@ -789,7 +796,20 @@ void hhcl::dverarbeit(const string& datei)
 						break;
 				}
 			} else if (cd=="8410" || cd=="8434") { // 8410=Test-Ident, 8434=Verfahren
-					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					if (usoffen) {
+						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+						My->LetzteID(&refid,aktc);
+						usoffen=0;
+					}
+					if (cd=="8434") {
+						rba.clear();
+						rba.hz("RefNr",refid);
+					} else if (cd=="8410") {
+						rwe.clear();
+						rwe.hz("RefNr",refid);
+					}
 			} else if (cd=="8310") {
 				rus.hz("Auftragsnummer",inh);
 			} else if (cd=="8311") {

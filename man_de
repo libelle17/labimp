@@ -2,7 +2,7 @@
 .\" Manual-Seite für ²DPROG²
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH man 1 "09.04.18" "Version 0.10496" "Manual-Seite für ²DPROG²"
+.TH man 1 "09.04.18" "Version 0.10498" "Manual-Seite für ²DPROG²"
 .SH NAME
 \fB²DPROG² \- FaxServer-Funktionalität\fR: veranlasst automatischen Faxversand von Dateien, Benennung empfangener Faxe und Protokollierung aller Faxe in einer Datenbank 
 .br
@@ -15,7 +15,7 @@
 .SH OPTIONEN 
 .SH VORAUSSETZUNGEN
 .br
-\fRProgramm: \fB/home/schade/labimp/labimp\fR, V: \fB0.10470\fR (Laborimport) 
+\fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.10497\fR (Laborimport) 
 .br
 \fBOptionen, die nicht gespeichert werden: \fR
 .br
