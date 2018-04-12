@@ -548,7 +548,7 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 			Feld("Grenzwerti","varchar","1","",Tx[T_8422_Grenzwertindikator_Turbomed],0,0,1),
 			Feld("Kommentar","varchar","1","",Tx[T_8480_Ergebnistest_Turbomed],0,0,1),
 			Feld("Teststatus","varchar","1","",Tx[T_8418_Teststatus_Turbomed],0,0,1),
-			Feld("Erklaerung","varchar","1","","",0,0,1),
+			Feld("Erklärung","varchar","1","","",0,0,1),
 			Feld("AuftrHinw","varchar","1","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("nbid","int","10","",Tx[T_Bezug_zu_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/0),
 		};
@@ -719,6 +719,7 @@ void hhcl::dverarbeit(const string& datei)
 	unsigned refnr;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen, usoffen;
+	uchar obBakt;
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlaboryeingel,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
@@ -731,6 +732,12 @@ void hhcl::dverarbeit(const string& datei)
 #endif 
 	insv rsaetze(My,/*itab*/tlaborysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rus(My,/*itab*/tlaboryus,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	if (obBakt) {
+		rba.hz("Erklärung",erklaerung);
+	} else {
+		rwe.hz("Erklärung",erklaerung);
+	}
+	erklaerung.clear();
 	insv rba(My,/*itab*/tlaborybakt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rwe(My,/*itab*/tlaborywert,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
@@ -738,7 +745,8 @@ void hhcl::dverarbeit(const string& datei)
 	mdatei mdat(datei,ios::in);
 	if (mdat.is_open()) {
 		string zeile,altz;
-		struct tm berdat;
+		struct tm berdat,abndat;
+		string erklaerung;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -806,14 +814,50 @@ void hhcl::dverarbeit(const string& datei)
 					if (cd=="8434") {
 						rba.clear();
 						rba.hz("RefNr",refid);
+						obBakt=1;
+						rba.hz("Verf",inh);
 					} else if (cd=="8410") {
 						rwe.clear();
 						rwe.hz("RefNr",refid);
-					}
+						obBakt=0;
+						rwe.hz("Abkü",inh);
+					} // 					if (cd=="8434") else if (cd=="8410")
+			} else if (cd=="8411") {
+				rwe.hz("Langname",inh);
+			} else if (cd=="8428") {
+				rba.hz("KuQu",inh);
+			} else if (cd=="8430" || cd=="8431") {
+				if (obBakt)
+					rba.hz("Quelle",inh);
+			  else
+					rwe.hz("Quelle",inh);
+			} else if (cd=="8432") {
+				memset(&abndat,0,sizeof abndat);
+				strptime(inh.c_str(),"%d%m%Y",&abndat);
+			} else if (cd=="8433") {
+				strptime(inh.c_str(),"%H%M",&abndat);
+				if (obBakt)
+					rba.hz("AbnDat",&abndat);
+			  else
+					rwe.hz("AbnDat",&abndat);
+			} else if (cd=="8470") {
+				if (erklaerung.empty()) erklaerung=inh;
+				else {
+					erklaerung+="\r\n";
+					erklaerung+=inh;
+				}
 			} else if (cd=="8310") {
 				rus.hz("Auftragsnummer",inh);
 			} else if (cd=="8311") {
 				rus.hz("Auftragsschlüssel",inh);
+			} else if (cd=="8418") {
+					rwe.hz("Teststatus",inh);
+			} else if (cd=="8420") {
+					rwe.hz("Wert",inh);
+			} else if (cd=="8421") {
+					rwe.hz("Einheit",inh);
+			} else if (cd=="8422") {
+					rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
 				tm tm=BDTtoDate(inh);
 				rus.hz("Eingang",&tm);
