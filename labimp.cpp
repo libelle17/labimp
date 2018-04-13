@@ -486,7 +486,7 @@ void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, 
 			Feld("Erklärung","LONGTEXT","","","",0,0,1),
 			Feld("Keimzahl","varchar","1","","",0,0,1),
 		};
-		Constraint csts[]{Constraint("Laboryuslaborybakt",new Feld{Feld("refnr")},1,"laboryus",new Feld{Feld("refnr")},1,cascade,cascade)};
+		Constraint csts[]{Constraint("Laboryuslaborybakt",new Feld{Feld("refnr")},1,"laboryus",new Feld{Feld("id")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborybakt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborbakt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
