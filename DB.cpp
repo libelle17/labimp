@@ -900,7 +900,7 @@ int Tabelle::machconstr(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 					if (j<cons->feldz2-1) machcon+=",";
 				}
 				machcon+=") ON UPDATE "+refacts[cons->onupdate]+" ON DELETE "+refacts[cons->ondelete];
-				RS rconsins(dbp);
+				RS rconsins(dbp,tbname);
 				rconsins.Abfrage(machcon,aktc,obverb);
 			} else {
 				fLog(Txd[T_Referenz]+blaus+cons->name+schwarz+Txd[T_auf_Tabelle]+blau+tbname+schwarz+Txd[T_nicht_erstellt_da_Referenztabelle]+blau+cons->reftab+schwarz+"`"+Txk[T_nicht_gefunden],1,oblog);
@@ -950,7 +950,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 			} //             if (!rind.result->row_count) else
 		} // if (obneu) 
 		if (obneu) {
-			RS rindins(dbp);
+			RS rindins(dbp,tbname);
 			//sql.str(std::string()); sql.clear();
 			std::stringstream sql;
 			sql<<"CREATE "<<(indx->unique?"UNIQUE ":"")<<"INDEX `"<<indx->name<<"` ON `"<<tbname<<"`(";
@@ -997,7 +997,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 {
   fLog(violetts+Txd[T_Pruefe_Tabelle]+blau+tbname+"'"+schwarz,obverb,oblog);
   int gesfehlr=0;
-  RS rs(dbp);
+  RS rs(dbp,tbname);
   std::stringstream sql;
   // eine Indexfeldlaenge groesser als die Feldlaenge fuehrt zu Fehler (zumindest bei MariaDB)
   for(unsigned i=0;i<indexzahl;i++){
@@ -1220,7 +1220,7 @@ uchar DB::tuerweitern(const string& tabs, const string& feld,long wlength,const 
 // in: RS::insert() und RS::update
 void DB::erweitern(const string& tabs, vector<instyp> einf,const size_t aktc,int obverb,uchar obsammeln, const unsigned long *maxl) const
 {
-  for(uint i=0;i<einf.size();i++) {
+  for(unsigned i=0;i<einf.size();i++) {
     long wlength;
     if (obsammeln) {
       wlength = maxl[i];
@@ -1228,7 +1228,7 @@ void DB::erweitern(const string& tabs, vector<instyp> einf,const size_t aktc,int
       wlength = einf[i].wert.length();
     } //     if (obsammeln)
     tuerweitern(tabs,einf[i].feld,wlength,aktc,obverb);
-  } //   for(uint i=0;i<einf.size();i++)
+  } //   for(unsigned i=0;i<einf.size();i++)
 } // RS::erweitern
 
 // in: RS::insert() und RS::update
@@ -1666,15 +1666,14 @@ char*** RS::HolZeile()
 } // char** DB::HolZeile() {
 
 
-RS::RS(const DB* pdb) 
+RS::RS(const DB* const pdb,const string& table):dbp(pdb),table(table)
 {
-  weisezu(pdb);
+  weisezu();
 }
 
-void RS::weisezu(const DB* pdb) 
+void RS::weisezu() 
 {
-  dbp=pdb;
-  this->result = 0;
+  this->result=0;
 #ifdef mitpostgres 
 	this->pres=0;
 #endif // mitpostgres
@@ -1688,7 +1687,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 {
 	int altobverb=obverb;
 //	obverb=1;
-	yLog(obverb,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
+	yLog(obverb>0?obverb-1:0,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
 	int obfalsch=0;
 	// fuer wiederholten Abfragen
@@ -1703,8 +1702,8 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 			num_fields=0;
 			////      if (sql=="select column_name from information_schema.columns where table_schema='emails' and table_name = 'lmailbody' and extra = 'auto_increment'") {mysql_commit(dbp->conn[aktc]);} // sql="select 'ID'";
 			//// <<"sql.c_str(): "<<sql.c_str()<<endl;
-			if (obverb==1)
-				fLog("SQL: '"+drots+sql+schwarz+"'",1,1);
+			if ((obverb>0)|oblog)
+				fLog("SQL: '"+drots+sql+schwarz+"'",obverb,oblog);
 			if (!dbp->conn[aktc]) {
 				fnr=9999;
 				fehler=Txd[T_Datenbank_nicht_zu_oeffnen];
@@ -1752,10 +1751,10 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 											if ((p2=SQL.find_first_of(" (",p1)+1)) {
 												string tbl=sql.substr(p1,p2-p1-1); // wegen Groß- und Kleinschreibung
 												anfzweg(tbl);
-												Tabelle aktt(dbp,tbl,aktc,obverb,oblog);
+												Tabelle aktt(dbp,tbl,aktc,obverb>0?obverb-1:0,oblog);
 												for(unsigned spnr=0;spnr<aktt.spalt->num_rows;spnr++) { // reale Spalten
 													if (aktt.spnamen[spnr]==col) {
-														dbp->tuerweitern(tbl,col,atol(aktt.splenge[spnr])+5,aktc,obverb);
+														dbp->tuerweitern(tbl,col,atol(aktt.splenge[spnr])+5,aktc,obverb>0?obverb-1:0);
 														neuerversuch=1;
 														break;
 													} // 													if (aktt.spnamen[spnr]==col)
@@ -1849,22 +1848,22 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 	KLZ
  */
 
-RS::RS(const DB* pdb,const char* const psql,const size_t aktc,int obverb) 
+RS::RS(const DB* const pdb,const char* const psql,const size_t aktc,int obverb):dbp(pdb)
 {
-	weisezu(pdb);
+	weisezu();
 	Abfrage(psql,aktc,obverb);
 } // RS::RS(const DB* pdb,const char* const psql,const size_t aktc,int obverb) 
 
-RS::RS(const DB* pdb,stringstream psqls,const size_t aktc,int obverb) 
+RS::RS(const DB* const pdb,stringstream psqls,const size_t aktc,int obverb):dbp(pdb)
 {
 	const string ueber=psqls.str();
-	weisezu(pdb);
+	weisezu();
 	Abfrage(ueber,aktc,obverb);
 } // RS::RS(const DB* pdb,stringstream psqls,const size_t aktc,int obverb) 
 
-RS::RS(const DB* pdb,const string& psql,const size_t aktc,int obverb) 
+RS::RS(const DB* const pdb,const string& psql,const size_t aktc,int obverb):dbp(pdb) 
 {
-	weisezu(pdb);
+	weisezu();
 	Abfrage(psql,aktc,obverb);
 } // RS::RS(const DB* pdb,const string& psql,const size_t aktc,int obverb) 
 
@@ -1916,14 +1915,15 @@ void RS::striktzurueck(string& altsqlm,const size_t aktc/*=0*/)
 }
 
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
-void RS::tbupd(const string& utab, vector<instyp> einf,int obverb, const string& bedingung,const size_t aktc/*=0*/,uchar asy/*=0*/) 
+my_ulonglong RS::tbupd(const string& utab, const vector<instyp>& einf,int obverb, const string& bedingung,const size_t aktc/*=0*/,uchar asy/*=0*/) 
 {
 	ulong locks=0;
 	fnr=0;
+	my_ulonglong zl=0;
   switch (dbp->DBS) {
     case MySQL:
       isql=string("UPDATE ")+dbp->dnb+utab+dbp->dne+" SET ";// string( hier nicht streichen!
-      for(uint i = 0;i<einf.size();i++) {
+      for(unsigned i = 0;i<einf.size();i++) {
         isql+=dbp->dnb+einf[i].feld+dbp->dne;
         isql+=" = ";
         if (einf[i].obkeinwert)
@@ -1935,7 +1935,7 @@ void RS::tbupd(const string& utab, vector<instyp> einf,int obverb, const string&
           isql+=(einf[i].wert);
         if (i<einf.size()-1)
           isql+=", ";
-      } //       for(uint i = 0;i<einf.size();i++)
+      } //       for(unsigned i = 0;i<einf.size();i++)
       isql+=" WHERE ";
       isql+=bedingung;
       //// <<blau<<isql<<schwarz<<endl;
@@ -1952,7 +1952,7 @@ void RS::tbupd(const string& utab, vector<instyp> einf,int obverb, const string&
         string altsqlm;
 				machstrikt(altsqlm,aktc);
         for (int iru=0;iru<2;iru++) { // interne Runde
-          Abfrage(isql,aktc,obverb,asy);
+          Abfrage(isql,aktc,obverb,asy,/*oblog*/0,/*idp*/0,&zl);
           if (!obfehl) {
 						// nach Gebrauch loeschen
 						isql.clear();
@@ -1982,6 +1982,7 @@ void RS::tbupd(const string& utab, vector<instyp> einf,int obverb, const string&
 			exitp(32);
       break;
   } //   switch (dbp->DBS)
+	return zl;
 } // void RS::update(const string& utab, vector<instyp> einf,int obverb, const string& bedingung,uchar asy) 
 
 /*
@@ -1992,6 +1993,7 @@ void RS::tbupd(const string& utab, vector<instyp> einf,int obverb, const string&
 my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
 		int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
 {
+	caus<<blau<<"tbins:"<<schwarz;
 	my_ulonglong zl=0;
 	ulong locks=0;
 	uchar obhauptfehl=0;
@@ -2036,21 +2038,24 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 			}
 		} //   for (unsigned long k=0;k<einfp->size();k++)
 		if (eindeutig) {
-			string autoz;
 			stringstream aut; // , autid;
 			////    RS autrs(dbp);
 			switch (dbp->DBS) {
 				case MySQL:
-					aut/*idp*/<<"SELECT column_name FROM information_schema.columns WHERE table_schema='"<<dbp->dbname<<
-						"' AND table_name = '"<<itab<<"' AND extra = 'auto_increment'";
-					Abfrage(aut.str().c_str(),aktc,obverb>0?obverb-1:0);
-					obhauptfehl=obfehl;
-					if (!obfehl) {
-						autoz=*HolZeile()[0];
+					if (autofeld.empty()) {
+						aut/*idp*/<<"SELECT column_name FROM information_schema.columns WHERE table_schema='"<<dbp->dbname<<
+							"' AND table_name = '"<<itab<<"' AND extra = 'auto_increment'";
+						Abfrage(aut.str().c_str(),aktc,obverb>0?obverb-1:0);
+						obhauptfehl=obfehl;
+						if (!obfehl) {
+							autofeld=*HolZeile()[0];
+						}
+					}
+					if (!autofeld.empty()) {
 						// Datensatz schon vorhanden?
 						aut.str(std::string()); aut.clear();
-						aut<<"SELECT `"<<autoz<<"` FROM `"<<itab<<"` WHERE ";
-						for(uint i=0;i<einfp->size();i++){
+						aut<<"SELECT `"<<autofeld<<"` FROM `"<<itab<<"` WHERE ";
+						for(unsigned i=0;i<einfp->size();i++){
 							if (i) aut<<" AND ";
 							aut<<dbp->dnb<<einfp->at(i).feld<<dbp->dne<<"="<<einfp->at(i).wert;
 						}
@@ -2076,20 +2081,20 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 		} // eindeutig
 		if (eindfeld.size()) {
 			string abfr;
-			for(uint i=0;i<einfp->size();i++){
+			for(unsigned i=0;i<einfp->size();i++){
 				if (!strcasecmp(einfp->at(i).feld.c_str(),eindfeld[0].c_str())) {
 					abfr="SELECT 1 FROM `"+itab+"` WHERE `"+einfp->at(i).feld+"`="+einfp->at(i).wert;
 					break;
 				} // 			if (!strcasecmp(einfp->at(i).feld.c_str(),eindfeld[0].c_str()))
-			} // 		for(uint i=0;i<einfp->size();i++)
-			for(uint j=1;j<eindfeld.size();j++) {
-				for(uint i=0;i<einfp->size();i++){
+			} // 		for(unsigned i=0;i<einfp->size();i++)
+			for(unsigned j=1;j<eindfeld.size();j++) {
+				for(unsigned i=0;i<einfp->size();i++){
 					if (!strcasecmp(einfp->at(i).feld.c_str(),eindfeld[j].c_str())) {
 						abfr+=" AND `"+einfp->at(i).feld+"`="+einfp->at(i).wert;
 						break;
 					} // 				if (!strcasecmp(einfp->at(i).feld.c_str(),eindfeld[j].c_str()))
-				} // 			for(uint i=0;i<einfp->size();i++)
-			} // 		for(uint j=1;j<eindfeld.size();j++)
+				} // 			for(unsigned i=0;i<einfp->size();i++)
+			} // 		for(unsigned j=1;j<eindfeld.size();j++)
 			if (!abfr.empty()) {
 				Abfrage(abfr,aktc,obverb>0?obverb-1:0);
 				if (!obfehl) {
@@ -2111,7 +2116,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 			switch (dbp->DBS) {
 				case MySQL:
 					isql=string("INSERT INTO ")+dbp->dnb+itab+dbp->dne+'('; // string( hier nicht streichen!
-					for(uint i = 0;i<einfp->size();i++) {
+					for(unsigned i = 0;i<einfp->size();i++) {
 						if (i) isql+=',';
 						isql+=dbp->dnb+einfp->at(i).feld+dbp->dne;
 					}
@@ -2130,7 +2135,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 					////				isql.reserve(isql.length()+2);
 					if (einfp->size()) {
 						if (zaehler>1) isql+=",(";
-						for(uint i = 0;i<einfp->size();i++) {
+						for(unsigned i = 0;i<einfp->size();i++) {
 							if (i) {
 								////						isql.reserve(isql.length()+1);
 								isql+=',';
@@ -2138,7 +2143,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 							////					isql.reserve(isql.length()+2+strlen(einfp->at(i).wert.c_str()));
 							////          if (einfp->at(i).feld=="EML") KLA isql+="_utf8"; KLZ
 							isql+=(einfp->at(i).wert);
-						} //         for(uint i = 0;i<einfp->size();i++)
+						} //         for(unsigned i = 0;i<einfp->size();i++)
 						////				isql.reserve(isql.length()+2);
 						isql+=")";
 					} // 				if (einfp->size())
@@ -2161,7 +2166,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 					for (int iru=0;iru<2;iru++) {
 						for(size_t iiru=0;iiru<(csets?csets->size():1);iiru++) {
 							if (csets)
-								RS zs(dbp,"SET NAMES '"+csets->at(iiru)+"'",aktc,obverb);
+								RS zs(dbp,"SET NAMES '"+csets->at(iiru)+"'",aktc,obverb>0?obverb-1:0);
 							Abfrage(isql,aktc,obverb,asy,/*oblog*/0,idp,&zl);
 							if (csets) if (iiru)
 								RS zs(dbp,"SET NAMES '"+csets->at(0)+"'",aktc,obverb>0?obverb-1:0);
@@ -2229,12 +2234,12 @@ void DB::prueffunc(const string& pname, const string& body, const string& para, 
 				RS rs(this,"SHOW CREATE FUNCTION `"+pname+"`",aktc,obverb);
 				char ***cerg;
 				while (cerg=rs.HolZeile(),cerg?*cerg:0) {
-					for(uint i=1;i<=2;i++) {
+					for(unsigned i=1;i<=2;i++) {
 						if (*(*cerg+i)) if (strstr(*(*cerg+i),body.c_str())) if (strstr(*(*cerg+i),owner.c_str())) {
 							fehlt=0;
-							break; // for(uint
+							break; // for(unsigned
 						} // 						if (*(*cerg+i)) if (strstr(*(*cerg+i),body.c_str())) if (strstr(*(*cerg+i),owner.c_str()))
-					} // 					for(uint i=1;i<=2;i++)
+					} // 					for(unsigned i=1;i<=2;i++)
 					break; // while(cerg=
 				} // 				while (cerg=rs.HolZeile(),cerg?*cerg:0)
 			} // 			if (rs0.result->row_count)

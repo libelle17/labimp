@@ -204,7 +204,7 @@ class instyp
 ////string ersetze(const char *u, const char* alt, const char* neu);
 
 // delimiter value begin
-inline char dvb(DBSTyp DBS) 
+inline const char dvb(DBSTyp DBS)
 {
   switch(DBS) {
     case MySQL: return '\'';
@@ -214,7 +214,7 @@ inline char dvb(DBSTyp DBS)
 } // inline char dvb(DBSTyp DBS) 
 
 // delimiter value end
-inline char dve(DBSTyp DBS) 
+inline const char dve(DBSTyp DBS)
 {
   switch(DBS) {
     case MySQL: return '\'';
@@ -225,7 +225,7 @@ inline char dve(DBSTyp DBS)
 
 
 // delimiter name begin
-inline char dnb(DBSTyp DBS) 
+inline const char dnb(DBSTyp DBS)
 {
   switch(DBS) {
     case MySQL: return '`';
@@ -235,7 +235,7 @@ inline char dnb(DBSTyp DBS)
 } // inline char dnb(DBSTyp DBS)
 
 // delimiter name end
-inline char dne(DBSTyp DBS) 
+inline const char dne(DBSTyp DBS)
 {
   switch(DBS) {
     case MySQL: return '`';
@@ -411,11 +411,12 @@ class Tabelle
 class RS 
 {
   public:
-    const DB* dbp;
+    const DB* const dbp;
     string sql;
     string isql; // insert-sql
     uchar obfehl;
     string fehler;
+		string autofeld;
 		char **betroffen=0; // fuer Abfrage in postgres
     unsigned int fnr;
     MYSQL_RES *result;
@@ -426,15 +427,15 @@ class RS
     MYSQL_ROW row;
     unsigned int num_fields;
     unsigned long long  num_rows;
-    string table;
+    const string table;
     vector<string> feld;
     vector<string> typ;
     vector<long> lenge;
     vector<long> prec;
     vector<string> kommentar;
-    RS(const DB* pdb);
+    RS(const DB* const pdb,const string& table);
     char*** HolZeile();
-    void weisezu(const DB* pdb);
+    void weisezu();
     void clear();
     template<typename sT> 
       int Abfrage(sT psql,const size_t aktc/*=0*/,int obverb=0,uchar asy=0,int oblog=0,string *idp=0,my_ulonglong *arowsp=0){
@@ -446,11 +447,11 @@ class RS
         return erg;
       } //       int Abfrage(sT psql,int obverb=1,uchar asy=0)
 
-    RS(const DB* pdb,const char* const psql, const size_t aktc, int obverb/*=1*/);
-    RS(const DB* pdb,const string& psql, const size_t aktc, int obverb/*=1*/);
-    RS(const DB* pdb,stringstream psqls, const size_t aktc, int obverb/*=1*/);
+    RS(const DB* const pdb,const char* const psql, const size_t aktc, int obverb/*=1*/);
+    RS(const DB* const pdb,const string& psql, const size_t aktc, int obverb/*=1*/);
+    RS(const DB* const pdb,stringstream psqls, const size_t aktc, int obverb/*=1*/);
     ~RS();
-    void tbupd(const string& tab,vector<instyp> einf,int obverb, const string& bedingung, const size_t aktc/*=0*/, uchar asy=0);
+    my_ulonglong tbupd(const string& tab,const vector<instyp>& einf,int obverb, const string& bedingung, const size_t aktc/*=0*/, uchar asy=0);
     my_ulonglong tbins(const string& tab,vector<instyp>* einfp,const size_t aktc=0,uchar sammeln=0,int obverb=0,string *id=0,
 		     const uchar eindeutig=0,const svec& eindfeld=svec(),const uchar asy=0, svec *csets=0);
 		void machstrikt(string& altmode,const size_t aktc=0);
@@ -473,7 +474,7 @@ struct insv
 //	my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/, int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
 	insv(DB *My,const string& itab,const size_t aktc,const uchar eindeutig,const svec& eindfeld,const uchar asy,svec *csets):My(My),itabp(&itab),aktc(aktc),eindeutig(eindeutig),eindfeld(eindfeld),asy(asy),csets(csets)
 	{
-		rsp=new RS(My);
+		rsp=new RS(My,itab);
 	}
 
 	my_ulonglong schreib(const uchar sammeln=0,int obverb=0,string* idp=0)
@@ -481,6 +482,18 @@ struct insv
 		my_ulonglong erg=0;
 		if (ivec.size()) {
 			erg=rsp->tbins(*itabp,&ivec,aktc,sammeln,obverb,idp,eindeutig,eindfeld,asy,csets);
+			if (rsp->fnr) {
+				fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
+			} //         if (runde==1)
+			ivec.clear();
+		}
+		return erg;
+	}
+	my_ulonglong ergaenz(const string& bedingung,const uchar sammeln=0,int obverb=0,string* idp=0)
+	{
+		my_ulonglong erg=0;
+		if (ivec.size()) {
+			erg=rsp->tbupd(*itabp,ivec,obverb,rsp->autofeld+"='"+bedingung+"'",aktc,asy);
 			if (rsp->fnr) {
 				fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
 			} //         if (runde==1)

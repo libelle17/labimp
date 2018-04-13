@@ -540,6 +540,7 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],1,0,0,string(),1),
 			Feld("Abkü","varchar","1","",Tx[T_8410_maximale_Laenge_8],0,0,1),
 			Feld("Langname","varchar","1","",Tx[T_8411_Testbezeichnung_Turbomed],0,0,1),
+			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
 			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
 			Feld("QSpez","varchar","1","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
 			Feld("AbnDat","datetime","0","0",Tx[T_8432_Abnahmedatum_Turbomed],0,0,1),
@@ -719,7 +720,6 @@ void hhcl::dverarbeit(const string& datei)
 	unsigned refnr;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen, usoffen;
-	uchar obBakt;
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlaboryeingel,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
@@ -732,20 +732,15 @@ void hhcl::dverarbeit(const string& datei)
 #endif 
 	insv rsaetze(My,/*itab*/tlaborysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rus(My,/*itab*/tlaboryus,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
-	if (obBakt) {
-		rba.hz("Erklärung",erklaerung);
-	} else {
-		rwe.hz("Erklärung",erklaerung);
-	}
-	erklaerung.clear();
 	insv rba(My,/*itab*/tlaborybakt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rwe(My,/*itab*/tlaborywert,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv *rbawep=0; // Zeiger auf rba oder rwe
 
 	caus<<rot<<datei<<schwarz<<endl;
 	mdatei mdat(datei,ios::in);
 	if (mdat.is_open()) {
 		string zeile,altz;
-		struct tm berdat,abndat;
+		struct tm berdat={0},abndat={0};
 		string erklaerung;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
@@ -769,10 +764,18 @@ void hhcl::dverarbeit(const string& datei)
 					refnr=0;
 				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
 					lsatzart=2;
-						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-						rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-						rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-//					satzid="0";
+					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					if (rbawep) {
+						rbawep->hz("Erklärung",erklaerung);
+						erklaerung.clear();
+						rbawep->hz("AbnDat",&abndat);
+						memset(&abndat,0,sizeof abndat);
+
+						rbawep=0;
+					}
+					rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					//					satzid="0";
 				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
 					lsatzart=3;
 					if (saetzeoffen) {
@@ -780,10 +783,10 @@ void hhcl::dverarbeit(const string& datei)
 						My->LetzteID(&satzid,aktc);
 						saetzeoffen=0;
 					}
-//					rus.zeig("0");
+					//					rus.zeig("0");
 					rus.clear();
-          rus.hz("DatID",datid);
-          rus.hz("SatzID",satzid);
+					rus.hz("DatID",datid);
+					rus.hz("SatzID",satzid);
 					rus.hz("SatzArt",inh);
 					rus.hz("RefNr",++refnr);
 					usoffen=1;
@@ -796,6 +799,7 @@ void hhcl::dverarbeit(const string& datei)
 					case 2:
 						rsaetze.hz("SatzlängeSchluss",inh);
 						// update rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+						rsaetze.ergaenz(satzid,/*sammeln*/0,/*obverb*/1,/*idp*/0);
 						break;
 					case 3:
 						rus.hz("Satzlänge",inh);
@@ -804,42 +808,46 @@ void hhcl::dverarbeit(const string& datei)
 						break;
 				}
 			} else if (cd=="8410" || cd=="8434") { // 8410=Test-Ident, 8434=Verfahren
-					rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-					rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-					if (usoffen) {
-						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+				if (rbawep) {
+					rbawep->hz("Erklärung",erklaerung);
+					erklaerung.clear();
+					rbawep->hz("AbnDat",&abndat);
+					memset(&abndat,0,sizeof abndat);
+					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+				}
+				if (usoffen) {
+					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 						My->LetzteID(&refid,aktc);
 						usoffen=0;
 					}
 					if (cd=="8434") {
 						rba.clear();
-						rba.hz("RefNr",refid);
-						obBakt=1;
-						rba.hz("Verf",inh);
-					} else if (cd=="8410") {
+						rbawep=&rba;
+					} else /*if (cd=="8410")*/ {
 						rwe.clear();
-						rwe.hz("RefNr",refid);
-						obBakt=0;
+						rbawep=&rwe;
+					} // 					if (cd=="8434") else if (cd=="8410")
+					rbawep->hz("RefNr",refid);
+					if (cd=="8434") {
+						rba.hz("Verf",inh);
+					} else /*if (cd=="8410")*/ {
 						rwe.hz("Abkü",inh);
 					} // 					if (cd=="8434") else if (cd=="8410")
 			} else if (cd=="8411") {
 				rwe.hz("Langname",inh);
 			} else if (cd=="8428") {
-				rba.hz("KuQu",inh);
-			} else if (cd=="8430" || cd=="8431") {
-				if (obBakt)
-					rba.hz("Quelle",inh);
-			  else
-					rwe.hz("Quelle",inh);
-			} else if (cd=="8432") {
-				memset(&abndat,0,sizeof abndat);
+				if (!rbawep) caus<<rot<<"4 Fehler rbawep 0"<<schwarz<<endl;
+				rbawep->hz("KuQu",inh);
+			} else if (cd=="8430") {
+				if (!rbawep) caus<<rot<<"3 Fehler rbawep 0"<<schwarz<<endl;
+				rbawep->hz("Quelle",inh);
+			} else if (cd=="8431") {
+				if (!rbawep) caus<<rot<<"2 Fehler rbawep 0"<<schwarz<<endl;
+				rbawep->hz("QSpez",inh);
+			} else if (cd=="8432") { // Abnahmedatum
 				strptime(inh.c_str(),"%d%m%Y",&abndat);
 			} else if (cd=="8433") {
 				strptime(inh.c_str(),"%H%M",&abndat);
-				if (obBakt)
-					rba.hz("AbnDat",&abndat);
-			  else
-					rwe.hz("AbnDat",&abndat);
 			} else if (cd=="8470") {
 				if (erklaerung.empty()) erklaerung=inh;
 				else {
@@ -869,7 +877,7 @@ void hhcl::dverarbeit(const string& datei)
 				rus.hz("Berichtsdatum",&berdat);
 			} else if (cd=="8609") {
 				rus.hz("Abrechnungstyp",inh);
-			} else if (cd=="8401") {
+			} else if (cd=="8401") { // Befundart
 				rus.hz("Befart",inh); // Fertigstellungsgrad
 			} else if (cd=="8615") {
 				rus.hz("Auftraggeber",inh);
