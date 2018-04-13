@@ -1914,15 +1914,31 @@ void RS::striktzurueck(string& altsqlm,const size_t aktc/*=0*/)
 	}
 }
 
+// in tbins
+uchar RS::holautofeld(const size_t aktc, int obverb)
+{
+	if (autofeld.empty()) {
+		stringstream aut;
+		aut/*idp*/<<"SELECT column_name FROM information_schema.columns WHERE table_schema='"<<dbp->dbname<<
+			"' AND table_name = '"<<table<<"' AND extra = 'auto_increment'";
+		Abfrage(aut.str().c_str(),aktc,obverb>0?obverb-1:0);
+		if (!obfehl) {
+			autofeld=*HolZeile()[0];
+		}
+		return obfehl;
+	}
+	return 0;
+}
+
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
-my_ulonglong RS::tbupd(const string& utab, const vector<instyp>& einf,int obverb, const string& bedingung,const size_t aktc/*=0*/,uchar asy/*=0*/) 
+my_ulonglong RS::tbupd(const vector<instyp>& einf,int obverb, const string& bedingung,const size_t aktc/*=0*/,uchar asy/*=0*/) 
 {
 	ulong locks=0;
 	fnr=0;
 	my_ulonglong zl=0;
-  switch (dbp->DBS) {
-    case MySQL:
-      isql=string("UPDATE ")+dbp->dnb+utab+dbp->dne+" SET ";// string( hier nicht streichen!
+	switch (dbp->DBS) {
+		case MySQL:
+      isql=string("UPDATE ")+dbp->dnb+table+dbp->dne+" SET ";// string( hier nicht streichen!
       for(unsigned i = 0;i<einf.size();i++) {
         isql+=dbp->dnb+einf[i].feld+dbp->dne;
         isql+=" = ";
@@ -1967,7 +1983,7 @@ my_ulonglong RS::tbupd(const string& utab, const vector<instyp>& einf,int obverb
               mysql_commit(dbp->conn[aktc]);
               continue;
             } else if (fnr==1366) { // Incorrect string value
-              dbp->machbinaer(utab,aktc,fmeld,0);
+              dbp->machbinaer(table,aktc,fmeld,0);
             } else {
               cout<<rot<<Txk[T_Fehler]<<schwarz<<fnr<<Txd[T_bei_sql_Befehl]<<isql<<endl;
               break; 
@@ -1983,14 +1999,14 @@ my_ulonglong RS::tbupd(const string& utab, const vector<instyp>& einf,int obverb
       break;
   } //   switch (dbp->DBS)
 	return zl;
-} // void RS::update(const string& utab, vector<instyp> einf,int obverb, const string& bedingung,uchar asy) 
+} // void RS::update(const string& table, vector<instyp> einf,int obverb, const string& bedingung,uchar asy) 
 
 /*
 	 sammeln=1 mit Puffer (isql) anfangen
 	 sammeln=0 ohne Puffer/Puffer auf Datenbank schreiben
  */
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
-my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
+my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
 		int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
 {
 	caus<<blau<<"tbins:"<<schwarz;
@@ -2003,7 +2019,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
   //1. falls 0, dann auch Kopfzeile nicht behandeln, 2. falls Maxzaehler erreicht, dann Zwischeneinfuegen
   const int maxzaehler=100; // wg. Performance: Maximalzahl fuer Sammelinsert
   static unsigned long *maxl=0; // fuer Feldlaengenkorrekturen 
-  // <<"insert in "<<drot<<itab<<schwarz<<" anfangen: "<<(int)anfangen<<" sammeln: "<<(int)sammeln<<endl;
+  // <<"insert in "<<drot<<table<<schwarz<<" anfangen: "<<(int)anfangen<<" sammeln: "<<(int)sammeln<<endl;
   uchar obeinfuegen=1; // Datensatz einfuegen, da noch nicht vorhanden
 	uchar anfangen=isql.empty();
   /*//
@@ -2042,19 +2058,11 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 			////    RS autrs(dbp);
 			switch (dbp->DBS) {
 				case MySQL:
-					if (autofeld.empty()) {
-						aut/*idp*/<<"SELECT column_name FROM information_schema.columns WHERE table_schema='"<<dbp->dbname<<
-							"' AND table_name = '"<<itab<<"' AND extra = 'auto_increment'";
-						Abfrage(aut.str().c_str(),aktc,obverb>0?obverb-1:0);
-						obhauptfehl=obfehl;
-						if (!obfehl) {
-							autofeld=*HolZeile()[0];
-						}
-					}
+					obhauptfehl=holautofeld(aktc,obverb);
 					if (!autofeld.empty()) {
 						// Datensatz schon vorhanden?
 						aut.str(std::string()); aut.clear();
-						aut<<"SELECT `"<<autofeld<<"` FROM `"<<itab<<"` WHERE ";
+						aut<<"SELECT `"<<autofeld<<"` FROM `"<<table<<"` WHERE ";
 						for(unsigned i=0;i<einfp->size();i++){
 							if (i) aut<<" AND ";
 							aut<<dbp->dnb<<einfp->at(i).feld<<dbp->dne<<"="<<einfp->at(i).wert;
@@ -2083,7 +2091,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 			string abfr;
 			for(unsigned i=0;i<einfp->size();i++){
 				if (!strcasecmp(einfp->at(i).feld.c_str(),eindfeld[0].c_str())) {
-					abfr="SELECT 1 FROM `"+itab+"` WHERE `"+einfp->at(i).feld+"`="+einfp->at(i).wert;
+					abfr="SELECT 1 FROM `"+table+"` WHERE `"+einfp->at(i).feld+"`="+einfp->at(i).wert;
 					break;
 				} // 			if (!strcasecmp(einfp->at(i).feld.c_str(),eindfeld[0].c_str()))
 			} // 		for(unsigned i=0;i<einfp->size();i++)
@@ -2115,7 +2123,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
 		if (anfangen) {
 			switch (dbp->DBS) {
 				case MySQL:
-					isql=string("INSERT INTO ")+dbp->dnb+itab+dbp->dne+'('; // string( hier nicht streichen!
+					isql=string("INSERT INTO ")+dbp->dnb+table+dbp->dne+'('; // string( hier nicht streichen!
 					for(unsigned i = 0;i<einfp->size();i++) {
 						if (i) isql+=',';
 						isql+=dbp->dnb+einfp->at(i).feld+dbp->dne;
@@ -2196,7 +2204,7 @@ my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t ak
                 mysql_commit(dbp->conn[aktc]);
                 continue;
               } else if (fnr==1366) { // Incorrect string value
-                dbp->machbinaer(itab,aktc,fmeld,0);
+                dbp->machbinaer(table,aktc,fmeld,0);
               } else {
 								cerr<<rot<<Txk[T_Fehler]<<schwarz<<fnr<<Txd[T_bei_sql_Befehl]<<isql<<endl;
 								exit(113);

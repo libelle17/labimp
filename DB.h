@@ -451,8 +451,9 @@ class RS
     RS(const DB* const pdb,const string& psql, const size_t aktc, int obverb/*=1*/);
     RS(const DB* const pdb,stringstream psqls, const size_t aktc, int obverb/*=1*/);
     ~RS();
-    my_ulonglong tbupd(const string& tab,const vector<instyp>& einf,int obverb, const string& bedingung, const size_t aktc/*=0*/, uchar asy=0);
-    my_ulonglong tbins(const string& tab,vector<instyp>* einfp,const size_t aktc=0,uchar sammeln=0,int obverb=0,string *id=0,
+		uchar holautofeld(const size_t aktc, int obverb);
+    my_ulonglong tbupd(const vector<instyp>& einf,int obverb, const string& bedingung, const size_t aktc/*=0*/, uchar asy=0);
+    my_ulonglong tbins(vector<instyp>* einfp,const size_t aktc=0,uchar sammeln=0,int obverb=0,string *id=0,
 		     const uchar eindeutig=0,const svec& eindfeld=svec(),const uchar asy=0, svec *csets=0);
 		void machstrikt(string& altmode,const size_t aktc=0);
 		void striktzurueck(string& altmode,const size_t aktc=0);
@@ -471,7 +472,7 @@ struct insv
 	const svec& eindfeld;
 	const uchar asy;
 	svec *csets;
-//	my_ulonglong RS::tbins(const string& itab, vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/, int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
+//	my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/, int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
 	insv(DB *My,const string& itab,const size_t aktc,const uchar eindeutig,const svec& eindfeld,const uchar asy,svec *csets):My(My),itabp(&itab),aktc(aktc),eindeutig(eindeutig),eindfeld(eindfeld),asy(asy),csets(csets)
 	{
 		rsp=new RS(My,itab);
@@ -481,7 +482,7 @@ struct insv
 	{
 		my_ulonglong erg=0;
 		if (ivec.size()) {
-			erg=rsp->tbins(*itabp,&ivec,aktc,sammeln,obverb,idp,eindeutig,eindfeld,asy,csets);
+			erg=rsp->tbins(&ivec,aktc,sammeln,obverb,idp,eindeutig,eindfeld,asy,csets);
 			if (rsp->fnr) {
 				fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
 			} //         if (runde==1)
@@ -493,7 +494,9 @@ struct insv
 	{
 		my_ulonglong erg=0;
 		if (ivec.size()) {
-			erg=rsp->tbupd(*itabp,ivec,obverb,rsp->autofeld+"='"+bedingung+"'",aktc,asy);
+			caus<<"Bedingung: "<<bedingung<<endl;
+			rsp->holautofeld(aktc,obverb);
+			erg=rsp->tbupd(ivec,obverb,rsp->autofeld+"='"+bedingung+"'",aktc,asy);
 			if (rsp->fnr) {
 				fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
 			} //         if (runde==1)
