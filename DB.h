@@ -410,7 +410,8 @@ class Tabelle
 
 class RS 
 {
-  public:
+	unsigned long zaehler=0; // Zahl der ueber tbins tatsaechlich einzufuegenden Datensaetze 
+	public:
     const DB* const dbp;
     string sql;
     string isql; // insert-sql

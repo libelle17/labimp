@@ -659,13 +659,18 @@ string zuzahl(const string& q)
 	for(const char& c:q) {
 		if (((c==',')&&kommazupunkt)||c=='.') {
 			if (pz++) break;
-			z+='.';
+			if (z.empty())
+				z="0.";
+			else
+				z+='.';
 		} else if (strchr("0123456789",c)) {
 			z+=c;
 	  }
 	}
 	if (z.empty())
 		z="0";
+	if (z[z.length()-1]=='.')
+		z.resize(z.length()-1);
 	return z;
 }
 

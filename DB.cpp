@@ -1706,7 +1706,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 			////      if (sql=="select column_name from information_schema.columns where table_schema='emails' and table_name = 'lmailbody' and extra = 'auto_increment'") {mysql_commit(dbp->conn[aktc]);} // sql="select 'ID'";
 			//// <<"sql.c_str(): "<<sql.c_str()<<endl;
 			if ((obverb>0)|oblog)
-				fLog("SQL: '"+hvioletts+sql+schwarz+"'",obverb,oblog);
+				fLog("SQL: '"+blaus+sql+schwarz+"'",obverb,oblog);
 			if (!dbp->conn[aktc]) {
 				fnr=9999;
 				fehler=Txd[T_Datenbank_nicht_zu_oeffnen];
@@ -2012,13 +2012,12 @@ my_ulonglong RS::tbupd(const vector<instyp>& einf,int obverb, const string& bedi
 my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
 		int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
 {
-	caus<<blau<<"tbins: "<<schwarz;
+	caus<<violett<<"tbins: "<<schwarz;
 	my_ulonglong zl=0;
 	ulong locks=0;
 	uchar obhauptfehl=0;
 	fnr=0;
   static uchar dochanfangen=0; // => bei Erreichen von maxzaehler in der naechsten Runde neu anfangen
-  static unsigned long zaehler=0; // Zahl der tatsaechlich einzufuegenden Datensaetze 
   //1. falls 0, dann auch Kopfzeile nicht behandeln, 2. falls Maxzaehler erreicht, dann Zwischeneinfuegen
   const int maxzaehler=100; // wg. Performance: Maximalzahl fuer Sammelinsert
   static unsigned long *maxl=0; // fuer Feldlaengenkorrekturen 
@@ -2044,7 +2043,7 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
       delete[] maxl; maxl=0;
     }
   } //   if (anfangen)
-	if (einfp) {
+	if (einfp) if (einfp->size()) {
 		if (!maxl) {
 			maxl= new unsigned long[einfp->size()];
 			for (unsigned long k=0;k<einfp->size();k++){
@@ -2213,10 +2212,10 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 								exit(113);
                 break; 
               } // if (fnr==1213) else else
-            } //             if (idp) else else else
-          } //  for (int iru=0;iru<2;iru++) 
-				striktzurueck(altsqlm,aktc);
-        } // case MySQL
+						} //             if (idp) else else else
+					} //  for (int iru=0;iru<2;iru++) 
+					striktzurueck(altsqlm,aktc);
+				} // case MySQL
         break;
       case Postgres:
 		  caup<<"hier insert 4"<<endl;
