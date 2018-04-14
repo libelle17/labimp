@@ -324,7 +324,7 @@ void hhcl::prueflaboryparameter(DB *My, const string& tlaboryparameter, const in
 		};
 		Index indices[]{Index("Abkü",new Feld[2]{Feld("Abkü"),Feld("Einheit")},2)};
 		Constraint csts[]{
-			Constraint("laborysaetzelaboryplab",new Feld{Feld("labid")},1,"laboryplab",new Feld{Feld("ID")},1,cascade,cascade),
+			Constraint("laboryparameterlaboryplab",new Feld{Feld("labid")},1,"laboryplab",new Feld{Feld("ID")},1,cascade,cascade),
 		};
 			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryparameter,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_LaborParameter]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
@@ -773,16 +773,17 @@ void hhcl::virtpruefweiteres()
 		RS d7(My,"DROP TABLE IF EXISTS laborypneu",aktc,ZDB);
 		RS d4(My,"DROP TABLE IF EXISTS laboryus",aktc,ZDB);
 		RS d5(My,"DROP TABLE IF EXISTS laborysaetze",aktc,ZDB);
+		RS d11(My,"DROP TABLE IF EXISTS laboryparameter",aktc,ZDB);
+		// aber: laborparameter nicht loeschen!
 		RS d8(My,"DROP TABLE IF EXISTS laboryplab",aktc,ZDB);
 		RS d10(My,"DROP TABLE IF EXISTS laboryfehlt",aktc,ZDB);
 		RS d9(My,"DROP TABLE IF EXISTS laboryeingel",aktc,ZDB);
-		// laboryparameter nicht loeschen!
 		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	}
+	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
 	prueflaboryparameter(My, tlaboryparameter, obverb, oblog, /*direkt*/0);
 	prueflaboryeingel(My, tlaboryeingel, obverb, oblog, /*direkt*/0);
 	prueflaboryfehlt(My, tlaboryfehlt, obverb, oblog, /*direkt*/0);
-	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
 	prueflaborysaetze(My, tlaborysaetze, obverb, oblog, /*direkt*/0);
 	prueflaboryus(My, tlaboryus, obverb, oblog, /*direkt*/0);
 	prueflaborypneu(My, tlaborypnb, obverb, oblog, /*direkt*/0);
@@ -843,7 +844,7 @@ void hhcl::dverarbeit(const string& datei)
 	if (mdat.is_open()) {
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
-		string erklaerung,verf,abkue;
+		string erklaerung,normbereich,verf,abkue;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -878,6 +879,10 @@ void hhcl::dverarbeit(const string& datei)
 					rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					if (!normbereich.empty()) {
+						rpar.hz("NB",normbereich);
+						normbereich.clear();
+					}
 					rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					//					satzid="0";
 				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
@@ -917,11 +922,16 @@ void hhcl::dverarbeit(const string& datei)
 					memset(&abndat,0,sizeof abndat);
 					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				}
+				if (!normbereich.empty()) {
+					rpar.hz("NB",normbereich);
+					normbereich.clear();
+				}
+				normbereich.clear();
 				rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (usoffen) {
 					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&refid);
-						usoffen=0;
+					usoffen=0;
 					}
 					if (cd=="8434") {
 						rba.clear();
@@ -939,6 +949,7 @@ void hhcl::dverarbeit(const string& datei)
 						rwe.hz("Abkü",inh);
 					} // 					if (cd=="8434") else if (cd=="8410")
 				  rpar.hz("Abkü",inh);
+					rpar.hz("LabID",labind);
 			} else if (cd=="5001") {
 				rle.clear();
 				rle.hz("Refnr",refid);
@@ -1070,7 +1081,21 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="0101") {
 				rsaetze.hz("KBVPrüfnr",inh);
 			} else if (cd=="8460") {
-				rpar.hz("NB",inh);
+				if (normbereich.empty()) {
+					normbereich=inh;
+					string nbn=ersetze(inh.c_str(),"bis","0-");
+					svec nbv;
+					aufSplit(&nbv, nbn,'-');
+					if (nbv.size()) {
+						rpar.hz("uNm",zuzahl(nbv[0]));
+						if (nbv.size()>1) {
+							rpar.hz("oNm",zuzahl(nbv[1]));
+						}
+					}
+				} else {
+					normbereich+="\r\n";
+					normbereich+=inh;
+				}
 			} else if (cd=="9106") {
 				rsaetze.hz("Zeichensatz",inh);
 			} else if (cd=="8312") {

@@ -1706,7 +1706,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 			////      if (sql=="select column_name from information_schema.columns where table_schema='emails' and table_name = 'lmailbody' and extra = 'auto_increment'") {mysql_commit(dbp->conn[aktc]);} // sql="select 'ID'";
 			//// <<"sql.c_str(): "<<sql.c_str()<<endl;
 			if ((obverb>0)|oblog)
-				fLog("SQL: '"+drots+sql+schwarz+"'",obverb,oblog);
+				fLog("SQL: '"+hvioletts+sql+schwarz+"'",obverb,oblog);
 			if (!dbp->conn[aktc]) {
 				fnr=9999;
 				fehler=Txd[T_Datenbank_nicht_zu_oeffnen];
@@ -2012,7 +2012,7 @@ my_ulonglong RS::tbupd(const vector<instyp>& einf,int obverb, const string& bedi
 my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
 		int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
 {
-	caus<<blau<<"tbins:"<<schwarz;
+	caus<<blau<<"tbins: "<<schwarz;
 	my_ulonglong zl=0;
 	ulong locks=0;
 	uchar obhauptfehl=0;

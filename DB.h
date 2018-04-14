@@ -271,7 +271,7 @@ struct Index
     Index(const string& vname, Feld *const vfelder, const unsigned vfeldzahl, const uchar unique=0);
 }; // struct Index 
 
-enum refact:uchar {cascade,set_null,restrict,no_action,set_default};
+enum refact:uchar {cascade,set_null,restrict_,no_action,set_default};
 
 
 struct Constraint
@@ -285,7 +285,7 @@ struct Constraint
 	const refact onupdate;
 	const refact ondelete;
 	Constraint(const string& name, Feld *const felder1, const unsigned feldz1, const string& reftab, 
-			Feld *const felder2, const unsigned feldz2, const refact onupdate=restrict, const refact ondelete=restrict);
+			Feld *const felder2, const unsigned feldz2, const refact onupdate=restrict_, const refact ondelete=restrict_);
 };
 
 class RS;

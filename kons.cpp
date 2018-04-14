@@ -651,12 +651,30 @@ extern class TxB Tx;
 
 uchar nrzf=0; // nicht rueckzufragen, fuer Aufruf aus Cron, wird auch in DB verwendet 
 
+string zuzahl(const string& q)
+{
+	string z;
+	uchar pz=0;
+	uchar kommazupunkt= q.find(',')!=string::npos && q.find('.'==string::npos);
+	for(const char& c:q) {
+		if (((c==',')&&kommazupunkt)||c=='.') {
+			if (pz++) break;
+			z+='.';
+		} else if (strchr("0123456789",c)) {
+			z+=c;
+	  }
+	}
+	if (z.empty())
+		z="0";
+	return z;
+}
+
 argcl::argcl(const int i,const char *const *const argv):argcs(argv[i])
 {
   argcs=argv[i];
 }
 
-const string drots=drot, rots=rot, schwarzs=schwarz, blaus=blau, dblaus=dblau, gelbs=gelb, tuerkiss=tuerkis, violetts=violett, gruens=gruen;
+const string drots=drot, rots=rot, schwarzs=schwarz, blaus=blau, dblaus=dblau, gelbs=gelb, tuerkiss=tuerkis, violetts=violett, hvioletts(violett),gruens=gruen;
 
 perfcl::perfcl(const string& vvonwo): vonwo(vvonwo)
 {

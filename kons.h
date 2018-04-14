@@ -95,7 +95,7 @@ extern const char *const tmmoegl[];
 // extern const char *rot, *weinrot, *schwarz, *blau, *gelb; // muss spaeter kompilerunabhaengig
 extern const char *const schwarz, *const dgrau, *const drot, *const rot, *const gruen, *const hgruen, *const braun, *const gelb,
 			 *const blau, *const dblau, *const violett, *const hviolett, *const tuerkis, *const htuerkis, *const hgrau, *const weiss, *const umgek;
-extern const string drots,rots,schwarzs,blaus,dblaus,gelbs,tuerkiss,hgraus,violetts,gruens;
+extern const string drots,rots,schwarzs,blaus,dblaus,gelbs,tuerkiss,hgraus,violetts,hvioletts,gruens;
 #ifdef linux
 extern const char *_rot, *_hrot, *_schwarz, *_blau, *_gelb, *_tuerkis, *_hgrau;
 #endif // linux
@@ -596,6 +596,8 @@ inline int isnumeric(const char* str)
   }
   return 1;
 } // inline int isnumeric(char* str)
+
+string zuzahl(const string& q);
  
 string* anfzweg(string& quel);
 char ers(const char roh);
