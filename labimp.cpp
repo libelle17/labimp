@@ -73,7 +73,9 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_Laborpgl
 	{"Parametergleichheiten","parameter equities"},
 	// T_Laborbakt
-	{"Laborbakt","Laborbak"},
+	{"Laborbakt","Laboratorybact"},
+	// T_Laborfehlt
+	{"Laborfehlt","Laboratorymissing"},
 	// T_laborxpneu
 	{"laborxpneu","laborxpneu"},
 	// T_laborparameter
@@ -250,6 +252,14 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"loescht alle Tabellen","deletes all tables"},
 	// T_Loesche_alle_Tabellen_und_fange_von_vorne_an
 	{"Loesche alle Tabellen und fange von vorne an","Deleting all tables and starting from scatch"},
+	// T_Kennung
+	{"Kennung","identifier"},
+	// T_Inhalt
+	{"Inhalt","content"},
+	// T_prueflaboryfehlt
+	{"prueflaboryfehlt()","testlaboratoymissing()"},
+	// T_Bezug_auf_Laboryplab
+	{"Bezug zu laboryplab","reference to laboryplab"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -277,8 +287,7 @@ void hhcl::prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obve
 			Feld("Zp","datetime","0","0",Tx[T_Einlesezeitpunkt],0,0,1),
 			Feld("fertig","bit","1","",Tx[T_ob_Einlesen_fertig],0,0,1),
 		};
-		Feld ifelder0[] = {Feld("Name"),Feld("Pfad")};   Index i0("NamePfad",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-		Index indices[]={i0};
+		Index indices[]{Index("NamePfad",new Feld[2]{Feld("Name"),Feld("Pfad")},2)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryeingel,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0,Tx[T_LaborEinlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -297,9 +306,11 @@ void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, 
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("Labor","varchar","1","",Tx[T_8300_maximale_Laenge_36],0,0,1),
+			Feld("StraßeLabor","varchar","1","",Tx[T_8321_Strasse_der_Laboradresse_Turbomed],0,0,1),
+			Feld("PLZLabor","varchar","1","",Tx[T_8322_PLZ_der_Laboradresse_Turbomed],0,0,1),
+			Feld("OrtLabor","varchar","1","",Tx[T_8323_Ort_der_Laboradresse_Turbomed],0,0,1),
 		};
-		Feld ifelder0[] = {Feld("Labor")};   Index i0("Labor",ifelder0,sizeof ifelder0/sizeof* ifelder0,/*unique*/1);
-		Index indices[]={i0};
+		Index indices[]{Index("Labor",new Feld[4]{Feld("Labor"),Feld("StraßeLabor"),Feld("PLZLabor"),Feld("OrtLabor")},4,/*unique*/1)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryplab,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Laborplab]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -323,8 +334,11 @@ void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, c
 			Feld("lid","int","10","",Tx[T_Bezug_auf_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/"NULL",/*unsig*/1),
 			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 		};
+		/*
 		Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit"),Feld("lid")};   Index i0("Abkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
+		*/
+		Index indices[]{Index("Abkü",new Feld[3]{Feld("Abkü"),Feld("Einheit"),Feld("lid")},3)};
 		Constraint csts[]{Constraint("Gruppe",new Feld{Feld("Gruppe")},1,"laborgruppen",new Feld{Feld("Laborgruppe")},1),
 			// geht beides!:
 			//			  								Constraint("Labore",new Feld[1]{Feld("lid")},1,"laboryplab",new Feld[1]{Feld("id")},1)};
@@ -388,21 +402,19 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 			Feld("LANR","varchar","1","",Tx[T_212_LANR],0,0,1),
 			Feld("PLZPraxis","varchar","1","",Tx[T_215_PLZ_der_Praxis_Turbomed],0,0,1),
 			Feld("OrtPraxis","varchar","1","",Tx[T_216_Ort_der_Praxis_Turbomed],0,0,1),
-			Feld("Labor","varchar","1","",Tx[T_8320_Labor],0,0,1),
-			Feld("StraßeLabor","varchar","1","",Tx[T_8321_Strasse_der_Laboradresse_Turbomed],0,0,1),
-			Feld("PLZLabor","varchar","1","",Tx[T_8322_PLZ_der_Laboradresse_Turbomed],0,0,1),
-			Feld("OrtLabor","varchar","1","",Tx[T_8323_Ort_der_Laboradresse_Turbomed],0,0,1),
+			Feld("LabID","int","10","",Tx[T_Bezug_auf_Laboryplab],0,0,1,string(),1),
 			Feld("KBVPrüfnr","varchar","1","",Tx[T_101_KBV_Pruefnummer_Turbomed],0,0,1),
 			Feld("Zeichensatz","varchar","1","",Tx[T_9106_verwendeter_Zeichensatz_Turbomed],0,0,1),
 			Feld("Kundenarztnr","varchar","1","",Tx[T_8312_Kundenarztnummer_Turbomed],0,0,1),
 			Feld("Erstellungsdatum","varchar","1","",Tx[T_9103_Erstellungsdatum_Turbomed],0,0,1),
 			Feld("Gesamtlänge","varchar","1","",Tx[T_9202_Gesamtlaenge_des_Datenpaketes_Turbomed],0,0,1),
 		};
-		Feld ifelder0[] = {Feld("PLZLabor"),Feld("OrtLabor")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-		Index indices[]={i0};
-		Constraint csts[]{Constraint("laborysaetzelaboryeingel",new Feld{Feld("datid")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade)};
+		Constraint csts[]{
+			Constraint("laborysaetzelaboryeingel",new Feld{Feld("datid")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade),
+			Constraint("laborysaetzelaboryplab",new Feld{Feld("labid")},1,"laboryplab",new Feld{Feld("ID")},1,cascade,cascade),
+		};
 			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborysaetze,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlaborysaetze,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborysaetze,1,1);
 			exit(11);
@@ -496,6 +508,27 @@ void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, 
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
+void hhcl::prueflaboryfehlt(DB *My, const string& tlaboryfehlt, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflaboryfehlt]+schwarz);
+	const size_t aktc=0;
+	if (!direkt) {
+		Feld felder[] = {
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,1,string(),1),
+			Feld("DatID","int","10","",Tx[T_eindeutige_Identifikation],1,0,0,string(),1),
+			Feld("Kennung","varchar","4","",Tx[T_Kennung],0,0,1),
+			Feld("Inhalt","varchar","1","",Tx[T_Inhalt],0,0,1),
+		};
+		Constraint csts[]{Constraint("Laboryeingellaboryfehlt",new Feld{Feld("DatID")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade)};
+		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+		Tabelle taba(My,tlaboryfehlt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborfehlt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryfehlt,1,1);
+			exit(11);
+		}
+	} // if (!direkt)
+} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
+
 
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb, const int oblog, const uchar direkt/*=0*/)
@@ -517,9 +550,9 @@ void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb
 ////		Index indices[]={i0};
 ////		Feld ifelder0[] = {};
 ////		Index indices[]={};
-		  Feld ifd0[]{Feld("RefNr")};
-			Constraint c0("LaborXUSLaborXLeist",ifd0,1,"laboryus",ifd0,1,cascade,cascade);
-			Constraint csts[]{c0};
+		Constraint csts[]{
+			Constraint("LaborXUSLaborXLeist",new Feld{Feld("RefNr")},1,"laboryus",new Feld{Feld("ID")},1,cascade,cascade),
+		};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryleist,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_LaborLeistungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -676,16 +709,18 @@ void hhcl::virtpruefweiteres()
 		RS d3(My,"DROP TABLE IF EXISTS laborybakt",aktc,ZDB);
 		RS d6(My,"DROP TABLE IF EXISTS laborypnb",aktc,ZDB);
 		RS d7(My,"DROP TABLE IF EXISTS laborypneu",aktc,ZDB);
-		RS d8(My,"DROP TABLE IF EXISTS laboryplab",aktc,ZDB);
 		RS d4(My,"DROP TABLE IF EXISTS laboryus",aktc,ZDB);
 		RS d5(My,"DROP TABLE IF EXISTS laborysaetze",aktc,ZDB);
+		RS d8(My,"DROP TABLE IF EXISTS laboryplab",aktc,ZDB);
+		RS d10(My,"DROP TABLE IF EXISTS laboryfehlt",aktc,ZDB);
 		RS d9(My,"DROP TABLE IF EXISTS laboryeingel",aktc,ZDB);
 		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	}
 	prueflaboryeingel(My, tlaboryeingel, obverb, oblog, /*direkt*/0);
+	prueflaboryfehlt(My, tlaboryfehlt, obverb, oblog, /*direkt*/0);
+	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
 	prueflaborysaetze(My, tlaborysaetze, obverb, oblog, /*direkt*/0);
 	prueflaboryus(My, tlaboryus, obverb, oblog, /*direkt*/0);
-	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
 	prueflaborypneu(My, tlaborypnb, obverb, oblog, /*direkt*/0);
 	prueflaborypnb(My, tlaborypnb, obverb, oblog, /*direkt*/0);
 	prueflaborybakt(My, tlaborybakt, obverb, oblog, /*direkt*/0);
@@ -716,7 +751,7 @@ void hhcl::dverarbeit(const string& datei)
 #ifdef speichern
 	const size_t aktc=0;
 #endif 
-	string datid,satzid,refid;
+	string datid,satzid,refid,labind;
 	unsigned refnr;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen, usoffen;
@@ -727,21 +762,23 @@ void hhcl::dverarbeit(const string& datei)
 	reing.hz("Pfad",datei);
 	reing.hz("Zp",&jetzt);
 #ifdef speichern
-	reing.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-	My->LetzteID(&datid,aktc);
+	reing.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&datid);
 #endif 
 	insv rsaetze(My,/*itab*/tlaborysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rlab(My,/*itab*/tlaboryplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rus(My,/*itab*/tlaboryus,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rfe(My,/*itab*/tlaboryfehlt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rba(My,/*itab*/tlaborybakt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rwe(My,/*itab*/tlaborywert,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv *rbawep=0; // Zeiger auf rba oder rwe
+	insv rle(My,/*itab*/tlaboryleist,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
 	caus<<rot<<datei<<schwarz<<endl;
 	mdatei mdat(datei,ios::in);
 	if (mdat.is_open()) {
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
-		string erklaerung;
+		string erklaerung,verf,abkue;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -775,12 +812,12 @@ void hhcl::dverarbeit(const string& datei)
 					}
 					rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					//					satzid="0";
 				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
 					lsatzart=3;
 					if (saetzeoffen) {
-						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-						My->LetzteID(&satzid,aktc);
+						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&satzid);
 						saetzeoffen=0;
 					}
 					//					rus.zeig("0");
@@ -798,8 +835,7 @@ void hhcl::dverarbeit(const string& datei)
 						break;
 					case 2:
 						rsaetze.hz("SatzlängeSchluss",inh);
-						// update rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-						rsaetze.ergaenz(satzid,/*sammeln*/0,/*obverb*/1,/*idp*/0);
+						// speichern unter 9202
 						break;
 					case 3:
 						rus.hz("Satzlänge",inh);
@@ -815,9 +851,9 @@ void hhcl::dverarbeit(const string& datei)
 					memset(&abndat,0,sizeof abndat);
 					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				}
+				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (usoffen) {
-					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-						My->LetzteID(&refid,aktc);
+					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&refid);
 						usoffen=0;
 					}
 					if (cd=="8434") {
@@ -829,10 +865,27 @@ void hhcl::dverarbeit(const string& datei)
 					} // 					if (cd=="8434") else if (cd=="8410")
 					rbawep->hz("RefNr",refid);
 					if (cd=="8434") {
+						verf=inh;
 						rba.hz("Verf",inh);
 					} else /*if (cd=="8410")*/ {
+						abkue=inh;
 						rwe.hz("Abkü",inh);
 					} // 					if (cd=="8434") else if (cd=="8410")
+			} else if (cd=="5001") {
+				rle.clear();
+				rle.hz("Refnr",refid);
+				if (rbawep==&rba) {
+					rle.hz("Verf",verf);
+				} else {
+					rle.hz("Abkü",abkue);
+				}
+				rle.hz("EBM",inh);
+			} else if (cd=="5005") {
+				rle.hz("Anzahl",inh);
+			} else if (cd=="8406") { // zwingende Abfolge mit 5001 wurde 2/05 geprueft
+				rle.hz("GOÄ",inh);
+			} else if (cd=="8416") { 
+				rle.hz("Abrd",inh);
 			} else if (cd=="8411") {
 				rwe.hz("Langname",inh);
 			} else if (cd=="8428") {
@@ -915,38 +968,52 @@ void hhcl::dverarbeit(const string& datei)
 					rsaetze.hz("PLZPraxis",inh);
       } else if (cd=="0216") {
 					rsaetze.hz("OrtPraxis",inh);
-      } else if (cd=="8300") {
+			} else if (cd=="8300") {
 				svec labv;
 				aufSplit(&labv, inh,';');
 				if (labv.size()>0) {
-					rsaetze.hz("Labor",labv[0]);
-					if (labv.size()>1)
-						rsaetze.hz("StraßeLabor",labv[1]);
-					if (labv.size()>2) {
-						rsaetze.hz("PLZLabor",labv[2].substr(0,5));
-						if (labv[2].size()>5) rsaetze.hz("OrtLabor",labv[2].substr(6));
+					rlab.hz("Labor",labv[0]);
+					if (labv.size()>1) {
+						rlab.hz("StraßeLabor",labv[1]);
+						if (labv.size()>2) {
+							rlab.hz("PLZLabor",labv[2].substr(0,5));
+							if (labv[2].size()>5) {
+								rlab.hz("OrtLabor",labv[2].substr(6));
+							}
+						}
 					}
 				} else {
-					rsaetze.hz("Labor",inh);
+					rlab.hz("Labor",inh);
 				}
+				rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
+				rsaetze.hz("labid",labind);
 			} else if (cd=="8320") {
-					rsaetze.hz("Labor",inh);
+				rlab.hz("Labor",inh);
 			} else if (cd=="8321") {
-						rsaetze.hz("StraßeLabor",inh);
+				rlab.hz("StraßeLabor",inh);
 			} else if (cd=="8322") {
-						rsaetze.hz("PLZLabor",inh);
+				rlab.hz("PLZLabor",inh);
 			} else if (cd=="8323") {
-						rsaetze.hz("OrtLabor",inh);
+				rlab.hz("OrtLabor",inh);
+				rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
+				rsaetze.hz("labid",labind);
 			} else if (cd=="0101") {
-						rsaetze.hz("KBVPrüfnr",inh);
+				rsaetze.hz("KBVPrüfnr",inh);
 			} else if (cd=="9106") {
-						rsaetze.hz("Zeichensatz",inh);
+				rsaetze.hz("Zeichensatz",inh);
 			} else if (cd=="8312") {
-						rsaetze.hz("Kundenarztnr",inh);
+				rsaetze.hz("Kundenarztnr",inh);
 			} else if (cd=="9103") {
-						rsaetze.hz("Erstellungsdatum",inh);
-			} else if (cd=="9102") {
-						rsaetze.hz("Gesamtlänge",inh);
+				rsaetze.hz("Erstellungsdatum",inh);
+			} else if (cd=="9202") {
+				rsaetze.hz("Gesamtlänge",inh);
+				// update rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+				rsaetze.ergaenz(satzid,/*sammeln*/0,/*obverb*/1,/*idp*/0);
+			} else {
+				rfe.hz("DatID",datid);
+				rfe.hz("Kennung",cd);
+				rfe.hz("Inhalt",inh);
+				rfe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 			}
 			altz=zeile;
 #endif 

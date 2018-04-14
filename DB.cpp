@@ -255,12 +255,13 @@ Feld::Feld(const string& name, string typ/*=string()*/, const string& lenge/*=st
 // Feld::Feld(Feld const& copy) { }
 
 
-Index::Index(const string& name, Feld *const felder, const unsigned feldzahl, const uchar unique/*=0*/):
+Index::Index(const string& name, Feld *const vfelder, const unsigned feldzahl, const uchar unique/*=0*/):
   name(name),
-  felder(felder),
+  felder(vfelder),
   feldzahl(feldzahl),
 	unique(unique)
-{}
+{
+}
 
 
 Constraint::Constraint(const string& name, Feld *const felder1, const unsigned feldz1, const string& reftab, 
@@ -273,7 +274,8 @@ Constraint::Constraint(const string& name, Feld *const felder1, const unsigned f
 	feldz2(feldz2),
 	onupdate(onupdate),
 	ondelete(ondelete)
-{}
+{
+}
 
 Tabelle::Tabelle(const DB* dbp,const std::string& tbname, Feld *vfelder, const int feldzahl, Index *vindices, const unsigned vindexzahl, 
 		Constraint *const constraints, const unsigned constrzahl, const string comment/*string()*/, 

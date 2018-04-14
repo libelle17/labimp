@@ -493,10 +493,12 @@ struct insv
 	my_ulonglong ergaenz(const string& bedingung,const uchar sammeln=0,int obverb=0,string* idp=0)
 	{
 		my_ulonglong erg=0;
-		if (ivec.size()) {
 			caus<<"Bedingung: "<<bedingung<<endl;
+		if (ivec.size()) {
 			rsp->holautofeld(aktc,obverb);
-			erg=rsp->tbupd(ivec,obverb,rsp->autofeld+"='"+bedingung+"'",aktc,asy);
+			const string gesbed=rsp->autofeld+"='"+bedingung+"'";
+			caus<<"Gesbed: "<<gesbed<<endl;
+			erg=rsp->tbupd(ivec,obverb,gesbed,aktc,asy);
 			if (rsp->fnr) {
 				fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
 			} //         if (runde==1)

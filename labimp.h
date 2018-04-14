@@ -35,6 +35,7 @@ enum T_
 	T_LaborLeistungen,
 	T_Laborpgl,
 	T_Laborbakt,
+	T_Laborfehlt,
 	T_laborxpneu,
 	T_laborparameter,
 	T_ist_identisch_mit_laborxpneu,
@@ -123,6 +124,10 @@ enum T_
 	T_vv_l,
 	T_loescht_alle_Tabellen,
 	T_Loesche_alle_Tabellen_und_fange_von_vorne_an,
+	T_Kennung,
+	T_Inhalt,
+	T_prueflaboryfehlt,
+	T_Bezug_auf_Laboryplab,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -140,6 +145,7 @@ class hhcl:public dhcl
 	string tlaboryus="laboryus";
 	string tlaborywert="laborywert";
 	string tlaborybakt="laborybakt";
+	string tlaboryfehlt="laboryfehlt";
 	ic_cl *icp;
  protected: //α
 	string p1;
@@ -161,6 +167,7 @@ class hhcl:public dhcl
 	void prueflaboryus(DB *My, const string& tlaboryus, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflaborywert(DB *My, const string& tlaborywert, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflaboryfehlt(DB *My, const string& tlaboryfehlt, const int obverb, const int oblog, const uchar direkt=0);
 	void virttesterg(); //α
 	void virtlieskonfein();
 	void virtautokonfschreib();
