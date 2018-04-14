@@ -128,6 +128,18 @@ enum T_
 	T_Inhalt,
 	T_prueflaboryfehlt,
 	T_Bezug_auf_Laboryplab,
+	T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich,
+	T_8421,
+	T_LaborParameter,
+	T_prueflaboryparameter,
+	T_Reihenfolge_innerhalb_der_Gruppe,
+	T_unterer_Normwert_maennlich,
+	T_oberer_Normwert_maennlich,
+	T_unterer_Normwert_weiblich,
+	T_oberer_Normwert_weiblich,
+	T_Normbereich_aus_laborywert,
+	T_Aktualisierungszeitpunt,
+	T_Ordnungsnummer_der_Dateiuebertragung,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -146,6 +158,7 @@ class hhcl:public dhcl
 	string tlaborywert="laborywert";
 	string tlaborybakt="laborybakt";
 	string tlaboryfehlt="laboryfehlt";
+	string tlaboryparameter="laboryparameter";
 	ic_cl *icp;
  protected: //α
 	string p1;
@@ -168,6 +181,7 @@ class hhcl:public dhcl
 	void prueflaborywert(DB *My, const string& tlaborywert, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflaboryfehlt(DB *My, const string& tlaboryfehlt, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflaboryparameter(DB *My, const string& tlaboryparameter, const int obverb, const int oblog, const uchar direkt=0);
 	void virttesterg(); //α
 	void virtlieskonfein();
 	void virtautokonfschreib();

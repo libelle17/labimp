@@ -260,6 +260,31 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"prueflaboryfehlt()","testlaboratoymissing()"},
 	// T_Bezug_auf_Laboryplab
 	{"Bezug zu laboryplab","reference to laboryplab"},
+	// T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich
+	{"Abkürzung mit gleicher Bedeutung, gleicher Einheit und gleichem Normbereich",
+	 "abbreviation with same meaning, same unit and same normal range"},
+	// T_8421
+	{"8421","8421"},
+	// T_LaborParameter
+	{"Laborparameter","laborory parameters"},
+	// T_prueflaboryparameter
+	{"prueflaboryparameter()","testlaboratoryparameters()"},
+	// T_Reihenfolge_innerhalb_der_Gruppe
+	{"Reihenfolge innerhalb der Gruppe","order within the group"},
+	// T_unterer_Normwert_maennlich
+	{"unterer Normwert maennlich","lower border male"},
+	// T_oberer_Normwert_maennlich,
+	{"oberer Normwert maennlich","upper border male"},
+	// T_unterer_Normwert_weiblich,
+	{"unterer Normwert weiblich","lower border female"},
+	// T_oberer_Normwert_weiblich,
+	{"oberer Normwert weiblich","upper border female"},
+	// T_Normbereich_aus_laborywert
+	{"Normbereich aus laborywert","normal range from laborywert"},
+	// T_Aktualisierungszeitpunt
+	{"Aktualisierungszeitpunkt","actualization time"},
+	// T_Ordnungsnummer_der_Dateiuebertragung
+	{"Ordnungsnummer der Dateiuebertragung","ordinal number of the file import"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -273,6 +298,43 @@ hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) 
 	// mitcron=0; //ω
 } // hhcl::hhcl //α
 // Hier neue Funktionen speichern: //ω
+
+// wird aufgerufen in: virtpruefweiteres
+void hhcl::prueflaboryparameter(DB *My, const string& tlaboryparameter, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflaboryparameter]+schwarz);
+	const size_t aktc=0;
+	if (!direkt) {
+		Feld felder[] = {
+			Feld(/*name*/"Abkü",/*typ*/"varchar",/*lenge*/"1",/*prec*/"",/*comment*/Tx[T_8410_maximale_Laenge_8],/*obind*/0,/*obaut*/0,/*nnull*/1),
+			Feld("AbküN","varchar","1","",Tx[T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich],0,0,1),
+			Feld("LabID","int","10","",Tx[T_Bezug_auf_Laboryplab],0,0,1,string(),1),
+			Feld("Langtext","varchar","1","",Tx[T_8411_maximale_Laenge_40],0,0,1),
+			Feld("Einheit","varchar","1","",Tx[T_8421],0,0,1),
+			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
+			Feld("Reihe","int","10","",Tx[T_Reihenfolge_innerhalb_der_Gruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
+			Feld("uNm","varchar","1","",Tx[T_unterer_Normwert_maennlich],0,0,1),
+			Feld("oNm","varchar","1","",Tx[T_oberer_Normwert_maennlich],0,0,1),
+			Feld("uNw","varchar","1","",Tx[T_unterer_Normwert_weiblich],0,0,1),
+			Feld("oNw","varchar","1","",Tx[T_oberer_Normwert_weiblich],0,0,1),
+			Feld("NB","varchar","1","",Tx[T_Normbereich_aus_laborywert],0,0,1),
+			Feld("Aktzeit","datetime","0","0",Tx[T_Aktualisierungszeitpunt],1,0,1),
+			Feld("StByte","int","10","",Tx[T_Ordnungsnummer_der_Dateiuebertragung],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+		};
+		Index indices[]{Index("Abkü",new Feld[2]{Feld("Abkü"),Feld("Einheit")},2)};
+		Constraint csts[]{
+			Constraint("laborysaetzelaboryplab",new Feld{Feld("labid")},1,"laboryplab",new Feld{Feld("ID")},1,cascade,cascade),
+		};
+			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+		Tabelle taba(My,tlaboryparameter,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_LaborParameter]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryparameter,1,1);
+			exit(11);
+		}
+	} // if (!direkt)
+} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
+
 
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obverb, const int oblog, const uchar direkt/*=0*/)
@@ -714,8 +776,10 @@ void hhcl::virtpruefweiteres()
 		RS d8(My,"DROP TABLE IF EXISTS laboryplab",aktc,ZDB);
 		RS d10(My,"DROP TABLE IF EXISTS laboryfehlt",aktc,ZDB);
 		RS d9(My,"DROP TABLE IF EXISTS laboryeingel",aktc,ZDB);
+		// laboryparameter nicht loeschen!
 		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	}
+	prueflaboryparameter(My, tlaboryparameter, obverb, oblog, /*direkt*/0);
 	prueflaboryeingel(My, tlaboryeingel, obverb, oblog, /*direkt*/0);
 	prueflaboryfehlt(My, tlaboryfehlt, obverb, oblog, /*direkt*/0);
 	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
@@ -765,6 +829,7 @@ void hhcl::dverarbeit(const string& datei)
 	reing.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&datid);
 #endif 
 	insv rsaetze(My,/*itab*/tlaborysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rpar(My,/*itab*/tlaboryparameter,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rlab(My,/*itab*/tlaboryplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rus(My,/*itab*/tlaboryus,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rfe(My,/*itab*/tlaboryfehlt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
@@ -813,6 +878,7 @@ void hhcl::dverarbeit(const string& datei)
 					rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					//					satzid="0";
 				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
 					lsatzart=3;
@@ -851,6 +917,7 @@ void hhcl::dverarbeit(const string& datei)
 					memset(&abndat,0,sizeof abndat);
 					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				}
+				rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (usoffen) {
 					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&refid);
@@ -871,6 +938,7 @@ void hhcl::dverarbeit(const string& datei)
 						abkue=inh;
 						rwe.hz("Abkü",inh);
 					} // 					if (cd=="8434") else if (cd=="8410")
+				  rpar.hz("Abkü",inh);
 			} else if (cd=="5001") {
 				rle.clear();
 				rle.hz("Refnr",refid);
@@ -888,6 +956,7 @@ void hhcl::dverarbeit(const string& datei)
 				rle.hz("Abrd",inh);
 			} else if (cd=="8411") {
 				rwe.hz("Langname",inh);
+				rpar.hz("Langtext",inh);
 			} else if (cd=="8428") {
 				if (!rbawep) caus<<rot<<"4 Fehler rbawep 0"<<schwarz<<endl;
 				rbawep->hz("KuQu",inh);
@@ -917,6 +986,7 @@ void hhcl::dverarbeit(const string& datei)
 					rwe.hz("Wert",inh);
 			} else if (cd=="8421") {
 					rwe.hz("Einheit",inh);
+					rpar.hz("Einheit",inh);
 			} else if (cd=="8422") {
 					rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
@@ -999,6 +1069,8 @@ void hhcl::dverarbeit(const string& datei)
 				rsaetze.hz("labid",labind);
 			} else if (cd=="0101") {
 				rsaetze.hz("KBVPrüfnr",inh);
+			} else if (cd=="8460") {
+				rpar.hz("NB",inh);
 			} else if (cd=="9106") {
 				rsaetze.hz("Zeichensatz",inh);
 			} else if (cd=="8312") {

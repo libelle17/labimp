@@ -219,7 +219,8 @@ void insv::hz(instyp it)
 }
 
 Feld::Feld()
-{}
+{
+}
 
 Feld::Feld(const string& name, string typ/*=string()*/, const string& lenge/*=string()*/, const string& prec/*=string()*/, 
     const string& comment/*=string()*/, bool obind/*=0*/, bool obauto/*=0*/, bool nnull/*=0*/, const string& vdefa/*=string()*/, bool unsig/*=0*/):
