@@ -122,8 +122,12 @@ enum T_
 	T_Verzeichnis_der_Faxdateien,
 	T_vv_k,
 	T_vv_l,
+	T_tr_k,
+	T_tr_l,
 	T_loescht_alle_Tabellen,
+	T_entleert_alle_Tabellen,
 	T_Loesche_alle_Tabellen_und_fange_von_vorne_an,
+	T_Entleere_alle_Tabellen_und_fange_von_vorne_an,
 	T_Kennung,
 	T_Inhalt,
 	T_prueflaboryfehlt,
@@ -166,6 +170,7 @@ class hhcl:public dhcl
 	string p3;
 	uchar oblista=0;
 	uchar vonvorne=0;
+	uchar entleer=0;
 	long listz=30; //ω
   string ldatvz;   // Verzeichnis der Labordateien
  public: //α //ω

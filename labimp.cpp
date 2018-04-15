@@ -248,10 +248,18 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"vonvorne","fromscratch"},
 	// T_vv_l
 	{"vonvorne","fromscratch"},
+	// T_tr_k
+	{"entleer","trunc"},
+	// T_tr_l
+	{"entleer","truncate"},
 	// T_loescht_alle_Tabellen
 	{"loescht alle Tabellen","deletes all tables"},
+	// T_entleert_alle_Tabellen
+	{"entleert alle Tabellen","truncates all tables"},
 	// T_Loesche_alle_Tabellen_und_fange_von_vorne_an
 	{"Loesche alle Tabellen und fange von vorne an","Deleting all tables and starting from scatch"},
+  //T_Entleere_alle_Tabellen_und_fange_von_vorne_an,
+	{"Entleere alle Tabellen und fange von vorne an","Truncating all tables and starting from scatch"},
 	// T_Kennung
 	{"Kennung","identifier"},
 	// T_Inhalt
@@ -717,6 +725,7 @@ void hhcl::virtinitopt()
 { //ω
 	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Faxdateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty());
 	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_entleert_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
 
@@ -779,6 +788,23 @@ void hhcl::virtpruefweiteres()
 		RS d10(My,"DROP TABLE IF EXISTS laboryfehlt",aktc,ZDB);
 		RS d9(My,"DROP TABLE IF EXISTS laboryeingel",aktc,ZDB);
 		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
+	} else if (entleer) {
+		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
+		RS d0(My,"truncate laborypgl",aktc,ZDB);
+		RS d1(My,"truncate laborywert",aktc,ZDB);
+		RS d2(My,"truncate laboryleist",aktc,ZDB);
+		RS d3(My,"truncate laborybakt",aktc,ZDB);
+		RS d6(My,"truncate laborypnb",aktc,ZDB);
+		RS d7(My,"truncate laborypneu",aktc,ZDB);
+		RS d4(My,"truncate laboryus",aktc,ZDB);
+		RS d5(My,"truncate laborysaetze",aktc,ZDB);
+		RS d11(My,"truncate laboryparameter",aktc,ZDB);
+		// aber: laborparameter nicht loeschen!
+		RS d8(My,"truncate laboryplab",aktc,ZDB);
+		RS d10(My,"truncate laboryfehlt",aktc,ZDB);
+		RS d9(My,"truncate laboryeingel",aktc,ZDB);
+		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
+		fLog(blaus+Tx[T_Entleere_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	}
 	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
 	prueflaboryparameter(My, tlaboryparameter, obverb, oblog, /*direkt*/0);
@@ -844,7 +870,7 @@ void hhcl::dverarbeit(const string& datei)
 	if (mdat.is_open()) {
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
-		string erklaerung,normbereich,verf,abkue;
+		string erklaerung,normbereich,uNm,oNm,verf,abkue;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -882,6 +908,14 @@ void hhcl::dverarbeit(const string& datei)
 					if (!normbereich.empty()) {
 						rpar.hz("NB",normbereich);
 						normbereich.clear();
+					}
+					if (!uNm.empty()) {
+						rpar.hz("uNm",uNm);
+						uNm.clear();
+					}
+					if (!oNm.empty()) {
+						rpar.hz("oNm",oNm);
+						oNm.clear();
 					}
 					rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					//					satzid="0";
@@ -926,26 +960,33 @@ void hhcl::dverarbeit(const string& datei)
 					rpar.hz("NB",normbereich);
 					normbereich.clear();
 				}
-				normbereich.clear();
+				if (!uNm.empty()) {
+					rpar.hz("uNm",uNm);
+					uNm.clear();
+				}
+				if (!oNm.empty()) {
+					rpar.hz("oNm",oNm);
+					oNm.clear();
+				}
 				rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (usoffen) {
 					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&refid);
 					usoffen=0;
-					}
-					if (cd=="8434") {
-						rba.clear();
-						rbawep=&rba;
-					} else /*if (cd=="8410")*/ {
-						rwe.clear();
-						rbawep=&rwe;
-					} // 					if (cd=="8434") else if (cd=="8410")
-					rbawep->hz("RefNr",refid);
-					if (cd=="8434") {
-						verf=inh;
-						rba.hz("Verf",inh);
-					} else /*if (cd=="8410")*/ {
-						abkue=inh;
+				}
+				if (cd=="8434") {
+					rba.clear();
+					rbawep=&rba;
+				} else /*if (cd=="8410")*/ {
+					rwe.clear();
+					rbawep=&rwe;
+				} // 					if (cd=="8434") else if (cd=="8410")
+				rbawep->hz("RefNr",refid);
+				if (cd=="8434") {
+					verf=inh;
+					rba.hz("Verf",inh);
+				} else /*if (cd=="8410")*/ {
+					abkue=inh;
 						rwe.hz("Abkü",inh);
 					} // 					if (cd=="8434") else if (cd=="8410")
 				  rpar.hz("Abkü",inh);
@@ -1084,18 +1125,43 @@ void hhcl::dverarbeit(const string& datei)
 				if (normbereich.empty()) {
 					normbereich=inh;
 					string nbn=ersetze(inh.c_str(),"bis","0-");
+					size_t pos;
+					if ((pos=nbn.find("ab "))!=string::npos) {
+						nbn.erase(0,pos+3);
+						nbn+='-';
+					} else if ((pos=nbn.find(">"))!=string::npos) {
+						nbn.erase(0,pos+1);
+						nbn+='-';
+					} else if ((pos=nbn.find(":"))!=string::npos) {
+						nbn.erase(0,pos+1);
+						nbn.insert(0,1,'-');
+					} else if ((pos=nbn.find("<"))!=string::npos) {
+						if (nbn.find("chwere")>pos) { // Schwere Pankreasinsuffizienz:        < 100 µg/g Stuhl
+							nbn.erase(0,pos+1);
+							nbn.insert(0,1,'-');
+						} else {
+							nbn.erase(0,pos+1);
+							nbn+='-';
+						}
+					}
 					svec nbv;
 					aufSplit(&nbv, nbn,'-');
 					if (nbv.size()) {
-						rpar.hz("uNm",zuzahl(nbv[0]));
+						uNm=zuzahl(nbv[0]);
 						if (nbv.size()>1) {
-							rpar.hz("oNm",zuzahl(nbv[1]));
+							oNm=zuzahl(nbv[1]);
 						}
+					} else {
+						caus<<rot<<"Normbereich ohne '-': "<<violett<<nbn<<schwarz<<endl;
 					}
 				} else {
 					normbereich+="\r\n";
 					normbereich+=inh;
 				}
+			} else if (cd=="8461") {
+				uNm=zuzahl(inh);
+			} else if (cd=="8462") {
+				oNm=zuzahl(inh);
 			} else if (cd=="9106") {
 				rsaetze.hz("Zeichensatz",inh);
 			} else if (cd=="8312") {
@@ -1116,8 +1182,8 @@ void hhcl::dverarbeit(const string& datei)
 #endif 
 		}
 	}
-	exit(0);
-}
+//	exit(0);
+} // void hhcl::dverarbeit(const string& datei)
 
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
