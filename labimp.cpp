@@ -293,6 +293,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Aktualisierungszeitpunkt","actualization time"},
 	// T_Ordnungsnummer_der_Dateiuebertragung
 	{"Ordnungsnummer der Dateiuebertragung","ordinal number of the file import"},
+	// T_fehlend
+	{"fehlend","missing"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -374,7 +376,7 @@ void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, 
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+			Feld(/*name*/"ID",/*typ*/"int",/*lenge*/"10",/*prec*/string(),/*comment*/Tx[T_eindeutige_Identifikation],/*obind*/1,/*obaut*/1,/*nnull*/0,/*defa*/string(),/*unsig*/1),
 			Feld("Labor","varchar","1","",Tx[T_8300_maximale_Laenge_36],0,0,1),
 			Feld("StraßeLabor","varchar","1","",Tx[T_8321_Strasse_der_Laboradresse_Turbomed],0,0,1),
 			Feld("PLZLabor","varchar","1","",Tx[T_8322_PLZ_der_Laboradresse_Turbomed],0,0,1),
@@ -387,6 +389,11 @@ void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, 
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryplab,1,1);
 			exit(11);
 		}
+		// "Labor 20051127 224528.dat": kein Labor angegeben
+		svec eindfeld; eindfeld<<"ID";
+		insv rlab(My,/*itab*/tlaboryplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
+		rlab.hz("Labor",Tx[T_fehlend]);
+		rlab.schreib(/*sammeln*/0,/*obverb*/3,/*idp*/&labind);
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
@@ -800,7 +807,7 @@ void hhcl::virtpruefweiteres()
 		RS d5(My,"truncate laborysaetze",aktc,ZDB);
 		RS d11(My,"truncate laboryparameter",aktc,ZDB);
 		// aber: laborparameter nicht loeschen!
-		RS d8(My,"truncate laboryplab",aktc,ZDB);
+		RS d8(My,"delete from laboryplab where id>1",aktc,ZDB);
 		RS d10(My,"truncate laboryfehlt",aktc,ZDB);
 		RS d9(My,"truncate laboryeingel",aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
@@ -842,10 +849,10 @@ void hhcl::dverarbeit(const string& datei)
 #ifdef speichern
 	const size_t aktc=0;
 #endif 
-	string datid,satzid,refid,labind;
+	string datid,satzid,satzart,refid;
 	unsigned refnr;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
-	uchar saetzeoffen, usoffen;
+	uchar saetzeoffen, usoffen=0;
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlaboryeingel,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
@@ -870,7 +877,8 @@ void hhcl::dverarbeit(const string& datei)
 	if (mdat.is_open()) {
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
-		string erklaerung,normbereich,uNm,oNm,verf,abkue;
+		uchar oblaborda=0;
+		string erklaerung,kommentar,normbereich,auftrhinw,uNm,oNm,verf,abkue;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -893,15 +901,23 @@ void hhcl::dverarbeit(const string& datei)
 					refnr=0;
 				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
 					lsatzart=2;
-					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					if (usoffen) {
+						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&refid);
+						usoffen=0;
+					}
 					if (rbawep) {
 						rbawep->hz("Erklärung",erklaerung);
 						erklaerung.clear();
+						rbawep->hz("Kommentar",kommentar);
+						kommentar.clear();
+						if (!auftrhinw.empty()) {
+							rbawep->hz("AuftrHinw",auftrhinw);
+							auftrhinw.clear();
+						} // 						if (!auftrhinw.empty())
 						rbawep->hz("AbnDat",&abndat);
 						memset(&abndat,0,sizeof abndat);
-
 						rbawep=0;
-					}
+					} // 					if (rbawep)
 					rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
@@ -922,14 +938,19 @@ void hhcl::dverarbeit(const string& datei)
 				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
 					lsatzart=3;
 					if (saetzeoffen) {
+						if (!oblaborda) {
+							rsaetze.hz("LabID",1);
+						} else
+							oblaborda=0;
 						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&satzid);
 						saetzeoffen=0;
 					}
 					//					rus.zeig("0");
 					rus.clear();
+					satzart=inh;
 					rus.hz("DatID",datid);
 					rus.hz("SatzID",satzid);
-					rus.hz("SatzArt",inh);
+					rus.hz("SatzArt",satzart);
 					rus.hz("RefNr",++refnr);
 					usoffen=1;
 				}
@@ -952,6 +973,12 @@ void hhcl::dverarbeit(const string& datei)
 				if (rbawep) {
 					rbawep->hz("Erklärung",erklaerung);
 					erklaerung.clear();
+					rbawep->hz("Kommentar",kommentar);
+					kommentar.clear();
+					if (!auftrhinw.empty()) {
+						rbawep->hz("AuftrHinw",auftrhinw);
+						auftrhinw.clear();
+					} // 						if (!auftrhinw.empty())
 					rbawep->hz("AbnDat",&abndat);
 					memset(&abndat,0,sizeof abndat);
 					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
@@ -1064,6 +1091,13 @@ void hhcl::dverarbeit(const string& datei)
 				rus.hz("Geschlecht",inh);
 			} else if (cd=="3101") {
 				rus.hz("Nachname",inh.substr(0,3)=="zzz"?inh.substr(4):inh);
+				if (!usoffen) {
+					rus.hz("DatID",datid);
+					rus.hz("SatzID",satzid);
+					rus.hz("SatzArt",satzart);
+					rus.hz("RefNr",++refnr);
+					usoffen=1; // verkuerzte Information z.B. in "Labor 20051127 224528.dat"
+				} // 				if (!usoffen)
 			} else if (cd=="3102") {
 				rus.hz("Vorname",inh);
 			} else if (cd=="3103") {
@@ -1107,7 +1141,9 @@ void hhcl::dverarbeit(const string& datei)
 				} else {
 					rlab.hz("Labor",inh);
 				}
+				// 1. Moeglichkeit
 				rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
+				oblaborda=1;
 				rsaetze.hz("labid",labind);
 			} else if (cd=="8320") {
 				rlab.hz("Labor",inh);
@@ -1116,11 +1152,27 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="8322") {
 				rlab.hz("PLZLabor",inh);
 			} else if (cd=="8323") {
+				// 2. Moeglichkeit
 				rlab.hz("OrtLabor",inh);
 				rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
+				oblaborda=1;
 				rsaetze.hz("labid",labind);
 			} else if (cd=="0101") {
 				rsaetze.hz("KBVPrüfnr",inh);
+			} else if (cd=="8480") {
+				if (kommentar.empty()) 
+					kommentar=inh;
+				else {
+					kommentar+="\r\n";
+					kommentar+=inh;
+				}
+			} else if (cd=="8490") {
+				if (auftrhinw.empty()) 
+					auftrhinw=inh;
+				else {
+					auftrhinw+="\r\n";
+					auftrhinw+=inh;
+				}
 			} else if (cd=="8460") {
 				if (normbereich.empty()) {
 					normbereich=inh;
@@ -1153,6 +1205,7 @@ void hhcl::dverarbeit(const string& datei)
 						}
 					} else {
 						caus<<rot<<"Normbereich ohne '-': "<<violett<<nbn<<schwarz<<endl;
+						exit(0);
 					}
 				} else {
 					normbereich+="\r\n";

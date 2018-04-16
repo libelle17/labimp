@@ -1926,12 +1926,18 @@ uchar RS::holautofeld(const size_t aktc, int obverb)
 			"' AND table_name = '"<<table<<"' AND extra = 'auto_increment'";
 		Abfrage(aut.str().c_str(),aktc,obverb>0?obverb-1:0);
 		if (!obfehl) {
-			autofeld=*HolZeile()[0];
+			char*** erg= HolZeile();
+			if (*erg) {
+//				autofeld=*HolZeile()[0];
+				autofeld=*erg[0];
+			} else {
+				return 1; // z.B. Datenbank oder Tabelle nicht vorhanden, kein auto_increment-Feld
+			}
 		}
 		return obfehl;
 	}
 	return 0;
-}
+} // uchar RS::holautofeld(const size_t aktc, int obverb)
 
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
 my_ulonglong RS::tbupd(const vector<instyp>& einf,int obverb, const string& bedingung,const size_t aktc/*=0*/,uchar asy/*=0*/) 
@@ -2036,7 +2042,7 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
   } //   if (dochanfangen)
   if (anfangen)
     zaehler=0;
-  ////  if (sammeln || (!sammeln && !anfangen)) 
+	////  if (sammeln || (!sammeln && !anfangen)) 
   ////<<"in insert, anfangen: "<<(int)(anfangen||dochanfangen)<<", sammeln: "<<(int)sammeln<<"\n";
   if (anfangen) {
     if (maxl) {

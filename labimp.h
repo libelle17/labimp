@@ -144,6 +144,7 @@ enum T_
 	T_Normbereich_aus_laborywert,
 	T_Aktualisierungszeitpunt,
 	T_Ordnungsnummer_der_Dateiuebertragung,
+	T_fehlend,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -163,6 +164,7 @@ class hhcl:public dhcl
 	string tlaborybakt="laborybakt";
 	string tlaboryfehlt="laboryfehlt";
 	string tlaboryparameter="laboryparameter";
+	string labind;
 	ic_cl *icp;
  protected: //α
 	string p1;
