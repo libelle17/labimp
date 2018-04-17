@@ -124,10 +124,11 @@ enum T_
 	T_vv_l,
 	T_tr_k,
 	T_tr_l,
+	T_la_k,
+	T_la_l,
 	T_loescht_alle_Tabellen,
-	T_entleert_alle_Tabellen,
 	T_Loesche_alle_Tabellen_und_fange_von_vorne_an,
-	T_Entleere_alle_Tabellen_und_fange_von_vorne_an,
+	T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,
 	T_Kennung,
 	T_Inhalt,
 	T_prueflyfehlt,
@@ -175,6 +176,7 @@ class hhcl:public dhcl
 	uchar oblista=0;
 	uchar vonvorne=0;
 	uchar entleer=0;
+	uchar loeschalle=0;
 	long listz=30; //ω
   string ldatvz;   // Verzeichnis der Labordateien
  public: //α //ω

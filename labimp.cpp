@@ -254,13 +254,15 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"entleer","trunc"},
 	// T_tr_l
 	{"entleer","truncate"},
+	// T_la_k
+	{"loeschalle","deleteall"},
+	// T_la_l
+	{"loeschalle","deleteall"},
 	// T_loescht_alle_Tabellen
 	{"loescht alle Tabellen","deletes all tables"},
-	// T_entleert_alle_Tabellen
-	{"entleert alle Tabellen","truncates all tables"},
 	// T_Loesche_alle_Tabellen_und_fange_von_vorne_an
 	{"Loesche alle Tabellen und fange von vorne an","Deleting all tables and starting from scatch"},
-  //T_Entleere_alle_Tabellen_und_fange_von_vorne_an,
+  //T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,
 	{"Entleere alle Tabellen und fange von vorne an","Truncating all tables and starting from scatch"},
 	// T_Kennung
 	{"Kennung","identifier"},
@@ -736,8 +738,9 @@ void hhcl::pvirtVorgbSpeziell()
 void hhcl::virtinitopt()
 { //ω
 	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Faxdateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty());
-	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_entleert_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
 
@@ -785,7 +788,7 @@ void hhcl::virtpruefweiteres()
 { //ω
 	initDB();
 	const size_t aktc=0;
-	if (vonvorne) {
+	if (vonvorne||loeschalle) {
 		RS d0(My,"DROP TABLE IF EXISTS "+vorsil+"pgl",aktc,ZDB);
 		RS d1(My,"DROP TABLE IF EXISTS "+vorsil+"wert",aktc,ZDB);
 		RS d2(My,"DROP TABLE IF EXISTS "+vorsil+"leist",aktc,ZDB);
@@ -799,7 +802,7 @@ void hhcl::virtpruefweiteres()
 		RS d8(My,"DROP TABLE IF EXISTS "+vorsil+"plab",aktc,ZDB);
 		RS d10(My,"DROP TABLE IF EXISTS "+vorsil+"fehlt",aktc,ZDB);
 		RS d9(My,"DROP TABLE IF EXISTS "+vorsil+"dat",aktc,ZDB);
-		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
+		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz,1,1);
 	} else if (entleer) {
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
 		RS d0(My,"truncate "+vorsil+"pgl",aktc,ZDB);
@@ -816,20 +819,22 @@ void hhcl::virtpruefweiteres()
 		RS d10(My,"truncate "+vorsil+"fehlt",aktc,ZDB);
 		RS d9(My,"truncate "+vorsil+"dat",aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
-		fLog(blaus+Tx[T_Entleere_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
+		fLog(blaus+Tx[T_Entleert_alle_Tabellen_und_faengt_von_vorne_an]+schwarz,1,1);
 	}
-	prueflyplab(My, tlyplab, obverb, oblog, /*direkt*/0);
-	prueflyparameter(My, tlyparameter, obverb, oblog, /*direkt*/0);
-	prueflydat(My, tlydat, obverb, oblog, /*direkt*/0);
-	prueflyfehlt(My, tlyfehlt, obverb, oblog, /*direkt*/0);
-	prueflysaetze(My, tlysaetze, obverb, oblog, /*direkt*/0);
-	prueflyus(My, tlyus, obverb, oblog, /*direkt*/0);
-	prueflypneu(My, tlypnb, obverb, oblog, /*direkt*/0);
-	prueflypnb(My, tlypnb, obverb, oblog, /*direkt*/0);
-	prueflybakt(My, tlybakt, obverb, oblog, /*direkt*/0);
-	prueflyleist(My, tlyleist, obverb, oblog, /*direkt*/0);
-	prueflywert(My, tlywert, obverb, oblog, /*direkt*/0);
-	prueflypgl(My, tlypgl, obverb, oblog, /*direkt*/0);
+	if (!loeschalle) {
+		prueflyplab(My, tlyplab, obverb, oblog, /*direkt*/0);
+		prueflyparameter(My, tlyparameter, obverb, oblog, /*direkt*/0);
+		prueflydat(My, tlydat, obverb, oblog, /*direkt*/0);
+		prueflyfehlt(My, tlyfehlt, obverb, oblog, /*direkt*/0);
+		prueflysaetze(My, tlysaetze, obverb, oblog, /*direkt*/0);
+		prueflyus(My, tlyus, obverb, oblog, /*direkt*/0);
+		prueflypneu(My, tlypnb, obverb, oblog, /*direkt*/0);
+		prueflypnb(My, tlypnb, obverb, oblog, /*direkt*/0);
+		prueflybakt(My, tlybakt, obverb, oblog, /*direkt*/0);
+		prueflyleist(My, tlyleist, obverb, oblog, /*direkt*/0);
+		prueflywert(My, tlywert, obverb, oblog, /*direkt*/0);
+		prueflypgl(My, tlypgl, obverb, oblog, /*direkt*/0);
+	}
 	hcl::virtpruefweiteres(); // z.Zt. leer //α
 } // void hhcl::virtpruefweiteres
 
@@ -1329,19 +1334,21 @@ void hhcl::pvirtfuehraus()
 { //ω
 	const size_t aktc=0;
 	const string fertigvz=ldatvz+"/"+fertiguvz;
-	pruefverz(fertigvz,obverb,oblog);
-	systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
-	systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
-	svec lrue;
-	systemrueck("find "+ldatvz+" -type f -maxdepth 1 \\( -iname '1b*.ld*' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
-	//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
-	for(size_t i=0;i<lrue.size();i++) {
-		//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-		char ***cerg;
-		RS rsfertig(My,"SELECT fertig,name FROM "+vorsil+"dat l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
-		if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
-			// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-			dverarbeit(lrue[i]);
+	if (!loeschalle) {
+		pruefverz(fertigvz,obverb,oblog);
+		systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
+		systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
+		svec lrue;
+		systemrueck("find "+ldatvz+" -type f -maxdepth 1 \\( -iname '1b*.ld*' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
+		//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
+		for(size_t i=0;i<lrue.size();i++) {
+			//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+			char ***cerg;
+			RS rsfertig(My,"SELECT fertig,name FROM "+vorsil+"dat l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
+			if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
+				// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+				dverarbeit(lrue[i]);
+			}
 		}
 	}
 	caus<<"fertig!"<<endl;
