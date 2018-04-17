@@ -337,3 +337,4 @@ if test "$ICH" = configure -o "$ICH" = install.sh -o "$ICH" = ${DPROG}_inst.sh -
 		Mf=Makefile;Mfr=$Mf.roh; test -f $Mfr && mv $Mfr $Mf
 	fi
 fi
+printf "                                                                                                                                            \r"
