@@ -785,35 +785,35 @@ void hhcl::virtpruefweiteres()
 	initDB();
 	const size_t aktc=0;
 	if (vonvorne) {
-		RS d0(My,"DROP TABLE IF EXISTS lypgl",aktc,ZDB);
-		RS d1(My,"DROP TABLE IF EXISTS lywert",aktc,ZDB);
-		RS d2(My,"DROP TABLE IF EXISTS lyleist",aktc,ZDB);
-		RS d3(My,"DROP TABLE IF EXISTS lybakt",aktc,ZDB);
-		RS d6(My,"DROP TABLE IF EXISTS lypnb",aktc,ZDB);
-		RS d7(My,"DROP TABLE IF EXISTS lypneu",aktc,ZDB);
-		RS d4(My,"DROP TABLE IF EXISTS lyus",aktc,ZDB);
-		RS d5(My,"DROP TABLE IF EXISTS lysaetze",aktc,ZDB);
-		RS d11(My,"DROP TABLE IF EXISTS lyparameter",aktc,ZDB);
+		RS d0(My,"DROP TABLE IF EXISTS "+vorsil+"pgl",aktc,ZDB);
+		RS d1(My,"DROP TABLE IF EXISTS "+vorsil+"wert",aktc,ZDB);
+		RS d2(My,"DROP TABLE IF EXISTS "+vorsil+"leist",aktc,ZDB);
+		RS d3(My,"DROP TABLE IF EXISTS "+vorsil+"bakt",aktc,ZDB);
+		RS d6(My,"DROP TABLE IF EXISTS "+vorsil+"pnb",aktc,ZDB);
+		RS d7(My,"DROP TABLE IF EXISTS "+vorsil+"pneu",aktc,ZDB);
+		RS d4(My,"DROP TABLE IF EXISTS "+vorsil+"us",aktc,ZDB);
+		RS d5(My,"DROP TABLE IF EXISTS "+vorsil+"saetze",aktc,ZDB);
+		RS d11(My,"DROP TABLE IF EXISTS "+vorsil+"parameter",aktc,ZDB);
 		// aber: laborparameter nicht loeschen!
-		RS d8(My,"DROP TABLE IF EXISTS lyplab",aktc,ZDB);
-		RS d10(My,"DROP TABLE IF EXISTS lyfehlt",aktc,ZDB);
-		RS d9(My,"DROP TABLE IF EXISTS lydat",aktc,ZDB);
+		RS d8(My,"DROP TABLE IF EXISTS "+vorsil+"plab",aktc,ZDB);
+		RS d10(My,"DROP TABLE IF EXISTS "+vorsil+"fehlt",aktc,ZDB);
+		RS d9(My,"DROP TABLE IF EXISTS "+vorsil+"dat",aktc,ZDB);
 		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	} else if (entleer) {
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
-		RS d0(My,"truncate lypgl",aktc,ZDB);
-		RS d1(My,"truncate lywert",aktc,ZDB);
-		RS d2(My,"truncate lyleist",aktc,ZDB);
-		RS d3(My,"truncate lybakt",aktc,ZDB);
-		RS d6(My,"truncate lypnb",aktc,ZDB);
-		RS d7(My,"truncate lypneu",aktc,ZDB);
-		RS d4(My,"truncate lyus",aktc,ZDB);
-		RS d5(My,"truncate lysaetze",aktc,ZDB);
-		RS d11(My,"truncate lyparameter",aktc,ZDB);
+		RS d0(My,"truncate "+vorsil+"pgl",aktc,ZDB);
+		RS d1(My,"truncate "+vorsil+"wert",aktc,ZDB);
+		RS d2(My,"truncate "+vorsil+"leist",aktc,ZDB);
+		RS d3(My,"truncate "+vorsil+"bakt",aktc,ZDB);
+		RS d6(My,"truncate "+vorsil+"pnb",aktc,ZDB);
+		RS d7(My,"truncate "+vorsil+"pneu",aktc,ZDB);
+		RS d4(My,"truncate "+vorsil+"us",aktc,ZDB);
+		RS d5(My,"truncate "+vorsil+"saetze",aktc,ZDB);
+		RS d11(My,"truncate "+vorsil+"parameter",aktc,ZDB);
 		// aber: laborparameter nicht loeschen!
-		RS d8(My,"delete from lyplab where id>1",aktc,ZDB);
-		RS d10(My,"truncate lyfehlt",aktc,ZDB);
-		RS d9(My,"truncate lydat",aktc,ZDB);
+		RS d8(My,"delete from "+vorsil+"plab where id>1",aktc,ZDB);
+		RS d10(My,"truncate "+vorsil+"fehlt",aktc,ZDB);
+		RS d9(My,"truncate "+vorsil+"dat",aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleere_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	}
