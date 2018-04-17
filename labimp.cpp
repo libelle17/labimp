@@ -22,26 +22,26 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Fehler beim Pruefen von: ","Error while examining: "},
 	// T_Fuege_ein
 	{"Fuege ein: ","Inserting: "}, //ω
-	// T_prueflaborydat
-	{"prueflaborydat()","testlaboratoryyfiles()"},
-	// 	T_prueflaboryleist,
-	{"prueflaboryleist()","testlaboratoryyservice()"},
-	// T_prueflaborypgl,
-	{"prueflaborypgl()","testlaboratoryparameterequities()"},
-	// T_prueflaboryplab,
-	{"prueflaboryplab()","testlaboratoryplab()"},
-	// T_prueflaborypnb,
-	{"prueflaborypnb()","testlaboratorypnb()"},
-	// T_prueflaborypneu,
-	{"prueflaborypneu()","testlaboratorypneu()"},
-	// T_prueflaborysaetze,
-	{"prueflaborysaetze()","testlaboratorysets()"},
-	// T_prueflaboryus,
-	{"prueflaboryus()","testlaboratoryus"},
-	// T_prueflaborywert,
-	{"prueflaborywert()","testlaboratoryvalue()"},
-	// T_prueflaborybakt,
-	{"prueflaborybakt","testlaboratorybact()"},
+	// T_prueflydat
+	{"prueflydat()","testlaboratoryyfiles()"},
+	// 	T_prueflyleist,
+	{"prueflyleist()","testlaboratoryyservice()"},
+	// T_prueflypgl,
+	{"prueflypgl()","testlaboratoryparameterequities()"},
+	// T_prueflyplab,
+	{"prueflyplab()","testlaboratoryplab()"},
+	// T_prueflypnb,
+	{"prueflypnb()","testlaboratorypnb()"},
+	// T_prueflypneu,
+	{"prueflypneu()","testlaboratorypneu()"},
+	// T_prueflysaetze,
+	{"prueflysaetze()","testlaboratorysets()"},
+	// T_prueflyus,
+	{"prueflyus()","testlaboratoryus"},
+	// T_prueflywert,
+	{"prueflywert()","testlaboratoryvalue()"},
+	// T_prueflybakt,
+	{"prueflybakt","testlaboratorybact()"},
 	// T_eindeutige_Identifikation
 	{"eindeutige Identifikation","unique identifier"},
 	// T_Pfadname
@@ -264,10 +264,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Kennung","identifier"},
 	// T_Inhalt
 	{"Inhalt","content"},
-	// T_prueflaboryfehlt
-	{"prueflaboryfehlt()","testlaboratoymissing()"},
-	// T_Bezug_auf_Laboryplab
-	{"Bezug zu laboryplab","reference to laboryplab"},
+	// T_prueflyfehlt
+	{"prueflyfehlt()","testlaboratoymissing()"},
+	// T_Bezug_auf_lyplab
+	{"Bezug zu lyplab","reference to lyplab"},
 	// T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich
 	{"Abkürzung mit gleicher Bedeutung, gleicher Einheit und gleichem Normbereich",
 	 "abbreviation with same meaning, same unit and same normal range"},
@@ -275,8 +275,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"8421","8421"},
 	// T_LaborParameter
 	{"Laborparameter","laborory parameters"},
-	// T_prueflaboryparameter
-	{"prueflaboryparameter()","testlaboratoryparameters()"},
+	// T_prueflyparameter
+	{"prueflyparameter()","testlaboratoryparameters()"},
 	// T_Reihenfolge_innerhalb_der_Gruppe
 	{"Reihenfolge innerhalb der Gruppe","order within the group"},
 	// T_unterer_Normwert_maennlich
@@ -287,8 +287,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"unterer Normwert weiblich","lower border female"},
 	// T_oberer_Normwert_weiblich,
 	{"oberer Normwert weiblich","upper border female"},
-	// T_Normbereich_aus_laborywert
-	{"Normbereich aus laborywert","normal range from laborywert"},
+	// T_Normbereich_aus_lywert
+	{"Normbereich aus lywert","normal range from lywert"},
 	// T_Aktualisierungszeitpunt
 	{"Aktualisierungszeitpunkt","actualization time"},
 	// T_Ordnungsnummer_der_Dateiuebertragung
@@ -304,6 +304,7 @@ class TxB Tx((const char* const* const* const*)DPROG_T);
 const char *logdt="/var/log/" DPROG "vorgabe.log";//darauf wird in kons.h verwiesen;
 
 using namespace std; //ω
+const string hhcl::vorsil="labory";
 hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) //α
 {
 	icp=new ic_cl("UTF8","ISO-8859-15");
@@ -312,15 +313,15 @@ hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) 
 // Hier neue Funktionen speichern: //ω
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaboryparameter(DB *My, const string& tlaboryparameter, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyparameter(DB *My, const string& tlyparameter, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaboryparameter]+schwarz);
+	hLog(violetts+Tx[T_prueflyparameter]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
 			Feld(/*name*/"Abkü",/*typ*/"varchar",/*lenge*/"1",/*prec*/"",/*comment*/Tx[T_8410_maximale_Laenge_8],/*obind*/0,/*obaut*/0,/*nnull*/1),
 			Feld("AbküN","varchar","1","",Tx[T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich],0,0,1),
-			Feld("LabID","int","10","",Tx[T_Bezug_auf_Laboryplab],0,0,1,string(),1),
+			Feld("LabID","int","10","",Tx[T_Bezug_auf_lyplab],0,0,1,string(),1),
 			Feld("Langtext","varchar","1","",Tx[T_8411_maximale_Laenge_40],0,0,1),
 			Feld("Einheit","varchar","1","",Tx[T_8421],0,0,1),
 			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
@@ -329,19 +330,19 @@ void hhcl::prueflaboryparameter(DB *My, const string& tlaboryparameter, const in
 			Feld("oNm","varchar","1","",Tx[T_oberer_Normwert_maennlich],0,0,1),
 			Feld("uNw","varchar","1","",Tx[T_unterer_Normwert_weiblich],0,0,1),
 			Feld("oNw","varchar","1","",Tx[T_oberer_Normwert_weiblich],0,0,1),
-			Feld("NB","varchar","1","",Tx[T_Normbereich_aus_laborywert],0,0,1),
+			Feld("NB","varchar","1","",Tx[T_Normbereich_aus_lywert],0,0,1),
 			Feld("Aktzeit","datetime","0","0",Tx[T_Aktualisierungszeitpunt],1,0,1),
 			Feld("StByte","int","10","",Tx[T_Ordnungsnummer_der_Dateiuebertragung],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 		};
 		Index indices[]{Index("Abkü",new Feld[2]{Feld("Abkü"),Feld("Einheit")},2)};
 		Constraint csts[]{
-			Constraint("laboryparameterlaboryplab",new Feld{Feld("labid")},1,"laboryplab",new Feld{Feld("ID")},1,cascade,cascade),
+			Constraint(vorsil+"parameter"+vorsil+"plab",new Feld{Feld("labid")},1,vorsil+"plab",new Feld{Feld("ID")},1,cascade,cascade),
 		};
 			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaboryparameter,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_LaborParameter]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlyparameter,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_LaborParameter]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryparameter,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyparameter,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -349,9 +350,9 @@ void hhcl::prueflaboryparameter(DB *My, const string& tlaboryparameter, const in
 
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborydat(DB *My, const string& tlaborydat, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflydat(DB *My, const string& tlydat, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaborydat]+schwarz);
+	hLog(violetts+Tx[T_prueflydat]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -363,18 +364,18 @@ void hhcl::prueflaborydat(DB *My, const string& tlaborydat, const int obverb, co
 		};
 		Index indices[]{Index("NamePfad",new Feld[2]{Feld("Name"),Feld("Pfad")},2)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborydat,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0,Tx[T_LaborEinlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlydat,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0,Tx[T_LaborEinlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborydat,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlydat,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyplab(DB *My, const string& tlyplab, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaboryplab]+schwarz);
+	hLog(violetts+Tx[T_prueflyplab]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -386,23 +387,23 @@ void hhcl::prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, 
 		};
 		Index indices[]{Index("Labor",new Feld[4]{Feld("Labor"),Feld("StraßeLabor"),Feld("PLZLabor"),Feld("OrtLabor")},4,/*unique*/1)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaboryplab,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Laborplab]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlyplab,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Laborplab]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryplab,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyplab,1,1);
 			exit(11);
 		}
 		// "Labor 20051127 224528.dat": kein Labor angegeben
 		svec eindfeld; eindfeld<<"ID";
-		insv rlab(My,/*itab*/tlaboryplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
+		insv rlab(My,/*itab*/tlyplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 		rlab.hz("Labor",Tx[T_fehlend]);
 		rlab.schreib(/*sammeln*/0,/*obverb*/3,/*idp*/&labind);
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflypneu(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaborypneu]+schwarz);
+	hLog(violetts+Tx[T_prueflypneu]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -414,27 +415,27 @@ void hhcl::prueflaborypneu(DB *My, const string& tlaborypnb, const int obverb, c
 			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 		};
 		/*
-		Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit"),Feld("lid")};   Index i0("Abkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-		Index indices[]={i0};
-		*/
+			 Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit"),Feld("lid")};   Index i0("Abkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
+			 Index indices[]={i0};
+		 */
 		Index indices[]{Index("Abkü",new Feld[3]{Feld("Abkü"),Feld("Einheit"),Feld("lid")},3)};
 		Constraint csts[]{Constraint("Gruppe",new Feld{Feld("Gruppe")},1,"laborgruppen",new Feld{Feld("Laborgruppe")},1),
 			// geht beides!:
-			//			  								Constraint("Labore",new Feld[1]{Feld("lid")},1,"laboryplab",new Feld[1]{Feld("id")},1)};
-							 Constraint("laborypneulaboryplab",new Feld{Feld("lid")},1,"laboryplab",new Feld{Feld("id")},1)};
-	// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-	Tabelle taba(My,tlaborypneu,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborneu]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
-	if (taba.prueftab(aktc,obverb)) {
-		fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypneu,1,1);
-		exit(11);
-	}
+			//			  								Constraint("Labore",new Feld[1]{Feld("lid")},1,vorsil+"plab",new Feld[1]{Feld("id")},1)};
+			Constraint(vorsil+"pneu"+vorsil+"plab",new Feld{Feld("lid")},1,vorsil+"plab",new Feld{Feld("id")},1)};
+		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+		Tabelle taba(My,tlypneu,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborneu]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlypneu,1,1);
+			exit(11);
+		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborypnb(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflypnb(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaborypnb]+schwarz);
+	hLog(violetts+Tx[T_prueflypnb]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -450,21 +451,21 @@ void hhcl::prueflaborypnb(DB *My, const string& tlaborypnb, const int obverb, co
 		};
 		Feld ifd0[]{Feld("pid")};
 		Feld ifd0a[]{Feld("id")};
-		Constraint c0("laborypnblaborypneu",ifd0,1,"laborypneu",ifd0a,1,cascade,cascade);
+		Constraint c0(vorsil+"pnb"+vorsil+"pneu",ifd0,1,vorsil+"pneu",ifd0a,1,cascade,cascade);
 		Constraint csts[]{c0};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborypnb,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_Labornb]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlypnb,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_Labornb]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypnb,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlypnb,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflysaetze(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaborysaetze]+schwarz);
+	hLog(violetts+Tx[T_prueflysaetze]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -481,7 +482,7 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 			Feld("LANR","varchar","1","",Tx[T_212_LANR],0,0,1),
 			Feld("PLZPraxis","varchar","1","",Tx[T_215_PLZ_der_Praxis_Turbomed],0,0,1),
 			Feld("OrtPraxis","varchar","1","",Tx[T_216_Ort_der_Praxis_Turbomed],0,0,1),
-			Feld("LabID","int","10","",Tx[T_Bezug_auf_Laboryplab],0,0,1,string(),1),
+			Feld("LabID","int","10","",Tx[T_Bezug_auf_lyplab],0,0,1,string(),1),
 			Feld("KBVPrüfnr","varchar","1","",Tx[T_101_KBV_Pruefnummer_Turbomed],0,0,1),
 			Feld("Zeichensatz","varchar","1","",Tx[T_9106_verwendeter_Zeichensatz_Turbomed],0,0,1),
 			Feld("Kundenarztnr","varchar","1","",Tx[T_8312_Kundenarztnummer_Turbomed],0,0,1),
@@ -489,13 +490,13 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 			Feld("Gesamtlänge","varchar","1","",Tx[T_9202_Gesamtlaenge_des_Datenpaketes_Turbomed],0,0,1),
 		};
 		Constraint csts[]{
-			Constraint("laborysaetzelaborydat",new Feld{Feld("datid")},1,"laborydat",new Feld{Feld("DatID")},1,cascade,cascade),
-			Constraint("laborysaetzelaboryplab",new Feld{Feld("labid")},1,"laboryplab",new Feld{Feld("ID")},1,cascade,cascade),
+			Constraint(vorsil+"saetze"+vorsil+"dat",new Feld{Feld("datid")},1,vorsil+"dat",new Feld{Feld("DatID")},1,cascade,cascade),
+			Constraint(vorsil+"saetze"+vorsil+"plab",new Feld{Feld("labid")},1,vorsil+"plab",new Feld{Feld("ID")},1,cascade,cascade),
 		};
 			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborysaetze,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlysaetze,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborysaetze,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlysaetze,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -503,9 +504,9 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyus(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaboryus]+schwarz);
+	hLog(violetts+Tx[T_prueflyus]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -548,21 +549,21 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 		};
 		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
-		Constraint csts[]{Constraint("Laborydatlaboryus",new Feld{Feld("DatID")},1,"laborydat",new Feld{Feld("DatID")},1,cascade,cascade),
-		                	Constraint("Laborysaetzelaboryus",new Feld{Feld("satzid")},1,"laborysaetze",new Feld{Feld("satzid")},1,cascade,cascade)};
+		Constraint csts[]{Constraint(vorsil+"dat"+vorsil+"us",new Feld{Feld("DatID")},1,vorsil+"dat",new Feld{Feld("DatID")},1,cascade,cascade),
+		                	Constraint(vorsil+"saetze"+vorsil+"us",new Feld{Feld("satzid")},1,vorsil+"saetze",new Feld{Feld("satzid")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaboryus,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborus]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlyus,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborus]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryus,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyus,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflybakt(DB *My, const string& tlybakt, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaborybakt]+schwarz);
+	hLog(violetts+Tx[T_prueflybakt]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -577,20 +578,20 @@ void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, 
 			Feld("Erklärung","LONGTEXT","","","",0,0,1),
 			Feld("Keimzahl","varchar","1","","",0,0,1),
 		};
-		Constraint csts[]{Constraint("Laboryuslaborybakt",new Feld{Feld("UsID")},1,"laboryus",new Feld{Feld("id")},1,cascade,cascade)};
+		Constraint csts[]{Constraint(vorsil+"us"+vorsil+"bakt",new Feld{Feld("UsID")},1,vorsil+"us",new Feld{Feld("id")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborybakt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborbakt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlybakt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborbakt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborybakt,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlybakt,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyleist(DB *My, const string& tlyleist, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaboryleist]+schwarz);
+	hLog(violetts+Tx[T_prueflyleist]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -608,21 +609,21 @@ void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb
 ////		Feld ifelder0[] = {};
 ////		Index indices[]={};
 		Constraint csts[]{
-			Constraint("LaborXUSLaborXLeist",new Feld{Feld("UsID")},1,"laboryus",new Feld{Feld("ID")},1,cascade,cascade),
+			Constraint(vorsil+"us"+vorsil+"leist",new Feld{Feld("UsID")},1,vorsil+"us",new Feld{Feld("ID")},1,cascade,cascade),
 		};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaboryleist,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_LaborLeistungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlyleist,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_LaborLeistungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryleist,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyleist,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflywert(DB *My, const string& tlywert, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaborywert]+schwarz);
+	hLog(violetts+Tx[T_prueflywert]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -648,19 +649,19 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 		Feld ifelder1[] = {Feld("UsID"),Feld("BaktID"),Feld("Abkü"),Feld("Langname"),Feld("Quelle"),Feld("QSpez"),Feld("AbnDat"),Feld("Wert"),Feld("Einheit"),Feld("Grenzwerti"),Feld("Teststatus"),Feld("nbid")};   
 				Index i1("doppelte",ifelder1,sizeof ifelder1/sizeof* ifelder1,/*unique*/1);
 		Index indices[]={i0,i1};
-		Constraint csts[]{Constraint("Laboryuslaborywert",new Feld{Feld("UsID")},1,"laboryus",new Feld{Feld("id")},1,cascade,cascade)};
+		Constraint csts[]{Constraint(vorsil+"us"+vorsil+"wert",new Feld{Feld("UsID")},1,vorsil+"us",new Feld{Feld("id")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborywert,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Laborwert]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlywert,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborwert]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborywert,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlywert,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
-void hhcl::prueflaboryfehlt(DB *My, const string& tlaboryfehlt, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyfehlt(DB *My, const string& tlyfehlt, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaboryfehlt]+schwarz);
+	hLog(violetts+Tx[T_prueflyfehlt]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -669,11 +670,11 @@ void hhcl::prueflaboryfehlt(DB *My, const string& tlaboryfehlt, const int obverb
 			Feld("Kennung","varchar","4","",Tx[T_Kennung],0,0,1),
 			Feld("Inhalt","varchar","1","",Tx[T_Inhalt],0,0,1),
 		};
-		Constraint csts[]{Constraint("Laborydatlaboryfehlt",new Feld{Feld("DatID")},1,"laborydat",new Feld{Feld("DatID")},1,cascade,cascade)};
+		Constraint csts[]{Constraint(vorsil+"dat"+vorsil+"fehlt",new Feld{Feld("DatID")},1,vorsil+"dat",new Feld{Feld("DatID")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaboryfehlt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborfehlt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlyfehlt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborfehlt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryfehlt,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyfehlt,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -681,9 +682,9 @@ void hhcl::prueflaboryfehlt(DB *My, const string& tlaboryfehlt, const int obverb
 
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflypgl(DB *My, const string& tlypgl, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaborypgl]+schwarz);
+	hLog(violetts+Tx[T_prueflypgl]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -693,20 +694,20 @@ void hhcl::prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, co
 			Feld("idxpbez","int","10","",Tx[T_ist_identisch_mit_laborxpneu],1,0,1,string(),1),
 			Feld("ergaenzt","datetime","0","0",Tx[T_Zeitpunkt_der_Ergaenzung],0,0,1),
 		};
-		  Feld ifd0[]{Feld("idxpneu")};
-		  Feld ifd0a[]{Feld("id")};
-		  Feld ifd1[]{Feld("idpara")};
-		  Feld ifd1a[]{Feld("id")};
-		  Feld ifd2[]{Feld("idxpbez")};
-		  Feld ifd2a[]{Feld("id")};
-			Constraint c0("laborxpgl_1",ifd0,1,"laborypneu",ifd0a,1);
-			Constraint c1("laborxpgl_2",ifd1,1,"laborparameter",ifd1a,1);
-			Constraint c2("laborxpgl_3",ifd2,1,"laborypneu",ifd2a,1,cascade,cascade);
-			Constraint csts[]{c0,c1,c2};
+		Feld ifd0[]{Feld("idxpneu")};
+		Feld ifd0a[]{Feld("id")};
+		Feld ifd1[]{Feld("idpara")};
+		Feld ifd1a[]{Feld("id")};
+		Feld ifd2[]{Feld("idxpbez")};
+		Feld ifd2a[]{Feld("id")};
+		Constraint c0(vorsil+"pgl_1",ifd0,1,vorsil+"pneu",ifd0a,1);
+		Constraint c1(vorsil+"pgl_2",ifd1,1,vorsil+"parameter",ifd1a,1); // bzw. laborparameter
+		Constraint c2(vorsil+"pgl_3",ifd2,1,vorsil+"pneu",ifd2a,1,cascade,cascade);
+		Constraint csts[]{c0,c1,c2};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaborypgl,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_Laborpgl]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlypgl,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_Laborpgl]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborypgl,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlypgl,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -784,50 +785,50 @@ void hhcl::virtpruefweiteres()
 	initDB();
 	const size_t aktc=0;
 	if (vonvorne) {
-		RS d0(My,"DROP TABLE IF EXISTS laborypgl",aktc,ZDB);
-		RS d1(My,"DROP TABLE IF EXISTS laborywert",aktc,ZDB);
-		RS d2(My,"DROP TABLE IF EXISTS laboryleist",aktc,ZDB);
-		RS d3(My,"DROP TABLE IF EXISTS laborybakt",aktc,ZDB);
-		RS d6(My,"DROP TABLE IF EXISTS laborypnb",aktc,ZDB);
-		RS d7(My,"DROP TABLE IF EXISTS laborypneu",aktc,ZDB);
-		RS d4(My,"DROP TABLE IF EXISTS laboryus",aktc,ZDB);
-		RS d5(My,"DROP TABLE IF EXISTS laborysaetze",aktc,ZDB);
-		RS d11(My,"DROP TABLE IF EXISTS laboryparameter",aktc,ZDB);
+		RS d0(My,"DROP TABLE IF EXISTS lypgl",aktc,ZDB);
+		RS d1(My,"DROP TABLE IF EXISTS lywert",aktc,ZDB);
+		RS d2(My,"DROP TABLE IF EXISTS lyleist",aktc,ZDB);
+		RS d3(My,"DROP TABLE IF EXISTS lybakt",aktc,ZDB);
+		RS d6(My,"DROP TABLE IF EXISTS lypnb",aktc,ZDB);
+		RS d7(My,"DROP TABLE IF EXISTS lypneu",aktc,ZDB);
+		RS d4(My,"DROP TABLE IF EXISTS lyus",aktc,ZDB);
+		RS d5(My,"DROP TABLE IF EXISTS lysaetze",aktc,ZDB);
+		RS d11(My,"DROP TABLE IF EXISTS lyparameter",aktc,ZDB);
 		// aber: laborparameter nicht loeschen!
-		RS d8(My,"DROP TABLE IF EXISTS laboryplab",aktc,ZDB);
-		RS d10(My,"DROP TABLE IF EXISTS laboryfehlt",aktc,ZDB);
-		RS d9(My,"DROP TABLE IF EXISTS laborydat",aktc,ZDB);
+		RS d8(My,"DROP TABLE IF EXISTS lyplab",aktc,ZDB);
+		RS d10(My,"DROP TABLE IF EXISTS lyfehlt",aktc,ZDB);
+		RS d9(My,"DROP TABLE IF EXISTS lydat",aktc,ZDB);
 		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	} else if (entleer) {
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
-		RS d0(My,"truncate laborypgl",aktc,ZDB);
-		RS d1(My,"truncate laborywert",aktc,ZDB);
-		RS d2(My,"truncate laboryleist",aktc,ZDB);
-		RS d3(My,"truncate laborybakt",aktc,ZDB);
-		RS d6(My,"truncate laborypnb",aktc,ZDB);
-		RS d7(My,"truncate laborypneu",aktc,ZDB);
-		RS d4(My,"truncate laboryus",aktc,ZDB);
-		RS d5(My,"truncate laborysaetze",aktc,ZDB);
-		RS d11(My,"truncate laboryparameter",aktc,ZDB);
+		RS d0(My,"truncate lypgl",aktc,ZDB);
+		RS d1(My,"truncate lywert",aktc,ZDB);
+		RS d2(My,"truncate lyleist",aktc,ZDB);
+		RS d3(My,"truncate lybakt",aktc,ZDB);
+		RS d6(My,"truncate lypnb",aktc,ZDB);
+		RS d7(My,"truncate lypneu",aktc,ZDB);
+		RS d4(My,"truncate lyus",aktc,ZDB);
+		RS d5(My,"truncate lysaetze",aktc,ZDB);
+		RS d11(My,"truncate lyparameter",aktc,ZDB);
 		// aber: laborparameter nicht loeschen!
-		RS d8(My,"delete from laboryplab where id>1",aktc,ZDB);
-		RS d10(My,"truncate laboryfehlt",aktc,ZDB);
-		RS d9(My,"truncate laborydat",aktc,ZDB);
+		RS d8(My,"delete from lyplab where id>1",aktc,ZDB);
+		RS d10(My,"truncate lyfehlt",aktc,ZDB);
+		RS d9(My,"truncate lydat",aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleere_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	}
-	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
-	prueflaboryparameter(My, tlaboryparameter, obverb, oblog, /*direkt*/0);
-	prueflaborydat(My, tlaborydat, obverb, oblog, /*direkt*/0);
-	prueflaboryfehlt(My, tlaboryfehlt, obverb, oblog, /*direkt*/0);
-	prueflaborysaetze(My, tlaborysaetze, obverb, oblog, /*direkt*/0);
-	prueflaboryus(My, tlaboryus, obverb, oblog, /*direkt*/0);
-	prueflaborypneu(My, tlaborypnb, obverb, oblog, /*direkt*/0);
-	prueflaborypnb(My, tlaborypnb, obverb, oblog, /*direkt*/0);
-	prueflaborybakt(My, tlaborybakt, obverb, oblog, /*direkt*/0);
-	prueflaboryleist(My, tlaboryleist, obverb, oblog, /*direkt*/0);
-	prueflaborywert(My, tlaborywert, obverb, oblog, /*direkt*/0);
-	prueflaborypgl(My, tlaborypgl, obverb, oblog, /*direkt*/0);
+	prueflyplab(My, tlyplab, obverb, oblog, /*direkt*/0);
+	prueflyparameter(My, tlyparameter, obverb, oblog, /*direkt*/0);
+	prueflydat(My, tlydat, obverb, oblog, /*direkt*/0);
+	prueflyfehlt(My, tlyfehlt, obverb, oblog, /*direkt*/0);
+	prueflysaetze(My, tlysaetze, obverb, oblog, /*direkt*/0);
+	prueflyus(My, tlyus, obverb, oblog, /*direkt*/0);
+	prueflypneu(My, tlypnb, obverb, oblog, /*direkt*/0);
+	prueflypnb(My, tlypnb, obverb, oblog, /*direkt*/0);
+	prueflybakt(My, tlybakt, obverb, oblog, /*direkt*/0);
+	prueflyleist(My, tlyleist, obverb, oblog, /*direkt*/0);
+	prueflywert(My, tlywert, obverb, oblog, /*direkt*/0);
+	prueflypgl(My, tlypgl, obverb, oblog, /*direkt*/0);
 	hcl::virtpruefweiteres(); // z.Zt. leer //α
 } // void hhcl::virtpruefweiteres
 
@@ -858,7 +859,7 @@ void hhcl::dverarbeit(const string& datei)
 	uchar saetzeoffen, usoffen=0;
 	int geschlecht; 
 	svec eindfeld; eindfeld<<"id";
-	insv reing(My,/*itab*/tlaborydat,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv reing(My,/*itab*/tlydat,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
 	reing.hz("Name",base_name(datei));
 	reing.hz("Pfad",datei);
@@ -866,15 +867,15 @@ void hhcl::dverarbeit(const string& datei)
 #ifdef speichern
 	reing.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&datid);
 #endif 
-	insv rsaetze(My,/*itab*/tlaborysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
-	insv rpar(My,/*itab*/tlaboryparameter,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
-	insv rlab(My,/*itab*/tlaboryplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
-	insv rus(My,/*itab*/tlaboryus,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
-	insv rfe(My,/*itab*/tlaboryfehlt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
-	insv rba(My,/*itab*/tlaborybakt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
-	insv rwe(My,/*itab*/tlaborywert,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rsaetze(My,/*itab*/tlysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rpar(My,/*itab*/tlyparameter,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rlab(My,/*itab*/tlyplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
+	insv rus(My,/*itab*/tlyus,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rfe(My,/*itab*/tlyfehlt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rba(My,/*itab*/tlybakt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rwe(My,/*itab*/tlywert,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv *rbawep=0; // Zeiger auf rba oder rwe
-	insv rle(My,/*itab*/tlaboryleist,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rle(My,/*itab*/tlyleist,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
 	caus<<rot<<datei<<schwarz<<endl;
 	mdatei mdat(datei,ios::in);
@@ -1336,7 +1337,7 @@ void hhcl::pvirtfuehraus()
 	for(size_t i=0;i<lrue.size();i++) {
 		//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 		char ***cerg;
-		RS rsfertig(My,"SELECT fertig,name FROM laborydat l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
+		RS rsfertig(My,"SELECT fertig,name FROM lydat l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
 		if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 			// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 			dverarbeit(lrue[i]);

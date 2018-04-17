@@ -9,16 +9,16 @@ enum T_
 	T_virtrueckfragen,
 	T_Fehler_beim_Pruefen_von,
 	T_Fuege_ein, //ω
-	T_prueflaborydat,
-	T_prueflaboryleist,
-	T_prueflaborypgl,
-	T_prueflaboryplab,
-	T_prueflaborypnb,
-	T_prueflaborypneu,
-	T_prueflaborysaetze,
-	T_prueflaboryus,
-	T_prueflaborywert,
-	T_prueflaborybakt,
+	T_prueflydat,
+	T_prueflyleist,
+	T_prueflypgl,
+	T_prueflyplab,
+	T_prueflypnb,
+	T_prueflypneu,
+	T_prueflysaetze,
+	T_prueflyus,
+	T_prueflywert,
+	T_prueflybakt,
 	T_eindeutige_Identifikation,
 	T_Pfadname,
 	T_Name_der_eingelesenen_Labordatei_ohne_Endung,
@@ -130,18 +130,18 @@ enum T_
 	T_Entleere_alle_Tabellen_und_fange_von_vorne_an,
 	T_Kennung,
 	T_Inhalt,
-	T_prueflaboryfehlt,
-	T_Bezug_auf_Laboryplab,
+	T_prueflyfehlt,
+	T_Bezug_auf_lyplab,
 	T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich,
 	T_8421,
 	T_LaborParameter,
-	T_prueflaboryparameter,
+	T_prueflyparameter,
 	T_Reihenfolge_innerhalb_der_Gruppe,
 	T_unterer_Normwert_maennlich,
 	T_oberer_Normwert_maennlich,
 	T_unterer_Normwert_weiblich,
 	T_oberer_Normwert_weiblich,
-	T_Normbereich_aus_laborywert,
+	T_Normbereich_aus_lywert,
 	T_Aktualisierungszeitpunt,
 	T_Ordnungsnummer_der_Dateiuebertragung,
 	T_fehlend,
@@ -153,18 +153,19 @@ const string fertiguvz="fertig";
 class hhcl:public dhcl
 {
  private: //ω
-	string tlaborydat="laborydat";
-	string tlaboryleist="laboryleist";
-	string tlaborypgl="laborypgl";
-	string tlaboryplab="laboryplab";
-	string tlaborypnb="laborypnb";
-	string tlaborypneu="laborypneu";
-	string tlaborysaetze="laborysaetze";
-	string tlaboryus="laboryus";
-	string tlaborywert="laborywert";
-	string tlaborybakt="laborybakt";
-	string tlaboryfehlt="laboryfehlt";
-	string tlaboryparameter="laboryparameter";
+	const static string vorsil; /*=labory*/
+	string tlydat=vorsil+"dat";
+	string tlyleist=vorsil+"leist";
+	string tlypgl=vorsil+"pgl";
+	string tlyplab=vorsil+"plab";
+	string tlypnb=vorsil+"pnb";
+	string tlypneu=vorsil+"pneu";
+	string tlysaetze=vorsil+"saetze";
+	string tlyus=vorsil+"us";
+	string tlywert=vorsil+"wert";
+	string tlybakt=vorsil+"bakt";
+	string tlyfehlt=vorsil+"fehlt";
+	string tlyparameter=vorsil+"parameter";
 	string labind;
 	ic_cl *icp;
  protected: //α
@@ -178,18 +179,18 @@ class hhcl:public dhcl
   string ldatvz;   // Verzeichnis der Labordateien
  public: //α //ω
  private: //α //ω
-	void prueflaborydat(DB *My, const string& tlaborydat, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaborypnb(DB *My, const string& tlaborypnb, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaborypneu(DB *My, const string& tlaborypneu, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaborysaetze(DB *My, const string& tlaborysaetze, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaboryus(DB *My, const string& tlaboryus, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaborywert(DB *My, const string& tlaborywert, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaboryfehlt(DB *My, const string& tlaboryfehlt, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflaboryparameter(DB *My, const string& tlaboryparameter, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflydat(DB *My, const string& tlydat, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyleist(DB *My, const string& tlyleist, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflypgl(DB *My, const string& tlypgl, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyplab(DB *My, const string& tlyplab, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflypnb(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflypneu(DB *My, const string& tlypneu, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflysaetze(DB *My, const string& tlysaetze, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyus(DB *My, const string& tlyus, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflywert(DB *My, const string& tlywert, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflybakt(DB *My, const string& tlybakt, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyfehlt(DB *My, const string& tlyfehlt, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyparameter(DB *My, const string& tlyparameter, const int obverb, const int oblog, const uchar direkt=0);
 	void virttesterg(); //α
 	void virtlieskonfein();
 	void virtautokonfschreib();
