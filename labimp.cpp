@@ -648,6 +648,7 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 		Feld ifelder1[] = {Feld("UsID"),Feld("BaktID"),Feld("Abkü"),Feld("Langname"),Feld("Quelle"),Feld("QSpez"),Feld("AbnDat"),Feld("Wert"),Feld("Einheit"),Feld("Grenzwerti"),Feld("Teststatus"),Feld("nbid")};   
 				Index i1("doppelte",ifelder1,sizeof ifelder1/sizeof* ifelder1,/*unique*/1);
 		Index indices[]={i0,i1};
+		Constraint csts[]{Constraint("Laboryuslaborywert",new Feld{Feld("UsID")},1,"laboryus",new Feld{Feld("id")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborywert,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Laborwert]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -881,7 +882,7 @@ void hhcl::dverarbeit(const string& datei)
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
 		uchar oblaborda=0, arztnameda=0;
-		string erklaerung,kommentar,normbereich,qspez,auftrhinw,uNm,oNm,uNw,oNw,verf,abkue;
+		string erklaerung,kommentar,normbereich,qspez,auftrhinw,uNm,oNm,uNw,oNw,verf,abkue,lanr;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -964,6 +965,10 @@ void hhcl::dverarbeit(const string& datei)
 							rsaetze.hz("LabID",1);
 						} else
 							oblaborda=0;
+						if (!lanr.empty()) {
+							rsaetze.hz("Lanr",lanr);
+							lanr.clear();
+						}
 						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&satzid);
 						arztnameda=0;
 						saetzeoffen=0;
@@ -1092,7 +1097,7 @@ void hhcl::dverarbeit(const string& datei)
 				rle.hz("Anzahl",inh);
 			} else if (cd=="8406") { // zwingende Abfolge mit 5001 wurde 2/05 geprueft
 				rle.hz("GOÄ",inh);
-			} else if (cd=="8416") { 
+			} else if (cd=="8614") { 
 				rle.hz("Abrd",inh);
 			} else if (cd=="8411") {
 				rwe.hz("Langname",inh);
@@ -1190,7 +1195,7 @@ void hhcl::dverarbeit(const string& datei)
 					arztnameda=1;
 				}
 			} else if (cd=="0212") {
-				rsaetze.hz("Lanr",inh);
+				lanr=inh;
       } else if (cd=="0215") {
 					rsaetze.hz("PLZPraxis",inh);
       } else if (cd=="0216") {
