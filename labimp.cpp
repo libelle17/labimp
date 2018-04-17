@@ -880,7 +880,7 @@ void hhcl::dverarbeit(const string& datei)
 	if (mdat.is_open()) {
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
-		uchar oblaborda=0;
+		uchar oblaborda=0, arztnameda=0;
 		string erklaerung,kommentar,normbereich,qspez,auftrhinw,uNm,oNm,uNw,oNw,verf,abkue;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
@@ -965,10 +965,15 @@ void hhcl::dverarbeit(const string& datei)
 						} else
 							oblaborda=0;
 						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&satzid);
+						arztnameda=0;
 						saetzeoffen=0;
 					}
 					//					rus.zeig("0");
-					rus.clear();
+					if (rus.size()) {
+						caus<<"rus.size(): "<<rus.size()<<endl;
+						exit(31);
+					}
+//					rus.clear();
 					satzart=inh;
 					rus.hz("DatID",datid);
 					rus.hz("SatzID",satzid);
@@ -1045,10 +1050,18 @@ void hhcl::dverarbeit(const string& datei)
 					baktid="0";
 				}
 				if (cd=="8434") {
-					rba.clear();
+					if (rba.size()) {
+						caus<<"rba.size(): "<<rba.size()<<endl;
+						exit(31);
+					}
+					//rba.clear();
 					rbawep=&rba;
 				} else /*if (cd=="8410")*/ {
-					rwe.clear();
+					if (rwe.size()) {
+						caus<<"rwe.size(): "<<rwe.size()<<endl;
+						exit(31);
+					}
+//					rwe.clear();
 					rbawep=&rwe;
 				} // 					if (cd=="8434") else if (cd=="8410")
 				rbawep->hz("UsID",usid);
@@ -1062,7 +1075,11 @@ void hhcl::dverarbeit(const string& datei)
 				  rpar.hz("Abkü",inh);
 					rpar.hz("LabID",labind);
 			} else if (cd=="5001") {
-				rle.clear();
+				if (rle.size()) {
+					caus<<"rle.size(): "<<rle.size()<<endl;
+					exit(31);
+				}
+//				rle.clear();
 				rle.hz("UsID",usid);
 				if (rbawep==&rba) {
 					rle.hz("Verf",verf);
@@ -1167,9 +1184,12 @@ void hhcl::dverarbeit(const string& datei)
       } else if (cd=="0205") {
 					rsaetze.hz("StraßePraxis",inh);
       } else if (cd=="0211") {
+				if (!arztnameda) {
 					rsaetze.hz("Arzt",inh);
-      } else if (cd=="0212") {
-					rsaetze.hz("Lanr",inh);
+					arztnameda=1;
+				}
+			} else if (cd=="0212") {
+				rsaetze.hz("Lanr",inh);
       } else if (cd=="0215") {
 					rsaetze.hz("PLZPraxis",inh);
       } else if (cd=="0216") {
