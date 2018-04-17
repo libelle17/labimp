@@ -22,8 +22,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Fehler beim Pruefen von: ","Error while examining: "},
 	// T_Fuege_ein
 	{"Fuege ein: ","Inserting: "}, //ω
-	// T_prueflaboryeingel
-	{"prueflaboryeingel()","testlaboratoryyimported()"},
+	// T_prueflaborydat
+	{"prueflaborydat()","testlaboratoryyfiles()"},
 	// 	T_prueflaboryleist,
 	{"prueflaboryleist()","testlaboratoryyservice()"},
 	// T_prueflaborypgl,
@@ -53,7 +53,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_ob_Einlesen_fertig
 	{"ob Einlesen fertig","if import finished"},
 	// T_LaborEinlesungen
-	{"Laboreinlesungen","laboratory imports"},
+	{"LaborDateien","laboratory files"},
 	// T_Bezug_auf_LaborUS
 	{"Bezug auf LaborUS","Reference to LaborUS"},
 	// T_8410_Test_Ident_Turbomed
@@ -132,8 +132,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Laborsaetze","laboratory sets"},
 	// T_zum_Bezug_fuer_LaborUS
 	{"zum Bezug für LaborUS","for reference of LaborUS"},
-	// T_Bezug_zu_LaborEingelesen
-	{"Bezug zu LaborEingelesen","reference to LaborEingelesen"},
+	// T_Bezug_zu_LaborDat
+	{"Bezug zu LaborDat","reference to LaborDat"},
 	// T_8000_Satzart_Turbomed
 	{"8000 Satzart (Turbomed)","8000 set category (turbomed)"},
 	// T_8100_Satzlaenge_Turbomed
@@ -295,6 +295,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Ordnungsnummer der Dateiuebertragung","ordinal number of the file import"},
 	// T_fehlend
 	{"fehlend","missing"},
+	// T_Bezug_auf_LaborBakt
+	{"Bezug auf laborbakt","reference to laboratorybact"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -347,9 +349,9 @@ void hhcl::prueflaboryparameter(DB *My, const string& tlaboryparameter, const in
 
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflaborydat(DB *My, const string& tlaborydat, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
-	hLog(violetts+Tx[T_prueflaboryeingel]+schwarz);
+	hLog(violetts+Tx[T_prueflaborydat]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
@@ -361,9 +363,9 @@ void hhcl::prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obve
 		};
 		Index indices[]{Index("NamePfad",new Feld[2]{Feld("Name"),Feld("Pfad")},2)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaboryeingel,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0,Tx[T_LaborEinlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlaborydat,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0,Tx[T_LaborEinlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryeingel,1,1);
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborydat,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -467,7 +469,7 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("SatzID","int","10","",Tx[T_zum_Bezug_fuer_LaborUS],1,1,0,string(),1),
-			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborEingelesen],1,0,0,string(),1),
+			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborDat],1,0,0,string(),1),
 			Feld("Satzart","varchar","1","",Tx[T_8000_Satzart_Turbomed],0,0,1),
 			Feld("Satzlänge","varchar","1","",Tx[T_8100_Satzlaenge_Turbomed],0,0,1),
 			Feld("SatzlängeSchluss","varchar","1","",Tx[T_8100_Satzlaenge_Turbomed_nach_8221_in_Feld_8000],0,0,1),
@@ -487,7 +489,7 @@ void hhcl::prueflaborysaetze(DB *My, const string& tlaborypnb, const int obverb,
 			Feld("Gesamtlänge","varchar","1","",Tx[T_9202_Gesamtlaenge_des_Datenpaketes_Turbomed],0,0,1),
 		};
 		Constraint csts[]{
-			Constraint("laborysaetzelaboryeingel",new Feld{Feld("datid")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade),
+			Constraint("laborysaetzelaborydat",new Feld{Feld("datid")},1,"laborydat",new Feld{Feld("DatID")},1,cascade,cascade),
 			Constraint("laborysaetzelaboryplab",new Feld{Feld("labid")},1,"laboryplab",new Feld{Feld("ID")},1,cascade,cascade),
 		};
 			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
@@ -508,8 +510,8 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborWert],1,0,0,string(),1),
-			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborEingelesen],1,0,1,string(),1),
+			Feld("UsLfd","int","10","",Tx[T_Bezug_auf_LaborWert],1,0,0,string(),1),
+			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborDat],1,0,1,string(),1),
 			Feld("SatzID","int","10","",Tx[T_Bezug_auf_LaborXSaetze],1,0,1,string(),1),
 			Feld("Satzart","varchar","1","",Tx[T_8000_Satzart_Turbomed],0,0,0),
 			Feld("Satzlänge","varchar","1","",Tx[T_8100_Satzlaenge_Turbomed],0,0,0),
@@ -528,7 +530,7 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 			Feld("GebüOrd","varchar","1","",Tx[T_8403_Gebuehrenordnung_Turbomed],0,0,0),
 			Feld("Auftraggeber","varchar","1","",Tx[T_8615_Auftraggeber_LANR],0,0,0),
 			Feld("Patienteninformation","varchar","1","",Tx[T_8405_Patienteninformation_Turbomed],0,0,0),
-			Feld("Geschlecht","varchar","1","",Tx[T_8407_Geschlecht_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
+			Feld("Geschlecht","varchar","1","",Tx[T_8407_Geschlecht_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/1),
 			Feld("AuftrHinw","varchar","1","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("Pat_idUrsp","varchar","1","",Tx[T_Ursprung_der_Pat_id_E__erwogene_Pat_id_su_L__vergleich_mit_ueber_Turbomed_eingelesenem_Labor],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("Pat_idErwVNG","varchar","1","",Tx[T_erwogene_Pat_id_mit_gleichem_Vornamen_Nachnamen_und_Geburtstag],/*obind*/0,/*obauto*/0,/*nnull*/0),
@@ -546,7 +548,7 @@ void hhcl::prueflaboryus(DB *My, const string& tlaborypnb, const int obverb, con
 		};
 		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
-		Constraint csts[]{Constraint("Laboryeingellaboryus",new Feld{Feld("DatID")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade),
+		Constraint csts[]{Constraint("Laborydatlaboryus",new Feld{Feld("DatID")},1,"laborydat",new Feld{Feld("DatID")},1,cascade,cascade),
 		                	Constraint("Laborysaetzelaboryus",new Feld{Feld("satzid")},1,"laborysaetze",new Feld{Feld("satzid")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryus,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborus]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
@@ -565,7 +567,7 @@ void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, 
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,1,string(),1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
+			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 			Feld("Verf","varchar","1","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
 			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
 			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
@@ -575,7 +577,7 @@ void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, 
 			Feld("Erklärung","LONGTEXT","","","",0,0,1),
 			Feld("Keimzahl","varchar","1","","",0,0,1),
 		};
-		Constraint csts[]{Constraint("Laboryuslaborybakt",new Feld{Feld("refnr")},1,"laboryus",new Feld{Feld("id")},1,cascade,cascade)};
+		Constraint csts[]{Constraint("Laboryuslaborybakt",new Feld{Feld("UsID")},1,"laboryus",new Feld{Feld("id")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborybakt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborbakt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -585,28 +587,6 @@ void hhcl::prueflaborybakt(DB *My, const string& tlaborybakt, const int obverb, 
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
-void hhcl::prueflaboryfehlt(DB *My, const string& tlaboryfehlt, const int obverb, const int oblog, const uchar direkt/*=0*/)
-{
-	hLog(violetts+Tx[T_prueflaboryfehlt]+schwarz);
-	const size_t aktc=0;
-	if (!direkt) {
-		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,1,string(),1),
-			Feld("DatID","int","10","",Tx[T_eindeutige_Identifikation],1,0,0,string(),1),
-			Feld("Kennung","varchar","4","",Tx[T_Kennung],0,0,1),
-			Feld("Inhalt","varchar","1","",Tx[T_Inhalt],0,0,1),
-		};
-		Constraint csts[]{Constraint("Laboryeingellaboryfehlt",new Feld{Feld("DatID")},1,"laboryeingel",new Feld{Feld("DatID")},1,cascade,cascade)};
-		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlaboryfehlt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborfehlt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
-		if (taba.prueftab(aktc,obverb)) {
-			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryfehlt,1,1);
-			exit(11);
-		}
-	} // if (!direkt)
-} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
-
-
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
@@ -615,7 +595,7 @@ void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,string(),/*unsigned*/1),
+			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,string(),/*unsigned*/1),
 			Feld("Abkü","varchar","1","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
 			Feld("Verf","varchar","1","",Tx[T_8434],0,0,1),
 			Feld("EBM","varchar","1","",Tx[T_5001_GNR_Turbomed],0,0,1),
@@ -623,12 +603,12 @@ void hhcl::prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb
 			Feld("Anzahl","varchar","1","",Tx[T_5005],0,0,1),
 			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
 		};
-////		Feld ifelder0[] = {Feld("RefNr")};   Index i0("RefNr",ifelder0,sizeof ifelder0/sizeof* ifelder0);
+////		Feld ifelder0[] = {Feld("UsID")};   Index i0("UsID",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 ////		Index indices[]={i0};
 ////		Feld ifelder0[] = {};
 ////		Index indices[]={};
 		Constraint csts[]{
-			Constraint("LaborXUSLaborXLeist",new Feld{Feld("RefNr")},1,"laboryus",new Feld{Feld("ID")},1,cascade,cascade),
+			Constraint("LaborXUSLaborXLeist",new Feld{Feld("UsID")},1,"laboryus",new Feld{Feld("ID")},1,cascade,cascade),
 		};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaboryleist,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_LaborLeistungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
@@ -647,7 +627,8 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
-			Feld("RefNr","int","10","",Tx[T_Bezug_auf_LaborUS],1,0,0,string(),1),
+			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],1,0,0,string(),1),
+			Feld("BaktID","int","10","",Tx[T_Bezug_auf_LaborBakt],1,0,0,string(),1),
 			Feld("Abkü","varchar","1","",Tx[T_8410_maximale_Laenge_8],0,0,1),
 			Feld("Langname","varchar","1","",Tx[T_8411_Testbezeichnung_Turbomed],0,0,1),
 			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
@@ -664,13 +645,34 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 			Feld("nbid","int","10","",Tx[T_Bezug_zu_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/0),
 		};
 		Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit")};   Index i0("LaborXWertAbkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-		Feld ifelder1[] = {Feld("RefNr"),Feld("Abkü"),Feld("Langname"),Feld("Quelle"),Feld("QSpez"),Feld("AbnDat"),Feld("Wert"),Feld("Einheit"),Feld("Grenzwerti"),Feld("Teststatus"),Feld("nbid")};   
+		Feld ifelder1[] = {Feld("UsID"),Feld("BaktID"),Feld("Abkü"),Feld("Langname"),Feld("Quelle"),Feld("QSpez"),Feld("AbnDat"),Feld("Wert"),Feld("Einheit"),Feld("Grenzwerti"),Feld("Teststatus"),Feld("nbid")};   
 				Index i1("doppelte",ifelder1,sizeof ifelder1/sizeof* ifelder1,/*unique*/1);
 		Index indices[]={i0,i1};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlaborywert,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Laborwert]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaborywert,1,1);
+			exit(11);
+		}
+	} // if (!direkt)
+} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
+
+void hhcl::prueflaboryfehlt(DB *My, const string& tlaboryfehlt, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflaboryfehlt]+schwarz);
+	const size_t aktc=0;
+	if (!direkt) {
+		Feld felder[] = {
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,1,string(),1),
+			Feld("DatID","int","10","",Tx[T_eindeutige_Identifikation],1,0,0,string(),1),
+			Feld("Kennung","varchar","4","",Tx[T_Kennung],0,0,1),
+			Feld("Inhalt","varchar","1","",Tx[T_Inhalt],0,0,1),
+		};
+		Constraint csts[]{Constraint("Laborydatlaboryfehlt",new Feld{Feld("DatID")},1,"laborydat",new Feld{Feld("DatID")},1,cascade,cascade)};
+		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+		Tabelle taba(My,tlaboryfehlt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborfehlt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlaboryfehlt,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
@@ -793,7 +795,7 @@ void hhcl::virtpruefweiteres()
 		// aber: laborparameter nicht loeschen!
 		RS d8(My,"DROP TABLE IF EXISTS laboryplab",aktc,ZDB);
 		RS d10(My,"DROP TABLE IF EXISTS laboryfehlt",aktc,ZDB);
-		RS d9(My,"DROP TABLE IF EXISTS laboryeingel",aktc,ZDB);
+		RS d9(My,"DROP TABLE IF EXISTS laborydat",aktc,ZDB);
 		fLog(blaus+Tx[T_Loesche_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	} else if (entleer) {
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
@@ -809,13 +811,13 @@ void hhcl::virtpruefweiteres()
 		// aber: laborparameter nicht loeschen!
 		RS d8(My,"delete from laboryplab where id>1",aktc,ZDB);
 		RS d10(My,"truncate laboryfehlt",aktc,ZDB);
-		RS d9(My,"truncate laboryeingel",aktc,ZDB);
+		RS d9(My,"truncate laborydat",aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleere_alle_Tabellen_und_fange_von_vorne_an]+schwarz,1,1);
 	}
 	prueflaboryplab(My, tlaboryplab, obverb, oblog, /*direkt*/0);
 	prueflaboryparameter(My, tlaboryparameter, obverb, oblog, /*direkt*/0);
-	prueflaboryeingel(My, tlaboryeingel, obverb, oblog, /*direkt*/0);
+	prueflaborydat(My, tlaborydat, obverb, oblog, /*direkt*/0);
 	prueflaboryfehlt(My, tlaboryfehlt, obverb, oblog, /*direkt*/0);
 	prueflaborysaetze(My, tlaborysaetze, obverb, oblog, /*direkt*/0);
 	prueflaboryus(My, tlaboryus, obverb, oblog, /*direkt*/0);
@@ -849,12 +851,13 @@ void hhcl::dverarbeit(const string& datei)
 #ifdef speichern
 	const size_t aktc=0;
 #endif 
-	string datid,satzid,satzart,refid;
-	unsigned refnr;
+	string datid,satzid,satzart,usid,baktid;
+	unsigned UsLfd;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen, usoffen=0;
+	int geschlecht; 
 	svec eindfeld; eindfeld<<"id";
-	insv reing(My,/*itab*/tlaboryeingel,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv reing(My,/*itab*/tlaborydat,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
 	reing.hz("Name",base_name(datei));
 	reing.hz("Pfad",datei);
@@ -878,7 +881,7 @@ void hhcl::dverarbeit(const string& datei)
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
 		uchar oblaborda=0;
-		string erklaerung,kommentar,normbereich,auftrhinw,uNm,oNm,verf,abkue;
+		string erklaerung,kommentar,normbereich,qspez,auftrhinw,uNm,oNm,uNw,oNw,verf,abkue;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -898,28 +901,38 @@ void hhcl::dverarbeit(const string& datei)
 					saetzeoffen=1;
 					rsaetze.hz("Satzart",inh);
 					rsaetze.hz("DatID",datid);
-					refnr=0;
+					UsLfd=0;
 				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
 					lsatzart=2;
 					if (usoffen) {
-						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&refid);
+						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
+						geschlecht=0;
 						usoffen=0;
 					}
 					if (rbawep) {
+						if (!qspez.empty()) {
+							rbawep->hz("QSpez",qspez);
+							qspez.clear();
+						}
+						// Field Erklärung doesn't have a default value
 						rbawep->hz("Erklärung",erklaerung);
 						erklaerung.clear();
-						rbawep->hz("Kommentar",kommentar);
-						kommentar.clear();
+						if (!kommentar.empty()) {
+							rbawep->hz("Kommentar",kommentar);
+							kommentar.clear();
+						}
 						if (!auftrhinw.empty()) {
 							rbawep->hz("AuftrHinw",auftrhinw);
 							auftrhinw.clear();
 						} // 						if (!auftrhinw.empty())
 						rbawep->hz("AbnDat",&abndat);
 						memset(&abndat,0,sizeof abndat);
+						if (rbawep==&rwe) {
+							rbawep->hz("BaktID",baktid);
+						}
+						rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==&rba?&baktid:0);
 						rbawep=0;
 					} // 					if (rbawep)
-					rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-					rwe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					if (!normbereich.empty()) {
 						rpar.hz("NB",normbereich);
@@ -932,6 +945,14 @@ void hhcl::dverarbeit(const string& datei)
 					if (!oNm.empty()) {
 						rpar.hz("oNm",oNm);
 						oNm.clear();
+					}
+					if (!uNw.empty()) {
+						rpar.hz("uNw",uNw);
+						uNw.clear();
+					}
+					if (!oNw.empty()) {
+						rpar.hz("oNw",oNw);
+						oNw.clear();
 					}
 					rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					//					satzid="0";
@@ -951,7 +972,7 @@ void hhcl::dverarbeit(const string& datei)
 					rus.hz("DatID",datid);
 					rus.hz("SatzID",satzid);
 					rus.hz("SatzArt",satzart);
-					rus.hz("RefNr",++refnr);
+					rus.hz("UsLfd",++UsLfd);
 					usoffen=1;
 				}
 			} else if (cd=="8100") {
@@ -971,17 +992,28 @@ void hhcl::dverarbeit(const string& datei)
 				}
 			} else if (cd=="8410" || cd=="8434") { // 8410=Test-Ident, 8434=Verfahren
 				if (rbawep) {
+					if (!qspez.empty()) {
+						rbawep->hz("QSpez",qspez);
+						qspez.clear();
+					}
+					// Field Erklärung doesn't have a default value
 					rbawep->hz("Erklärung",erklaerung);
 					erklaerung.clear();
-					rbawep->hz("Kommentar",kommentar);
-					kommentar.clear();
+					if (!kommentar.empty()) {
+						rbawep->hz("Kommentar",kommentar);
+						kommentar.clear();
+					}
 					if (!auftrhinw.empty()) {
 						rbawep->hz("AuftrHinw",auftrhinw);
 						auftrhinw.clear();
 					} // 						if (!auftrhinw.empty())
 					rbawep->hz("AbnDat",&abndat);
 					memset(&abndat,0,sizeof abndat);
-					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					if (rbawep==&rwe) {
+						rbawep->hz("BaktID",baktid);
+					}
+					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==&rba?&baktid:0);
+					rbawep=0;
 				}
 				if (!normbereich.empty()) {
 					rpar.hz("NB",normbereich);
@@ -995,10 +1027,19 @@ void hhcl::dverarbeit(const string& datei)
 					rpar.hz("oNm",oNm);
 					oNm.clear();
 				}
+				if (!uNw.empty()) {
+					rpar.hz("uNw",uNw);
+					uNw.clear();
+				}
+				if (!oNw.empty()) {
+					rpar.hz("oNw",oNw);
+					oNw.clear();
+				}
 				rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (usoffen) {
-					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&refid);
+					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
+					geschlecht=0;
 					usoffen=0;
 				}
 				if (cd=="8434") {
@@ -1008,7 +1049,7 @@ void hhcl::dverarbeit(const string& datei)
 					rwe.clear();
 					rbawep=&rwe;
 				} // 					if (cd=="8434") else if (cd=="8410")
-				rbawep->hz("RefNr",refid);
+				rbawep->hz("UsID",usid);
 				if (cd=="8434") {
 					verf=inh;
 					rba.hz("Verf",inh);
@@ -1020,7 +1061,7 @@ void hhcl::dverarbeit(const string& datei)
 					rpar.hz("LabID",labind);
 			} else if (cd=="5001") {
 				rle.clear();
-				rle.hz("Refnr",refid);
+				rle.hz("UsID",usid);
 				if (rbawep==&rba) {
 					rle.hz("Verf",verf);
 				} else {
@@ -1044,7 +1085,11 @@ void hhcl::dverarbeit(const string& datei)
 				rbawep->hz("Quelle",inh);
 			} else if (cd=="8431") {
 				if (!rbawep) caus<<rot<<"2 Fehler rbawep 0"<<schwarz<<endl;
-				rbawep->hz("QSpez",inh);
+				if (qspez.empty()) qspez=inh;
+				else {
+					qspez+="\r\n";
+					qspez+=inh;
+				}
 			} else if (cd=="8432") { // Abnahmedatum
 				strptime(inh.c_str(),"%d%m%Y",&abndat);
 			} else if (cd=="8433") {
@@ -1087,7 +1132,8 @@ void hhcl::dverarbeit(const string& datei)
 				rus.hz("GebüOrd",inh);
 			} else if (cd=="8405") {
 				rus.hz("Patienteninformation",inh);
-			} else if (cd=="8407") {
+			} else if (cd=="8407") { // ' 1=Mann, 2=Frau, 3=unbek, 4=Knabe, 5=Mädchen, 0=Name fehlt, 9=beide;
+				geschlecht=atol(inh.c_str());
 				rus.hz("Geschlecht",inh);
 			} else if (cd=="3101") {
 				rus.hz("Nachname",inh.substr(0,3)=="zzz"?inh.substr(4):inh);
@@ -1095,7 +1141,7 @@ void hhcl::dverarbeit(const string& datei)
 					rus.hz("DatID",datid);
 					rus.hz("SatzID",satzid);
 					rus.hz("SatzArt",satzart);
-					rus.hz("RefNr",++refnr);
+					rus.hz("UsLfd",++UsLfd);
 					usoffen=1; // verkuerzte Information z.B. in "Labor 20051127 224528.dat"
 				} // 				if (!usoffen)
 			} else if (cd=="3102") {
@@ -1103,6 +1149,7 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="3103") {
 				rus.hz("GebDat",inh);
 			} else if (cd=="3110") {
+				geschlecht=inh=="W"?2:inh=="M"?1:inh=="X"?3:atol(inh.c_str());
 				rus.hz("Geschlecht",inh=="W"?"2":inh=="M"?"1":inh=="X"?"3":inh);
 			} else if (cd=="3104") {
 				rus.hz("Titel",inh);
@@ -1212,9 +1259,17 @@ void hhcl::dverarbeit(const string& datei)
 					normbereich+=inh;
 				}
 			} else if (cd=="8461") {
-				uNm=zuzahl(inh);
+				if (geschlecht==2) {
+					uNw=zuzahl(inh);
+				} else {
+					uNm=zuzahl(inh);
+				}
 			} else if (cd=="8462") {
-				oNm=zuzahl(inh);
+				if (geschlecht==2) {
+					oNw=zuzahl(inh);
+				} else {
+					oNm=zuzahl(inh);
+				}
 			} else if (cd=="9106") {
 				rsaetze.hz("Zeichensatz",inh);
 			} else if (cd=="8312") {
@@ -1252,7 +1307,7 @@ void hhcl::pvirtfuehraus()
 	for(size_t i=0;i<lrue.size();i++) {
 		//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 		char ***cerg;
-		RS rsfertig(My,"SELECT fertig,name FROM laboryeingel l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
+		RS rsfertig(My,"SELECT fertig,name FROM laborydat l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
 		if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 			// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 			dverarbeit(lrue[i]);

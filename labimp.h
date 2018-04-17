@@ -9,7 +9,7 @@ enum T_
 	T_virtrueckfragen,
 	T_Fehler_beim_Pruefen_von,
 	T_Fuege_ein, //ω
-	T_prueflaboryeingel,
+	T_prueflaborydat,
 	T_prueflaboryleist,
 	T_prueflaborypgl,
 	T_prueflaboryplab,
@@ -64,7 +64,7 @@ enum T_
 	T_Bezug_auf_laborgruppen_laborgruppe,
 	T_Laborsaetze,
 	T_zum_Bezug_fuer_LaborUS,
-	T_Bezug_zu_LaborEingelesen,
+	T_Bezug_zu_LaborDat,
 	T_8000_Satzart_Turbomed,
 	T_8100_Satzlaenge_Turbomed,
 	T_8100_Satzlaenge_Turbomed_nach_8221_in_Feld_8000,
@@ -145,6 +145,7 @@ enum T_
 	T_Aktualisierungszeitpunt,
 	T_Ordnungsnummer_der_Dateiuebertragung,
 	T_fehlend,
+	T_Bezug_auf_LaborBakt,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -152,7 +153,7 @@ const string fertiguvz="fertig";
 class hhcl:public dhcl
 {
  private: //ω
-	string tlaboryeingel="laboryeingel";
+	string tlaborydat="laborydat";
 	string tlaboryleist="laboryleist";
 	string tlaborypgl="laborypgl";
 	string tlaboryplab="laboryplab";
@@ -177,7 +178,7 @@ class hhcl:public dhcl
   string ldatvz;   // Verzeichnis der Labordateien
  public: //α //ω
  private: //α //ω
-	void prueflaboryeingel(DB *My, const string& tlaboryeingel, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflaborydat(DB *My, const string& tlaborydat, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflaboryleist(DB *My, const string& tlaboryleist, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflaborypgl(DB *My, const string& tlaborypgl, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflaboryplab(DB *My, const string& tlaboryplab, const int obverb, const int oblog, const uchar direkt=0);
