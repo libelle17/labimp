@@ -628,7 +628,7 @@ void hhcl::prueflaborywert(DB *My, const string& tlaborywert, const int obverb, 
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],1,0,0,string(),1),
-			Feld("BaktID","int","10","",Tx[T_Bezug_auf_LaborBakt],1,0,0,string(),1),
+			Feld("BaktID","int","10","",Tx[T_Bezug_auf_LaborBakt],1,0,0,"0",1),
 			Feld("Abkü","varchar","1","",Tx[T_8410_maximale_Laenge_8],0,0,1),
 			Feld("Langname","varchar","1","",Tx[T_8411_Testbezeichnung_Turbomed],0,0,1),
 			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
@@ -908,6 +908,7 @@ void hhcl::dverarbeit(const string& datei)
 						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
 						geschlecht=0;
 						usoffen=0;
+						baktid="0";
 					}
 					if (rbawep) {
 						if (!qspez.empty()) {
@@ -1041,6 +1042,7 @@ void hhcl::dverarbeit(const string& datei)
 					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
 					geschlecht=0;
 					usoffen=0;
+					baktid="0";
 				}
 				if (cd=="8434") {
 					rba.clear();
@@ -1109,8 +1111,9 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="8420") {
 					rwe.hz("Wert",inh);
 			} else if (cd=="8421") {
-					rwe.hz("Einheit",inh);
-					rpar.hz("Einheit",inh);
+				if (rbawep) {
+					rbawep->hz("Einheit",inh);
+				}
 			} else if (cd=="8422") {
 					rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
