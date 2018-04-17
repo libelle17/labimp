@@ -934,7 +934,6 @@ void hhcl::dverarbeit(const string& datei)
 						rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==&rba?&baktid:0);
 						rbawep=0;
 					} // 					if (rbawep)
-					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					if (!normbereich.empty()) {
 						rpar.hz("NB",normbereich);
 						normbereich.clear();
@@ -956,6 +955,7 @@ void hhcl::dverarbeit(const string& datei)
 						oNw.clear();
 					}
 					rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					//					satzid="0";
 				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
 					lsatzart=3;
@@ -1075,6 +1075,7 @@ void hhcl::dverarbeit(const string& datei)
 				  rpar.hz("Abkü",inh);
 					rpar.hz("LabID",labind);
 			} else if (cd=="5001") {
+				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (rle.size()) {
 					caus<<"rle.size(): "<<rle.size()<<endl;
 					exit(31);
