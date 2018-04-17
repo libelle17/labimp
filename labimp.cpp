@@ -7,6 +7,8 @@
 #define VOMHAUPTCODE // um Funktionsdefinition manchmal mit "__attribute__((weak)) " versehen zu können //ω
 #include "labimp.h"
 // fuer verschiedene Sprachen //α
+#define vorsilbe "labory"
+const string hhcl::vorsil=vorsilbe;
 char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_virtVorgbAllg
 	{"virtVorgbAllg()","virtgeneralprefs()"},
@@ -23,25 +25,25 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_Fuege_ein
 	{"Fuege ein: ","Inserting: "}, //ω
 	// T_prueflydat
-	{"prueflydat()","testlaboratoryyfiles()"},
+	{"prueflydat()","testlyfiles()"},
 	// 	T_prueflyleist,
-	{"prueflyleist()","testlaboratoryyservice()"},
+	{"prueflyleist()","testlyservice()"},
 	// T_prueflypgl,
-	{"prueflypgl()","testlaboratoryparameterequities()"},
+	{"prueflypgl()","testlyparameterequities()"},
 	// T_prueflyplab,
-	{"prueflyplab()","testlaboratoryplab()"},
+	{"prueflyplab()","testlyplab()"},
 	// T_prueflypnb,
-	{"prueflypnb()","testlaboratorypnb()"},
+	{"prueflypnb()","testlypnb()"},
 	// T_prueflypneu,
-	{"prueflypneu()","testlaboratorypneu()"},
+	{"prueflypneu()","testlypneu()"},
 	// T_prueflysaetze,
-	{"prueflysaetze()","testlaboratorysets()"},
+	{"prueflysaetze()","testlysets()"},
 	// T_prueflyus,
-	{"prueflyus()","testlaboratoryus"},
+	{"prueflyus()","testlyus"},
 	// T_prueflywert,
-	{"prueflywert()","testlaboratoryvalue()"},
+	{"prueflywert()","testlyvalue()"},
 	// T_prueflybakt,
-	{"prueflybakt","testlaboratorybact()"},
+	{"prueflybakt","testlybact()"},
 	// T_eindeutige_Identifikation
 	{"eindeutige Identifikation","unique identifier"},
 	// T_Pfadname
@@ -73,11 +75,11 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_Laborpgl
 	{"Parametergleichheiten","parameter equities"},
 	// T_Laborbakt
-	{"Laborbakt","Laboratorybact"},
+	{"lybakt","lybact"},
 	// T_Laborfehlt
-	{"Laborfehlt","Laboratorymissing"},
+	{"Lyfehlt","lymissing"},
 	// T_laborxpneu
-	{"laborxpneu","laborxpneu"},
+	{"lypneu","lypneu"},
 	// T_laborparameter
 	{"laborparameter","laborparameter"},
 	// T_ist_identisch_mit_laborxpneu
@@ -267,7 +269,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_prueflyfehlt
 	{"prueflyfehlt()","testlaboratoymissing()"},
 	// T_Bezug_auf_lyplab
-	{"Bezug zu lyplab","reference to lyplab"},
+	{"Bezug zu " vorsilbe"plab","reference to " vorsilbe"plab"},
 	// T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich
 	{"Abkürzung mit gleicher Bedeutung, gleicher Einheit und gleichem Normbereich",
 	 "abbreviation with same meaning, same unit and same normal range"},
@@ -276,7 +278,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_LaborParameter
 	{"Laborparameter","laborory parameters"},
 	// T_prueflyparameter
-	{"prueflyparameter()","testlaboratoryparameters()"},
+	{"prueflyparameter()","testlyparameters()"},
 	// T_Reihenfolge_innerhalb_der_Gruppe
 	{"Reihenfolge innerhalb der Gruppe","order within the group"},
 	// T_unterer_Normwert_maennlich
@@ -288,7 +290,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_oberer_Normwert_weiblich,
 	{"oberer Normwert weiblich","upper border female"},
 	// T_Normbereich_aus_lywert
-	{"Normbereich aus lywert","normal range from lywert"},
+	{"Normbereich aus " vorsilbe"wert","normal range from " vorsilbe"wert"},
 	// T_Aktualisierungszeitpunt
 	{"Aktualisierungszeitpunkt","actualization time"},
 	// T_Ordnungsnummer_der_Dateiuebertragung
@@ -296,7 +298,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_fehlend
 	{"fehlend","missing"},
 	// T_Bezug_auf_LaborBakt
-	{"Bezug auf laborbakt","reference to laboratorybact"},
+	{"Bezug auf lybakt","reference to lybact"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -304,7 +306,6 @@ class TxB Tx((const char* const* const* const*)DPROG_T);
 const char *logdt="/var/log/" DPROG "vorgabe.log";//darauf wird in kons.h verwiesen;
 
 using namespace std; //ω
-const string hhcl::vorsil="labory";
 hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) //α
 {
 	icp=new ic_cl("UTF8","ISO-8859-15");
@@ -1337,7 +1338,7 @@ void hhcl::pvirtfuehraus()
 	for(size_t i=0;i<lrue.size();i++) {
 		//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 		char ***cerg;
-		RS rsfertig(My,"SELECT fertig,name FROM lydat l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
+		RS rsfertig(My,"SELECT fertig,name FROM "+vorsil+"dat l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
 		if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 			// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 			dverarbeit(lrue[i]);
