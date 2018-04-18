@@ -580,6 +580,7 @@ void hhcl::prueflybakt(DB *My, const string& tlybakt, const int obverb, const in
 			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
 			Feld("Erklärung","LONGTEXT","","","",0,0,1),
 			Feld("Keimzahl","varchar","1","","",0,0,1),
+			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
 		};
 		Constraint csts[]{Constraint(vorsil+"us"+vorsil+"bakt",new Feld{Feld("UsID")},1,vorsil+"us",new Feld{Feld("id")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
@@ -605,7 +606,6 @@ void hhcl::prueflyleist(DB *My, const string& tlyleist, const int obverb, const 
 			Feld("EBM","varchar","1","",Tx[T_5001_GNR_Turbomed],0,0,1),
 			Feld("goä","varchar","1","",Tx[T_8406],0,0,1),
 			Feld("Anzahl","varchar","1","",Tx[T_5005],0,0,1),
-			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
 		};
 ////		Feld ifelder0[] = {Feld("UsID")};   Index i0("UsID",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 ////		Index indices[]={i0};
@@ -634,7 +634,7 @@ void hhcl::prueflywert(DB *My, const string& tlywert, const int obverb, const in
 			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],1,0,0,string(),1),
 			Feld("BaktID","int","10","",Tx[T_Bezug_auf_LaborBakt],1,0,0,"0",1),
 			Feld("Abkü","varchar","1","",Tx[T_8410_maximale_Laenge_8],0,0,1),
-			Feld("Langname","varchar","1","",Tx[T_8411_Testbezeichnung_Turbomed],0,0,1),
+			Feld("Langtext","varchar","1","",Tx[T_8411_Testbezeichnung_Turbomed],0,0,1),
 			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
 			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
 			Feld("QSpez","varchar","1","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
@@ -646,10 +646,11 @@ void hhcl::prueflywert(DB *My, const string& tlywert, const int obverb, const in
 			Feld("Teststatus","varchar","1","",Tx[T_8418_Teststatus_Turbomed],0,0,1),
 			Feld("Erklärung","varchar","1","","",0,0,1),
 			Feld("AuftrHinw","varchar","1","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
+			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
 			Feld("nbid","int","10","",Tx[T_Bezug_zu_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/0),
 		};
 		Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit")};   Index i0("LaborXWertAbkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-		Feld ifelder1[] = {Feld("UsID"),Feld("BaktID"),Feld("Abkü"),Feld("Langname"),Feld("Quelle"),Feld("QSpez"),Feld("AbnDat"),Feld("Wert"),Feld("Einheit"),Feld("Grenzwerti"),Feld("Teststatus"),Feld("nbid")};   
+		Feld ifelder1[] = {Feld("UsID"),Feld("BaktID"),Feld("Abkü"),Feld("Langtext"),Feld("Quelle"),Feld("QSpez"),Feld("AbnDat"),Feld("Wert"),Feld("Einheit"),Feld("Grenzwerti"),Feld("Teststatus"),Feld("nbid")};   
 				Index i1("doppelte",ifelder1,sizeof ifelder1/sizeof* ifelder1,/*unique*/1);
 		Index indices[]={i0,i1};
 		Constraint csts[]{Constraint(vorsil+"us"+vorsil+"wert",new Feld{Feld("UsID")},1,vorsil+"us",new Feld{Feld("id")},1,cascade,cascade)};
@@ -862,7 +863,7 @@ void hhcl::dverarbeit(const string& datei)
 	string datid,satzid,satzart,usid,baktid;
 	unsigned UsLfd;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
-	uchar saetzeoffen, usoffen=0;
+	uchar saetzeoffen, usoffen=0, keimz=0;
 	int geschlecht; 
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlydat,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
@@ -982,8 +983,13 @@ void hhcl::dverarbeit(const string& datei)
 					}
 					//					rus.zeig("0");
 					if (rus.size()) {
+						caus<<rot<<"Restsaetze: "<<schwarz<<", usoffen: "<<(int)usoffen<<endl;
+						for(size_t i=0;i<rus.size();i++) {
+							caus<<blau<<rus.ivec[i].feld<<schwarz<<": "<<rus.ivec[i].wert<<endl;
+						}
 						caus<<"rus.size(): "<<rus.size()<<endl;
-						exit(31);
+						caus<<"datid: "<<datid<<endl;
+						exit(33);
 					}
 //					rus.clear();
 					satzart=inh;
@@ -1105,10 +1111,9 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="8406") { // zwingende Abfolge mit 5001 wurde 2/05 geprueft
 				rle.hz("GOÄ",inh);
 			} else if (cd=="8614") { 
-				rle.hz("Abrd",inh);
+				rbawep->hz("Abrd",inh);
 			} else if (cd=="8411") {
-				rwe.hz("Langname",inh);
-				rpar.hz("Langtext",inh);
+				rbawep->hz("Langtext",inh);
 			} else if (cd=="8428") {
 				if (!rbawep) caus<<rot<<"4 Fehler rbawep 0"<<schwarz<<endl;
 				rbawep->hz("KuQu",inh);
@@ -1249,6 +1254,12 @@ void hhcl::dverarbeit(const string& datei)
 					kommentar+="\r\n";
 					kommentar+=inh;
 				}
+				if (keimz) {
+					rba.hz("Keimzahl",inh);
+					keimz=0;
+				}
+				if (inh.find("Keimzahl")!=string::npos)
+					keimz=1;
 			} else if (cd=="8490") {
 				if (auftrhinw.empty()) 
 					auftrhinw=inh;
@@ -1341,6 +1352,7 @@ void hhcl::pvirtfuehraus()
 		svec lrue;
 		systemrueck("find "+ldatvz+" -type f -maxdepth 1 \\( -iname '1b*.ld*' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 		//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
+		caus<<"Dateien gefunden: "<<lrue.size()<<endl;
 		for(size_t i=0;i<lrue.size();i++) {
 			//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 			char ***cerg;
