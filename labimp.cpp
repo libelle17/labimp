@@ -989,6 +989,9 @@ void hhcl::dverarbeit(const string& datei)
 						}
 						caus<<"rus.size(): "<<rus.size()<<endl;
 						caus<<"datid: "<<datid<<endl;
+						caus<<"satid: "<<satzid<<endl;
+						caus<<"satart: "<<satzart<<endl;
+						caus<<"UsLfd: "<<UsLfd<<endl;
 						exit(33);
 					}
 //					rus.clear();
