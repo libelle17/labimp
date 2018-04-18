@@ -579,6 +579,7 @@ void hhcl::prueflybakt(DB *My, const string& tlybakt, const int obverb, const in
 			Feld("AbnDat","datetime","0","0",Tx[T_8432_Abnahmedatum_Turbomed],0,0,1),
 			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
 			Feld("Erklärung","LONGTEXT","","","",0,0,1),
+			Feld("AuftrHinw","varchar","1","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/1,string()),
 			Feld("Keimzahl","varchar","1","","",0,0,1),
 			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
 		};
@@ -642,10 +643,10 @@ void hhcl::prueflywert(DB *My, const string& tlywert, const int obverb, const in
 			Feld("Wert","varchar","1","0",Tx[T_8420_Ergebniswert_Turbomed],0,0,1),
 			Feld("Einheit","varchar","1","",Tx[T_8421_maximale_Laenge_12],0,0,1),
 			Feld("Grenzwerti","varchar","1","",Tx[T_8422_Grenzwertindikator_Turbomed],0,0,1),
-			Feld("Kommentar","varchar","1","",Tx[T_8480_Ergebnistest_Turbomed],0,0,1),
+			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
 			Feld("Teststatus","varchar","1","",Tx[T_8418_Teststatus_Turbomed],0,0,1),
-			Feld("Erklärung","varchar","1","","",0,0,1),
-			Feld("AuftrHinw","varchar","1","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
+			Feld("Erklärung","LONGTEXT","","","",0,0,1),
+			Feld("AuftrHinw","varchar","1","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/1,string()),
 			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
 			Feld("nbid","int","10","",Tx[T_Bezug_zu_laborxplab_id],/*obind*/1,/*obauto*/0,/*nnull*/0),
 		};
@@ -914,6 +915,7 @@ void hhcl::dverarbeit(const string& datei)
 				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
 					lsatzart=2;
 					if (usoffen) {
+						exit(28);
 						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
 						geschlecht=0;
 						usoffen=0;
@@ -982,19 +984,13 @@ void hhcl::dverarbeit(const string& datei)
 						saetzeoffen=0;
 					}
 					//					rus.zeig("0");
-					if (rus.size()) {
-						caus<<rot<<"Restsaetze: "<<schwarz<<", usoffen: "<<(int)usoffen<<endl;
-						for(size_t i=0;i<rus.size();i++) {
-							caus<<blau<<rus.ivec[i].feld<<schwarz<<": "<<rus.ivec[i].wert<<endl;
-						}
-						caus<<"rus.size(): "<<rus.size()<<endl;
-						caus<<"datid: "<<datid<<endl;
-						caus<<"satid: "<<satzid<<endl;
-						caus<<"satart: "<<satzart<<endl;
-						caus<<"UsLfd: "<<UsLfd<<endl;
-						exit(33);
+					if (usoffen) {
+						// wurde gebraucht fuer: "Labor 20091126 162200.dat"
+						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
+						geschlecht=0;
+						usoffen=0;
+						baktid="0";
 					}
-//					rus.clear();
 					satzart=inh;
 					rus.hz("DatID",datid);
 					rus.hz("SatzID",satzid);
@@ -1065,6 +1061,7 @@ void hhcl::dverarbeit(const string& datei)
 				rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (usoffen) {
+					// z.B. "Labor 20091126 162829.dat"
 					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
 					geschlecht=0;
 					usoffen=0;
