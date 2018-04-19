@@ -2019,7 +2019,7 @@ my_ulonglong RS::tbupd(const vector<instyp>& einf,int obverb, const string& bedi
  */
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
 my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
-		int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
+		int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/,uchar mitupd/*=0*/) 
 {
 	caus<<violett<<"tbins: "<<schwarz;
 	my_ulonglong zl=0;
@@ -2166,6 +2166,10 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 						////				isql.reserve(isql.length()+2);
 						isql+=")";
 					} // 				if (einfp->size())
+					if (mitupd) {
+						isql+=" ON DUPLICATE KEY UPDATE ";
+						isql+=dbp->dnb+einfp->at(0).feld+dbp->dne+"="+dbp->dnb+einfp->at(0).feld+dbp->dne;
+					}
 					break;
 				case Postgres:
 					caup<<"hier insert 3"<<endl;

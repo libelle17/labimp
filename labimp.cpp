@@ -942,7 +942,7 @@ void hhcl::dverarbeit(const string& datei)
 						if (rbawep==&rwe) {
 							rbawep->hz("BaktID",baktid);
 						}
-						rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==&rba?&baktid:0);
+						rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==&rba?&baktid:0,/*mitupd=*/1);
 						rbawep=0;
 					} // 					if (rbawep)
 					if (!normbereich.empty()) {
@@ -1035,7 +1035,8 @@ void hhcl::dverarbeit(const string& datei)
 					if (rbawep==&rwe) {
 						rbawep->hz("BaktID",baktid);
 					}
-					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==&rba?&baktid:0);
+					// mitupd wg. /opt/turbomed/labor/backup/Labor 20100217 235210.dat
+					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==&rba?&baktid:0,/*mitupd=*/1);
 					rbawep=0;
 				}
 				if (!normbereich.empty()) {
