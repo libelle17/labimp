@@ -454,7 +454,7 @@ class RS
     ~RS();
 		uchar holautofeld(const size_t aktc, int obverb);
     my_ulonglong tbupd(const vector<instyp>& einf,int obverb, const string& bedingung, const size_t aktc/*=0*/, uchar asy=0);
-    my_ulonglong tbins(vector<instyp>* einfp,const size_t aktc=0,uchar sammeln=0,int obverb=0,string *id=0,
+    my_ulonglong tbins(vector<instyp>* einfp,const size_t aktc=0,uchar sammeln=0,int obverb=0,string *const id=0,
 		     const uchar eindeutig=0,const svec& eindfeld=svec(),const uchar asy=0, svec *csets=0, uchar mitupd=0);
 		void machstrikt(string& altmode,const size_t aktc=0);
 		void striktzurueck(string& altmode,const size_t aktc=0);
@@ -480,7 +480,7 @@ struct insv
 		rsp=new RS(My,itab);
 	}
 
-	my_ulonglong schreib(const uchar sammeln=0,int obverb=0,string* idp=0,uchar mitupd=0)
+	my_ulonglong schreib(const uchar sammeln=0,int obverb=0,string* const idp=0,uchar mitupd=0)
 	{
 		my_ulonglong erg=0;
 		if (ivec.size()) {
@@ -492,7 +492,7 @@ struct insv
 		}
 		return erg;
 	}
-	my_ulonglong ergaenz(const string& bedingung,const uchar sammeln=0,int obverb=0,string* idp=0)
+	my_ulonglong ergaenz(const string& bedingung,const uchar sammeln=0,int obverb=0,string* const idp=0)
 	{
 		my_ulonglong erg=0;
 			caus<<"Bedingung: "<<bedingung<<endl;

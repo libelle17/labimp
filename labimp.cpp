@@ -864,7 +864,7 @@ void hhcl::dverarbeit(const string& datei)
 	string datid,satzid,satzart,usid,baktid;
 	unsigned UsLfd;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
-	uchar saetzeoffen, usoffen=0, keimz=0;
+	uchar saetzeoffen, usoffen=0;
 	int geschlecht; 
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlydat,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
@@ -890,7 +890,7 @@ void hhcl::dverarbeit(const string& datei)
 	if (mdat.is_open()) {
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
-		uchar oblaborda=0, arztnameda=0;
+		uchar oblaborda=0, arztnameda=0, keimz=0,keimzda=0;
 		string erklaerung,kommentar,normbereich,qspez,auftrhinw,uNm,oNm,uNw,oNw,verf,abkue,lanr;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
@@ -915,13 +915,15 @@ void hhcl::dverarbeit(const string& datei)
 				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
 					lsatzart=2;
 					if (usoffen) {
-						exit(28);
+						// caus<<rus.size()<<endl;
+						// z.B. "Labor 20120223 020708.dat"
 						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
 						geschlecht=0;
 						usoffen=0;
 						baktid="0";
 					}
 					if (rbawep) {
+						// z.B. "Labor 20101201 004634.dat"
 						if (!qspez.empty()) {
 							rbawep->hz("QSpez",qspez);
 							qspez.clear();
@@ -944,6 +946,8 @@ void hhcl::dverarbeit(const string& datei)
 						}
 						rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==&rba?&baktid:0,/*mitupd=*/1);
 						rbawep=0;
+						keimz=0; // "Labor 20101204 195050.dat"
+						keimzda=0; // "Labor 20101210 034422.dat"
 					} // 					if (rbawep)
 					if (!normbereich.empty()) {
 						rpar.hz("NB",normbereich);
@@ -965,7 +969,9 @@ void hhcl::dverarbeit(const string& datei)
 						rpar.hz("oNw",oNw);
 						oNw.clear();
 					}
+					// z.B. "Labor 20101201 044232.dat"
 					rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+					// z.B. "Labor 20101201 004634.dat"
 					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					//					satzid="0";
 				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
@@ -979,13 +985,14 @@ void hhcl::dverarbeit(const string& datei)
 							rsaetze.hz("Lanr",lanr);
 							lanr.clear();
 						}
+						// z.B. "Labor 20101201 044232.dat"
 						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&satzid);
 						arztnameda=0;
 						saetzeoffen=0;
 					}
 					//					rus.zeig("0");
 					if (usoffen) {
-						// wurde gebraucht fuer: "Labor 20091126 162200.dat"
+						// z.B. "Labor 20091126 162200.dat"
 						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
 						geschlecht=0;
 						usoffen=0;
@@ -1019,9 +1026,6 @@ void hhcl::dverarbeit(const string& datei)
 						rbawep->hz("QSpez",qspez);
 						qspez.clear();
 					}
-					// Field Erklärung doesn't have a default value
-					rbawep->hz("Erklärung",erklaerung);
-					erklaerung.clear();
 					if (!kommentar.empty()) {
 						rbawep->hz("Kommentar",kommentar);
 						kommentar.clear();
@@ -1030,14 +1034,21 @@ void hhcl::dverarbeit(const string& datei)
 						rbawep->hz("AuftrHinw",auftrhinw);
 						auftrhinw.clear();
 					} // 						if (!auftrhinw.empty())
-					rbawep->hz("AbnDat",&abndat);
-					memset(&abndat,0,sizeof abndat);
-					if (rbawep==&rwe) {
-						rbawep->hz("BaktID",baktid);
+					if (rbawep->size()) {
+						// Field Erklärung doesn't have a default value
+						rbawep->hz("Erklärung",erklaerung);
+						erklaerung.clear();
+						rbawep->hz("AbnDat",&abndat);
+						memset(&abndat,0,sizeof abndat);
+						if (rbawep==&rwe) {
+							rbawep->hz("BaktID",baktid);
+						}
 					}
 					// mitupd wg. /opt/turbomed/labor/backup/Labor 20100217 235210.dat
 					rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==&rba?&baktid:0,/*mitupd=*/1);
 					rbawep=0;
+					keimz=0; // "Labor 20101204 195050.dat"
+					keimzda=0; // "Labor 20101210 034422.dat"
 				}
 				if (!normbereich.empty()) {
 					rpar.hz("NB",normbereich);
@@ -1059,7 +1070,9 @@ void hhcl::dverarbeit(const string& datei)
 					rpar.hz("oNw",oNw);
 					oNw.clear();
 				}
+				// z.B. "Labor 20101202 002036.dat"
 				rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+				// z.B. "Labor 20101202 011636.dat"
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (usoffen) {
 					// z.B. "Labor 20091126 162829.dat"
@@ -1071,9 +1084,11 @@ void hhcl::dverarbeit(const string& datei)
 				if (cd=="8434") {
 					if (rba.size()) {
 						caus<<"rba.size(): "<<rba.size()<<endl;
-						exit(31);
+						rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&baktid,/*mitupd=*/1);
+						keimz=0; // "Labor 20101204 195050.dat"
+						keimzda=0; // "Labor 20101210 034422.dat"
+						exit(59);
 					}
-					//rba.clear();
 					rbawep=&rba;
 				} else /*if (cd=="8410")*/ {
 					if (rwe.size()) {
@@ -1094,11 +1109,11 @@ void hhcl::dverarbeit(const string& datei)
 				  rpar.hz("Abkü",inh);
 					rpar.hz("LabID",labind);
 			} else if (cd=="5001") {
+					if (rle.size()) {
+						caus<<"rle.size(): "<<rle.size()<<endl;
+						exit(46);
+					}
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-				if (rle.size()) {
-					caus<<"rle.size(): "<<rle.size()<<endl;
-					exit(31);
-				}
 //				rle.clear();
 				rle.hz("UsID",usid);
 				if (rbawep==&rba) {
@@ -1231,6 +1246,7 @@ void hhcl::dverarbeit(const string& datei)
 					rlab.hz("Labor",inh);
 				}
 				// 1. Moeglichkeit
+				// z.B. "Labor 20101201 004634.dat"
 				rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
 				oblaborda=1;
 				rsaetze.hz("labid",labind);
@@ -1243,6 +1259,10 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="8323") {
 				// 2. Moeglichkeit
 				rlab.hz("OrtLabor",inh);
+				if (rlab.size()) {
+					caus<<"rlab.size()"<<rlab.size()<<endl;
+					exit(51);
+				}
 				rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
 				oblaborda=1;
 				rsaetze.hz("labid",labind);
@@ -1255,12 +1275,14 @@ void hhcl::dverarbeit(const string& datei)
 					kommentar+="\r\n";
 					kommentar+=inh;
 				}
-				if (keimz) {
+				if (keimz && !keimzda) {
 					rba.hz("Keimzahl",inh);
+					keimzda=1; // "Labor 20101210 034422.dat"
 					keimz=0;
 				}
-				if (inh.find("Keimzahl")!=string::npos)
+				if (inh.find("Keimzahl")!=string::npos) {
 					keimz=1;
+				}
 			} else if (cd=="8490") {
 				if (auftrhinw.empty()) 
 					auftrhinw=inh;
@@ -1300,7 +1322,7 @@ void hhcl::dverarbeit(const string& datei)
 						}
 					} else {
 						caus<<rot<<"Normbereich ohne '-': "<<violett<<nbn<<schwarz<<endl;
-						exit(0);
+						exit(47);
 					}
 				} else {
 					normbereich+="\r\n";
@@ -1332,6 +1354,10 @@ void hhcl::dverarbeit(const string& datei)
 				rfe.hz("DatID",datid);
 				rfe.hz("Kennung",cd);
 				rfe.hz("Inhalt",inh);
+				if (rfe.size()) {
+					caus<<"rfe.size()"<<rfe.size()<<endl;
+					exit(52);
+				}
 				rfe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 			}
 			altz=zeile;
