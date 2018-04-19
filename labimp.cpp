@@ -913,6 +913,10 @@ void hhcl::dverarbeit(const string& datei)
 					rsaetze.hz("DatID",datid);
 					UsLfd=0;
 				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
+					if (inh.length()>4) {
+						caus<<"inh: "<<inh<<endl;
+						exit(70);
+					}
 					lsatzart=2;
 					if (usoffen) {
 						// caus<<rus.size()<<endl;
@@ -1109,10 +1113,7 @@ void hhcl::dverarbeit(const string& datei)
 				  rpar.hz("Abkü",inh);
 					rpar.hz("LabID",labind);
 			} else if (cd=="5001") {
-					if (rle.size()) {
-						caus<<"rle.size(): "<<rle.size()<<endl;
-						exit(46);
-					}
+				// z.B. 1b01042005.ld0
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 //				rle.clear();
 				rle.hz("UsID",usid);
@@ -1259,10 +1260,7 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="8323") {
 				// 2. Moeglichkeit
 				rlab.hz("OrtLabor",inh);
-				if (rlab.size()) {
-					caus<<"rlab.size()"<<rlab.size()<<endl;
-					exit(51);
-				}
+				// z.B. 1b01042005.ldt
 				rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
 				oblaborda=1;
 				rsaetze.hz("labid",labind);
@@ -1354,10 +1352,7 @@ void hhcl::dverarbeit(const string& datei)
 				rfe.hz("DatID",datid);
 				rfe.hz("Kennung",cd);
 				rfe.hz("Inhalt",inh);
-				if (rfe.size()) {
-					caus<<"rfe.size()"<<rfe.size()<<endl;
-					exit(52);
-				}
+				// z.B. "Labor 20120724 072122.dat"
 				rfe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 			}
 			altz=zeile;
