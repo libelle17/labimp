@@ -975,7 +975,7 @@ void hhcl::dverarbeit(const string& datei)
 					}
 					// z.B. "Labor 20101201 044232.dat"
 					/*auto*/chrono::system_clock::time_point aktzp=chrono::system_clock::now();
-					reing.hz("Aktzeit",&aktzp);
+					rpar.hz("Aktzeit",&aktzp);
 					rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					// z.B. "Labor 20101201 004634.dat"
 					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
@@ -1077,7 +1077,7 @@ void hhcl::dverarbeit(const string& datei)
 					oNw.clear();
 				}
 				/*auto*/chrono::system_clock::time_point aktzp=chrono::system_clock::now();
-				reing.hz("Aktzeit",&aktzp);
+				rpar.hz("Aktzeit",&aktzp);
 				// z.B. "Labor 20101202 002036.dat"
 				rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				// z.B. "Labor 20101202 011636.dat"
