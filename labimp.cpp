@@ -1108,14 +1108,14 @@ void hhcl::dverarbeit(const string& datei)
 					rba.hz("Verf",inh);
 				} else /*if (cd=="8410")*/ {
 					abkue=inh;
-						rwe.hz("Abkü",inh);
-					} // 					if (cd=="8434") else if (cd=="8410")
-				  rpar.hz("Abkü",inh);
-					rpar.hz("LabID",labind);
+					rwe.hz("Abkü",inh);
+				} // 					if (cd=="8434") else if (cd=="8410")
+				rpar.hz("Abkü",inh);
+				rpar.hz("LabID",labind);
 			} else if (cd=="5001") {
 				// z.B. 1b01042005.ld0
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-//				rle.clear();
+				//				rle.clear();
 				rle.hz("UsID",usid);
 				if (rbawep==&rba) {
 					rle.hz("Verf",verf);
@@ -1131,6 +1131,7 @@ void hhcl::dverarbeit(const string& datei)
 				rbawep->hz("Abrd",inh);
 			} else if (cd=="8411") {
 				rbawep->hz("Langtext",inh);
+				rpar.hz("Langtext",inh);
 			} else if (cd=="8428") {
 				if (!rbawep) caus<<rot<<"4 Fehler rbawep 0"<<schwarz<<endl;
 				rbawep->hz("KuQu",inh);
@@ -1166,6 +1167,7 @@ void hhcl::dverarbeit(const string& datei)
 				if (rbawep) {
 					rbawep->hz("Einheit",inh);
 				}
+				rpar.hz("Einheit",inh);
 			} else if (cd=="8422") {
 					rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
