@@ -822,7 +822,6 @@ return ergi;
 // wird aufgerufen in: prueftab
 void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 {
-	obverb=1;
   fLog(violetts+Txd[T_Lesespalten]+blau+": "+tbname+"'"+schwarz,obverb,oblog);
   char ***cerg;
   ////          RS spalt(this,string("SHOW COLUMNS FROM `")+name+"`");
@@ -833,8 +832,6 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
         "MID(column_type,INSTR(column_type,'(')+1,INSTR(column_type,')')-INSTR(column_type,'(')-1) p1, column_type p2 "
         "FROM information_schema.columns WHERE table_name = '"+tbname+"' AND table_schema = '"+dbp->dbname+"' ORDER BY ordinal_position",
 				  aktc,obverb>0?obverb-1:0);
-	caus<<"tbname: "<<tbname<<", spalt: "<<spalt->sql<<endl;
-	caus<<"spalt->num_rows: "<<spalt->num_rows<<endl;
   if (!spalt->obfehl) {
     delete[] spnamen;
     spnamen=new char const*[spalt->num_rows];
@@ -846,11 +843,9 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
     ////    <<violett<<"Schema: "<<schwarz<<db<<endl;
     ////    <<violett<<"Tabelle: "<<schwarz<<name<<endl;
     while (cerg=spalt->HolZeile(),cerg?*cerg:0) {
-			caus<<"spalt->num_rows: "<<spalt->num_rows<<endl;
 			spnamen[spnr]=*(*cerg);
       splenge[spnr]=cjj(cerg,1);
       sptyp[spnr]=cjj(cerg,2);
-			caus<<"spnr: "<<spnr<<", spnamen[spnr]: "<<spnamen[spnr]<<endl;
       /*//
          MYSQL_RES *dbres;
          dbres = mysql_list_fields(conn,name.c_str(),ltab->felder[spnr].name.c_str());
@@ -921,6 +916,7 @@ int Tabelle::machconstr(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 // aufgerufen in prueftab
 int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 {
+	lesespalten(aktc,obverb>0?obverb-1:0,oblog);
 	for(unsigned i=0;i<indexzahl;i++) {
 		const Index* const indx=&indices[i];
 		// steht aus: Namen nicht beruecksichtigen, nur Feldreihenfolge und ggf. -laenge
@@ -969,21 +965,19 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 			sql<<"OR REPLACE ";
 #endif				
 			sql<<(indx->unique?"UNIQUE ":"")<<"INDEX `"<<indx->name<<"` ON `"<<tbname<<"`(";
-			caus<<rot<<sql.str()<<schwarz<<endl;
 			for(unsigned j=0;j<indx->feldzahl;j++) {
 				sql<<"`"<<indx->felder[j].name<<"`";
-				caus<<"`"<<indx->felder[j].name<<"`"<<endl;
-				caus<<"spalt->num_rows: "<<spalt->num_rows<<endl;
+				// caus<<"`"<<indx->felder[j].name<<"`"<<endl;
+				// caus<<"spalt->num_rows: "<<spalt->num_rows<<endl;
 				for(unsigned spnr=0;spnr<spalt->num_rows;spnr++) { // reale Spalten
-					caus<<"spnr: "<<spnr<<", spnamen: "<<spnamen[spnr]<<endl;
+					// caus<<"spnr: "<<spnr<<", spnamen: "<<spnamen[spnr]<<endl;
 					if (!strcasecmp(indx->felder[j].name.c_str(),spnamen[spnr])) { // Feldnamen identisch
-						caus<<rot<<indx->felder[j].name<<schwarz<<", spnamen: "<<spnamen[spnr]<<", spnr: "<<spnr<<schwarz<<endl;
+						// caus<<rot<<indx->felder[j].name<<schwarz<<", spnamen: "<<spnamen[spnr]<<", spnr: "<<spnr<<schwarz<<endl;
 						//						if (indx->felder[j].lenge.empty()) indx->felder[j].lenge=splenge[spnr];
 						const long numsplen=atol(splenge[spnr]);
 						const long numinlen=indx->felder[j].lenge.empty()?0:atol(indx->felder[j].lenge.c_str());
-						caus<<"typ: "<<sptyp[spnr]<<endl;
 						if (strcasecmp(sptyp[spnr],"DATE") && strcasecmp(sptyp[spnr],"DATETIME")) {
-							caus<<rot<<indx->felder[j].name<<violett<<", numinlen: "<<rot<<numinlen<<violett<<", numsplen: "<<rot<<numsplen<<schwarz<<endl;
+							// caus<<rot<<indx->felder[j].name<<violett<<", numinlen: "<<rot<<numinlen<<violett<<", numsplen: "<<rot<<numsplen<<schwarz<<endl;
 							if (!numinlen || !numsplen) { // numsplen ist 0 z.B. bei varbinary
 								// das sollte reichen
 								if (numsplen>50 || !numsplen) {
