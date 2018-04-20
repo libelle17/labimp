@@ -965,6 +965,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 						const long numsplen=atol(splenge[spnr]);
 						const long numinlen=indx->felder[j].lenge.empty()?0:atol(indx->felder[j].lenge.c_str());
 						if (strcasecmp(sptyp[spnr],"DATE") && strcasecmp(sptyp[spnr],"DATETIME")) {
+							caus<<rot<<indx->felder[j].name<<violett<<", numinlen: "<<rot<<numinlen<<violett<<", numsplen: "<<rot<<numsplen<<schwarz<<endl;
 							if (!numinlen || !numsplen) { // numsplen ist 0 z.B. bei varbinary
 								// das sollte reichen
 								if (numsplen>50 || !numsplen) {

@@ -1385,6 +1385,7 @@ void hhcl::pvirtfuehraus()
 { //ω
 	const size_t aktc=0;
 	const string fertigvz=ldatvz+"/"+fertiguvz;
+	exit(80);
 	if (!loeschalle) {
 		pruefverz(fertigvz,obverb,oblog);
 		systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
