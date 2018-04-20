@@ -333,7 +333,7 @@ void hhcl::prueflyparameter(DB *My, const string& tlyparameter, const int obverb
 			Feld("oNm","varchar","1","",Tx[T_oberer_Normwert_maennlich],0,0,1),
 			Feld("uNw","varchar","1","",Tx[T_unterer_Normwert_weiblich],0,0,1),
 			Feld("oNw","varchar","1","",Tx[T_oberer_Normwert_weiblich],0,0,1),
-			Feld("NB","varchar","1","",Tx[T_Normbereich_aus_lywert],0,0,1),
+			Feld("NB","varchar","260","",Tx[T_Normbereich_aus_lywert],0,0,1),
 			Feld("Aktzeit","datetime","0","0",Tx[T_Aktualisierungszeitpunt],1,0,1),
 			Feld("StByte","int","10","",Tx[T_Ordnungsnummer_der_Dateiuebertragung],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
