@@ -833,7 +833,7 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
         "MID(column_type,INSTR(column_type,'(')+1,INSTR(column_type,')')-INSTR(column_type,'(')-1) p1, column_type p2 "
         "FROM information_schema.columns WHERE table_name = '"+tbname+"' AND table_schema = '"+dbp->dbname+"' ORDER BY ordinal_position",
 				  aktc,obverb>0?obverb-1:0);
-	caus<<"spalt: "<<spalt->sql<<endl;
+	caus<<"tbname: "<<tbname<<", spalt: "<<spalt->sql<<endl;
 	caus<<"spalt->num_rows: "<<spalt->num_rows<<endl;
   if (!spalt->obfehl) {
     delete[] spnamen;
@@ -843,6 +843,12 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
     delete[] sptyp;
     sptyp=new char const*[spalt->num_rows];
     int spnr=0;
+    while (cerg=spalt->HolZeile(),cerg?*cerg:0) {
+			caus<<rot<<"spnr:              "<<spnr<<"!!!!!!!!!!!!!!!!!!!!"<<schwarz<<endl;
+
+		}
+		spnr=0;
+
     ////    <<violett<<"Schema: "<<schwarz<<db<<endl;
     ////    <<violett<<"Tabelle: "<<schwarz<<name<<endl;
     while (cerg=spalt->HolZeile(),cerg?*cerg:0) {
@@ -1167,7 +1173,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
             } // if (aendere) 
           } // if (verschieb || aendere)
         } // for(int gspn=0;gspn<feldzahl;gspn++) 
-				RS commit(dbp,"COMMIT",aktc,obverb);
+				//RS commit(dbp,"COMMIT",aktc,obverb);
 				machind(aktc,obverb,oblog);
 				machconstr(aktc,obverb,oblog);
 			} // case Mysql
