@@ -845,7 +845,8 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
     ////    <<violett<<"Schema: "<<schwarz<<db<<endl;
     ////    <<violett<<"Tabelle: "<<schwarz<<name<<endl;
     while (cerg=spalt->HolZeile(),cerg?*cerg:0) {
-      spnamen[spnr]=*(*cerg);
+			caus<<"spalt->num_rows: "<<spalt->num_rows<<endl;
+			spnamen[spnr]=*(*cerg);
       splenge[spnr]=cjj(cerg,1);
       sptyp[spnr]=cjj(cerg,2);
       /*//
