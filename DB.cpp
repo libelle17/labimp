@@ -967,6 +967,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 			for(unsigned j=0;j<indx->feldzahl;j++) {
 				sql<<"`"<<indx->felder[j].name<<"`";
 				for(unsigned spnr=0;spnr<spalt->num_rows;spnr++) { // reale Spalten
+					caus<<rot<<indx->felder[j].name<<schwarz<<", spnamen: "<<spnamen[spnr]<<", spnr: "<<spnr<<schwarz<<endl;
 					if (!strcasecmp(indx->felder[j].name.c_str(),spnamen[spnr])) { // Feldnamen identisch
 //						if (indx->felder[j].lenge.empty()) indx->felder[j].lenge=splenge[spnr];
 						const long numsplen=atol(splenge[spnr]);
