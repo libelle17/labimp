@@ -833,6 +833,7 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
         "FROM information_schema.columns WHERE table_name = '"+tbname+"' AND table_schema = '"+dbp->dbname+"' ORDER BY ordinal_position",
 				  aktc,obverb>0?obverb-1:0);
 	caus<<"spalt: "<<spalt->sql<<endl;
+	caus<<"spalt->num_rows: "<<spalt->num_rows<<endl;
   if (!spalt->obfehl) {
     delete[] spnamen;
     spnamen=new char const*[spalt->num_rows];
