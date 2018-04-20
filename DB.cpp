@@ -1457,7 +1457,7 @@ sqlft::sqlft(DBSTyp eDBS, const chrono::system_clock::time_point* const tp): str
 	pthread_mutex_unlock(&timemutex);
 	druckeein(eDBS,&zt);
 #endif // altzeit
-////	caus<<rot<<c_str()<<schwarz<<" "<<string_to_hex(c_str())<<" "<<length()<<" "<<size()<<endl;
+////caus<<rot<<c_str()<<schwarz<<" "<<string_to_hex(c_str())<<" "<<length()<<" "<<size()<<endl;
 }
 
 void stmax(int *zahl,int stellen=2)
