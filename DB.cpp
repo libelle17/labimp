@@ -862,6 +862,7 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
        */
       spnr++;
     }
+		if (tbname=="laboryparameter") exit(81);
     if (obverb) {
 		  fLog(blaus+"spalt->num_rows: "+schwarz+ltoan(spalt->num_rows),obverb,oblog);
       for(size_t j=0;j<spalt->num_rows;j++) {
