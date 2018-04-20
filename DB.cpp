@@ -964,6 +964,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 			sql<<"OR REPLACE ";
 #endif				
 			sql<<(indx->unique?"UNIQUE ":"")<<"INDEX `"<<indx->name<<"` ON `"<<tbname<<"`(";
+			caus<<rot<<sql.str()<<schwarz<<endl;
 			for(unsigned j=0;j<indx->feldzahl;j++) {
 				sql<<"`"<<indx->felder[j].name<<"`";
 				caus<<"`"<<indx->felder[j].name<<"`"<<endl;
