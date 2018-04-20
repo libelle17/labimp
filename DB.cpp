@@ -947,7 +947,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 						obneu=1;
 					}
 				} //               if (!obneu)    // Wenn zu viele Zeilen da sind, auch loeschen
-#define abMariaDB1014				
+//#define abMariaDB1014				
 #ifndef abMariaDB1014				
 				if (obneu) {
 					RS rloesch(dbp,"DROP INDEX `"+indx->name +"` ON `"+tbname+"`",aktc,obverb);
