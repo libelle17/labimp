@@ -338,7 +338,10 @@ void hhcl::prueflyparameter(DB *My, const string& tlyparameter, const int obverb
 			Feld("StByte","int","10","",Tx[T_Ordnungsnummer_der_Dateiuebertragung],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 		};
-		Index indices[]{Index("Abkü",new Feld[2]{Feld("Abkü"),Feld("Einheit")},2)};
+		Index indices[]{
+			Index("Abkü",new Feld[2]{Feld("Abkü"),Feld("Einheit")},2),
+			Index("eindeutig",new Feld[3]{Feld("Abkü"),Feld("Einheit"),Feld("NB")},3,/*unique*/1),
+		};
 		Constraint csts[]{
 			Constraint(vorsil+"parameter"+vorsil+"plab",new Feld{Feld("labid")},1,vorsil+"plab",new Feld{Feld("ID")},1,cascade,cascade),
 		};
@@ -365,7 +368,10 @@ void hhcl::prueflydat(DB *My, const string& tlydat, const int obverb, const int 
 			Feld("Zp","datetime","0","0",Tx[T_Einlesezeitpunkt],0,0,1),
 			Feld("fertig","bit","1","",Tx[T_ob_Einlesen_fertig],0,0,1),
 		};
-		Index indices[]{Index("NamePfad",new Feld[2]{Feld("Name"),Feld("Pfad")},2)};
+		Index indices[]{
+			Index("NamePfad",new Feld[2]{Feld("Name"),Feld("Pfad")},2),
+				Index("DatID",new Feld[1]{Feld("DatID")},1),
+		};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlydat,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0,Tx[T_LaborEinlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -890,7 +896,7 @@ void hhcl::dverarbeit(const string& datei)
 	if (mdat.is_open()) {
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
-		uchar oblaborda=0, arztnameda=0, keimz=0,keimzda=0;
+		uchar oblaborda=0, arztnameda=0, /*in (Vor)zeile kommt Wort Keimzahl vor*/keimz=0,/*die Keimzahl wurde schon eingesetzt*/keimzda=0;
 		string erklaerung,kommentar,normbereich,qspez,auftrhinw,uNm,oNm,uNw,oNw,verf,abkue,lanr;
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
@@ -1284,11 +1290,13 @@ void hhcl::dverarbeit(const string& datei)
 					kommentar+=inh;
 				}
 				if (keimz && !keimzda) {
-					rba.hz("Keimzahl",inh);
+					if (inh.find("00")!=string::npos) {
+						rba.hz("Keimzahl",inh);
+					}
 					keimzda=1; // "Labor 20101210 034422.dat"
 					keimz=0;
 				}
-				if (inh.find("Keimzahl")!=string::npos) {
+				if (!keimz && inh.find("Keimzahl")!=string::npos) {
 					keimz=1;
 				}
 			} else if (cd=="8490") {
@@ -1382,7 +1390,7 @@ void hhcl::pvirtfuehraus()
 		systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 		systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
 		svec lrue;
-		systemrueck("find "+ldatvz+" -type f -maxdepth 1 \\( -iname '1b*.ld*' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
+		systemrueck("find "+ldatvz+" -type f -maxdepth 1 \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 		//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 		caus<<"Dateien gefunden: "<<lrue.size()<<endl;
 		for(size_t i=0;i<lrue.size();i++) {

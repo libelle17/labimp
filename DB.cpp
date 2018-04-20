@@ -296,7 +296,7 @@ Tabelle::Tabelle(const DB* dbp,const std::string& tbname, Feld *vfelder, const i
 {
 }
 
-Tabelle::Tabelle(const DB* dbp,const string& tbname,const size_t aktc,int obverb,int oblog): dbp(dbp),tbname(tbname)
+Tabelle::Tabelle(const DB* dbp,const string& vtbname,const size_t aktc,int obverb,int oblog): dbp(dbp),tbname(vtbname)
 {
 	lesespalten(aktc,obverb,oblog);
 }
@@ -828,7 +828,7 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
   delete spalt;
   ////  spalt=new RS(this,string("SELECT column_name,character_maximum_length FROM information_schema.columns WHERE table_name = '")+name
   ////      +"' and table_schema = '"+db+"' order by ordinal_position"); // geht nicht fuer Zahlen
-  spalt=new RS(dbp,"SELECT column_name p0,"
+	spalt=new RS(dbp,"SELECT column_name p0,"
         "MID(column_type,INSTR(column_type,'(')+1,INSTR(column_type,')')-INSTR(column_type,'(')-1) p1, column_type p2 "
         "FROM information_schema.columns WHERE table_name = '"+tbname+"' AND table_schema = '"+dbp->dbname+"' ORDER BY ordinal_position",
 				  aktc,obverb>0?obverb-1:0);
@@ -1136,8 +1136,9 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
             /*int erg=*/rs.Abfrage(sql.str(),aktc,obverb);
             gesfehlr+=rs.obfehl;
             if (gesfehlr) fLog(string("gesfehlr 3: ")+ltoan(gesfehlr),1,1);
-            if (verschieb) 
+            if (verschieb)  {
               lesespalten(aktc,obverb>0?obverb-1:0,oblog);
+						}
             if (aendere) {
               if (!istr[gspn].empty()) {
                 RS rloesch(dbp,string("DROP INDEX `")+felder[gspn].name +"` ON `"+tbname+"`",aktc,obverb);
@@ -1689,6 +1690,7 @@ void RS::weisezu()
 int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int oblog/*=0*/,string *idp/*=0*/,my_ulonglong *arowsp/*=0*/)
 {
 	int altobverb=obverb;
+	const unsigned vlz=10; // Verlängerungszahl
 //	obverb=1;
 	yLog(obverb>0?obverb-1:0,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
@@ -1746,7 +1748,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 									const string col=fehler.substr(p1,p2-p1-1);
 									string SQL=boost::locale::to_upper(sql, loc);
 ////									transform(sql.begin(),sql.end(),std::back_inserter(SQL),::toupper);
-									string suchstr[2]={"INSERT INTO ","UPDATE "};
+									string suchstr[2]={"INSERT INTO ","UPDATE "}; // Problem: "ON DUPLICATE KEY UPDATE"
 									uchar neuerversuch=0;
 									for(unsigned uru=0;uru<sizeof suchstr/sizeof *suchstr;uru++) {
 										if ((p1=SQL.find(suchstr[uru]))!=string::npos) {
@@ -1754,10 +1756,11 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 											if ((p2=SQL.find_first_of(" (",p1)+1)) {
 												string tbl=sql.substr(p1,p2-p1-1); // wegen Groß- und Kleinschreibung
 												anfzweg(tbl);
+												if (tbl.find_first_of(",='`")!=string::npos) continue;
 												Tabelle aktt(dbp,tbl,aktc,obverb>0?obverb-1:0,oblog);
 												for(unsigned spnr=0;spnr<aktt.spalt->num_rows;spnr++) { // reale Spalten
 													if (aktt.spnamen[spnr]==col) {
-														dbp->tuerweitern(tbl,col,atol(aktt.splenge[spnr])+5,aktc,obverb>0?obverb-1:0);
+														dbp->tuerweitern(tbl,col,atol(aktt.splenge[spnr])+vlz,aktc,obverb>0?obverb-1:0);
 														neuerversuch=1;
 														break;
 													} // 													if (aktt.spnamen[spnr]==col)
@@ -2021,7 +2024,7 @@ my_ulonglong RS::tbupd(const vector<instyp>& einf,int obverb, const string& bedi
 my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
 		int obverb/*=0*/,string *const idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/,uchar mitupd/*=0*/) 
 {
-	caus<<violett<<"tbins: "<<schwarz;
+	caus<<violett<<"tbins: "<<blau<<table<<" "<<schwarz;
 	my_ulonglong zl=0;
 	ulong locks=0;
 	uchar obhauptfehl=0;
@@ -2168,8 +2171,11 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 					} // 				if (einfp->size())
 					if (mitupd) {
 						isql+=" ON DUPLICATE KEY UPDATE ";
-						isql+=dbp->dnb+einfp->at(0).feld+dbp->dne+"="+dbp->dnb+einfp->at(0).feld+dbp->dne;
-					}
+						for(unsigned i = 0;i<einfp->size();i++) {
+							if (i) isql+=',';
+							isql+=dbp->dnb+einfp->at(i).feld+dbp->dne+'='+einfp->at(i).wert;
+						}
+					} // 					if (mitupd)
 					break;
 				case Postgres:
 					caup<<"hier insert 3"<<endl;
