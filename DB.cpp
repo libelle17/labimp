@@ -822,6 +822,7 @@ return ergi;
 // wird aufgerufen in: prueftab
 void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 {
+	obverb=1;
   fLog(violetts+Txd[T_Lesespalten]+blau+": "+tbname+"'"+schwarz,obverb,oblog);
   char ***cerg;
   ////          RS spalt(this,string("SHOW COLUMNS FROM `")+name+"`");
