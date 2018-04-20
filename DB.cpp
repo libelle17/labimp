@@ -862,7 +862,6 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
        */
       spnr++;
     }
-		if (tbname=="laboryparameter") exit(81);
     if (obverb) {
 		  fLog(blaus+"spalt->num_rows: "+schwarz+ltoan(spalt->num_rows),obverb,oblog);
       for(size_t j=0;j<spalt->num_rows;j++) {
@@ -1168,6 +1167,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
             } // if (aendere) 
           } // if (verschieb || aendere)
         } // for(int gspn=0;gspn<feldzahl;gspn++) 
+				if (tbname=="laboryparameter") exit(82);
 				machind(aktc,obverb,oblog);
 				machconstr(aktc,obverb,oblog);
 			} // case Mysql
