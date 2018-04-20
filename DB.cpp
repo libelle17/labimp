@@ -843,12 +843,6 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
     delete[] sptyp;
     sptyp=new char const*[spalt->num_rows];
     int spnr=0;
-    while (cerg=spalt->HolZeile(),cerg?*cerg:0) {
-			caus<<rot<<"spnr:              "<<spnr<<"!!!!!!!!!!!!!!!!!!!!"<<schwarz<<endl;
-
-		}
-		spnr=0;
-
     ////    <<violett<<"Schema: "<<schwarz<<db<<endl;
     ////    <<violett<<"Tabelle: "<<schwarz<<name<<endl;
     while (cerg=spalt->HolZeile(),cerg?*cerg:0) {
@@ -856,6 +850,7 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 			spnamen[spnr]=*(*cerg);
       splenge[spnr]=cjj(cerg,1);
       sptyp[spnr]=cjj(cerg,2);
+			caus<<"spnr: "<<spnr<<", spnamen[spnr]: "<<spnamen[spnr]<<endl;
       /*//
          MYSQL_RES *dbres;
          dbres = mysql_list_fields(conn,name.c_str(),ltab->felder[spnr].name.c_str());
