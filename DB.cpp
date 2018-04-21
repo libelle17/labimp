@@ -2439,3 +2439,16 @@ void dhcl::virtschlussanzeige()
 {
 	hcl::virtschlussanzeige();
 }
+
+void instyp::ausgeb()
+{
+	caus<<"Feld: '"<<blau<<feld<<schwarz<<"', Wert: '"<<blau<<wert<<"'"<<schwarz<<endl;
+}
+
+void insv::ausgeb()
+{
+	caus<<"Tabelle: "<<*itabp<<endl;
+	for(instyp i:ivec) {
+		i.ausgeb();
+	}
+}

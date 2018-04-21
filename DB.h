@@ -200,6 +200,7 @@ class instyp
       wert=sqlft(eDBS,vwert);
       obkeinwert=0;
     }
+		void ausgeb();
 }; // class instyp 
 ////string ersetze(const char *u, const char* alt, const char* neu);
 
@@ -533,6 +534,7 @@ struct insv
 			caus<<violett<<"i: "<<gruen<<i<<": '"<<schwarz<<ivec[i].feld<<": '"<<blau<<ivec[i].wert<<"'"<<schwarz<<endl;
 		}
 	}
+	void ausgeb();
 };
 
 #endif // DB_H_DRIN

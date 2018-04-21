@@ -147,6 +147,7 @@ enum T_
 	T_Ordnungsnummer_der_Dateiuebertragung,
 	T_fehlend,
 	T_Bezug_auf_LaborBakt,
+	T_pruefPatID_leere_Funktion,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -168,7 +169,7 @@ class hhcl:public dhcl
 	string tlyfehlt=vorsil+"fehlt";
 	string tlyparameter=vorsil+"parameter";
 	string labind;
-	ic_cl *icp;
+	ic_cl *icp[2];
  protected: //α
 	string p1;
 	int p2;
@@ -205,6 +206,12 @@ class hhcl:public dhcl
 		__attribute__((weak)) // implementationsspezifische Vorgaben, Modul vgb.cpp)
 #endif
 		;
+	void pruefPatID(const int aktc,tm &eingang, string &nname,string &vname,string &titel,string &nvorsatz,tm &gebdat,string &sgschl,string &pat_id)
+#ifdef VOMHAUPTCODE
+		__attribute__((weak)) // implementationsspezifische Adresspruefung)
+#endif
+		;
+	void russchreib(insv &rus,const int aktc,tm &eingtm,string &usid,string &baktid,string &nname,string &vname,string &titel,string &nvorsatz,tm &gebdat,string &sgschl,string &pat_id);
 	void virtinitopt(); // (programm-)spezifische Optionen
 	void pvirtmacherkl();
 	void virtMusterVorgb();

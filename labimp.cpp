@@ -301,6 +301,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"fehlend","missing"},
 	// T_Bezug_auf_LaborBakt
 	{"Bezug auf lybakt","reference to lybact"},
+	// T_pruefPatID_leere_Funktion
+	{"pruefPatID() (leere Funktion)","checkPatID() (empty function)"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -310,7 +312,8 @@ const char *logdt="/var/log/" DPROG "vorgabe.log";//darauf wird in kons.h verwie
 using namespace std; //ω
 hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) //α
 {
-	icp=new ic_cl("UTF8","ISO-8859-15");
+	icp[0]=new ic_cl("UTF8","ISO-8859-15");
+	icp[1]=new ic_cl("UTF8","CP850");
 	// mitcron=0; //ω
 } // hhcl::hhcl //α
 // Hier neue Funktionen speichern: //ω
@@ -353,7 +356,6 @@ void hhcl::prueflyparameter(DB *My, const string& tlyparameter, const int obverb
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
-
 
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflydat(DB *My, const string& tlydat, const int obverb, const int oblog, const uchar direkt/*=0*/)
@@ -427,7 +429,10 @@ void hhcl::prueflypneu(DB *My, const string& tlypnb, const int obverb, const int
 			 Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit"),Feld("lid")};   Index i0("Abkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 			 Index indices[]={i0};
 		 */
-		Index indices[]{Index("Abkü",new Feld[3]{Feld("Abkü"),Feld("Einheit"),Feld("lid")},3)};
+		Index indices[]{
+			Index("Abkü",new Feld[3]{Feld("Abkü"),Feld("Einheit"),Feld("lid")},3),
+			Index("eindeutig",new Feld[3]{Feld("Abkü"),Feld("Einheit"),Feld("lid")},3,/*unique*/1),
+		};
 		Constraint csts[]{Constraint("Gruppe",new Feld{Feld("Gruppe")},1,"laborgruppen",new Feld{Feld("Laborgruppe")},1),
 			// geht beides!:
 			//			  								Constraint("Labore",new Feld[1]{Feld("lid")},1,vorsil+"plab",new Feld[1]{Feld("id")},1)};
@@ -495,7 +500,7 @@ void hhcl::prueflysaetze(DB *My, const string& tlypnb, const int obverb, const i
 			Feld("KBVPrüfnr","varchar","1","",Tx[T_101_KBV_Pruefnummer_Turbomed],0,0,1),
 			Feld("Zeichensatz","varchar","1","",Tx[T_9106_verwendeter_Zeichensatz_Turbomed],0,0,1),
 			Feld("Kundenarztnr","varchar","1","",Tx[T_8312_Kundenarztnummer_Turbomed],0,0,1),
-			Feld("Erstellungsdatum","varchar","1","",Tx[T_9103_Erstellungsdatum_Turbomed],0,0,1),
+			Feld("Erstellungsdatum","date","","",Tx[T_9103_Erstellungsdatum_Turbomed],0,0,1),
 			Feld("Gesamtlänge","varchar","1","",Tx[T_9202_Gesamtlaenge_des_Datenpaketes_Turbomed],0,0,1),
 		};
 		Constraint csts[]{
@@ -532,7 +537,7 @@ void hhcl::prueflyus(DB *My, const string& tlypnb, const int obverb, const int o
 			Feld("Pat_id","int","10","","",1,0,1,string(),1),
 			Feld("Nachname","varchar","1","","3101",0,0,0),
 			Feld("Vorname","varchar","1","","3102",0,0,0),
-			Feld("GebDat","varchar","1","","3103",0,0,0),
+			Feld("GebDat","date","","","3103",0,0,0),
 			Feld("Titel","varchar","1","","3104",0,0,0),
 			Feld("NVorsatz","varchar","1","","3105",0,0,0),
 			Feld("BefArt","varchar","1","",Tx[T_8401_Befundart_Turbomed__Fertigstellungsgrad_EEndbefund_T__Teilbefund],0,0,0),
@@ -681,7 +686,9 @@ void hhcl::prueflyfehlt(DB *My, const string& tlyfehlt, const int obverb, const 
 			Feld("Kennung","varchar","4","",Tx[T_Kennung],0,0,1),
 			Feld("Inhalt","varchar","1","",Tx[T_Inhalt],0,0,1),
 		};
-		Constraint csts[]{Constraint(vorsil+"dat"+vorsil+"fehlt",new Feld{Feld("DatID")},1,vorsil+"dat",new Feld{Feld("DatID")},1,cascade,cascade)};
+		Constraint csts[]{
+			Constraint(vorsil+"dat"+vorsil+"fehlt",new Feld{Feld("DatID")},1,vorsil+"dat",new Feld{Feld("DatID")},1,cascade,cascade)
+		};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlyfehlt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborfehlt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -705,6 +712,9 @@ void hhcl::prueflypgl(DB *My, const string& tlypgl, const int obverb, const int 
 			Feld("idxpbez","int","10","",Tx[T_ist_identisch_mit_laborxpneu],1,0,1,string(),1),
 			Feld("ergaenzt","datetime","0","0",Tx[T_Zeitpunkt_der_Ergaenzung],0,0,1),
 		};
+		Index indices[]{
+		};
+		/*//
 		Feld ifd0[]{Feld("idxpneu")};
 		Feld ifd0a[]{Feld("id")};
 		Feld ifd1[]{Feld("idpara")};
@@ -715,8 +725,14 @@ void hhcl::prueflypgl(DB *My, const string& tlypgl, const int obverb, const int 
 		Constraint c1(vorsil+"pgl_2",ifd1,1,vorsil+"parameter",ifd1a,1); // bzw. laborparameter
 		Constraint c2(vorsil+"pgl_3",ifd2,1,vorsil+"pneu",ifd2a,1,cascade,cascade);
 		Constraint csts[]{c0,c1,c2};
+		*/
+		Constraint csts[]{
+			Constraint(vorsil+"pgl_1",new Feld{Feld("idxpneu")},1,vorsil+"pneu",new Feld{Feld("id")},1),
+			Constraint(vorsil+"pgl_2",new Feld{Feld("idpara")},1,vorsil+"parameter",new Feld{Feld("id")},1),
+			Constraint(vorsil+"pgl_3",new Feld{Feld("idxpbez")},1,vorsil+"pneu",new Feld{Feld("id")},1,cascade,cascade),
+		};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlypgl,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_Laborpgl]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlypgl,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborpgl]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlypgl,1,1);
 			exit(11);
@@ -724,6 +740,10 @@ void hhcl::prueflypgl(DB *My, const string& tlypgl, const int obverb, const int 
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
+void hhcl::pruefPatID(const int aktc,tm &eingtm, string &nname,string &vname,string &titel,string &nvorsatz,tm &gebdat,string &sgschl,string &pat_id)
+{
+	hLog(violetts+Tx[T_pruefPatID_leere_Funktion]+schwarz);
+} // void hhcl::virtVorgbAllg
 
 //α
 // wird aufgerufen in lauf
@@ -854,12 +874,39 @@ void hhcl::virtzeigueberschrift()
 	hcl::virtzeigueberschrift();
 } // void hhcl::virtzeigueberschrift
 
-struct tm BDTtoDate(string& inh)
+void BDTtoDate(string& inh,struct tm *tm)
 {
-	tm tm={0};
-	strptime(inh.c_str(),"%d%m%Y",&tm);
-	return tm;
+	memset(tm,0,sizeof *tm);
+//	const char* const mu[]{"%d%m%Y","%Y%m%d"};
+	const char* const mu[]{"%Y%m%d","%d%m%Y"};
+	for(auto aktmu:mu) {
+		strptime(inh.c_str(),aktmu,tm);
+		if (tm->tm_year && tm->tm_year<200 && tm->tm_mon<12 && tm->tm_mday && tm->tm_mday<32)
+			break;
+	}
 }
+
+void hhcl::russchreib(insv &rus,const int aktc,tm &eingtm,string &usid,string &baktid,string &nname,string &vname,string &titel,string &nvorsatz,tm &gebdat,string &sgschl,string &pat_id)
+{
+	rus.ausgeb();
+	pruefPatID(aktc,eingtm,nname,vname,titel,nvorsatz,gebdat,sgschl,pat_id);
+	rus.hz("Nachname",nname);
+	rus.hz("Vorname",vname);
+	rus.hz("Titel",titel);
+	rus.hz("NVorsatz",nvorsatz);
+	rus.hz("GebDat",&gebdat);
+	rus.hz("Geschlecht",sgschl);
+	rus.hz("Pat_id",pat_id);
+	rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
+	nname.clear();
+	vname.clear();
+	titel.clear();
+	nvorsatz.clear();
+	memset(&gebdat,0,sizeof gebdat);
+	sgschl.clear();
+	pat_id="0";
+	baktid="0";
+} // void hhcl::russchreib
 
 void hhcl::dverarbeit(const string& datei)
 {
@@ -871,7 +918,10 @@ void hhcl::dverarbeit(const string& datei)
 	unsigned UsLfd;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen, usoffen=0;
-	int geschlecht; 
+	string nname,vname,titel,nvorsatz,sgschl,pat_id{"0"};
+	// Zahl der unbekannten Geschlechter aus Namen reduzieren
+	RS unbekgschl(My,"update namen n set geschlecht = if((select count(distinct i.geschlecht) from (select * from namen) i where vorname=n.vorname and geschlecht<>' ')=1,(select max(i.geschlecht) from (select * from namen) i where vorname=n.vorname and geschlecht<>' '),n.geschlecht) where geschlecht= ' '",aktc,ZDB);
+	tm gebdat{0}, eingtm{0};
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlydat,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
@@ -883,6 +933,8 @@ void hhcl::dverarbeit(const string& datei)
 #endif 
 	insv rsaetze(My,/*itab*/tlysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rpar(My,/*itab*/tlyparameter,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rpneu(My,/*itab*/tlypneu,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rpnb(My,/*itab*/tlypnb,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rlab(My,/*itab*/tlyplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rus(My,/*itab*/tlyus,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rfe(My,/*itab*/tlyfehlt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
@@ -892,8 +944,13 @@ void hhcl::dverarbeit(const string& datei)
 	insv rle(My,/*itab*/tlyleist,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
 	caus<<rot<<datei<<schwarz<<endl;
+	
 	mdatei mdat(datei,ios::in);
 	if (mdat.is_open()) {
+		uchar cp=0; // 0=utf-8, 1=iso-8859-15, 2=cp850
+		// ä,ö,ü,Ä,Ö,Ü,ß,µ, iso8859-15, cp850
+//		unsigned char const sonder[2][8]={{0xE4,0xF6,0xFC,0xC4,0xD6,0xDC,0xDF,0xB5},{0x84,0x94,0x81,0x8E,0x99,0x9A,0xE1,0xE6}};
+		const char* const sonder[2]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6"};
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
 		uchar oblaborda=0, arztnameda=0, /*in (Vor)zeile kommt Wort Keimzahl vor*/keimz=0,/*die Keimzahl wurde schon eingesetzt*/keimzda=0;
@@ -903,13 +960,25 @@ void hhcl::dverarbeit(const string& datei)
 			string cd,inh;
 			if (zeile.size()>3) cd=zeile.substr(3,4);
 			if (zeile.size()>7) {
-				inh=icp->convert(zeile,7);
+				if (!cp) {
+					for(unsigned p=0;p<2;p++) {
+						if (zeile.find_first_of(sonder[p],7)!=string::npos) {
+							cp=p+1;
+							break;
+						}
+					}
+				}
+				if (cp) {
+					inh=icp[cp-1]->convert(zeile,7);
+				} else {
+					inh=zeile.substr(7);
+				}
 				sersetze(&inh,"\r","");
 			}
 			if (cd.empty()||!cd[0]) continue;
 			// sonst keinen Fall von Zeilenumbruch gefunden
 			caus<<blau<<bzahl<<" "<<cd<<" "<<schwarz<<inh<<endl;
-//			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
+			//			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
 #ifdef speichern
 			if (cd=="8000") {
 				if (inh.substr(0,4)=="8220") { // Datenpaket-Header
@@ -927,10 +996,8 @@ void hhcl::dverarbeit(const string& datei)
 					if (usoffen) {
 						// caus<<rus.size()<<endl;
 						// z.B. "Labor 20120223 020708.dat"
-						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
-						geschlecht=0;
+						russchreib(rus,aktc,eingtm,usid,baktid,nname,vname,titel,nvorsatz,gebdat,sgschl,pat_id);
 						usoffen=0;
-						baktid="0";
 					}
 					if (rbawep) {
 						// z.B. "Labor 20101201 004634.dat"
@@ -979,11 +1046,11 @@ void hhcl::dverarbeit(const string& datei)
 						rpar.hz("oNw",oNw);
 						oNw.clear();
 					}
-					// z.B. "Labor 20101201 044232.dat"
 					if (rpar.size()) {
 						/*auto*/chrono::system_clock::time_point aktzp=chrono::system_clock::now();
 						rpar.hz("Aktzeit",&aktzp);
 					}
+					// z.B. "Labor 20101201 044232.dat"
 					rpar.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0,/*mitupd=*/1);
 					// z.B. "Labor 20101201 004634.dat"
 					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
@@ -1006,11 +1073,10 @@ void hhcl::dverarbeit(const string& datei)
 					}
 					//					rus.zeig("0");
 					if (usoffen) {
+						// caus<<rus.size()<<endl;
 						// z.B. "Labor 20091126 162200.dat"
-						rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
-						geschlecht=0;
+						russchreib(rus,aktc,eingtm,usid,baktid,nname,vname,titel,nvorsatz,gebdat,sgschl,pat_id);
 						usoffen=0;
-						baktid="0";
 					}
 					satzart=inh;
 					rus.hz("DatID",datid);
@@ -1093,11 +1159,10 @@ void hhcl::dverarbeit(const string& datei)
 				// z.B. "Labor 20101202 011636.dat"
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (usoffen) {
+					// caus<<rus.size()<<endl;
 					// z.B. "Labor 20091126 162829.dat"
-					rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&usid);
-					geschlecht=0;
+					russchreib(rus,aktc,eingtm,usid,baktid,nname,vname,titel,nvorsatz,gebdat,sgschl,pat_id);
 					usoffen=0;
-					baktid="0";
 				}
 				if (cd=="8434") {
 					if (rba.size()) {
@@ -1160,7 +1225,7 @@ void hhcl::dverarbeit(const string& datei)
 					qspez+=inh;
 				}
 			} else if (cd=="8432") { // Abnahmedatum
-				strptime(inh.c_str(),"%d%m%Y",&abndat);
+				BDTtoDate(inh,&abndat);
 			} else if (cd=="8433") {
 				strptime(inh.c_str(),"%H%M",&abndat);
 			} else if (cd=="8470") {
@@ -1185,14 +1250,14 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="8422") {
 					rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
-				tm tm=BDTtoDate(inh);
-				rus.hz("Eingang",&tm);
+				BDTtoDate(inh,&eingtm);
+				rus.hz("Eingang",&eingtm);
 			} else if (cd=="8302") {
-				memset(&berdat,0,sizeof berdat);
-				strptime(inh.c_str(),"%d%m%Y",&berdat);
+				BDTtoDate(inh,&berdat);
 			} else if (cd=="8303") {
 				strptime(inh.c_str(),"%H%M",&berdat);
 				rus.hz("Berichtsdatum",&berdat);
+				//// <<"3 berdat: "<<ztacl(&berdat,"%F %T")<<endl;
 			} else if (cd=="8609") {
 				rus.hz("Abrechnungstyp",inh);
 			} else if (cd=="8401") { // Befundart
@@ -1204,10 +1269,9 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="8405") {
 				rus.hz("Patienteninformation",inh);
 			} else if (cd=="8407") { // ' 1=Mann, 2=Frau, 3=unbek, 4=Knabe, 5=Mädchen, 0=Name fehlt, 9=beide;
-				geschlecht=atol(inh.c_str());
-				rus.hz("Geschlecht",inh);
+				sgschl=inh;
 			} else if (cd=="3101") {
-				rus.hz("Nachname",inh.substr(0,3)=="zzz"?inh.substr(4):inh);
+				nname=(inh.substr(0,3)=="zzz"?inh.substr(4):inh);
 				if (!usoffen) {
 					rus.hz("DatID",datid);
 					rus.hz("SatzID",satzid);
@@ -1216,16 +1280,15 @@ void hhcl::dverarbeit(const string& datei)
 					usoffen=1; // verkuerzte Information z.B. in "Labor 20051127 224528.dat"
 				} // 				if (!usoffen)
 			} else if (cd=="3102") {
-				rus.hz("Vorname",inh);
+				vname=inh;
 			} else if (cd=="3103") {
-				rus.hz("GebDat",inh);
+				BDTtoDate(inh,&gebdat);
 			} else if (cd=="3110") {
-				geschlecht=inh=="W"?2:inh=="M"?1:inh=="X"?3:atol(inh.c_str());
-				rus.hz("Geschlecht",inh=="W"?"2":inh=="M"?"1":inh=="X"?"3":inh);
+				sgschl=(inh=="W"?"2":inh=="M"?"1":inh=="X"?"3":inh);
 			} else if (cd=="3104") {
-				rus.hz("Titel",inh);
+				titel=inh;
 			} else if (cd=="3100") {
-				rus.hz("NVorsatz",inh);
+				nvorsatz=inh;
 			} else if (cd=="9212") {
 				rsaetze.hz("VersionSatzb",inh);
       } else if (cd=="0201") {
@@ -1345,13 +1408,13 @@ void hhcl::dverarbeit(const string& datei)
 					normbereich+=inh;
 				}
 			} else if (cd=="8461") {
-				if (geschlecht==2) {
+				if (sgschl=="2") {
 					uNw=zuzahl(inh);
 				} else {
 					uNm=zuzahl(inh);
 				}
 			} else if (cd=="8462") {
-				if (geschlecht==2) {
+				if (sgschl=="2") {
 					oNw=zuzahl(inh);
 				} else {
 					oNm=zuzahl(inh);
@@ -1361,7 +1424,9 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="8312") {
 				rsaetze.hz("Kundenarztnr",inh);
 			} else if (cd=="9103") {
-				rsaetze.hz("Erstellungsdatum",inh);
+				tm erstd;
+				BDTtoDate(inh,&erstd);
+				rsaetze.hz("Erstellungsdatum",&erstd);
 			} else if (cd=="9202") {
 				rsaetze.hz("Gesamtlänge",inh);
 				// update rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
