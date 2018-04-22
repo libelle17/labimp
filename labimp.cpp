@@ -947,9 +947,9 @@ void hhcl::dverarbeit(const string& datei)
 	
 	mdatei mdat(datei,ios::in);
 	if (mdat.is_open()) {
+		// Zeichensatz ermitteln und verwenden
 		uchar cp=0; // 0=utf-8, 1=iso-8859-15, 2=cp850
 		// ä,ö,ü,Ä,Ö,Ü,ß,µ, iso8859-15, cp850
-//		unsigned char const sonder[2][8]={{0xE4,0xF6,0xFC,0xC4,0xD6,0xDC,0xDF,0xB5},{0x84,0x94,0x81,0x8E,0x99,0x9A,0xE1,0xE6}};
 		const char* const sonder[2]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6"};
 		string zeile,altz;
 		struct tm berdat={0},abndat={0};
