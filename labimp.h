@@ -147,7 +147,11 @@ enum T_
 	T_Ordnungsnummer_der_Dateiuebertragung,
 	T_fehlend,
 	T_Bezug_auf_LaborBakt,
-	T_pruefPatID_leere_Funktion,
+	T_pruefPatID_Standardfunktion,
+	T_ergpql_leere_Funktion,
+	T_Bezug_zu_laborynb,
+	T_prueflyaerzte,
+	T_zum_Bezug_fuer_Laborsaetze,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -156,20 +160,27 @@ class hhcl:public dhcl
 {
  private: //ω
 	const static string vorsil; /*=labory*/
-	string tlydat=vorsil+"dat";
-	string tlyleist=vorsil+"leist";
-	string tlypgl=vorsil+"pgl";
-	string tlyplab=vorsil+"plab";
-	string tlypnb=vorsil+"pnb";
-	string tlypneu=vorsil+"pneu";
-	string tlysaetze=vorsil+"saetze";
-	string tlyus=vorsil+"us";
-	string tlywert=vorsil+"wert";
-	string tlybakt=vorsil+"bakt";
-	string tlyfehlt=vorsil+"fehlt";
-	string tlyparameter=vorsil+"parameter";
-	string labind;
+	const static string tlydat; /*=vorsil+"dat"*/
+	const static string tlyleist; /*=vorsil+"leist"*/
+	const static string tlypgl; /*=vorsil+"pgl"*/
+	const static string tlyplab; /*=vorsil+"plab"*/
+	const static string tlypnb; /*=vorsil+"pnb"*/
+	const static string tlypneu; /*=vorsil+"pneu"*/
+	const static string tlyaerzte; /*=vorsil+"saetze"*/
+	const static string tlysaetze; /*=vorsil+"saetze"*/
+	const static string tlyus; /*=vorsil+"us"*/
+	const static string tlywert; /*=vorsil+"wert"*/
+	const static string tlybakt; /*=vorsil+"bakt"*/
+	const static string tlyfehlt; /*=vorsil+"fehlt"*/
+	const static string tlyparameter; /*=vorsil+"parameter"*/
+	string labind,pneuind,pnbid;
 	ic_cl *icp[2];
+	tm eingtm, gebdat;
+	string nname,vname,titel,nvorsatz,sgschl,pat_id,auftrschl,baktid;
+	svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
+	string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
+	tm abndat{0};
+	uchar keimz{0},keimzda{0};
  protected: //α
 	string p1;
 	int p2;
@@ -188,6 +199,7 @@ class hhcl:public dhcl
 	void prueflyplab(DB *My, const string& tlyplab, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflypnb(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflypneu(DB *My, const string& tlypneu, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyaerzte(DB *My, const string& tlyaerzte, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflysaetze(DB *My, const string& tlysaetze, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflyus(DB *My, const string& tlyus, const int obverb, const int oblog, const uchar direkt=0);
 	void prueflywert(DB *My, const string& tlywert, const int obverb, const int oblog, const uchar direkt=0);
@@ -198,6 +210,8 @@ class hhcl:public dhcl
 	void virtlieskonfein();
 	void virtautokonfschreib();
 	void dverarbeit(const string& datei);
+	void usreset();
+	void wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep);
  protected: 
 	// void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, lieskonfein, hcl::hcl nach holsystemsprache
 	void virtVorgbAllg();
@@ -206,12 +220,17 @@ class hhcl:public dhcl
 		__attribute__((weak)) // implementationsspezifische Vorgaben, Modul vgb.cpp)
 #endif
 		;
-	void pruefPatID(const int aktc,tm &eingang, string &nname,string &vname,string &titel,string &nvorsatz,tm &gebdat,string &sgschl,string &pat_id)
+	void pruefPatID(const int aktc)
 #ifdef VOMHAUPTCODE
 		__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
 		;
-	void russchreib(insv &rus,const int aktc,tm &eingtm,string &usid,string &baktid,string &nname,string &vname,string &titel,string &nvorsatz,tm &gebdat,string &sgschl,string &pat_id);
+void ergpql()
+#ifdef VOMHAUPTCODE
+		__attribute__((weak)) // implementationsspezifische Adresspruefung)
+#endif
+		;
+	void russchreib(insv &rus,const int aktc,string *usidp);
 	void virtinitopt(); // (programm-)spezifische Optionen
 	void pvirtmacherkl();
 	void virtMusterVorgb();

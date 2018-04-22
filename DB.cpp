@@ -2099,7 +2099,11 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 						if (!obfehl) {
 							char*** erg= HolZeile();
 							if (*erg) {
-								if (idp) *idp=*erg[0];
+								if (idp) {
+									//// <<"1 idp: "<<*idp<<", aut.str(): "<<aut.str()<<endl;
+									*idp=*erg[0];
+									//// <<"2 idp: "<<*idp<<", aut.str(): "<<aut.str()<<endl;
+								}
 								obeinfuegen=0;
 							} //             if (*erg)
 							break;
@@ -2135,8 +2139,9 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 				Abfrage(abfr,aktc,obverb>0?obverb-1:0);
 				if (!obfehl) {
 					char*** erg=HolZeile();
-					if (*erg)
+					if (*erg) {
 						obeinfuegen=0;
+					}
 				} // 				if (!obfehl)
 			} // 		if (!abfr.empty())
 		} // 	if (eindfeld.size())
@@ -2226,8 +2231,6 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 						 */
 						//// <<gruen<<"zaehler: "<<(int)zaehler<<", obfehl: "<<(int)obfehl<<schwarz<<endl;
 						if (!obfehl) {
-							// nach Gebrauch loeschen
-							isql.clear();
 							break;
 						}  else {
 							fLog(tuerkiss+"SQL: "+schwarz+"\n"+isql+"\n",iru||(fnr!=1213&&fnr!=1366),0);
@@ -2256,11 +2259,15 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 			break;
 		} // 		switch (dbp->DBS)
   }  // if (!sammeln)if (zaehler)
-  if (!sammeln) if (!obhauptfehl){
+  if (!sammeln) {
+		// nach Gebrauch loeschen
+		isql.clear();
+		if (!obhauptfehl){
     if (maxl) {
       delete[] maxl; maxl=0;
     }
-  } //   if (!sammeln) if (!obhauptfehl)
+  } //   if (!obhauptfehl)
+	} // if (!sammeln)
 	return zl;
 } // my_ulonglong DB::insert(vector<instyp>* einfp,const char** erg,int anfangen=1,int sammeln=0) 
 
@@ -2447,7 +2454,7 @@ void instyp::ausgeb()
 
 void insv::ausgeb()
 {
-	caus<<"Tabelle: "<<*itabp<<endl;
+	caus<<"Tabelle: "<<blau<<*itabp<<schwarz<<endl;
 	for(instyp i:ivec) {
 		i.ausgeb();
 	}
