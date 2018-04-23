@@ -152,6 +152,14 @@ enum T_
 	T_Bezug_zu_laborynb,
 	T_prueflyaerzte,
 	T_zum_Bezug_fuer_Laborsaetze,
+	T_Bezug_auf_lyaerzte,
+	T_prueflyhinw,
+	T_Auftragshinweis_Kommentar_oder_Erklaerung,
+	T_Hinweise,
+	T_codepage_0_utf8_1_iso88591_2_cp850,
+	T_Auftragshinweis_Bezug_auf_lyhinw,
+	T_Erklaerung_Bezug_auf_lyhinw,
+	T_Kommentar_Bezug_auf_lyhinw,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -173,10 +181,11 @@ class hhcl:public dhcl
 	const static string tlybakt; /*=vorsil+"bakt"*/
 	const static string tlyfehlt; /*=vorsil+"fehlt"*/
 	const static string tlyparameter; /*=vorsil+"parameter"*/
-	string labind,pneuind,pnbid;
+	const static string tlyhinw; /*=vorsil+"hinw"*/
+	string labind,pneuind,pnbid,hinwind;
 	ic_cl *icp[2];
 	tm eingtm, gebdat;
-	string nname,vname,titel,nvorsatz,sgschl,pat_id,auftrschl,baktid;
+	string nname,vname,titel,nvorsatz,sgschl,pat_id,auftrschl,baktid,hinwid,erklid,kommid;
 	svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
 	string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
 	tm abndat{0};
@@ -193,25 +202,26 @@ class hhcl:public dhcl
   string ldatvz;   // Verzeichnis der Labordateien
  public: //α //ω
  private: //α //ω
-	void prueflydat(DB *My, const string& tlydat, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyleist(DB *My, const string& tlyleist, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflypgl(DB *My, const string& tlypgl, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyplab(DB *My, const string& tlyplab, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflypnb(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflypneu(DB *My, const string& tlypneu, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyaerzte(DB *My, const string& tlyaerzte, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflysaetze(DB *My, const string& tlysaetze, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyus(DB *My, const string& tlyus, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflywert(DB *My, const string& tlywert, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflybakt(DB *My, const string& tlybakt, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyfehlt(DB *My, const string& tlyfehlt, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyparameter(DB *My, const string& tlyparameter, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflydat(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyleist(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflypgl(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyplab(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflypnb(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflypneu(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyaerzte(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflysaetze(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyus(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflywert(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflybakt(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyfehlt(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyparameter(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+	void prueflyhinw(DB *My, const int obverb, const int oblog, const uchar direkt=0);
 	void virttesterg(); //α
 	void virtlieskonfein();
 	void virtautokonfschreib();
 	void dverarbeit(const string& datei);
 	void usreset();
-	void wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep);
+	void wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp);
  protected: 
 	// void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, lieskonfein, hcl::hcl nach holsystemsprache
 	void virtVorgbAllg();

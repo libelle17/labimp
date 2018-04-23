@@ -7,7 +7,7 @@
 #define VOMHAUPTCODE // um Funktionsdefinition manchmal mit "__attribute__((weak)) " versehen zu können //ω
 #include "labimp.h"
 // fuer verschiedene Sprachen //α
-#define vorsilbe "labory"
+#define vorsilbe "laby"
 const string hhcl::vorsil=vorsilbe;
 const string hhcl::tlydat=vorsil+"dat";
 const string hhcl::tlyleist=vorsil+"leist";
@@ -22,6 +22,7 @@ const string hhcl::tlywert=vorsil+"wert";
 const string hhcl::tlybakt=vorsil+"bakt";
 const string hhcl::tlyfehlt=vorsil+"fehlt";
 const string hhcl::tlyparameter=vorsil+"parameter";
+const string hhcl::tlyhinw=vorsil+"hinw";
 char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_virtVorgbAllg
 	{"virtVorgbAllg()","virtgeneralprefs()"},
@@ -324,6 +325,22 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"prueflysaetze()","checklysets()"},
 	// T_zum_Bezug_fuer_Laborsaetze
 	{"zum Bezug fuer lysaetze","for reference of lysets"},
+	// T_Bezug_auf_lyaerzte
+	{"Bezug auf lyaerzte","reference to lyaerzte"},
+	// T_prueflyhinw
+	{"prueflyhinw()","checklynote()"},
+	// T_Auftragshinweis_Kommentar_oder_Erklaerung
+	{"Auftragshinweis, Kommentar oder Erklärung","order note, comment or explanation"},
+	// T_Hinweise
+	{"Hinweise","notes"},
+	// T_codepage_0_utf8_1_iso88591_2_cp850
+	{"Zeichensatz: 0=utf-8, 1=iso8859-15, 2=cp850","code page: 0=utf-8, 1=iso8859-15, 2=cp850"},
+	// T_Auftragshinweis_Bezug_auf_lyhinw
+	{"Auftragshinweis, Bezug auf lyhinw","order note, reference to lyhinw"},
+	// T_Erklaerung_Bezug_auf_lyhinw
+	{"Erklärung, Bezug auf lyhinw","explanation, reference to lyhinw"},
+	// T_Kommentar_Bezug_auf_lyhinw	
+	{"Kommentar, Bezug auf lyhinw","comment, reference to lyhinw"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -345,7 +362,33 @@ void hhcl::ergpql()
 }
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflyparameter(DB *My, const string& tlyparameter, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyhinw(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflyhinw]+schwarz);
+	const size_t aktc=0;
+	if (!direkt) {
+		Feld felder[] = {
+			Feld(/*name*/"ID",/*typ*/"int",/*lenge*/"10",/*prec*/string(),/*comment*/Tx[T_eindeutige_Identifikation],/*obind*/1,/*obaut*/1,/*nnull*/0,/*defa*/string(),/*unsig*/1),
+			Feld("Text","LONGTEXT","","",Tx[T_Auftragshinweis_Kommentar_oder_Erklaerung],0,0,1,string()),
+		};
+		Index indices[]{
+			Index("Text",new Feld[1]{Feld("Text",string(),"767")},1,/*unique*/0)
+		};
+		Tabelle taba(My,tlyhinw,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Hinweise]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyhinw,1,1);
+			exit(11);
+		}
+		// "Labor 20051127 224528.dat": kein Labor angegeben
+		svec eindfeld; eindfeld<<"ID";
+		insv rhinw(My,/*itab*/tlyhinw,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
+		rhinw.hz("Text",string());
+		rhinw.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&hinwind);
+	} // if (!direkt)
+} // int prueflyhinw
+
+// wird aufgerufen in: virtpruefweiteres
+void hhcl::prueflyparameter(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflyparameter]+schwarz);
 	const size_t aktc=0;
@@ -384,21 +427,22 @@ void hhcl::prueflyparameter(DB *My, const string& tlyparameter, const int obverb
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflydat(DB *My, const string& tlydat, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflydat(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflydat]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("DatID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
-			Feld("Pfad","varchar","60","",Tx[T_Pfadname],0,0,1),
-			Feld("Name","varchar","31","",Tx[T_Name_der_eingelesenen_Labordatei_ohne_Endung],0,0,1),
+			Feld("Pfad","varchar","60","",Tx[T_Pfadname],1,0,1),
+			Feld("Name","varchar","31","",Tx[T_Name_der_eingelesenen_Labordatei_ohne_Endung],1,0,1),
 			Feld("Zp","datetime","0","0",Tx[T_Einlesezeitpunkt],0,0,1),
+			Feld("codepage","integer","1","",Tx[T_codepage_0_utf8_1_iso88591_2_cp850],1,0,1),
 			Feld("fertig","bit","1","",Tx[T_ob_Einlesen_fertig],0,0,1),
 		};
 		Index indices[]{
-			Index("NamePfad",new Feld[2]{Feld("Name"),Feld("Pfad")},2),
-				Index("DatID",new Feld[1]{Feld("DatID")},1),
+//			Index("NamePfad",new Feld[2]{Feld("Name"),Feld("Pfad")},2),
+//				Index("DatID",new Feld[1]{Feld("DatID")},1),
 		};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlydat,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0,Tx[T_LaborEinlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
@@ -410,7 +454,7 @@ void hhcl::prueflydat(DB *My, const string& tlydat, const int obverb, const int 
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflyplab(DB *My, const string& tlyplab, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyplab(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflyplab]+schwarz);
 	const size_t aktc=0;
@@ -438,7 +482,7 @@ void hhcl::prueflyplab(DB *My, const string& tlyplab, const int obverb, const in
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflypneu(DB *My, const string& tlypneu, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflypneu(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflypneu]+schwarz);
 	const size_t aktc=0;
@@ -477,7 +521,7 @@ void hhcl::prueflypneu(DB *My, const string& tlypneu, const int obverb, const in
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflypnb(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflypnb(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflypnb]+schwarz);
 	const size_t aktc=0;
@@ -507,7 +551,7 @@ void hhcl::prueflypnb(DB *My, const string& tlypnb, const int obverb, const int 
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflyaerzte(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyaerzte(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflyaerzte]+schwarz);
 	const size_t aktc=0;
@@ -515,17 +559,20 @@ void hhcl::prueflyaerzte(DB *My, const string& tlypnb, const int obverb, const i
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_zum_Bezug_fuer_Laborsaetze],1,1,0,string(),1),
 			Feld("Arztnr","varchar","1","",Tx[T_201_Arztnummer_Turbomed],1,0,1),
-			Feld("Arztname","varchar","11","",Tx[T_203_Arztname_Turbomed],1,0,1),
+			Feld("Arztname","varchar","41","",Tx[T_203_Arztname_Turbomed],1,0,1),
 			Feld("StraßePraxis","varchar","41","",Tx[T_205_Strasse_der_Praxis_Turbomed],0,0,1),
 			Feld("Arzt","varchar","41","",Tx[T_211_Ausfuehrender_Arzt],1,0,1),
 			Feld("LANR","varchar","11","",Tx[T_212_LANR],1,0,1),
 			Feld("PLZPraxis","varchar","11","",Tx[T_215_PLZ_der_Praxis_Turbomed],0,0,1),
 			Feld("OrtPraxis","varchar","11","",Tx[T_216_Ort_der_Praxis_Turbomed],0,0,1),
 		};
+		Index indices[]{
+			Index("eindeutig",new Feld[7]{Feld("Arztnr"),Feld("Arztname"),Feld("StraßePraxis"),Feld("Arzt"),Feld("LANR"),Feld("PLZPraxis"),Feld("OrtPraxis")},7,/*unique*/1),
+		};
 		Constraint csts[]{
 		};
 			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tlyaerzte,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		Tabelle taba(My,tlyaerzte,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyaerzte,1,1);
 			exit(11);
@@ -533,7 +580,7 @@ void hhcl::prueflyaerzte(DB *My, const string& tlypnb, const int obverb, const i
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflysaetze(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflysaetze(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflysaetze]+schwarz);
 	const size_t aktc=0;
@@ -545,13 +592,7 @@ void hhcl::prueflysaetze(DB *My, const string& tlypnb, const int obverb, const i
 			Feld("Satzlänge","varchar","11","",Tx[T_8100_Satzlaenge_Turbomed],0,0,1),
 			Feld("SatzlängeSchluss","varchar","11","",Tx[T_8100_Satzlaenge_Turbomed_nach_8221_in_Feld_8000],0,0,1),
 			Feld("VersionSatzb","varchar","11","",Tx[T_9212_Version_der_Satzbeschreibung_Turbomed],0,0,1),
-			Feld("Arztnr","varchar","1","",Tx[T_201_Arztnummer_Turbomed],0,0,1),
-			Feld("Arztname","varchar","11","",Tx[T_203_Arztname_Turbomed],0,0,1),
-			Feld("StraßePraxis","varchar","41","",Tx[T_205_Strasse_der_Praxis_Turbomed],0,0,1),
-			Feld("Arzt","varchar","41","",Tx[T_211_Ausfuehrender_Arzt],0,0,1),
-			Feld("LANR","varchar","11","",Tx[T_212_LANR],0,0,1),
-			Feld("PLZPraxis","varchar","11","",Tx[T_215_PLZ_der_Praxis_Turbomed],0,0,1),
-			Feld("OrtPraxis","varchar","11","",Tx[T_216_Ort_der_Praxis_Turbomed],0,0,1),
+			Feld("ArztID","int","10","",Tx[T_Bezug_auf_lyaerzte],0,0,1,string(),1),
 			Feld("LabID","int","10","",Tx[T_Bezug_auf_lyplab],0,0,1,string(),1),
 			Feld("KBVPrüfnr","varchar","21","",Tx[T_101_KBV_Pruefnummer_Turbomed],0,0,1),
 			Feld("Zeichensatz","varchar","1","",Tx[T_9106_verwendeter_Zeichensatz_Turbomed],0,0,1),
@@ -561,6 +602,7 @@ void hhcl::prueflysaetze(DB *My, const string& tlypnb, const int obverb, const i
 		};
 		Constraint csts[]{
 			Constraint(vorsil+"saetze"+vorsil+"dat",new Feld{Feld("datid")},1,vorsil+"dat",new Feld{Feld("DatID")},1,cascade,cascade),
+			Constraint(vorsil+"saetze"+vorsil+"aerzte",new Feld{Feld("arztid")},1,vorsil+"aerzte",new Feld{Feld("ID")},1,cascade,cascade),
 			Constraint(vorsil+"saetze"+vorsil+"plab",new Feld{Feld("labid")},1,vorsil+"plab",new Feld{Feld("ID")},1,cascade,cascade),
 		};
 			// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
@@ -574,7 +616,7 @@ void hhcl::prueflysaetze(DB *My, const string& tlypnb, const int obverb, const i
 
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflyus(DB *My, const string& tlypnb, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflyus]+schwarz);
 	const size_t aktc=0;
@@ -602,7 +644,7 @@ void hhcl::prueflyus(DB *My, const string& tlypnb, const int obverb, const int o
 			Feld("Auftraggeber","varchar","1","",Tx[T_8615_Auftraggeber_LANR],0,0,0),
 			Feld("Patienteninformation","varchar","1","",Tx[T_8405_Patienteninformation_Turbomed],0,0,0),
 			Feld("Geschlecht","varchar","1","",Tx[T_8407_Geschlecht_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/1),
-			Feld("AuftrHinw","LONGTEXT","","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
+//			Feld("AuftrHinw","LONGTEXT","","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("Pat_idUrsp","varchar","1","",Tx[T_Ursprung_der_Pat_id_E__erwogene_Pat_id_su_L__vergleich_mit_ueber_Turbomed_eingelesenem_Labor],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("Pat_idErwVNG","varchar","1","",Tx[T_erwogene_Pat_id_mit_gleichem_Vornamen_Nachnamen_und_Geburtstag],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("Pat_idErwVN","varchar","1","",Tx[T_erwogene_Pat_id_mit_gleichem_Vornamen_und_Nachnamen],/*obind*/0,/*obauto*/0,/*nnull*/0),
@@ -631,7 +673,7 @@ void hhcl::prueflyus(DB *My, const string& tlypnb, const int obverb, const int o
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflybakt(DB *My, const string& tlybakt, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflybakt(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflybakt]+schwarz);
 	const size_t aktc=0;
@@ -645,9 +687,12 @@ void hhcl::prueflybakt(DB *My, const string& tlybakt, const int obverb, const in
 			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
 			Feld("QSpez","varchar","1","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
 			Feld("AbnDat","datetime","0","0",Tx[T_8432_Abnahmedatum_Turbomed],0,0,1),
-			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
-			Feld("Erklärung","LONGTEXT","","","",0,0,0),
-			Feld("AuftrHinw","LONGTEXT","","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
+//			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
+			Feld("KommID","int","10","",Tx[T_Kommentar_Bezug_auf_lyhinw],1,0,0,"0",1),
+//			Feld("Erklärung","LONGTEXT","","","",0,0,0),
+			Feld("ErklID","int","10","",Tx[T_Erklaerung_Bezug_auf_lyhinw],1,0,0,"0",1),
+//			Feld("AuftrHinw","LONGTEXT","","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
+			Feld("HinwID","int","10","",Tx[T_Auftragshinweis_Bezug_auf_lyhinw],1,0,0,"0",1),
 			Feld("Keimzahl","varchar","1","","",0,0,1),
 			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
 		};
@@ -662,7 +707,7 @@ void hhcl::prueflybakt(DB *My, const string& tlybakt, const int obverb, const in
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflyleist(DB *My, const string& tlyleist, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyleist(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflyleist]+schwarz);
 	const size_t aktc=0;
@@ -693,7 +738,7 @@ void hhcl::prueflyleist(DB *My, const string& tlyleist, const int obverb, const 
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflywert(DB *My, const string& tlywert, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflywert(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflywert]+schwarz);
 	const size_t aktc=0;
@@ -712,14 +757,17 @@ void hhcl::prueflywert(DB *My, const string& tlywert, const int obverb, const in
 			Feld("Wert","varchar","11","0",Tx[T_8420_Ergebniswert_Turbomed],0,0,1),
 			Feld("Einheit","varchar","12","",Tx[T_8421_maximale_Laenge_12],0,0,1,"kA"),
 			Feld("Grenzwerti","varchar","1","",Tx[T_8422_Grenzwertindikator_Turbomed],0,0,1),
-			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
+			//Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
+			Feld("KommID","int","10","",Tx[T_Kommentar_Bezug_auf_lyhinw],1,0,0,"0",1),
 			Feld("Teststatus","varchar","1","",Tx[T_8418_Teststatus_Turbomed],0,0,1),
-			Feld("Erklärung","LONGTEXT","","","",0,0,0),
-			Feld("AuftrHinw","LONGTEXT","","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
+			//Feld("Erklärung","LONGTEXT","","","",0,0,0),
+			Feld("ErklID","int","10","",Tx[T_Erklaerung_Bezug_auf_lyhinw],1,0,0,"0",1),
+//			Feld("AuftrHinw","LONGTEXT","","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
+			Feld("HinwID","int","10","",Tx[T_Auftragshinweis_Bezug_auf_lyhinw],1,0,0,"0",1),
 			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
 		};
 		Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit")};   Index i0("LaborXWertAbkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-		Feld ifelder1[] = {Feld("UsID"),Feld("BaktID"),Feld("Abkü"),Feld("Langtext"),Feld("Quelle"),Feld("QSpez"),Feld("AbnDat"),Feld("Wert"),Feld("Einheit"),Feld("Grenzwerti"),Feld("Teststatus"),Feld("nbid")};   
+		Feld ifelder1[] = {Feld("UsID"),Feld("BaktID"),Feld("Abkü"),Feld("Langtext"),Feld("Quelle"),Feld("QSpez"),Feld("AbnDat"),Feld("Wert"),Feld("Einheit"),Feld("Grenzwerti"),Feld("Teststatus"),Feld("nbid"),Feld("HinwID"),Feld("KommID"),Feld("ErklID")};   
 				Index i1("doppelte",ifelder1,sizeof ifelder1/sizeof* ifelder1,/*unique*/1);
 		Index indices[]={i0,i1};
 		Constraint csts[]{Constraint(vorsil+"us"+vorsil+"wert",new Feld{Feld("UsID")},1,vorsil+"us",new Feld{Feld("id")},1,cascade,cascade)};
@@ -732,7 +780,7 @@ void hhcl::prueflywert(DB *My, const string& tlywert, const int obverb, const in
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
-void hhcl::prueflyfehlt(DB *My, const string& tlyfehlt, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflyfehlt(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflyfehlt]+schwarz);
 	const size_t aktc=0;
@@ -757,7 +805,7 @@ void hhcl::prueflyfehlt(DB *My, const string& tlyfehlt, const int obverb, const 
 
 
 // wird aufgerufen in: virtpruefweiteres
-void hhcl::prueflypgl(DB *My, const string& tlypgl, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::prueflypgl(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	hLog(violetts+Tx[T_prueflypgl]+schwarz);
 	const size_t aktc=0;
@@ -904,6 +952,7 @@ void hhcl::virtpruefweiteres()
 		RS d7(My,"DROP TABLE IF EXISTS "+vorsil+"pneu",aktc,ZDB);
 		RS d4(My,"DROP TABLE IF EXISTS "+vorsil+"us",aktc,ZDB);
 		RS d5(My,"DROP TABLE IF EXISTS "+vorsil+"saetze",aktc,ZDB);
+		RS d12(My,"DROP TABLE IF EXISTS "+vorsil+"aerzte",aktc,ZDB);
 		RS d11(My,"DROP TABLE IF EXISTS "+vorsil+"parameter",aktc,ZDB);
 		// aber: laborparameter nicht loeschen!
 		RS d8(My,"DROP TABLE IF EXISTS "+vorsil+"plab",aktc,ZDB);
@@ -920,28 +969,30 @@ void hhcl::virtpruefweiteres()
 		RS d7(My,"truncate "+vorsil+"pneu",aktc,ZDB);
 		RS d4(My,"truncate "+vorsil+"us",aktc,ZDB);
 		RS d5(My,"truncate "+vorsil+"saetze",aktc,ZDB);
+		RS d12(My,"truncate "+vorsil+"aerzte",aktc,ZDB);
 		RS d11(My,"truncate "+vorsil+"parameter",aktc,ZDB);
 		// aber: laborparameter nicht loeschen!
-		RS d8(My,"delete from "+vorsil+"plab where id>1",aktc,ZDB);
+		RS d8(My,"DELETE FROM "+vorsil+"plab where id>1",aktc,ZDB);
 		RS d10(My,"truncate "+vorsil+"fehlt",aktc,ZDB);
 		RS d9(My,"truncate "+vorsil+"dat",aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleert_alle_Tabellen_und_faengt_von_vorne_an]+schwarz,1,1);
 	}
 	if (!loeschalle) {
-		prueflyplab(My, tlyplab, obverb, oblog, /*direkt*/0);
-		prueflyparameter(My, tlyparameter, obverb, oblog, /*direkt*/0);
-		prueflypneu(My, tlypneu, obverb, oblog, /*direkt*/0);
-		prueflypnb(My, tlypnb, obverb, oblog, /*direkt*/0);
-		prueflydat(My, tlydat, obverb, oblog, /*direkt*/0);
-		prueflyfehlt(My, tlyfehlt, obverb, oblog, /*direkt*/0);
-		prueflyaerzte(My, tlyaerzte, obverb, oblog, /*direkt*/0);
-		prueflysaetze(My, tlysaetze, obverb, oblog, /*direkt*/0);
-		prueflyus(My, tlyus, obverb, oblog, /*direkt*/0);
-		prueflybakt(My, tlybakt, obverb, oblog, /*direkt*/0);
-		prueflyleist(My, tlyleist, obverb, oblog, /*direkt*/0);
-		prueflywert(My, tlywert, obverb, oblog, /*direkt*/0);
-		prueflypgl(My, tlypgl, obverb, oblog, /*direkt*/0);
+		prueflyhinw(My, obverb, oblog, /*direkt*/0);
+		prueflyplab(My, obverb, oblog, /*direkt*/0);
+		prueflyparameter(My, obverb, oblog, /*direkt*/0);
+		prueflypneu(My, obverb, oblog, /*direkt*/0);
+		prueflypnb(My, obverb, oblog, /*direkt*/0);
+		prueflydat(My, obverb, oblog, /*direkt*/0);
+		prueflyfehlt(My, obverb, oblog, /*direkt*/0);
+		prueflyaerzte(My, obverb, oblog, /*direkt*/0);
+		prueflysaetze(My, obverb, oblog, /*direkt*/0);
+		prueflyus(My, obverb, oblog, /*direkt*/0);
+		prueflybakt(My, obverb, oblog, /*direkt*/0);
+		prueflyleist(My, obverb, oblog, /*direkt*/0);
+		prueflywert(My, obverb, oblog, /*direkt*/0);
+		prueflypgl(My, obverb, oblog, /*direkt*/0);
 	}
 	hcl::virtpruefweiteres(); // z.Zt. leer //α
 } // void hhcl::virtpruefweiteres
@@ -994,9 +1045,12 @@ void hhcl::usreset()
 	auftrschl.clear();
 	pat_id="0";
 	baktid="0";
-}
+	hinwid="0";
+	erklid="0";
+	kommid="0";
+} // void hhcl::usreset
 
-void hhcl::wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep)
+void hhcl::wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp)
 {
 	if (!normbereich.empty()) {
 		rpar->hz("NB",normbereich);
@@ -1040,12 +1094,21 @@ void hhcl::wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv 
 			rbawep->hz("QSpez",qspez);
 		}
 		// Field Erklärung doesn't have a default value
-		rbawep->hz("Erklärung",erklaerung);
+			rhinwp->hz("Text",erklaerung);
+			rhinwp->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&erklid,/*mitupd=*/0);
+			rbawep->hz("ErklID",erklid);
+//		rbawep->hz("Erklärung",erklaerung);
 		if (!kommentar.empty()) {
-			rbawep->hz("Kommentar",kommentar);
+			rhinwp->hz("Text",kommentar);
+			rhinwp->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&kommid,/*mitupd=*/0);
+			rbawep->hz("KommID",kommid);
+//			rbawep->hz("Kommentar",kommentar);
 		}
 		if (!auftrhinw.empty()) {
-			rbawep->hz("AuftrHinw",auftrhinw);
+			rhinwp->hz("Text",auftrhinw);
+			rhinwp->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&hinwid,/*mitupd=*/0);
+			rbawep->hz("HinwID",hinwid);
+//			rbawep->hz("AuftrHinw",auftrhinw);
 		} // 						if (!auftrhinw.empty())
 		rbawep->hz("AbnDat",&abndat);
 		if (rbawep==rwe) {
@@ -1074,7 +1137,7 @@ void hhcl::dverarbeit(const string& datei)
 #ifdef speichern
 	const size_t aktc=0;
 #endif 
-	string datid,satzid,satzart;
+	string datid,satzid,arztid,satzart;
 	unsigned UsLfd;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen, usoffen=0;
@@ -1091,7 +1154,7 @@ void hhcl::dverarbeit(const string& datei)
 #ifdef speichern
 	reing.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&datid);
 #endif 
-	insv raerzte(My,/*itab*/tlyaerzte,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv raerzte(My,/*itab*/tlyaerzte,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rsaetze(My,/*itab*/tlysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rpar(My,/*itab*/tlyparameter,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rpneu(My,/*itab*/tlypneu,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
@@ -1102,6 +1165,7 @@ void hhcl::dverarbeit(const string& datei)
 	insv rba(My,/*itab*/tlybakt,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv rwe(My,/*itab*/tlywert,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	insv *rbawep=0; // Zeiger auf rba oder rwe
+	insv rhinw(My,/*itab*/tlyhinw,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rle(My,/*itab*/tlyleist,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
 	caus<<rot<<datei<<schwarz<<endl;
@@ -1157,7 +1221,7 @@ void hhcl::dverarbeit(const string& datei)
 						russchreib(rus,aktc,&usid);
 						usoffen=0;
 					}
-					wertschreib(aktc,&rpar,&rpneu,&rpnb,&rwe,rbawep);
+					wertschreib(aktc,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw);
 					// z.B. "Labor 20101201 004634.dat"
 					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 					//					satzid="0";
@@ -1169,10 +1233,12 @@ void hhcl::dverarbeit(const string& datei)
 						} else
 							oblaborda=0;
 						if (!lanr.empty()) {
-							rsaetze.hz("Lanr",lanr);
+							raerzte.hz("Lanr",lanr);
 							lanr.clear();
 						}
 						// z.B. "Labor 20101201 044232.dat"
+						raerzte.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&arztid);
+						rsaetze.hz("ArztID",arztid);
 						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&satzid);
 						arztnameda=0;
 						saetzeoffen=0;
@@ -1208,7 +1274,7 @@ void hhcl::dverarbeit(const string& datei)
 				}
 			} else if (cd=="8410" || cd=="8434") { // 8410=Test-Ident, 8434=Verfahren
 				// z.B. "Labor 20101202 002036.dat"
-					wertschreib(aktc,&rpar,&rpneu,&rpnb,&rwe,rbawep);
+					wertschreib(aktc,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw);
 				// z.B. "Labor 20101202 011636.dat"
 				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 				if (usoffen) {
@@ -1346,22 +1412,22 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="9212") {
 				rsaetze.hz("VersionSatzb",inh);
       } else if (cd=="0201") {
-					rsaetze.hz("ArztNr",inh);
+					raerzte.hz("ArztNr",inh);
       } else if (cd=="0203") {
-					rsaetze.hz("ArztName",inh);
+					raerzte.hz("ArztName",inh);
       } else if (cd=="0205") {
-					rsaetze.hz("StraßePraxis",inh);
+					raerzte.hz("StraßePraxis",inh);
       } else if (cd=="0211") {
 				if (!arztnameda) {
-					rsaetze.hz("Arzt",inh);
+					raerzte.hz("Arzt",inh);
 					arztnameda=1;
 				}
 			} else if (cd=="0212") {
 				lanr=inh;
       } else if (cd=="0215") {
-					rsaetze.hz("PLZPraxis",inh);
+					raerzte.hz("PLZPraxis",inh);
       } else if (cd=="0216") {
-					rsaetze.hz("OrtPraxis",inh);
+					raerzte.hz("OrtPraxis",inh);
 			} else if (cd=="8300") {
 				svec labv;
 				aufSplit(&labv, inh,';');
@@ -1513,7 +1579,10 @@ void hhcl::dverarbeit(const string& datei)
 			altz=zeile;
 #endif 
 		}
-	}
+		reing.hz("codepage",cp);
+		reing.hz("fertig",1);
+		reing.ergaenz(datid,/*sammeln*/0,/*obverb*/1,/*idp*/0);
+	} // 	if (mdat.is_open())
 //	exit(0);
 } // void hhcl::dverarbeit(const string& datei)
 
@@ -1527,11 +1596,12 @@ void hhcl::pvirtfuehraus()
 		systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 		systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
 		svec lrue;
-		systemrueck("find "+ldatvz+" -type f -maxdepth 1 \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
+		systemrueck("find "+ldatvz+" -maxdepth 1 -type f \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 		//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 		caus<<"Dateien gefunden: "<<lrue.size()<<endl;
 		for(size_t i=0;i<lrue.size();i++) {
 			//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+			RS loeschvor(My,"DELETE FROM `"+tlydat+"` where pfad='"+lrue[i]+"' and fertig<>1",aktc,ZDB);
 			char ***cerg;
 			RS rsfertig(My,"SELECT fertig,name FROM "+vorsil+"dat l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
 			if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {

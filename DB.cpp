@@ -980,7 +980,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 							// caus<<rot<<indx->felder[j].name<<violett<<", numinlen: "<<rot<<numinlen<<violett<<", numsplen: "<<rot<<numsplen<<schwarz<<endl;
 							if (!numinlen || !numsplen) { // numsplen ist 0 z.B. bei varbinary
 								// das sollte reichen
-								if (numsplen>50 || !numsplen) {
+								if ((numsplen>50&&indx->felder[j].typ!="LONGTEXT") || !numsplen) {
 									indx->felder[j].lenge="50"; 
 								}
 							} else if (numinlen>numsplen) {
@@ -1705,6 +1705,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 {
 	int altobverb=obverb;
 	const unsigned vlz=10; // Verlängerungszahl
+	const unsigned maxversuche=3;
 //	obverb=1;
 	yLog(obverb>0?obverb-1:0,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
@@ -1732,7 +1733,9 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 				machstrikt(altsqlm,aktc);
 				string usql;
 				string* sqlp=&sql;
-				while (1) {
+				for (unsigned versuche=0;versuche<maxversuche;versuche++) {
+					if (versuche==maxversuche-1)
+						exit(99);
 					if (asy) {
 						obfalsch=mysql_send_query(dbp->conn[aktc],sqlp->c_str(),sqlp->length());
 					} else {
@@ -1742,6 +1745,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 					fnr=mysql_errno(dbp->conn[aktc]);
 					fehler=mysql_error(dbp->conn[aktc]);
 					if (obfalsch) {
+						fLog("fnr: "+blaus+ltoan(fnr)+schwarz+", "+Txk[T_Fehler]+": "+blau+fehler+schwarz,1,1);
 						// Invalid use of NULL value; bei Spaltenverschiebungen kann oft NOT NULL nicht mehr geaendert werden
 						if (idp) *idp="null";
 						if (fnr==1138 && sqlp!=&usql) {
