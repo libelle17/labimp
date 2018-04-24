@@ -160,6 +160,8 @@ enum T_
 	T_Auftragshinweis_Bezug_auf_lyhinw,
 	T_Erklaerung_Bezug_auf_lyhinw,
 	T_Kommentar_Bezug_auf_lyhinw,
+	T_letzte_Aenderung,
+	T_Groesse,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";

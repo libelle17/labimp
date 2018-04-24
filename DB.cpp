@@ -980,7 +980,11 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 							// caus<<rot<<indx->felder[j].name<<violett<<", numinlen: "<<rot<<numinlen<<violett<<", numsplen: "<<rot<<numsplen<<schwarz<<endl;
 							if (!numinlen || !numsplen) { // numsplen ist 0 z.B. bei varbinary
 								// das sollte reichen
-								if ((numsplen>50&&indx->felder[j].typ!="LONGTEXT") || !numsplen) {
+								if (indx->felder[j].typ=="LONGTEXT") {
+									if (numsplen>50 || !numsplen) {
+										indx->felder[j].lenge="767"; 
+									}
+								} else if (numsplen>50 || !numsplen) {
 									indx->felder[j].lenge="50"; 
 								}
 							} else if (numinlen>numsplen) {
@@ -1779,6 +1783,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 												for(unsigned spnr=0;spnr<aktt.spalt->num_rows;spnr++) { // reale Spalten
 													if (aktt.spnamen[spnr]==col) {
 														dbp->tuerweitern(tbl,col,atol(aktt.splenge[spnr])+vlz,aktc,obverb>0?obverb-1:0);
+														versuche=0;
 														neuerversuch=1;
 														break;
 													} // 													if (aktt.spnamen[spnr]==col)
