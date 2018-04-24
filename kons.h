@@ -677,7 +677,7 @@ class tsvec: public vector<T>
   public:
     inline tsvec<T>& operator<<(const T& str) {
       this->push_back(str);
-      ((T&)str).init();
+//      ((T&)str).init();
       return *this;
     } // inline tsvec
 }; // template<typename T> class tsvec: public vector<T>

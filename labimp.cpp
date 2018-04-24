@@ -628,6 +628,46 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 	hLog(violetts+Tx[T_prueflyus]+schwarz);
 	const size_t aktc=0;
 	if (!direkt) {
+		sfeld fdr;
+		fdr<<new Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1);
+		fdr<<new Feld("UsLfd","int","10","",Tx[T_Bezug_auf_LaborWert],1,0,0,string(),1);
+		fdr<<new Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborDat],1,0,1,string(),1);
+		fdr<<new Feld("SatzID","int","10","",Tx[T_Bezug_auf_LaborXSaetze],1,0,1,string(),1);
+		fdr<<new Feld("Satzart","varchar","11","",Tx[T_8000_Satzart_Turbomed],0,0,0);
+		fdr<<new Feld("Satzlänge","varchar","11","",Tx[T_8100_Satzlaenge_Turbomed],0,0,0);
+		fdr<<new Feld("Auftragsnummer","varchar","11","",Tx[T_8310_Anforderungsident_Turbomed],0,0,0);
+		fdr<<new Feld("Auftragsschlüssel","varchar","11","",Tx[T_8311_Anforderungsnr_d_Labors_Turbomed],/*obind*/1,0,0);
+		fdr<<new Feld("Eingang","datetime","0","0",Tx[T_Eingangsdatum_im_Labor],1,0,0);
+		fdr<<new Feld("Berichtsdatum","varchar","21","",Tx[T_8302_Berichtsdatum],0,0,0);
+		fdr<<new Feld("Pat_id","int","10","","",1,0,1,string(),1);
+		fdr<<new Feld("Nachname","varchar","31","","3101",0,0,0);
+		fdr<<new Feld("Vorname","varchar","31","","3102",0,0,0);
+		fdr<<new Feld("GebDat","date","","","3103",0,0,0);
+		fdr<<new Feld("Titel","varchar","1","","3104",0,0,0);
+		fdr<<new Feld("NVorsatz","varchar","1","","3105",0,0,0);
+		fdr<<new Feld("BefArt","varchar","1","",Tx[T_8401_Befundart_Turbomed__Fertigstellungsgrad_EEndbefund_T__Teilbefund],0,0,0);
+		fdr<<new Feld("Abrechnungstyp","varchar","1","",Tx[T_8609_Abrechnungstyp_Kasse_Privat_X_anderer_RE_Einsender_Turbomed],0,0,0);
+		fdr<<new Feld("GebüOrd","varchar","1","",Tx[T_8403_Gebuehrenordnung_Turbomed],0,0,0);
+		fdr<<new Feld("Auftraggeber","varchar","1","",Tx[T_8615_Auftraggeber_LANR],0,0,0);
+		fdr<<new Feld("Patienteninformation","varchar","1","",Tx[T_8405_Patienteninformation_Turbomed],0,0,0);
+		fdr<<new Feld("Geschlecht","varchar","1","",Tx[T_8407_Geschlecht_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/1);
+		fuellpql();
+		for(size_t i=0;i<pql.size();i++) {
+			fdr<<new Feld("Pat_id_"+ltoan(i),"varchar","1","",pql[i],/*obind*/1,/*obauto*/0,/*nnull*/0);
+		}
+		fdr<<new Feld("ZeitpunktLaborneu","datetime","0","0",Tx[T_Zeitpunkt_der_Untersuchung_die_in_Laborneu_zugeordnet_wurde],0,0,0);
+		fdr<<new Feld("ZdüP","smallint","6","0",Tx[T_Zahl_der_verglichenen_Parameter],0,0,0);
+		fdr<<new Feld("ZdiP","int","10","0",Tx[T_Zahl_der_infragekommenden_Patienten],0,0,0);
+		fdr<<new Feld("LWerte","LONGTEXT","","0",Tx[T_Laborwerte_die_zur_Zuordnung_gefuehrt_haben],0,0,0);
+		fdr<<new Feld("verglichen","datetime","0","0",Tx[T_Datum_zu_dem_Datensatz_zuletzt_verglichen_wurde],0,0,0);
+		fdr<<new Feld("AfN","smallint","6","0",Tx[T_Affected_Number_Zahl_der_zugehoerigen_Datensaetze_in_Laborneu],0,0,0);
+		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
+		Index indices[]={i0};
+		Constraint csts[]{Constraint(tlydat+tlyus,new Feld{Feld("DatID")},1,tlydat,new Feld{Feld("DatID")},1,cascade,cascade),
+		                	Constraint(tlysaetze+tlyus,new Feld{Feld("satzid")},1,tlysaetze,new Feld{Feld("satzid")},1,cascade,cascade)};
+		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+		Tabelle taba(My,tlyus,fdr,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborus]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+#ifdef altfelder
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("UsLfd","int","10","",Tx[T_Bezug_auf_LaborWert],1,0,0,string(),1),
@@ -652,11 +692,6 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 			Feld("Patienteninformation","varchar","1","",Tx[T_8405_Patienteninformation_Turbomed],0,0,0),
 			Feld("Geschlecht","varchar","1","",Tx[T_8407_Geschlecht_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/1),
 //			Feld("AuftrHinw","LONGTEXT","","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
-			fuellpql();
-			for(auto i=0;i<pql.size();i++) {
-				Feld("Pat_id_"+ltoan(i),"varchar","1","",pql[i],/*obind*/1,/*obauto*/0,/*nnull*/0)
-
-			}
 			Feld("Pat_idUrsp","varchar","1","",Tx[T_Ursprung_der_Pat_id_E__erwogene_Pat_id_su_L__vergleich_mit_ueber_Turbomed_eingelesenem_Labor],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("Pat_idErwVNG","varchar","1","",Tx[T_erwogene_Pat_id_mit_gleichem_Vornamen_Nachnamen_und_Geburtstag],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("Pat_idErwVN","varchar","1","",Tx[T_erwogene_Pat_id_mit_gleichem_Vornamen_und_Nachnamen],/*obind*/0,/*obauto*/0,/*nnull*/0),
@@ -677,6 +712,7 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 		                	Constraint(tlysaetze+tlyus,new Feld{Feld("satzid")},1,tlysaetze,new Feld{Feld("satzid")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlyus,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborus]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+#endif
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyus,1,1);
 			exit(11);

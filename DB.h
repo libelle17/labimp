@@ -263,9 +263,17 @@ struct Feld
 //		Feld(Feld const& copy);
 }; // struct Feld 
 
+struct sfeld: vector<Feld*>
+{
+	inline sfeld& operator<<(Feld *fdp) {
+		this->push_back(fdp);
+		return *this;
+	}
+}; // class svec: public vector<std::string>
+
 struct Index 
 {
-		const string name;
+	const string name;
     Feld *const felder;
     const unsigned feldzahl;
 		uchar unique;
@@ -397,6 +405,10 @@ class Tabelle
     const string collate;
     const string rowformat;
     Tabelle(const DB* dbp,const string& tbname, Feld *felder, const int feldzahl, Index *const indices=0, const unsigned vindexzahl=0, 
+				Constraint *const constraints=0, const unsigned constrzahl=0,
+				const string comment=string(), const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
+				const string& rowformat=DB::defmyrowform);
+    Tabelle(const DB* dbp,const string& tbname, sfeld& fdr, Index *const indices=0, const unsigned vindexzahl=0, 
 				Constraint *const constraints=0, const unsigned constrzahl=0,
 				const string comment=string(), const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
 				const string& rowformat=DB::defmyrowform);

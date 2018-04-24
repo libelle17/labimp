@@ -876,7 +876,7 @@ string ersetzAllezu(const string& quelle, const string& alt, const string& neu)
 
 void ersetzAlle(string& quelle, const string& alt, const string& neu) 
 {
-  if(!alt.empty()) {
+  if(!quelle.empty() && !alt.empty()) {
     string zwi;
     zwi.reserve(quelle.length());
     size_t p0 = 0, pakt;
@@ -887,14 +887,15 @@ void ersetzAlle(string& quelle, const string& alt, const string& neu)
       p0 = pakt;
     }
     zwi += quelle.substr(p0);
-    quelle.swap(zwi); 
+//    quelle.swap(zwi); // 24.4.18 Absturz
+		quelle=zwi;
   }
 } // void ersetzAlle(string& quelle, const string& alt, const string& neu) 
 
 
 string ersetzAllezu(string *quelle, const char* const alt, const char* const neu) 
 {
-  if(*alt) {
+  if(!quelle->empty() && *alt) {
     string zwi;
     zwi.reserve(quelle->length());
     size_t altlen = strlen(alt);
@@ -937,7 +938,7 @@ string ersetzAllezu(const char *const quelle, const char* const alt, const char*
 
 void ersetzAlle(string *quelle, const char* const alt, const char* const neu) 
 {
-  if(*alt) {
+  if(!quelle->empty() && *alt) {
     string zwi;
     zwi.reserve(quelle->length());
     size_t altlen = strlen(alt);
@@ -956,7 +957,7 @@ void ersetzAlle(string *quelle, const char* const alt, const char* const neu)
 
 void ersetzAlle(string *quelle, const string& alt, const string& neu) 
 {
-  if(!alt.empty()) {
+  if(!quelle->empty() && !alt.empty()) {
     string zwi;
     zwi.reserve(quelle->length());
     size_t p0 = 0, pakt;
