@@ -4,6 +4,7 @@
 
 enum Txt_ {
 	T_ergpql_volle_Funktion,
+	T_auswertpql_volle_Funktion,
 	T_tmMAX,
 };
 
@@ -11,6 +12,8 @@ enum Txt_ {
 const char *tm_T[T_tmMAX+1][SprachZahl]={
 	// T_ergpql_volle_Funktion
 	{"ergpql() (volle Funktion)","ergpql() (filled function)"},
+	// T_auswertpql_volle_Funktion
+	{"auswertpql() (volle Funktion)","auswertpql() (filled function)"},
 	{"",""}
 }; // const char *Txvgcl::TextC[T_vgMAX+1][SprachZahl]=
 
@@ -33,3 +36,11 @@ void hhcl::ergpql()
 	pql<<"select n.pat_id from namen n left join laborneu l on n.pat_id = l.pat_id where n.nachname="+nname+" and l.zeitpunkt between "
 		"subdate("+sqlft(My->DBS,&eingtm)+",interval 5 day) and adddate("+sqlft(My->DBS,&eingtm)+",interval 10 day) group by n.pat_id";
 } // void hhcl::ergpql
+
+// schwache Funktion, kann ueberdeckt werden
+void hhcl::auswertpql(const size_t i,insv& rus)
+{
+	hLog(violetts+Tx[T_auswertpql_volle_Funktion]+schwarz);
+	rus.hz(("Pat_id_"+ltoan(i)).c_str(),pat_id);
+}
+

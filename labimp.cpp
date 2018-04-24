@@ -345,6 +345,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"letzte Änderung","last modification"},
 	// T_Groesse
 	{"Größe","size"},
+	// T_auswertpql_leere_Funktion
+	{"auswertpql() (leere Funktion)","evaluatepql() (empty function)"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -366,6 +368,12 @@ void hhcl::ergpql()
 	hLog(violetts+Tx[T_ergpql_leere_Funktion]+schwarz);
 }
 
+// schwache Funktion, kann ueberdeckt werden
+void hhcl::auswertpql(const size_t i,insv& rus)
+{
+	hLog(violetts+Tx[T_auswertpql_leere_Funktion]+schwarz);
+}
+
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflyhinw(DB *My, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
@@ -384,11 +392,13 @@ void hhcl::prueflyhinw(DB *My, const int obverb, const int oblog, const uchar di
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyhinw,1,1);
 			exit(11);
 		}
-		// "Labor 20051127 224528.dat": kein Labor angegeben
-		svec eindfeld; eindfeld<<"ID";
-		insv rhinw(My,/*itab*/tlyhinw,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
-		rhinw.hz("Text",string());
-		rhinw.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&hinwind);
+		if (taba.tbneu) {
+			// "Labor 20051127 224528.dat": kein Labor angegeben
+			svec eindfeld; eindfeld<<"ID";
+			insv rhinw(My,/*itab*/tlyhinw,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
+			rhinw.hz("Text",string());
+			rhinw.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&hinwind);
+		}
 	} // if (!direkt)
 } // int prueflyhinw
 
@@ -480,11 +490,13 @@ void hhcl::prueflyplab(DB *My, const int obverb, const int oblog, const uchar di
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyplab,1,1);
 			exit(11);
 		}
-		// "Labor 20051127 224528.dat": kein Labor angegeben
-		svec eindfeld; eindfeld<<"ID";
-		insv rlab(My,/*itab*/tlyplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
-		rlab.hz("Labor",Tx[T_fehlend]);
-		rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
+		if (taba.tbneu) {
+			// "Labor 20051127 224528.dat": kein Labor angegeben
+			svec eindfeld; eindfeld<<"ID";
+			insv rlab(My,/*itab*/tlyplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
+			rlab.hz("Labor",Tx[T_fehlend]);
+			rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
+		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
@@ -900,26 +912,27 @@ void hhcl::fuellpql()
 	ergpql();
 }
 
-void hhcl::pruefPatID(const int aktc)
+void hhcl::pruefPatID(const int aktc,insv& rus)
 {
 	hLog(violetts+Tx[T_pruefPatID_Standardfunktion]+schwarz);
 	fuellpql();
-	for(string const& aktsql:pql) {
-		RS rspat(My,aktsql,aktc,ZDB);
+	for(size_t i=0;i<pql.size();i++) {
+		RS rspat(My,pql[i],aktc,ZDB);
 		if (!rspat.obfehl) {
-			caus<<gruen<<"Zahl: "<<blau<<rspat.result->row_count<<gruen<<" bei: "<<blau<<aktsql<<schwarz<<endl;
+			caus<<gruen<<"Zahl: "<<blau<<rspat.result->row_count<<gruen<<" bei: "<<blau<<pql[i]<<schwarz<<endl;
 			if (rspat.result->row_count==1){
 				char ***cerg;
 				if ((cerg=rspat.HolZeile())) {
 					if (*cerg) {
 						caus<<"Pat_id fuer "<<nname<<", "<<vname<<": "<<**cerg<<endl;
 						pat_id=**cerg;
+						auswertpql(i,rus);
 						break;
 					}
 				}
 			}
 		} else {
-			caus<<rot<<"Fehler bei sql: "<<violett<<aktsql<<schwarz<<endl;
+			caus<<rot<<"Fehler bei sql: "<<violett<<pql[i]<<schwarz<<endl;
 		}
 	}
 //	if (pat_id=="0") exit(97);
@@ -997,6 +1010,7 @@ void hhcl::virtpruefweiteres()
 	initDB();
 	const size_t aktc=0;
 	if (vonvorne||loeschalle) {
+		RS d13(My,"DROP TABLE IF EXISTS "+tlyhinw,aktc,ZDB);
 		RS d0(My,"DROP TABLE IF EXISTS "+tlypgl,aktc,ZDB);
 		RS d1(My,"DROP TABLE IF EXISTS "+tlywert,aktc,ZDB);
 		RS d2(My,"DROP TABLE IF EXISTS "+tlyleist,aktc,ZDB);
@@ -1014,6 +1028,7 @@ void hhcl::virtpruefweiteres()
 		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz,1,1);
 	} else if (entleer) {
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
+		RS d13(My,"TRUNCATE "+tlyhinw,aktc,ZDB);
 		RS d0(My,"TRUNCATE "+tlypgl,aktc,ZDB);
 		RS d1(My,"TRUNCATE "+tlywert,aktc,ZDB);
 		RS d2(My,"TRUNCATE "+tlyleist,aktc,ZDB);
@@ -1073,7 +1088,7 @@ void BDTtoDate(string& inh,struct tm *tm)
 void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 {
 	rus.ausgeb();
-	pruefPatID(aktc);
+	pruefPatID(aktc,rus);
 	rus.hz("Nachname",nname);
 	rus.hz("Vorname",vname);
 	rus.hz("Titel",titel);

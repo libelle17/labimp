@@ -112,6 +112,7 @@ enum Txdb_
 	T_auf_Tabelle,
 	T_nicht_erstellt_da_Referenztabelle,
 	T_Fehler_af,
+	T_erstelle_Tabelle,
 	T_dbMAX,
 }; // enum Txdb_ 
 
@@ -385,38 +386,38 @@ class DB
     my_ulonglong affrows(const size_t aktc) const; // unsigned __int64
 }; // class DB 
 
-class Tabelle 
+struct Tabelle 
 {
-  public:
-		const DB* dbp;
-    const string tbname;
-    string comment; // wird geaendert
-		const string dbname;
-    RS *spalt=nullptr;
-		const char **spnamen=nullptr, **splenge=nullptr, **sptyp=nullptr;
-    Feld *felder;
-    unsigned feldzahl;
-    Index *indices;
-    unsigned indexzahl;
-		Constraint *constraints;
-		unsigned constrzahl;
-    const string engine;
-    const string charset;
-    const string collate;
-    const string rowformat;
-    Tabelle(const DB* dbp,const string& tbname, Feld *felder, const int feldzahl, Index *const indices=0, const unsigned vindexzahl=0, 
-				Constraint *const constraints=0, const unsigned constrzahl=0,
-				const string comment=string(), const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
-				const string& rowformat=DB::defmyrowform);
-    Tabelle(const DB* dbp,const string& tbname, sfeld& fdr, Index *const indices=0, const unsigned vindexzahl=0, 
-				Constraint *const constraints=0, const unsigned constrzahl=0,
-				const string comment=string(), const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
-				const string& rowformat=DB::defmyrowform);
-		Tabelle(const DB* dbp,const string& name,const size_t aktc/*=0*/,int obverb/*=0*/,int oblog/*=0*/);
-		void lesespalten(const size_t aktc/*=0*/,int obverb/*=0*/,int oblog/*=0*/);
-		int machind(const size_t aktc,int obverb=0, int oblog=0);
-		int machconstr(const size_t aktc,int obverb=0, int oblog=0);
-    int prueftab(const size_t aktc,int obverb=0,int oblog=0);
+	const DB* dbp;
+	const string tbname;
+	string comment; // wird geaendert
+	const string dbname;
+	RS *spalt=nullptr;
+	const char **spnamen=nullptr, **splenge=nullptr, **sptyp=nullptr;
+	Feld *felder;
+	unsigned feldzahl;
+	Index *indices;
+	unsigned indexzahl;
+	Constraint *constraints;
+	unsigned constrzahl;
+	const string engine;
+	const string charset;
+	const string collate;
+	const string rowformat;
+	uchar tbneu=0; // Tabelle wurde auf der Datenbank neu erstellt
+	Tabelle(const DB* dbp,const string& tbname, Feld *felder, const int feldzahl, Index *const indices=0, const unsigned vindexzahl=0, 
+			Constraint *const constraints=0, const unsigned constrzahl=0,
+			const string comment=string(), const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
+			const string& rowformat=DB::defmyrowform);
+	Tabelle(const DB* dbp,const string& tbname, sfeld& fdr, Index *const indices=0, const unsigned vindexzahl=0, 
+			Constraint *const constraints=0, const unsigned constrzahl=0,
+			const string comment=string(), const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
+			const string& rowformat=DB::defmyrowform);
+	Tabelle(const DB* dbp,const string& name,const size_t aktc/*=0*/,int obverb/*=0*/,int oblog/*=0*/);
+	void lesespalten(const size_t aktc/*=0*/,int obverb/*=0*/,int oblog/*=0*/);
+	int machind(const size_t aktc,int obverb=0, int oblog=0);
+	int machconstr(const size_t aktc,int obverb=0, int oblog=0);
+	int prueftab(const size_t aktc,int obverb=0,int oblog=0);
 }; // class Tabelle 
 
 

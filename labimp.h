@@ -162,6 +162,7 @@ enum T_
 	T_Kommentar_Bezug_auf_lyhinw,
 	T_letzte_Aenderung,
 	T_Groesse,
+	T_auswertpql_leere_Funktion,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -232,12 +233,17 @@ class hhcl:public dhcl
 		__attribute__((weak)) // implementationsspezifische Vorgaben, Modul vgb.cpp)
 #endif
 		;
-	void pruefPatID(const int aktc)
+	void pruefPatID(const int aktc,insv& rus)
 #ifdef VOMHAUPTCODE
 		__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
 		;
 void fuellpql();
+void auswertpql(const size_t i,insv& rus)
+#ifdef VOMHAUPTCODE
+		__attribute__((weak)) // implementationsspezifische Adresspruefung)
+#endif
+		;
 void ergpql()
 #ifdef VOMHAUPTCODE
 		__attribute__((weak)) // implementationsspezifische Adresspruefung)

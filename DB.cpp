@@ -152,6 +152,8 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"` nicht erstellt, da Referenztabelle `","` not created, because referenced table `"},
 	// T_Fehler_af,
 	{"Fehler ","Errror "},
+	// T_erstelle_Tabelle
+	{"erstelle Tabelle ","creating table "},
 	{"",""}
 };
 // Txdbcl::Txdbcl() {TCp=(const char* const * const * const *)&TextC;}
@@ -1062,7 +1064,6 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
         if (dbp->conn[aktc]==0) dbp->conn[aktc] = mysql_init(NULL);
         lesespalten(aktc,obverb>0?obverb-1:0,oblog);
         for(unsigned i=0;i<feldzahl;i++) {
-					caus<<tbname<<" 1 prueftab, i: "<<i<<endl;
 					if (!spalt->obfehl)
             for(unsigned j=0;j<spalt->num_rows;j++) {
               if (!strcasecmp(felder[i].name.c_str(),spnamen[j])) {
@@ -1073,17 +1074,11 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
               } //               if (!strcasecmp(felder[i].name.c_str(),spnamen[j]))
             } //             for(unsigned j=0;j<spalt->num_rows;j++)
 
-					caus<<tbname<<" 2 prueftab, i: "<<i<<endl;
           fstr.resize(fstr.size()+1);
-					caus<<tbname<<" 3 prueftab, i: "<<i<<endl;
           istr.resize(istr.size()+1);
-					caus<<tbname<<" 4 prueftab, i: "<<i<<endl;
-					caus<<tbname<<" comment: '"<<felder[i].comment<<"', comment.size(): "<<felder[i].comment.size()<<endl;
           ersetzAlle(felder[i].comment,"'","´"); // 13.8.17: \\' geht auf Fedora nicht mehr, \' auch nicht
-					caus<<tbname<<" 5 prueftab, i: "<<i<<endl;
           ////<<"felder[i].comment: "<<felder[i].comment<<endl;
 					utyp=boost::locale::to_upper(felder[i].typ, loc);
-					caus<<tbname<<" 6 prueftab, i: "<<i<<endl;
           fstr[i]= "`" + felder[i].name + "` "+
             utyp+
             ((utyp=="DATE"||felder[i].lenge.empty()||felder[i].lenge=="0")?"":
@@ -1101,14 +1096,14 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
             +(felder[i].obind && felder[i].obauto?" PRIMARY KEY":" ")
             +((felder[i].comment.empty())?"":
                 (" COMMENT '"+felder[i].comment+"'"));
-					caus<<tbname<<" 7 prueftab, i: "<<i<<endl;
           if (felder[i].obind && !felder[i].obauto) {
             istr[i]=", ADD INDEX `"+felder[i].name+"`(`"+felder[i].name+"`)";
           }
-					caus<<tbname<<" 8 prueftab, i: "<<i<<endl;
         } // for(int i=0;i<feldzahl;i++)
         MYSQL_RES *dbres = mysql_list_tables(dbp->conn[aktc],tbname.c_str());
         if (dbres && !dbres->row_count) {
+					fLog(Txd[T_erstelle_Tabelle]+blaus+tbname+schwarz,1,oblog);
+					tbneu=1;
           /*comment=**/sersetze(&comment,string("'"),string("\\'"));
           sql<<"CREATE TABLE `"<<tbname.c_str();
           sql<<"` ("<<fstr[0]<<istr[0]<<") COMMENT='"<<comment<<"'";
@@ -2078,7 +2073,7 @@ my_ulonglong RS::tbupd(const vector<instyp>& einf,int obverb, const string& bedi
 my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
 		int obverb/*=0*/,string *const idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/,uchar mitupd/*=0*/) 
 {
-	caus<<violett<<"tbins: "<<blau<<table<<" "<<schwarz;
+	caus<<violett<<"tbins: "<<blau<<table<<" "<<schwarz<<endl;
 	my_ulonglong zl=0;
 	ulong locks=0;
 	uchar obhauptfehl=0;
