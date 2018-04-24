@@ -237,6 +237,7 @@ class hhcl:public dhcl
 		__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
 		;
+void fuellpql();
 void ergpql()
 #ifdef VOMHAUPTCODE
 		__attribute__((weak)) // implementationsspezifische Adresspruefung)

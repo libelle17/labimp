@@ -7,7 +7,7 @@
 #define VOMHAUPTCODE // um Funktionsdefinition manchmal mit "__attribute__((weak)) " versehen zu können //ω
 #include "labimp.h"
 // fuer verschiedene Sprachen //α
-#define vorsilbe "laby"
+#define vorsilbe "labory"
 const string hhcl::vorsil=vorsilbe;
 const string hhcl::tlydat=vorsil+"dat";
 const string hhcl::tlyleist=vorsil+"leist";
@@ -360,6 +360,7 @@ hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) 
 } // hhcl::hhcl //α
 // Hier neue Funktionen speichern: //ω
 
+// schwache Funktion, kann ueberdeckt werden
 void hhcl::ergpql()
 {
 	hLog(violetts+Tx[T_ergpql_leere_Funktion]+schwarz);
@@ -651,6 +652,11 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 			Feld("Patienteninformation","varchar","1","",Tx[T_8405_Patienteninformation_Turbomed],0,0,0),
 			Feld("Geschlecht","varchar","1","",Tx[T_8407_Geschlecht_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/1),
 //			Feld("AuftrHinw","LONGTEXT","","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
+			fuellpql();
+			for(auto i=0;i<pql.size();i++) {
+				Feld("Pat_id_"+ltoan(i),"varchar","1","",pql[i],/*obind*/1,/*obauto*/0,/*nnull*/0)
+
+			}
 			Feld("Pat_idUrsp","varchar","1","",Tx[T_Ursprung_der_Pat_id_E__erwogene_Pat_id_su_L__vergleich_mit_ueber_Turbomed_eingelesenem_Labor],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("Pat_idErwVNG","varchar","1","",Tx[T_erwogene_Pat_id_mit_gleichem_Vornamen_Nachnamen_und_Geburtstag],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("Pat_idErwVN","varchar","1","",Tx[T_erwogene_Pat_id_mit_gleichem_Vornamen_und_Nachnamen],/*obind*/0,/*obauto*/0,/*nnull*/0),
@@ -851,12 +857,17 @@ void hhcl::prueflypgl(DB *My, const int obverb, const int oblog, const uchar dir
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
-void hhcl::pruefPatID(const int aktc)
+void hhcl::fuellpql()
 {
-	hLog(violetts+Tx[T_pruefPatID_Standardfunktion]+schwarz);
 	pql.clear();
 	pql<<"SELECT pat_id FROM `"+tlyus+"` u WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND auftragsschlüssel = '"+auftrschl+"' AND pat_id<>0 GROUP BY pat_id";
 	ergpql();
+}
+
+void hhcl::pruefPatID(const int aktc)
+{
+	hLog(violetts+Tx[T_pruefPatID_Standardfunktion]+schwarz);
+	fuellpql();
 	for(string const& aktsql:pql) {
 		RS rspat(My,aktsql,aktc,ZDB);
 		if (!rspat.obfehl) {
@@ -1016,12 +1027,12 @@ void BDTtoDate(string& inh,struct tm *tm)
 	memset(tm,0,sizeof *tm);
 //	const char* const mu[]{"%d%m%Y","%Y%m%d"};
 	const char* const mu[]{"%Y%m%d","%d%m%Y"};
-	for(auto aktmu:mu) {
+	for(auto const& aktmu:mu) {
 		strptime(inh.c_str(),aktmu,tm);
 		if (tm->tm_year && tm->tm_year<200 && tm->tm_mon<12 && tm->tm_mday && tm->tm_mday<32)
 			break;
-	}
-}
+	} // 	for(auto& aktmu:mu)
+} // void BDTtoDate
 
 void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 {
@@ -1202,6 +1213,7 @@ void hhcl::dverarbeit(const string& datei)
 			if (zeile.size()>7) {
 				if (!cp) {
 					for(unsigned p=0;p<2;p++) {
+//					for(unsigned const& p: {0,1}) {
 						if (zeile.find_first_of(sonder[p],7)!=string::npos) {
 							cp=p+1;
 							break;
@@ -1624,7 +1636,7 @@ void hhcl::pvirtfuehraus()
 				dverarbeit(lrue[i]);
 			}
 		}
-	}
+	} // 	if (!loeschalle)
 	caus<<"fertig!"<<endl;
 } // void hhcl::pvirtfuehraus  //α
 

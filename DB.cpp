@@ -190,9 +190,9 @@ svec holdbaussql(string sql)
         db=sql.substr(ab);
       if (!db.empty()) {
         uchar alt=0;
-        for(size_t j=0;j<erg.size();j++) {
-          if (erg[j]==db) {alt=1;break;}
-        }
+				for(auto const& aerg:erg) {
+					if (aerg==db) {alt=1;break;}
+				}
         if (!alt) erg<<db;
       } // if (!db.empty()) 
       if (bis==string::npos) break;
@@ -413,19 +413,18 @@ void DB::init(
 							if (zzruck.size()) {
 								systemrueck("cat "+zzruck[0]+" | sed 's/#.*$//g' | grep '!includedir' | sed 's/^[ \t]//g' | cut -d' ' -f2-", 
 										obverb,oblog,&zincldir,/*obsudc=*/1); 
-								for(size_t i=0;i<zincldir.size();i++) {
+								for(auto const& aktdir:zincldir) {
 									svec zzruck2;
-									systemrueck("find "+zincldir[i]+" -not -type d",obverb,oblog,&zzruck2,/*obsudc=*/1); // auch links
-									for(size_t i=0;i<zzruck2.size();i++) {
-										zzruck<<zzruck2[i];
+									systemrueck("find "+aktdir+" -not -type d",obverb,oblog,&zzruck2,/*obsudc=*/1); // auch links
+									for(auto const& aktzz2:zzruck2) {
+										zzruck<<aktzz2;
 									}
 								} //                 for(size_t i=0;i<zincldir.size();i++)
 							} //               if (zzruck.size())
 							if(zzruck.size()) {
-								for(size_t i=0;i<zzruck.size();i++) {
+								for(auto const& aktzz:zzruck) {
 									svec zrueck;
-									if (!systemrueck(("sed 's/#.*$//g' '")+zzruck[i]+"' | grep datadir | cut -d'=' -f2",
-												obverb,oblog,&zrueck,/*obsudc=*/1)) {
+									if (!systemrueck(("sed 's/#.*$//g' '")+aktzz+"' | grep datadir | cut -d'=' -f2",obverb,oblog,&zrueck,/*obsudc=*/1)) {
 										if (zrueck.size()) {
 											datadir=zrueck[zrueck.size()-1];  
 											break;
