@@ -1212,7 +1212,7 @@ class hcl
 		string muser; // Benutzer fuer Mysql/MariaDB
 		string mpwd;  // Passwort fuer Mysql/MariaDB //ω
 		stringstream uebers; // Ueberschrift fuer Verarbeitungslauf
-		uchar mitcron; // ob Programm auch in Cron eingetragen werden kann
+		uchar mitcron=0; // ob Programm auch in Cron eingetragen werden kann
 	public:
 		int obverb=0; // verbose
 		int oblog=0;  // mehr Protokollieren

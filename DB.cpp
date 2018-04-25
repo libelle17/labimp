@@ -315,10 +315,12 @@ Tabelle::Tabelle(const DB* dbp,const string& tbname, sfeld& fdr, Index *const in
 {
 	feldzahl=fdr.size();
 	felder=new Feld[feldzahl];
-	for(size_t i=0;i<fdr.size();i++) {
-		memcpy(&felder[i],fdr[i],sizeof *felder);
+	copy(fdr.begin(),fdr.end(),felder);
+//	for(size_t i=0;i<fdr.size();i++) {
+//		felder[i]=&fdr[i];
+//		memcpy(&felder[i],fdr[i],sizeof *felder);
 ////		caus<<"Name ("<<i<<"): "<<felder[i].name<<endl;
-	}
+//	}
 }
 
 Tabelle::Tabelle(const DB* dbp,const string& vtbname,const size_t aktc,int obverb,int oblog): dbp(dbp),tbname(vtbname)

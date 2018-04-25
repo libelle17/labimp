@@ -347,6 +347,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Größe","size"},
 	// T_auswertpql_leere_Funktion
 	{"auswertpql() (leere Funktion)","evaluatepql() (empty function)"},
+	// T_PatID_aus_Laborneu
+	{"Pat_ID aus Laborneu","Pat_id from laborneu"},
+	// T_nachbearbeit_leere_Funktion
+	{"nachbearbeit() (leere Funktion)","afterwork() (empty function)"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -372,6 +376,12 @@ void hhcl::ergpql()
 void hhcl::auswertpql(const size_t i,insv& rus)
 {
 	hLog(violetts+Tx[T_auswertpql_leere_Funktion]+schwarz);
+}
+
+// schwache Funktion, kann ueberdeckt werden
+void hhcl::nachbearbeit(const size_t aktc)
+{
+	hLog(violetts+Tx[T_nachbearbeit_leere_Funktion]+schwarz);
 }
 
 // wird aufgerufen in: virtpruefweiteres
@@ -420,7 +430,7 @@ void hhcl::prueflyparameter(DB *My, const int obverb, const int oblog, const uch
 			Feld("oNm","varchar","11","",Tx[T_oberer_Normwert_maennlich],0,0,1),
 			Feld("uNw","varchar","11","",Tx[T_unterer_Normwert_weiblich],0,0,1),
 			Feld("oNw","varchar","11","",Tx[T_oberer_Normwert_weiblich],0,0,1),
-			Feld("NB","varchar","650","",Tx[T_Normbereich_aus_lywert],0,0,1),
+			Feld("NB","varchar","1330","",Tx[T_Normbereich_aus_lywert],0,0,1),
 			Feld("Aktzeit","datetime","0","0",Tx[T_Aktualisierungszeitpunt],1,0,1),
 			Feld("StByte","int","10","",Tx[T_Ordnungsnummer_der_Dateiuebertragung],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
@@ -552,7 +562,7 @@ void hhcl::prueflypnb(DB *My, const int obverb, const int oblog, const uchar dir
 //			Feld("Eingang","datetime","0","0",Tx[T_Eingangsdatum_im_Labor],0,0,1),
 			Feld("uNg","varchar","11","",Tx[T_untere_Normgrenze],0,0,1),
 			Feld("oNg","varchar","11","",Tx[T_obere_Normgrenze],0,0,1),
-			Feld("NB","varchar","650","",Tx[T_Normbereich],0,0,1),
+			Feld("NB","varchar","1330","",Tx[T_Normbereich],0,0,1),
 			Feld("zahl","int","10","",Tx[T_Haeufigkeit_eines_Laborparameters],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 			Feld("uid","int","10","",Tx[T_laborxus_id_des_ersten_Eintrags],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 		};
@@ -649,7 +659,7 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 		fdr<<new Feld("Satzlänge","varchar","11","",Tx[T_8100_Satzlaenge_Turbomed],0,0,0);
 		fdr<<new Feld("Auftragsnummer","varchar","11","",Tx[T_8310_Anforderungsident_Turbomed],0,0,0);
 		fdr<<new Feld("Auftragsschlüssel","varchar","11","",Tx[T_8311_Anforderungsnr_d_Labors_Turbomed],/*obind*/1,0,0);
-		fdr<<new Feld("Eingang","datetime","0","0",Tx[T_Eingangsdatum_im_Labor],1,0,0);
+		fdr<<new Feld("Eingang","date","0","0",Tx[T_Eingangsdatum_im_Labor],1,0,0);
 		fdr<<new Feld("Berichtsdatum","varchar","21","",Tx[T_8302_Berichtsdatum],0,0,0);
 		fdr<<new Feld("Pat_id","int","10","","",1,0,1,string(),1);
 		fdr<<new Feld("Nachname","varchar","31","","3101",0,0,0);
@@ -665,12 +675,15 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 		fdr<<new Feld("Geschlecht","varchar","1","",Tx[T_8407_Geschlecht_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/1);
 		fuellpql();
 		for(size_t i=0;i<pql.size();i++) {
-			fdr<<new Feld("Pat_id_"+ltoan(i),"varchar","1","",pql[i],/*obind*/1,/*obauto*/0,/*nnull*/0);
+			fdr<<new Feld("Pat_id_"+ltoan(i),"varchar","1","",ersetze(pql[i].c_str(),"'",""),/*obind*/1,/*obauto*/0,/*nnull*/0);
 		}
 		fdr<<new Feld("ZeitpunktLaborneu","datetime","0","0",Tx[T_Zeitpunkt_der_Untersuchung_die_in_Laborneu_zugeordnet_wurde],0,0,0);
+		fdr<<new Feld("Pat_id_Laborneu","varchar","1","",Tx[T_PatID_aus_Laborneu],0,0,0);
+		/*
 		fdr<<new Feld("ZdüP","smallint","6","0",Tx[T_Zahl_der_verglichenen_Parameter],0,0,0);
 		fdr<<new Feld("ZdiP","int","10","0",Tx[T_Zahl_der_infragekommenden_Patienten],0,0,0);
 		fdr<<new Feld("LWerte","LONGTEXT","","0",Tx[T_Laborwerte_die_zur_Zuordnung_gefuehrt_haben],0,0,0);
+		*/
 		fdr<<new Feld("verglichen","datetime","0","0",Tx[T_Datum_zu_dem_Datensatz_zuletzt_verglichen_wurde],0,0,0);
 		fdr<<new Feld("AfN","smallint","6","0",Tx[T_Affected_Number_Zahl_der_zugehoerigen_Datensaetze_in_Laborneu],0,0,0);
 		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
@@ -689,7 +702,7 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 			Feld("Satzlänge","varchar","11","",Tx[T_8100_Satzlaenge_Turbomed],0,0,0),
 			Feld("Auftragsnummer","varchar","11","",Tx[T_8310_Anforderungsident_Turbomed],0,0,0),
 			Feld("Auftragsschlüssel","varchar","11","",Tx[T_8311_Anforderungsnr_d_Labors_Turbomed],/*obind*/1,0,0),
-			Feld("Eingang","datetime","0","0",Tx[T_Eingangsdatum_im_Labor],1,0,0),
+			Feld("Eingang","date","0","0",Tx[T_Eingangsdatum_im_Labor],1,0,0),
 			Feld("Berichtsdatum","varchar","21","",Tx[T_8302_Berichtsdatum],0,0,0),
 			Feld("Pat_id","int","10","","",1,0,1,string(),1),
 			Feld("Nachname","varchar","31","","3101",0,0,0),
@@ -925,9 +938,9 @@ void hhcl::pruefPatID(const int aktc,insv& rus)
 				if ((cerg=rspat.HolZeile())) {
 					if (*cerg) {
 						caus<<"Pat_id fuer "<<nname<<", "<<vname<<": "<<**cerg<<endl;
-						pat_id=**cerg;
+						if (pat_id=="0" || pat_id.empty()) pat_id=**cerg;
 						auswertpql(i,rus);
-						break;
+//						break;
 					}
 				}
 			}
@@ -1687,6 +1700,7 @@ void hhcl::pvirtfuehraus()
 				dverarbeit(lrue[i]);
 			}
 		}
+		nachbearbeit(aktc);
 	} // 	if (!loeschalle)
 	caus<<"fertig!"<<endl;
 } // void hhcl::pvirtfuehraus  //α

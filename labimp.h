@@ -163,104 +163,111 @@ enum T_
 	T_letzte_Aenderung,
 	T_Groesse,
 	T_auswertpql_leere_Funktion,
+	T_PatID_aus_Laborneu,
+	T_nachbearbeit_leere_Funktion,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
 //α
 class hhcl:public dhcl
 {
- private: //ω
-	const static string vorsil; /*=labory*/
-	const static string tlydat; /*=vorsil+"dat"*/
-	const static string tlyleist; /*=vorsil+"leist"*/
-	const static string tlypgl; /*=vorsil+"pgl"*/
-	const static string tlyplab; /*=vorsil+"plab"*/
-	const static string tlypnb; /*=vorsil+"pnb"*/
-	const static string tlypneu; /*=vorsil+"pneu"*/
-	const static string tlyaerzte; /*=vorsil+"saetze"*/
-	const static string tlysaetze; /*=vorsil+"saetze"*/
-	const static string tlyus; /*=vorsil+"us"*/
-	const static string tlywert; /*=vorsil+"wert"*/
-	const static string tlybakt; /*=vorsil+"bakt"*/
-	const static string tlyfehlt; /*=vorsil+"fehlt"*/
-	const static string tlyparameter; /*=vorsil+"parameter"*/
-	const static string tlyhinw; /*=vorsil+"hinw"*/
-	string labind,pneuind,pnbid,hinwind;
-	ic_cl *icp[2];
-	tm eingtm, gebdat;
-	string nname,vname,titel,nvorsatz,sgschl,pat_id,auftrschl,baktid,hinwid,erklid,kommid;
-	svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
-	string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
-	tm abndat{0};
-	uchar keimz{0},keimzda{0};
- protected: //α
-	string p1;
-	int p2;
-	string p3;
-	uchar oblista=0;
-	uchar vonvorne=0;
-	uchar entleer=0;
-	uchar loeschalle=0;
-	long listz=30; //ω
-  string ldatvz;   // Verzeichnis der Labordateien
- public: //α //ω
- private: //α //ω
-	void prueflydat(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyleist(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflypgl(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyplab(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflypnb(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflypneu(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyaerzte(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflysaetze(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyus(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflywert(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflybakt(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyfehlt(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyparameter(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void prueflyhinw(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-	void virttesterg(); //α
-	void virtlieskonfein();
-	void virtautokonfschreib();
-	void dverarbeit(const string& datei);
-	void usreset();
-	void wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp);
- protected: 
-	// void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, lieskonfein, hcl::hcl nach holsystemsprache
-	void virtVorgbAllg();
-	void pvirtVorgbSpeziell()
+	private: //ω
+		const static string vorsil; /*=labory*/
+		const static string tlydat; /*=vorsil+"dat"*/
+		const static string tlyleist; /*=vorsil+"leist"*/
+		const static string tlypgl; /*=vorsil+"pgl"*/
+		const static string tlyplab; /*=vorsil+"plab"*/
+		const static string tlypnb; /*=vorsil+"pnb"*/
+		const static string tlypneu; /*=vorsil+"pneu"*/
+		const static string tlyaerzte; /*=vorsil+"saetze"*/
+		const static string tlysaetze; /*=vorsil+"saetze"*/
+		const static string tlyus; /*=vorsil+"us"*/
+		const static string tlywert; /*=vorsil+"wert"*/
+		const static string tlybakt; /*=vorsil+"bakt"*/
+		const static string tlyfehlt; /*=vorsil+"fehlt"*/
+		const static string tlyparameter; /*=vorsil+"parameter"*/
+		const static string tlyhinw; /*=vorsil+"hinw"*/
+		string labind,pneuind,pnbid,hinwind;
+		ic_cl *icp[2];
+		tm eingtm{0}, gebdat={0};
+		string nname,vname,titel,nvorsatz,sgschl,pat_id{"0"},auftrschl,baktid,hinwid,erklid,kommid;
+		svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
+		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
+		tm abndat{0};
+		uchar keimz{0},keimzda{0};
+	protected: //α
+		string p1;
+		int p2;
+		string p3;
+		uchar oblista=0;
+		uchar vonvorne=0;
+		uchar entleer=0;
+		uchar loeschalle=0;
+		long listz=30; //ω
+		string ldatvz;   // Verzeichnis der Labordateien
+	public: //α //ω
+	private: //α //ω
+		void prueflydat(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyleist(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflypgl(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyplab(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflypnb(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflypneu(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyaerzte(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflysaetze(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyus(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflywert(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflybakt(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyfehlt(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyparameter(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyhinw(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void virttesterg(); //α
+		void virtlieskonfein();
+		void virtautokonfschreib();
+		void dverarbeit(const string& datei);
+		void usreset();
+		void wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp);
+	protected: 
+		// void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, lieskonfein, hcl::hcl nach holsystemsprache
+		void virtVorgbAllg();
+		void pvirtVorgbSpeziell()
 #ifdef VOMHAUPTCODE
-		__attribute__((weak)) // implementationsspezifische Vorgaben, Modul vgb.cpp)
+			__attribute__((weak)) // implementationsspezifische Vorgaben, Modul vgb.cpp)
 #endif
-		;
-	void pruefPatID(const int aktc,insv& rus)
+			;
+		void pruefPatID(const int aktc,insv& rus)
 #ifdef VOMHAUPTCODE
-		__attribute__((weak)) // implementationsspezifische Adresspruefung)
+			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
-		;
-void fuellpql();
-void auswertpql(const size_t i,insv& rus)
+			;
+		void fuellpql();
+		void auswertpql(const size_t i,insv& rus)
 #ifdef VOMHAUPTCODE
-		__attribute__((weak)) // implementationsspezifische Adresspruefung)
+			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
-		;
-void ergpql()
+			;
+		void ergpql()
 #ifdef VOMHAUPTCODE
-		__attribute__((weak)) // implementationsspezifische Adresspruefung)
+			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
-		;
-	void russchreib(insv &rus,const int aktc,string *usidp);
-	void virtinitopt(); // (programm-)spezifische Optionen
-	void pvirtmacherkl();
-	void virtMusterVorgb();
-	void virtzeigversion(const string& ltiffv=nix);
-	void pvirtvorrueckfragen();
-	void virtrueckfragen();
-	void virtpruefweiteres();
-	void virtzeigueberschrift();
-	void pvirtfuehraus();
-	void virtschlussanzeige(); //ω
- public: //α
-  hhcl(const int argc, const char *const *const argv);
-	~hhcl();
+			;
+		void nachbearbeit(const size_t aktc)
+#ifdef VOMHAUPTCODE
+			__attribute__((weak)) // implementationsspezifische Adresspruefung)
+#endif
+			;
+		void russchreib(insv &rus,const int aktc,string *usidp);
+		void virtinitopt(); // (programm-)spezifische Optionen
+		void pvirtmacherkl();
+		void virtMusterVorgb();
+		void virtzeigversion(const string& ltiffv=nix);
+		void pvirtvorrueckfragen();
+		void virtrueckfragen();
+		void virtpruefweiteres();
+		void virtzeigueberschrift();
+		void pvirtfuehraus();
+		void virtschlussanzeige(); //ω
+	public: //α
+		hhcl(const int argc, const char *const *const argv);
+		~hhcl();
 }; // class hhcl //ω

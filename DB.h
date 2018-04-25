@@ -262,13 +262,29 @@ struct Feld
     Feld(const string& name, string typ=string(), const string& lenge=string(), const string& prec=string(), 
          const string& comment=string(), bool obind=0, bool obauto=0, bool nnull=0, const string& defa=string(), bool unsig=0);
 //		Feld(Feld const& copy);
+		// um im Konstruktor von Tabelle aus einem Feld-vector ein Feld-Array machen zu koennen
+		Feld& operator=(const Feld *fur) {
+			if (fur!=this) {
+				string *np=(string*)&name; *np=fur->name;
+				np=(string*)&typ;*np=fur->typ;
+				lenge=fur->lenge;
+				np=(string*)&prec;*np=fur->prec;
+				comment=fur->comment;
+				obind=fur->obind;
+				obauto=fur->obauto;
+				nnull=fur->nnull;
+				defa=fur->defa;
+				unsig=fur->unsig;
+			}
+			return *this;
+		}
 }; // struct Feld 
 
 struct sfeld: vector<Feld*>
 {
-	inline sfeld& operator<<(Feld *fdp) {
+	inline void operator<<(Feld *fdp) {
 		this->push_back(fdp);
-		return *this;
+//		return *this;
 	}
 }; // class svec: public vector<std::string>
 
