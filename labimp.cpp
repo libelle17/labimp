@@ -1690,17 +1690,21 @@ void hhcl::pvirtfuehraus()
 		systemrueck("find "+ldatvz+" -maxdepth 1 -type f \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 		//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 		caus<<"Dateien gefunden: "<<lrue.size()<<endl;
-		for(size_t i=0;i<lrue.size();i++) {
-			//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-			RS loeschvor(My,"DELETE FROM `"+tlydat+"` where pfad='"+lrue[i]+"' and fertig<>1",aktc,ZDB);
-			char ***cerg;
-			RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
-			if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
-				// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-				dverarbeit(lrue[i]);
+		if (0) {
+			for(size_t i=0;i<lrue.size();i++) {
+				//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+				RS loeschvor(My,"DELETE FROM `"+tlydat+"` where pfad='"+lrue[i]+"' and fertig<>1",aktc,ZDB);
+				char ***cerg;
+				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
+				if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
+					// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+					dverarbeit(lrue[i]);
+				}
 			}
 		}
+		caus<<"Stell 0"<<endl;
 		nachbearbeit(aktc);
+		caus<<"Stell 1"<<endl;
 	} // 	if (!loeschalle)
 	caus<<"fertig!"<<endl;
 } // void hhcl::pvirtfuehraus  //α

@@ -46,6 +46,9 @@ void hhcl::auswertpql(const size_t i,insv& rus)
 
 void hhcl::nachbearbeit(const size_t aktc)
 {
+	uchar altZDB=ZDB;
+	ZDB=1;
+	RS vor1(My,"SET group_concat_max_len=15000;",aktc,ZDB);
 	RS upd1(My,"update `"+tlyus+"` u left join ("
   "select x.id,y.pat_id,y.zeitpunkt from ("
 	"select u.id, u.pat_id, gesname(u.pat_id) name, eingang, group_concat(concat(w.abkü,replace(replace(replace(replace(w.wert,'.',''),'<',''),':',''),'-',''))) werte from `"
@@ -58,6 +61,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 	") i on u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zeitpunkt "
 	"where pat_id_laborneu=0;"
 ,aktc,ZDB);
+	RS vor2(My,"SET group_concat_max_len=15000;",aktc,ZDB);
 	RS upd2(My,"update `"+tlyus+"` u left join ("
   "select x.id,y.pat_id,y.zeitpunkt from ("
 	"select u.id, u.pat_id, gesname(u.pat_id) name, eingang, group_concat(concat(w.abkü,replace(replace(replace(replace(w.wert,'.',''),'<',''),':',''),'-',''))) werte from `"
@@ -70,4 +74,5 @@ void hhcl::nachbearbeit(const size_t aktc)
 	") i on u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zeitpunkt "
 	"where pat_id_laborneu=0 and eingang<subdate(now(),interval 10 day);"
 ,aktc,ZDB);
+	ZDB=altZDB;
 }
