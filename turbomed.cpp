@@ -59,7 +59,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 	"on x.werte=y.werte and date(x.eingang) =date(y.zeitpunkt) "
 	"where not isnull(y.pat_id) "
 	") i on u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zeitpunkt "
-	"where pat_id_laborneu=0;"
+	"where isnull(pat_id_laborneu);"
 ,aktc,ZDB);
 	RS vor2(My,"SET group_concat_max_len=15000;",aktc,ZDB);
 	RS upd2(My,"update `"+tlyus+"` u left join ("
@@ -72,7 +72,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 	"on x.werte=y.werte and x.eingang between subdate(y.zeitpunkt, interval 5 day) and adddate(y.zeitpunkt, interval 5 day) "
 	"where not isnull(y.pat_id) "
 	") i on u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zeitpunkt "
-	"where pat_id_laborneu=0 and eingang<subdate(now(),interval 10 day);"
+	"where isnull(pat_id_laborneu) and eingang<subdate(now(),interval 10 day);"
 ,aktc,ZDB);
 	ZDB=altZDB;
 }
