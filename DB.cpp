@@ -218,7 +218,7 @@ void insv::hzp(instyp it)
 void insv::hz(instyp it) 
 {
 	ivec.push_back(it);
-}
+} // void insv::hz
 
 Feld::Feld()
 {

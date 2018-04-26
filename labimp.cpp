@@ -1131,11 +1131,17 @@ void hhcl::usreset()
 	kommid="0";
 } // void hhcl::usreset
 
-void hhcl::wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp)
+void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep)
 {
+	if (*usoffenp) {
+		// caus<<rusp->size()<<endl;
+		russchreib(*rusp,aktc,usidp);
+		*usoffenp=0;
+	}
 	if (!normbereich.empty()) {
 		rpar->hz("NB",normbereich);
 		rpnb->hz("NB",normbereich);
+		normbereich.clear();
 	}
 	if (!uNm.empty()) {
 		rpar->hz("uNm",uNm);
@@ -1154,7 +1160,7 @@ void hhcl::wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv 
 		rpar->hz("Aktzeit",&aktzp);
 		// z.B. "Labor 20101201 044232.dat"
 		rpar->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0,/*mitupd=*/1);
-	}
+	} // 	if (rpar->size())
 	if (rpneu->size()) {
 		rpneu->ausgeb();
 		rpneu->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&pneuind);
@@ -1169,7 +1175,7 @@ void hhcl::wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv 
 			}
 			rpnb->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&pnbid);
 		}
-	}
+	} // 	if (rpneu->size())
 
 	if (rbawep) {
 		rbawep->hz("NBID",pnbid);
@@ -1203,17 +1209,17 @@ void hhcl::wertschreib(const int aktc,insv *rpar, insv *rpneu, insv *rpnb, insv 
 		keimz=0; // "Labor 20101204 195050.dat"
 		keimzda=0; // "Labor 20101210 034422.dat"
 	} // 					if (rbawep)
-	normbereich.clear();
 	uNm.clear();
 	oNm.clear();
 	uNw.clear();
 	oNw.clear();
+	pnbid.clear();
 	qspez.clear();
 	erklaerung.clear();
 	kommentar.clear();
 	auftrhinw.clear();
 	memset(&abndat,0,sizeof abndat);
-	pnbid.clear();
+	rlep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
 } // void hhcl::wertschreib
 
 void hhcl::dverarbeit(const string& datei)
@@ -1259,7 +1265,7 @@ void hhcl::dverarbeit(const string& datei)
 	insv rle(My,/*itab*/tlyleist,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
 	caus<<rot<<datei<<schwarz<<endl;
-	
+
 	mdatei mdat(datei,ios::in);
 	if (mdat.is_open()) {
 		// Zeichensatz ermitteln und verwenden
@@ -1277,7 +1283,6 @@ void hhcl::dverarbeit(const string& datei)
 			if (zeile.size()>7) {
 				if (!cp) {
 					for(unsigned p=0;p<2;p++) {
-//					for(unsigned const& p: {0,1}) {
 						if (zeile.find_first_of(sonder[p],7)!=string::npos) {
 							cp=p+1;
 							break;
@@ -1304,17 +1309,11 @@ void hhcl::dverarbeit(const string& datei)
 					rsaetze.hz("DatID",datid);
 					UsLfd=0;
 				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
-//					if (inh.length()>4) ... // trat nicht auf
+					//					if (inh.length()>4) ... // trat nicht auf
 					lsatzart=2;
-					if (usoffen) {
-						// caus<<rus.size()<<endl;
-						// z.B. "Labor 20120223 020708.dat"
-						russchreib(rus,aktc,&usid);
-						usoffen=0;
-					}
-					wertschreib(aktc,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw);
-					// z.B. "Labor 20101201 004634.dat"
-					rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+						// russchreib z.B. "Labor 20120223 020708.dat"
+					wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
+					// rle.schreib z.B. "Labor 20101201 004634.dat"
 					//					satzid="0";
 				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
 					lsatzart=3;
@@ -1364,16 +1363,10 @@ void hhcl::dverarbeit(const string& datei)
 						break;
 				}
 			} else if (cd=="8410" || cd=="8434") { // 8410=Test-Ident, 8434=Verfahren
+				// russchreib z.B. "Labor 20091126 162829.dat"
 				// z.B. "Labor 20101202 002036.dat"
-					wertschreib(aktc,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw);
-				// z.B. "Labor 20101202 011636.dat"
-				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-				if (usoffen) {
-					// caus<<rus.size()<<endl;
-					// z.B. "Labor 20091126 162829.dat"
-					russchreib(rus,aktc,&usid);
-					usoffen=0;
-				}
+				wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
+				// rle.schreib z.B. "Labor 20101202 011636.dat"
 				if (cd=="8434") {
 					if (rba.size()) {
 						caus<<"rba.size(): "<<rba.size()<<endl;
@@ -1384,7 +1377,7 @@ void hhcl::dverarbeit(const string& datei)
 					}
 					rbawep=&rba;
 				} else /*if (cd=="8410")*/ {
-//					if (rwe.size()) ... trat nicht auf
+					//					if (rwe.size()) ... trat nicht auf
 					rbawep=&rwe;
 				} // 					if (cd=="8434") else if (cd=="8410")
 				rbawep->hz("UsID",usid);
@@ -1449,9 +1442,9 @@ void hhcl::dverarbeit(const string& datei)
 				auftrschl=inh;
 				rus.hz("Auftragsschlüssel",auftrschl);
 			} else if (cd=="8418") {
-					rwe.hz("Teststatus",inh);
+				rwe.hz("Teststatus",inh);
 			} else if (cd=="8420") {
-					rwe.hz("Wert",inh);
+				rwe.hz("Wert",inh);
 			} else if (cd=="8421") {
 				if (rbawep) {
 					rbawep->hz("Einheit",inh);
@@ -1459,7 +1452,7 @@ void hhcl::dverarbeit(const string& datei)
 				rpar.hz("Einheit",inh);
 				rpneu.hz("Einheit",inh);
 			} else if (cd=="8422") {
-					rwe.hz("Grenzwerti",inh);
+				rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
 				BDTtoDate(inh,&eingtm);
 				rus.hz("Eingang",&eingtm);
@@ -1502,23 +1495,23 @@ void hhcl::dverarbeit(const string& datei)
 				nvorsatz=inh;
 			} else if (cd=="9212") {
 				rsaetze.hz("VersionSatzb",inh);
-      } else if (cd=="0201") {
-					raerzte.hz("ArztNr",inh);
-      } else if (cd=="0203") {
-					raerzte.hz("ArztName",inh);
-      } else if (cd=="0205") {
-					raerzte.hz("StraßePraxis",inh);
-      } else if (cd=="0211") {
+			} else if (cd=="0201") {
+				raerzte.hz("ArztNr",inh);
+			} else if (cd=="0203") {
+				raerzte.hz("ArztName",inh);
+			} else if (cd=="0205") {
+				raerzte.hz("StraßePraxis",inh);
+			} else if (cd=="0211") {
 				if (!arztnameda) {
 					raerzte.hz("Arzt",inh);
 					arztnameda=1;
 				}
 			} else if (cd=="0212") {
 				lanr=inh;
-      } else if (cd=="0215") {
-					raerzte.hz("PLZPraxis",inh);
-      } else if (cd=="0216") {
-					raerzte.hz("OrtPraxis",inh);
+			} else if (cd=="0215") {
+				raerzte.hz("PLZPraxis",inh);
+			} else if (cd=="0216") {
+				raerzte.hz("OrtPraxis",inh);
 			} else if (cd=="8300") {
 				svec labv;
 				aufSplit(&labv, inh,';');
@@ -1669,12 +1662,13 @@ void hhcl::dverarbeit(const string& datei)
 			}
 			altz=zeile;
 #endif 
-		}
+		} // 		while(getline(mdat,zeile))
+		wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
 		reing.hz("codepage",cp);
 		reing.hz("fertig",1);
 		reing.ergaenz(datid,/*sammeln*/0,/*obverb*/1,/*idp*/0);
 	} // 	if (mdat.is_open())
-//	exit(0);
+	//	exit(0);
 } // void hhcl::dverarbeit(const string& datei)
 
 // wird aufgerufen in lauf
@@ -1693,7 +1687,7 @@ void hhcl::pvirtfuehraus()
 		if (1) {
 			for(size_t i=0;i<lrue.size();i++) {
 				//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-				RS loeschvor(My,"DELETE FROM `"+tlydat+"` where pfad='"+lrue[i]+"' and fertig<>1",aktc,ZDB);
+				RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad='"+lrue[i]+"' AND fertig<>1",aktc,ZDB);
 				char ***cerg;
 				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
 				if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
