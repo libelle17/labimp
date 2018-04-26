@@ -1178,21 +1178,22 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	} // 	if (rpneu->size())
 
 	if (rbawep) {
-		rbawep->hz("NBID",pnbid);
+		if (!pnbid.empty()) {
+			rbawep->hz("NBID",pnbid);
+		}
 		// z.B. "Labor 20101201 004634.dat"
 		if (!qspez.empty()) {
 			rbawep->hz("QSpez",qspez);
 		}
 		// Field Erklärung doesn't have a default value
-			rhinwp->hz("Text",erklaerung);
-			rhinwp->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&erklid,/*mitupd=*/0);
-			rbawep->hz("ErklID",erklid);
-//		rbawep->hz("Erklärung",erklaerung);
+		rhinwp->hz("Text",erklaerung);
+		rhinwp->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&erklid,/*mitupd=*/0); // erklid s.u.
+		//		rbawep->hz("Erklärung",erklaerung);
 		if (!kommentar.empty()) {
 			rhinwp->hz("Text",kommentar);
 			rhinwp->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&kommid,/*mitupd=*/0);
 			rbawep->hz("KommID",kommid);
-//			rbawep->hz("Kommentar",kommentar);
+			//			rbawep->hz("Kommentar",kommentar);
 		}
 		if (!auftrhinw.empty()) {
 			rhinwp->hz("Text",auftrhinw);
@@ -1200,9 +1201,15 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 			rbawep->hz("HinwID",hinwid);
 //			rbawep->hz("AuftrHinw",auftrhinw);
 		} // 						if (!auftrhinw.empty())
-		rbawep->hz("AbnDat",&abndat);
+		const struct tm tmnull{0};
+		if (memcmp(&abndat,&tmnull,sizeof abndat)) {
+			rbawep->hz("AbnDat",&abndat);
+		}
 		if (rbawep==rwe) {
 			rbawep->hz("BaktID",baktid);
+		} // 		if (rbawep==rwe)
+		if (rbawep->size()) {
+			rbawep->hz("ErklID",erklid);
 		}
 		rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==rwe?0:&baktid,/*mitupd=*/1);
 		rbawep=0;
