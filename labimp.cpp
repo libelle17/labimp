@@ -1205,10 +1205,10 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		if (memcmp(&abndat,&tmnull,sizeof abndat)) {
 			rbawep->hz("AbnDat",&abndat);
 		}
-		if (rbawep==rwe) {
-			rbawep->hz("BaktID",baktid);
-		} // 		if (rbawep==rwe)
 		if (rbawep->size()) {
+			if (rbawep==rwe) {
+				rbawep->hz("BaktID",baktid);
+			} // 		if (rbawep==rwe)
 			rbawep->hz("ErklID",erklid);
 		}
 		rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==rwe?0:&baktid,/*mitupd=*/1);
