@@ -1268,9 +1268,9 @@ void hhcl::dverarbeit(const string& datei)
 	const size_t aktc=0;
 #endif 
 	string datid,satzid,arztid,satzart;
-	unsigned UsLfd;
+	unsigned UsLfd=0;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
-	uchar saetzeoffen, usoffen=0;
+	uchar saetzeoffen=0, usoffen=0;
 	usreset();
 	string usid;
 	vordverarb(aktc);
@@ -1731,7 +1731,7 @@ void hhcl::pvirtfuehraus()
 						pthread_mutex_unlock(&timemutex);
 					}
 					RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad='"+lrue[i]+"' AND fertig<>1",aktc,ZDB);
-					char ***cerg;
+					char ***cerg{0};
 					RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
 					if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 						// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
