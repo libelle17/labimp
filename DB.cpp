@@ -154,6 +154,10 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"Fehler ","Errror "},
 	// T_erstelle_Tabelle
 	{"erstelle Tabelle ","creating table "},
+	// T_Zeige
+	{"Zeige: ","showing: "},
+	// T_an_Position
+	{"an Position: ","at position: "},
 	{"",""}
 };
 // Txdbcl::Txdbcl() {TCp=(const char* const * const * const *)&TextC;}
@@ -1718,10 +1722,10 @@ char*** RS::HolZeile()
 
 RS::RS(const DB* const pdb,const string& table):dbp(pdb),table(table)
 {
-  weisezu();
+  setzzruck();
 }
 
-void RS::weisezu() 
+void RS::setzzruck() 
 {
   this->result=0;
 #ifdef mitpostgres 
@@ -1908,23 +1912,23 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 	KLZ
  */
 
-RS::RS(const DB* const pdb,const char* const psql,const size_t aktc,int obverb):dbp(pdb)
+RS::RS(const DB* const pdb,const char* const psql,const size_t aktc,int obverb,uchar asy/*=0*/,int oblog/*=0*/,string* idp/*=0*/,my_ulonglong *arowsp/*=0*/):dbp(pdb)
 {
-	weisezu();
-	Abfrage(psql,aktc,obverb);
+	setzzruck();
+	Abfrage(psql,aktc,obverb,asy,oblog,idp,arowsp);
 } // RS::RS(const DB* pdb,const char* const psql,const size_t aktc,int obverb) 
 
-RS::RS(const DB* const pdb,stringstream psqls,const size_t aktc,int obverb):dbp(pdb)
+RS::RS(const DB* const pdb,stringstream psqls,const size_t aktc,int obverb,uchar asy/*=0*/,int oblog/*=0*/,string* idp/*=0*/,my_ulonglong *arowsp/*=0*/):dbp(pdb)
 {
 	const string ueber=psqls.str();
-	weisezu();
-	Abfrage(ueber,aktc,obverb);
+	setzzruck();
+	Abfrage(ueber,aktc,obverb,asy,oblog,idp,arowsp);
 } // RS::RS(const DB* pdb,stringstream psqls,const size_t aktc,int obverb) 
 
-RS::RS(const DB* const pdb,const string& psql,const size_t aktc,int obverb):dbp(pdb) 
+RS::RS(const DB* const pdb,const string& psql,const size_t aktc,int obverb,uchar asy/*=0*/,int oblog/*=0*/,string* idp/*=0*/,my_ulonglong *arowsp/*=0*/):dbp(pdb) 
 {
-	weisezu();
-	Abfrage(psql,aktc,obverb);
+	setzzruck();
+	Abfrage(psql,aktc,obverb,asy,oblog,idp,arowsp);
 } // RS::RS(const DB* pdb,const string& psql,const size_t aktc,int obverb) 
 
 RS::~RS() 
@@ -2075,7 +2079,7 @@ my_ulonglong RS::tbupd(const vector<instyp>& einf,int obverb, const string& bedi
 my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
 		int obverb/*=0*/,string *const idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/,uchar mitupd/*=0*/) 
 {
-	caus<<violett<<"tbins: "<<blau<<table<<" "<<schwarz<<endl;
+	fLog(violetts+"tbins: "+blau+table+" "+schwarz,obverb,0);
 	my_ulonglong zl=0;
 	ulong locks=0;
 	uchar obhauptfehl=0;
@@ -2396,7 +2400,7 @@ int dhcl::initDB()
 		fehler=1046;
 	} else {
 		if (!My) {
-			My=new DB(myDBS,linstp,host,muser,mpwd,maxconz,dbq,/*port=*/0,/*unix_socket=*/0,/*client_flag=*/0,obverb,oblog);
+			My=new DB(myDBS,linstp,host,muser,mpwd,maxconz,dbq,/*port=*/0,/*unix_socket=*/0,/*client_flag=*/CLIENT_MULTI_STATEMENTS,obverb,oblog);
 			if (My->ConnError) {
 				delete My;
 				My=0;
@@ -2494,5 +2498,51 @@ void insv::ausgeb()
 	caus<<"Tabelle: "<<blau<<*itabp<<schwarz<<endl;
 	for(instyp i:ivec) {
 		i.ausgeb();
+	}
+}
+
+insv::insv(DB *My,const string& itab,const size_t aktc,const uchar eindeutig,const svec& eindfeld,const uchar asy,svec *csets):My(My),itabp(&itab),aktc(aktc),eindeutig(eindeutig),eindfeld(eindfeld),asy(asy),csets(csets)
+{
+	rsp=new RS(My,itab);
+}
+
+my_ulonglong insv::schreib(const uchar sammeln/*=0*/,int obverb/*=0*/,string* const idp/*=0*/,uchar mitupd/*=0*/)
+{
+	my_ulonglong erg=0;
+	if (ivec.size()) {
+		erg=rsp->tbins(&ivec,aktc,sammeln,obverb,idp,eindeutig,eindfeld,asy,csets,mitupd);
+		if (rsp->fnr) {
+			fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
+		} //         if (runde==1)
+		ivec.clear();
+	}
+	return erg;
+}
+
+my_ulonglong insv::ergaenz(const string& bedingung,const uchar sammeln/*=0*/,int obverb/*=0*/,string* const idp/*=0*/)
+{
+	my_ulonglong erg=0;
+	// <<"Bedingung: "<<bedingung<<endl;
+	if (ivec.size()) {
+		rsp->holautofeld(aktc,obverb);
+		const string gesbed=rsp->autofeld+"='"+bedingung+"'";
+		// <<"Gesbed: "<<gesbed<<endl;
+		erg=rsp->tbupd(ivec,obverb,gesbed,aktc,asy);
+		if (rsp->fnr) {
+			fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
+		} //         if (runde==1)
+		ivec.clear();
+	}
+	return erg;
+}
+
+void insv::clear() {
+	ivec.clear();
+}
+
+void insv::zeig(const char* const wo) {
+	fLog(Txd[T_Zeige]+blaus+*itabp+schwarz+Txd[T_an_Position]+blau+wo+schwarz,1,0);
+	for(size_t i=0;i<ivec.size();i++) {
+		fLog(violetts+"i: "+gruen+ltoan(i)+": "+schwarz+ivec[i].feld+": '"+blau+ivec[i].wert+"'"+schwarz,1,0);
 	}
 }

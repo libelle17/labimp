@@ -7,7 +7,7 @@
 #define VOMHAUPTCODE // um Funktionsdefinition manchmal mit "__attribute__((weak)) " versehen zu können //ω
 #include "labimp.h"
 // fuer verschiedene Sprachen //α
-#define vorsilbe "labory"
+#define vorsilbe "laby"
 const string hhcl::vorsil=vorsilbe;
 const string hhcl::tlydat=vorsil+"dat";
 const string hhcl::tlyleist=vorsil+"leist";
@@ -351,6 +351,26 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Pat_ID aus Laborneu","Pat_id from laborneu"},
 	// T_nachbearbeit_leere_Funktion
 	{"nachbearbeit() (leere Funktion)","afterwork() (empty function)"},
+	// T_vordverarb_leere_Funktion
+	{"vordverarb() (leere Funktion)","beforefilework() (empty function)"},
+	// T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien
+	{"loescht Datensaetze aus unvollstaendig eingelesenen Dateien","deletes entries from incompletely read files"},
+	// T_lu_k
+	{"loeunv","delincomp"},
+	// T_la_l
+	{"loeschunvollstaendige","deleteincomplete"},
+	// T_Pat_id_fuer
+	{"Pat_id fuer ","Pat_id for"},
+	// T_Zahl
+	{"Zahl: ","no: "},
+	// T_nurnach_k
+	{"nurnach","onlyafter"},
+	// T_nurnach_l
+	{"nurnachbearbeitung","onlyafterwork"},
+	// T_nur_Nachbearbeitung
+	{"nur Nachbearbeitung","only afterwork"},
+	// T_fertig
+	{"fertig!","finished!"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -378,6 +398,10 @@ void hhcl::auswertpql(const size_t i,insv& rus)
 	hLog(violetts+Tx[T_auswertpql_leere_Funktion]+schwarz);
 }
 
+void hhcl::vordverarb(const size_t aktc)
+{
+	hLog(violetts+Tx[T_vordverarb_leere_Funktion]+schwarz);
+}
 // schwache Funktion, kann ueberdeckt werden
 void hhcl::nachbearbeit(const size_t aktc)
 {
@@ -407,7 +431,7 @@ void hhcl::prueflyhinw(DB *My, const int obverb, const int oblog, const uchar di
 			svec eindfeld; eindfeld<<"ID";
 			insv rhinw(My,/*itab*/tlyhinw,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 			rhinw.hz("Text",string());
-			rhinw.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&hinwind);
+			rhinw.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&hinwind);
 		}
 	} // if (!direkt)
 } // int prueflyhinw
@@ -505,7 +529,7 @@ void hhcl::prueflyplab(DB *My, const int obverb, const int oblog, const uchar di
 			svec eindfeld; eindfeld<<"ID";
 			insv rlab(My,/*itab*/tlyplab,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 			rlab.hz("Labor",Tx[T_fehlend]);
-			rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
+			rlab.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&labind);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -755,10 +779,10 @@ void hhcl::prueflybakt(DB *My, const int obverb, const int oblog, const uchar di
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,1,string(),1),
 			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 			Feld("NBID","int","10","",Tx[T_Bezug_zu_laborynb],/*obind*/1,/*obauto*/0,/*nnull*/0),
-			Feld("Verf","varchar","31","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
+			Feld("Verf","varchar","41","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
 			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
 			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
-			Feld("QSpez","varchar","1","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
+			Feld("QSpez","varchar","11","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
 			Feld("AbnDat","datetime","0","0",Tx[T_8432_Abnahmedatum_Turbomed],0,0,1),
 //			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
 			Feld("KommID","int","10","",Tx[T_Kommentar_Bezug_auf_lyhinw],1,0,0,"0",1),
@@ -789,7 +813,7 @@ void hhcl::prueflyleist(DB *My, const int obverb, const int oblog, const uchar d
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,string(),/*unsigned*/1),
 			Feld("Abkü","varchar","11","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
-			Feld("Verf","varchar","1","",Tx[T_8434],0,0,1),
+			Feld("Verf","varchar","41","",Tx[T_8434],0,0,1),
 			Feld("EBM","varchar","11","",Tx[T_5001_GNR_Turbomed],0,0,1),
 			Feld("goä","varchar","11","",Tx[T_8406],0,0,1),
 			Feld("Anzahl","varchar","1","",Tx[T_5005],0,0,1),
@@ -825,7 +849,7 @@ void hhcl::prueflywert(DB *My, const int obverb, const int oblog, const uchar di
 			Feld("Langtext","varchar","41","",Tx[T_8411_Testbezeichnung_Turbomed],0,0,1),
 			Feld("KuQu","varchar","11","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
 			Feld("Quelle","varchar","21","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
-			Feld("QSpez","varchar","1","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
+			Feld("QSpez","varchar","161","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
 			Feld("AbnDat","datetime","0","0",Tx[T_8432_Abnahmedatum_Turbomed],0,0,1),
 			Feld("Wert","varchar","11","0",Tx[T_8420_Ergebniswert_Turbomed],0,0,1),
 			Feld("Einheit","varchar","12","",Tx[T_8421_maximale_Laenge_12],0,0,1,"kA"),
@@ -932,12 +956,12 @@ void hhcl::pruefPatID(const int aktc,insv& rus)
 	for(size_t i=0;i<pql.size();i++) {
 		RS rspat(My,pql[i],aktc,ZDB);
 		if (!rspat.obfehl) {
-			caus<<gruen<<"Zahl: "<<blau<<rspat.result->row_count<<gruen<<" bei: "<<blau<<pql[i]<<schwarz<<endl;
+			hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+pql[i]+schwarz);
 			if (rspat.result->row_count==1){
 				char ***cerg;
 				if ((cerg=rspat.HolZeile())) {
 					if (*cerg) {
-						caus<<"Pat_id fuer "<<nname<<", "<<vname<<": "<<**cerg<<endl;
+					  hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
 						if (pat_id=="0" || pat_id.empty()) pat_id=**cerg;
 						auswertpql(i,rus);
 //						break;
@@ -975,6 +999,8 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnach,/*art*/puchar,T_nurnach_k,T_nurnach_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
 
@@ -1058,6 +1084,8 @@ void hhcl::virtpruefweiteres()
 		RS d9(My,"TRUNCATE "+tlydat,aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleert_alle_Tabellen_und_faengt_von_vorne_an]+schwarz,1,1);
+	} else if (loeschunvollst||nurnach) {
+		RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE fertig<>1",aktc,ZDB);
 	}
 	if (!loeschalle) {
 		prueflyhinw(My, obverb, oblog, /*direkt*/0);
@@ -1100,7 +1128,7 @@ void BDTtoDate(string& inh,struct tm *tm)
 
 void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 {
-	rus.ausgeb();
+	if (obverb) rus.ausgeb();
 	pruefPatID(aktc,rus);
 	rus.hz("Nachname",nname);
 	rus.hz("Vorname",vname);
@@ -1109,7 +1137,7 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 	rus.hz("GebDat",&gebdat);
 	rus.hz("Geschlecht",sgschl);
 	rus.hz("Pat_id",pat_id);
-	rus.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/usidp);
+	rus.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/usidp);
 	usreset();
 } // void hhcl::russchreib
 
@@ -1159,11 +1187,11 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		/*auto*/chrono::system_clock::time_point aktzp=chrono::system_clock::now();
 		rpar->hz("Aktzeit",&aktzp);
 		// z.B. "Labor 20101201 044232.dat"
-		rpar->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0,/*mitupd=*/1);
+		rpar->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0,/*mitupd=*/1);
 	} // 	if (rpar->size())
 	if (rpneu->size()) {
-		rpneu->ausgeb();
-		rpneu->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&pneuind);
+		// rpneu->ausgeb();
+		rpneu->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&pneuind);
 		if (!pneuind.empty()) {
 			rpnb->hz("PNEUID",pneuind);
 			if (sgschl=="2") {
@@ -1173,7 +1201,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 				rpnb->hz("uNg",uNm);
 				rpnb->hz("oNg",oNm);
 			}
-			rpnb->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&pnbid);
+			rpnb->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&pnbid);
 		}
 	} // 	if (rpneu->size())
 
@@ -1187,17 +1215,17 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		}
 		// Field Erklärung doesn't have a default value
 		rhinwp->hz("Text",erklaerung);
-		rhinwp->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&erklid,/*mitupd=*/0); // erklid s.u.
+		rhinwp->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&erklid,/*mitupd=*/0); // erklid s.u.
 		//		rbawep->hz("Erklärung",erklaerung);
 		if (!kommentar.empty()) {
 			rhinwp->hz("Text",kommentar);
-			rhinwp->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&kommid,/*mitupd=*/0);
+			rhinwp->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&kommid,/*mitupd=*/0);
 			rbawep->hz("KommID",kommid);
 			//			rbawep->hz("Kommentar",kommentar);
 		}
 		if (!auftrhinw.empty()) {
 			rhinwp->hz("Text",auftrhinw);
-			rhinwp->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&hinwid,/*mitupd=*/0);
+			rhinwp->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&hinwid,/*mitupd=*/0);
 			rbawep->hz("HinwID",hinwid);
 //			rbawep->hz("AuftrHinw",auftrhinw);
 		} // 						if (!auftrhinw.empty())
@@ -1211,7 +1239,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 			} // 		if (rbawep==rwe)
 			rbawep->hz("ErklID",erklid);
 		}
-		rbawep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/rbawep==rwe?0:&baktid,/*mitupd=*/1);
+		rbawep->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/rbawep==rwe?0:&baktid,/*mitupd=*/1);
 		rbawep=0;
 		keimz=0; // "Labor 20101204 195050.dat"
 		keimzda=0; // "Labor 20101210 034422.dat"
@@ -1226,7 +1254,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	kommentar.clear();
 	auftrhinw.clear();
 	memset(&abndat,0,sizeof abndat);
-	rlep->schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+	rlep->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 } // void hhcl::wertschreib
 
 void hhcl::dverarbeit(const string& datei)
@@ -1241,8 +1269,7 @@ void hhcl::dverarbeit(const string& datei)
 	uchar saetzeoffen, usoffen=0;
 	usreset();
 	string usid;
-	// Zahl der unbekannten Geschlechter aus Namen reduzieren
-	RS unbekgschl(My,"update namen n set geschlecht = if((SELECT COUNT(DISTINCT i.geschlecht) FROM (SELECT * FROM namen) i WHERE vorname=n.vorname AND geschlecht<>' ')=1,(SELECT MAX(i.geschlecht) FROM (SELECT * FROM namen) i WHERE vorname=n.vorname AND geschlecht<>' '),n.geschlecht) WHERE geschlecht= ' '",aktc,ZDB);
+	vordverarb(aktc);
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlydat,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
@@ -1255,7 +1282,7 @@ void hhcl::dverarbeit(const string& datei)
 	}
 	reing.hz("Zp",&jetzt);
 #ifdef speichern
-	reing.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&datid);
+	reing.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&datid);
 #endif 
 	insv raerzte(My,/*itab*/tlyaerzte,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rsaetze(My,/*itab*/tlysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
@@ -1305,7 +1332,7 @@ void hhcl::dverarbeit(const string& datei)
 			}
 			if (cd.empty()||!cd[0]) continue;
 			// sonst keinen Fall von Zeilenumbruch gefunden
-			caus<<blau<<bzahl<<" "<<cd<<" "<<schwarz<<inh<<endl;
+			hLog(blaus+bzahl+" "+cd+" "+schwarz+inh);
 			//			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
 #ifdef speichern
 			if (cd=="8000") {
@@ -1334,9 +1361,9 @@ void hhcl::dverarbeit(const string& datei)
 							lanr.clear();
 						}
 						// z.B. "Labor 20101201 044232.dat"
-						raerzte.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&arztid);
+						raerzte.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&arztid);
 						rsaetze.hz("ArztID",arztid);
-						rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&satzid);
+						rsaetze.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&satzid);
 						arztnameda=0;
 						saetzeoffen=0;
 					}
@@ -1377,7 +1404,7 @@ void hhcl::dverarbeit(const string& datei)
 				if (cd=="8434") {
 					if (rba.size()) {
 						caus<<"rba.size(): "<<rba.size()<<endl;
-						rba.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&baktid,/*mitupd=*/1);
+						rba.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&baktid,/*mitupd=*/1);
 						keimz=0; // "Labor 20101204 195050.dat"
 						keimzda=0; // "Labor 20101210 034422.dat"
 						exit(59);
@@ -1401,7 +1428,7 @@ void hhcl::dverarbeit(const string& datei)
 				rpneu.hz("LabID",labind);
 			} else if (cd=="5001") {
 				// z.B. 1b01042005.ld0
-				rle.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+				rle.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 				//				rle.clear();
 				rle.hz("UsID",usid);
 				if (rbawep==&rba) {
@@ -1538,7 +1565,7 @@ void hhcl::dverarbeit(const string& datei)
 				}
 				// 1. Moeglichkeit
 				// z.B. "Labor 20101201 004634.dat"
-				rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
+				rlab.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&labind);
 				oblaborda=1;
 				rsaetze.hz("labid",labind);
 			} else if (cd=="8320") {
@@ -1551,7 +1578,7 @@ void hhcl::dverarbeit(const string& datei)
 				// 2. Moeglichkeit
 				rlab.hz("OrtLabor",inh);
 				// z.B. 1b01042005.ldt
-				rlab.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/&labind);
+				rlab.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&labind);
 				oblaborda=1;
 				rsaetze.hz("labid",labind);
 			} else if (cd=="0101") {
@@ -1659,13 +1686,13 @@ void hhcl::dverarbeit(const string& datei)
 			} else if (cd=="9202") {
 				rsaetze.hz("Gesamtlänge",inh);
 				// update rsaetze.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
-				rsaetze.ergaenz(satzid,/*sammeln*/0,/*obverb*/1,/*idp*/0);
+				rsaetze.ergaenz(satzid,/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 			} else {
 				rfe.hz("DatID",datid);
 				rfe.hz("Kennung",cd);
 				rfe.hz("Inhalt",inh);
 				// z.B. "Labor 20120724 072122.dat"
-				rfe.schreib(/*sammeln*/0,/*obverb*/1,/*idp*/0);
+				rfe.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 			}
 			altz=zeile;
 #endif 
@@ -1673,7 +1700,7 @@ void hhcl::dverarbeit(const string& datei)
 		wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
 		reing.hz("codepage",cp);
 		reing.hz("fertig",1);
-		reing.ergaenz(datid,/*sammeln*/0,/*obverb*/1,/*idp*/0);
+		reing.ergaenz(datid,/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 	} // 	if (mdat.is_open())
 	//	exit(0);
 } // void hhcl::dverarbeit(const string& datei)
@@ -1683,31 +1710,37 @@ void hhcl::pvirtfuehraus()
 { //ω
 	const size_t aktc=0;
 	const string fertigvz=ldatvz+"/"+fertiguvz;
-	if (!loeschalle) {
-		pruefverz(fertigvz,obverb,oblog);
-		systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
-		systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
-		svec lrue;
-		systemrueck("find "+ldatvz+" -maxdepth 1 -type f \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
-		//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
-		caus<<"Dateien gefunden: "<<lrue.size()<<endl;
-		if (1) {
-			for(size_t i=0;i<lrue.size();i++) {
-				//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-				RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad='"+lrue[i]+"' AND fertig<>1",aktc,ZDB);
-				char ***cerg;
-				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
-				if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
-					// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-					dverarbeit(lrue[i]);
+	if (!loeschalle && !loeschunvollst) {
+		if (!nurnach) {
+			pruefverz(fertigvz,obverb,oblog);
+			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
+			systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
+			svec lrue;
+			systemrueck("find "+ldatvz+" -maxdepth 1 -type f \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
+			//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
+			caus<<"Dateien gefunden: "<<lrue.size()<<endl;
+			if (1) {
+				for(size_t i=0;i<lrue.size();i++) {
+					//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+					struct stat pfst{0};
+					if (!lstat(lrue[i].c_str(),&pfst)) {
+						pthread_mutex_lock(&timemutex);
+						memcpy(&minnachdat,localtime(&pfst.st_mtime),sizeof minnachdat);
+						pthread_mutex_unlock(&timemutex);
+					}
+					RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad='"+lrue[i]+"' AND fertig<>1",aktc,ZDB);
+					char ***cerg;
+					RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
+					if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
+						// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+						dverarbeit(lrue[i]);
+					}
 				}
 			}
 		}
-		caus<<"Stell 0"<<endl;
 		nachbearbeit(aktc);
-		caus<<"Stell 1"<<endl;
 	} // 	if (!loeschalle)
-	caus<<"fertig!"<<endl;
+	fLog(Tx[T_fertig],1,0);
 } // void hhcl::pvirtfuehraus  //α
 
 // wird aufgerufen in lauf

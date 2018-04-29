@@ -165,6 +165,16 @@ enum T_
 	T_auswertpql_leere_Funktion,
 	T_PatID_aus_Laborneu,
 	T_nachbearbeit_leere_Funktion,
+	T_vordverarb_leere_Funktion,
+	T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,
+	T_lu_k,
+	T_lu_l,
+	T_Pat_id_fuer,
+	T_Zahl,
+	T_nurnach_k,
+	T_nurnach_l,
+	T_nur_Nachbearbeitung,
+	T_fertig,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -190,6 +200,7 @@ class hhcl:public dhcl
 		string labind,pneuind,pnbid,hinwind;
 		ic_cl *icp[2];
 		tm eingtm{0}, gebdat={0};
+		tm minnachdat{0}; // minimales Datum der Tabelle tlyus fuer die Nachbearbeitung
 		string nname,vname,titel,nvorsatz,sgschl,pat_id{"0"},auftrschl,baktid,hinwid,erklid,kommid;
 		svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
 		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
@@ -203,6 +214,8 @@ class hhcl:public dhcl
 		uchar vonvorne=0;
 		uchar entleer=0;
 		uchar loeschalle=0;
+		uchar loeschunvollst=0;
+		uchar nurnach=0;
 		long listz=30; //ω
 		string ldatvz;   // Verzeichnis der Labordateien
 	public: //α //ω
@@ -247,6 +260,11 @@ class hhcl:public dhcl
 #endif
 			;
 		void ergpql()
+#ifdef VOMHAUPTCODE
+			__attribute__((weak)) // implementationsspezifische Adresspruefung)
+#endif
+			;
+		void vordverarb(const size_t aktc)
 #ifdef VOMHAUPTCODE
 			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif

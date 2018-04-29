@@ -113,6 +113,8 @@ enum Txdb_
 	T_nicht_erstellt_da_Referenztabelle,
 	T_Fehler_af,
 	T_erstelle_Tabelle,
+	T_Zeige,
+	T_an_Position,
 	T_dbMAX,
 }; // enum Txdb_ 
 
@@ -464,9 +466,8 @@ class RS
     vector<long> lenge;
     vector<long> prec;
     vector<string> kommentar;
-    RS(const DB* const pdb,const string& table);
     char*** HolZeile();
-    void weisezu();
+    void setzzruck();
     void clear();
     template<typename sT> 
       int Abfrage(sT psql,const size_t aktc/*=0*/,int obverb=0,uchar asy=0,int oblog=0,string *idp=0,my_ulonglong *arowsp=0){
@@ -478,9 +479,10 @@ class RS
         return erg;
       } //       int Abfrage(sT psql,int obverb=1,uchar asy=0)
 
-    RS(const DB* const pdb,const char* const psql, const size_t aktc, int obverb/*=1*/);
-    RS(const DB* const pdb,const string& psql, const size_t aktc, int obverb/*=1*/);
-    RS(const DB* const pdb,stringstream psqls, const size_t aktc, int obverb/*=1*/);
+    RS(const DB* const pdb,const string& table);
+    RS(const DB* const pdb,const char* const psql, const size_t aktc, int obverb/*=1*/,uchar asy=0,int oblog=0,string* idp=0,my_ulonglong *arowsp=0);
+    RS(const DB* const pdb,const string& psql, const size_t aktc, int obverb/*=1*/,uchar asy=0,int oblog=0,string* idp=0,my_ulonglong *arowsp=0);
+    RS(const DB* const pdb,stringstream psqls, const size_t aktc, int obverb/*=1*/,uchar asy=0,int oblog=0,string* idp=0,my_ulonglong *arowsp=0);
     ~RS();
 		uchar holautofeld(const size_t aktc, int obverb);
     my_ulonglong tbupd(const vector<instyp>& einf,int obverb, const string& bedingung, const size_t aktc/*=0*/, uchar asy=0);
@@ -505,44 +507,12 @@ struct insv
 	svec *csets;
 	inline size_t size(){return ivec.size();}
 	//	my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/, int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
-	insv(DB *My,const string& itab,const size_t aktc,const uchar eindeutig,const svec& eindfeld,const uchar asy,svec *csets):My(My),itabp(&itab),aktc(aktc),eindeutig(eindeutig),eindfeld(eindfeld),asy(asy),csets(csets)
-	{
-		rsp=new RS(My,itab);
-	}
-
-	my_ulonglong schreib(const uchar sammeln=0,int obverb=0,string* const idp=0,uchar mitupd=0)
-	{
-		my_ulonglong erg=0;
-		if (ivec.size()) {
-			erg=rsp->tbins(&ivec,aktc,sammeln,obverb,idp,eindeutig,eindfeld,asy,csets,mitupd);
-			if (rsp->fnr) {
-				fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
-			} //         if (runde==1)
-			ivec.clear();
-		}
-		return erg;
-	}
-	my_ulonglong ergaenz(const string& bedingung,const uchar sammeln=0,int obverb=0,string* const idp=0)
-	{
-		my_ulonglong erg=0;
-			caus<<"Bedingung: "<<bedingung<<endl;
-		if (ivec.size()) {
-			rsp->holautofeld(aktc,obverb);
-			const string gesbed=rsp->autofeld+"='"+bedingung+"'";
-			caus<<"Gesbed: "<<gesbed<<endl;
-			erg=rsp->tbupd(ivec,obverb,gesbed,aktc,asy);
-			if (rsp->fnr) {
-				fLog(Txd[T_Fehler_af]+drots+ltoan(rsp->fnr)+schwarz+Txk[T_bei]+tuerkis+rsp->sql+schwarz+": "+blau+rsp->fehler+schwarz,1,1);
-			} //         if (runde==1)
-			ivec.clear();
-		}
-		return erg;
-	}
+	insv(DB *My,const string& itab,const size_t aktc,const uchar eindeutig,const svec& eindfeld,const uchar asy,svec *csets);
+	my_ulonglong schreib(const uchar sammeln=0,int obverb=0,string* const idp=0,uchar mitupd=0);
+	my_ulonglong ergaenz(const string& bedingung,const uchar sammeln=0,int obverb=0,string* const idp=0);
 	void hzp(const instyp it);
 	void hz(const instyp it);
-	inline void clear() {
-		ivec.clear();
-	}
+	void clear();
 	template<typename sT> void hzp(const char* const feld, sT vwert)
 	{
 		instyp it(My->DBS,feld,vwert);
@@ -557,12 +527,7 @@ struct insv
 		this->hz(it);
 		return *this;
 	}
-	void zeig(const char* const wo) {
-		caus<<"Zeige "<<blau<<*itabp<<schwarz<<" an Position: "<<blau<<wo<<schwarz<<endl;
-		for(size_t i=0;i<ivec.size();i++) {
-			caus<<violett<<"i: "<<gruen<<i<<": '"<<schwarz<<ivec[i].feld<<": '"<<blau<<ivec[i].wert<<"'"<<schwarz<<endl;
-		}
-	}
+	void zeig(const char* const wo);
 	void ausgeb();
 };
 
