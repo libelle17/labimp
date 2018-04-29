@@ -216,6 +216,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"8407 Geschlecht (Turbomed)","8407 Geschlecht (Turbomed)"},
 	// T_8490_Auftragsbezogene_Hinweise_Turbomed
 	{"8490 Auftragsbezogene Hinweise (Turbomed)","8490 Auftragsbezogene Hinweise (Turbomed)"},
+#ifdef altfelder
 	// T_Ursprung_der_Pat_id_E__erwogene_Pat_id_su_L__vergleich_mit_ueber_Turbomed_eingelesenem_Labor
 	{"Ursprung der Pat_id: E = erwogene Pat_id s.u., L = vergleich mit über Turbomed eingelesenem Labor","Ursprung der Pat_id: E = erwogene Pat_id s.u., L = vergleich mit über Turbomed eingelesenem Labor"},
 	// T_erwogene_Pat_id_mit_gleichem_Vornamen_Nachnamen_und_Geburtstag
@@ -230,6 +231,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"erwogene Pat_id mit gleichem Geburtstag und zeitlich passendem Labor","erwogene Pat_id mit gleichem Geburtstag und zeitlich passendem Labor"},
 	// T_Pat_ids_von_in_Laborneu_zuordnbaren_Patienten
 	{"Pat_ids von in Laborneu zuordnbaren Patienten","Pat_ids von in Laborneu zuordnbaren Patienten"},
+#endif
 	// T_Zeitpunkt_der_Untersuchung_die_in_Laborneu_zugeordnet_wurde
 	{"Zeitpunkt der Untersuchung, die in Laborneu zugeordnet wurde","Zeitpunkt der Untersuchung, die in Laborneu zugeordnet wurde"},
 	// T_Zahl_der_verglichenen_Parameter
@@ -371,6 +373,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"nur Nachbearbeitung","only afterwork"},
 	// T_fertig
 	{"fertig!","finished!"},
+	// T_Dateien_gefunden
+	{"Dateien gefunden: ","Files found: "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1064,7 +1068,7 @@ void hhcl::virtpruefweiteres()
 		RS d8(My,"DROP TABLE IF EXISTS "+tlyplab,aktc,ZDB);
 		RS d10(My,"DROP TABLE IF EXISTS "+tlyfehlt,aktc,ZDB);
 		RS d9(My,"DROP TABLE IF EXISTS "+tlydat,aktc,ZDB);
-		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz,1,1);
+		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsilbe,1,1);
 	} else if (entleer) {
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
 		RS d13(My,"TRUNCATE "+tlyhinw,aktc,ZDB);
@@ -1297,8 +1301,6 @@ void hhcl::dverarbeit(const string& datei)
 	insv *rbawep=0; // Zeiger auf rba oder rwe
 	insv rhinw(My,/*itab*/tlyhinw,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rle(My,/*itab*/tlyleist,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
-
-	caus<<rot<<datei<<schwarz<<endl;
 
 	mdatei mdat(datei,ios::in);
 	if (mdat.is_open()) {
@@ -1718,7 +1720,7 @@ void hhcl::pvirtfuehraus()
 			svec lrue;
 			systemrueck("find "+ldatvz+" -maxdepth 1 -type f \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 			//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
-			caus<<"Dateien gefunden: "<<lrue.size()<<endl;
+			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);
 			if (1) {
 				for(size_t i=0;i<lrue.size();i++) {
 					//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
@@ -1733,6 +1735,7 @@ void hhcl::pvirtfuehraus()
 					RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
 					if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 						// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,lrue[i].c_str(),schwarz);
 						dverarbeit(lrue[i]);
 					}
 				}
@@ -1740,7 +1743,7 @@ void hhcl::pvirtfuehraus()
 		}
 		nachbearbeit(aktc);
 	} // 	if (!loeschalle)
-	fLog(Tx[T_fertig],1,0);
+	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);
 } // void hhcl::pvirtfuehraus  //α
 
 // wird aufgerufen in lauf

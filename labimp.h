@@ -98,6 +98,7 @@ enum T_
 	T_8405_Patienteninformation_Turbomed,
 	T_8407_Geschlecht_Turbomed,
 	T_8490_Auftragsbezogene_Hinweise_Turbomed,
+#ifdef altfelder
 	T_Ursprung_der_Pat_id_E__erwogene_Pat_id_su_L__vergleich_mit_ueber_Turbomed_eingelesenem_Labor,
 	T_erwogene_Pat_id_mit_gleichem_Vornamen_Nachnamen_und_Geburtstag,
 	T_erwogene_Pat_id_mit_gleichem_Vornamen_und_Nachnamen,
@@ -105,6 +106,7 @@ enum T_
 	T_erwogene_Pat_id_mit_gleichem_Geburtstag_und_zeitlich_passender_Behandlung,
 	T_erwogene_Pat_id_mit_gleichem_Geburtstag_und_zeitlich_passendem_Labor,
 	T_Pat_ids_von_in_Laborneu_zuordnbaren_Patienten,
+#endif
 	T_Zeitpunkt_der_Untersuchung_die_in_Laborneu_zugeordnet_wurde,
 	T_Zahl_der_verglichenen_Parameter,
 	T_Zahl_der_infragekommenden_Patienten,
@@ -175,6 +177,7 @@ enum T_
 	T_nurnach_l,
 	T_nur_Nachbearbeitung,
 	T_fertig,
+	T_Dateien_gefunden,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
