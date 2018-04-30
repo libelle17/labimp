@@ -402,6 +402,7 @@ class DB
     char* tmtosqlmZ(tm *tmh,char* buf);
     ////	char** HolZeile();
     my_ulonglong affrows(const size_t aktc) const; // unsigned __int64
+		uchar obtabspda(const char* const tab,const char* const sp);
 }; // class DB 
 
 struct Tabelle 
@@ -431,8 +432,9 @@ struct Tabelle
 			Constraint *const constraints=0, const unsigned constrzahl=0,
 			const string comment=string(), const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
 			const string& rowformat=DB::defmyrowform);
-	Tabelle(const DB* dbp,const string& name,const size_t aktc/*=0*/,int obverb/*=0*/,int oblog/*=0*/);
-	void lesespalten(const size_t aktc/*=0*/,int obverb/*=0*/,int oblog/*=0*/);
+	Tabelle(const DB* dbp,const string& name,const size_t aktc=0,int obverb=0,int oblog=0);
+	void lesespalten(const size_t aktc=0,int obverb=0,int oblog=0);
+	void zeigspalten(int obverb=0, int oblog=0);
 	int machind(const size_t aktc,int obverb=0, int oblog=0);
 	int machconstr(const size_t aktc,int obverb=0, int oblog=0);
 	int prueftab(const size_t aktc,int obverb=0,int oblog=0);

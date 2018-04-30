@@ -889,18 +889,23 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
       spnr++;
     }
     if (obverb) {
-		  fLog(blaus+"spalt->num_rows: "+schwarz+ltoan(spalt->num_rows),obverb,oblog);
-      for(size_t j=0;j<spalt->num_rows;j++) {
-       fLog(blaus+"spanmen["+ltoan(j)+"]: "+schwarz+spnamen[j]);
-       fLog(blaus+"splenge["+ltoan(j)+"]:  "+schwarz+splenge[j]);
-       fLog(blaus+"sptyp["+ltoan(j)+"]:    "+schwarz+sptyp[j]);
-      }
+      zeigspalten();
     } //     if (obverb)
 	} else if (obverb||oblog) {
     fLog(blaus+"spalt->obfehl: "+ltoan(int(spalt->obfehl)),obverb,oblog);
   }
   fLog(violetts+Txk[T_Ende]+Txd[T_Lesespalten]+blau+": "+tbname+"'"+schwarz,obverb,oblog);
 } // lesespalten
+
+void Tabelle::zeigspalten(int obverb/*=0*/,int oblog/*=0*/)
+{
+	fLog(blaus+"spalt->num_rows: "+schwarz+ltoan(spalt->num_rows),obverb,oblog);
+	for(size_t j=0;j<spalt->num_rows;j++) {
+		fLog(blaus+"spnamen["+ltoan(j)+"]: "+schwarz+spnamen[j],obverb,oblog);
+		fLog(blaus+"splenge["+ltoan(j)+"]:  "+schwarz+splenge[j],obverb,oblog);
+		fLog(blaus+"sptyp["+ltoan(j)+"]:    "+schwarz+sptyp[j],obverb,oblog);
+	}
+} // void Tabelle::zeigspalten
 
 // enum refact:uchar {cascade,set_null,restrict,no_action,set_default};
 const string refacts[]={"CASCADE","SET NULL","RESTRICT","NO ACTION","SET DEFAULT"};
@@ -1042,6 +1047,19 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 	return 0;
 } // int DB::machind(const string& tbname, Index* indx,int obverb/*=0*/, int oblog/*=0*/)
 
+uchar DB::obtabspda(const char* const tab,const char* const sp)
+{
+	uchar obda=0;
+	Tabelle namen(this,tab);
+	for(size_t i=0;i<namen.spalt->num_rows;i++) {
+    if (!strcasecmp(namen.spnamen[i],sp)) {
+			obda=1;
+			break;
+		}
+	}
+	// <<"obda: "<<(int)obda<<endl;
+	return obda;
+}
 
 int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/) 
 {
