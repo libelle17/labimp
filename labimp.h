@@ -178,6 +178,12 @@ enum T_
 	T_nur_Nachbearbeitung,
 	T_fertig,
 	T_Dateien_gefunden,
+	T_lab_k,
+	T_lab_l,
+	T_loescht_alle_Datensaetze_ab,
+	T_Loescheab,
+	T_Datensaetze_geloescht,
+	T_fertig_mit_datid,
 	T_MAX //α
 }; // enum T_ //ω
 const string fertiguvz="fertig";
@@ -201,6 +207,7 @@ class hhcl:public dhcl
 		const static string tlyparameter; /*=vorsil+"parameter"*/
 		const static string tlyhinw; /*=vorsil+"hinw"*/
 		string labind,pneuind,pnbid,hinwind;
+		string datid;
 		ic_cl *icp[2];
 		tm eingtm{0}, gebdat={0};
 		tm minnachdat{0}; // minimales Datum der Tabelle tlyus fuer die Nachbearbeitung
@@ -219,6 +226,7 @@ class hhcl:public dhcl
 		uchar loeschalle=0;
 		uchar loeschunvollst=0;
 		uchar nurnach=0;
+		string loeschab;
 		long listz=30; //ω
 		string ldatvz;   // Verzeichnis der Labordateien
 	public: //α //ω
@@ -240,7 +248,7 @@ class hhcl:public dhcl
 		void virttesterg(); //α
 		void virtlieskonfein();
 		void virtautokonfschreib();
-		void dverarbeit(const string& datei);
+		void dverarbeit(const string& datei,string *datidp);
 		void usreset();
 		void wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep);
 	protected: 

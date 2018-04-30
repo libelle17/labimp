@@ -853,8 +853,7 @@ return ergi;
 void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 {
   fLog(violetts+Txd[T_Lesespalten]+blau+": "+tbname+"'"+schwarz,obverb,oblog);
-  char ***cerg;
-  ////          RS spalt(this,string("SHOW COLUMNS FROM `")+name+"`");
+	////          RS spalt(this,string("SHOW COLUMNS FROM `")+name+"`");
   delete spalt;
   ////  spalt=new RS(this,string("SELECT column_name,character_maximum_length FROM information_schema.columns WHERE table_name = '")+name
   ////      +"' and table_schema = '"+db+"' order by ordinal_position"); // geht nicht fuer Zahlen
@@ -872,7 +871,8 @@ void Tabelle::lesespalten(size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
     int spnr=0;
     ////    <<violett<<"Schema: "<<schwarz<<db<<endl;
     ////    <<violett<<"Tabelle: "<<schwarz<<name<<endl;
-    while (cerg=spalt->HolZeile(),cerg?*cerg:0) {
+		char ***cerg;
+		while (cerg=spalt->HolZeile(),cerg?*cerg:0) {
 			spnamen[spnr]=*(*cerg);
       splenge[spnr]=cjj(cerg,1);
       sptyp[spnr]=cjj(cerg,2);
@@ -1383,8 +1383,14 @@ KLZ // instyp::instyp(char* vfeld,struct tm zt) KLA
 
 void sqlft::ersetzalles()
 {
+	if (this->find("Amato")!=string::npos) {
+	caus<<"vor ersetzen: "<<blau<<c_str()<<schwarz;
+	}
   ersetze("\\","\\\\");
   ersetze("\'","\\\'");
+	if (this->find("Amato")!=string::npos) {
+	caus<<", nach ersetzen: "<<blau<<c_str()<<schwarz<<endl;
+	}
 }
 
 sqlft::sqlft(DBSTyp eDBS, const string& vwert):

@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "29.04.18" "Version 0.11057" "\fB²DPROG²\fR man page"
+.TH man 1 "30.04.18" "Version 0.11073" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -15,7 +15,7 @@
 .SH OPTIONS 
 .SH PRECONDITIONS
 .br
-\fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11057\fR (Laborimport) 
+\fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11064\fR (Laborimport) 
 .br
 \fBOptions which are not saved: \fR
 .br
@@ -24,6 +24,8 @@
 \fB -trunc, --truncate\fR: Truncating all tables and starting from scatch\fB or not\fR (\fB0\fR)
 .br
 \fB -deleteall, --deleteall\fR: deletes all tables\fB or not\fR (\fB0\fR)
+.br
+\fB -delfrom, --deletefrom <string>\fR: deletes all data set beginning at ('\fB\fR')
 .br
 \fB -delincomp, --deleteincomplete\fR: deletes entries from incompletely read files\fB or not\fR (\fB0\fR)
 .br

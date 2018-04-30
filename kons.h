@@ -442,6 +442,8 @@ enum Tkons_
 	T_schon_eingetragen,
 	T_wird_jetzt_eingetragen,
 	T_lieszaehlerein,
+	T_Parameter,
+	T_gefunden,
 	T_konsMAX
 }; // Tkons_
 

@@ -632,6 +632,10 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
 	{"wird jetzt eingetragen: '","will now be entered: '"},
 	// T_lieszaehlerein
 	{"lieszaehlerein()","readingcounter()"},
+	// T_Parameter
+	{"Parameter: ","Parameter: "},
+	// T_gefunden
+	{" gefunden, "," found, "},
 	{"",""}
 }; // const char *Txkonscl::TextC[T_konsMAX+1][SprachZahl]=
 
@@ -5096,7 +5100,9 @@ void hcl::parsecl()
 						// omit ist also jetzt iterator fuer die relevante map auf die aktuelle Option (kurz oder lang)
 						if (omit->first) if (!strcmp(omit->first,acstr)) {
 							ap->agef++; // Parameter gefunden
+							hLog(Txk[T_Parameter]+blaus+acstr+schwarz+Txk[T_gefunden]+(omit->second->pptr?"1":"0"));
 							if (omit->second->pptr) {
+								hLog("pptr gefunden");
 								// pzuweis liefert -1, wenn der naechste Parameter als Inhalt verwendet wurde, sonst wiefalsch
 								apn=ap; apn++;
 								const char *nacstr=apn==argcmv.end()?"":apn->argcs;

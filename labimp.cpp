@@ -375,6 +375,18 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"fertig!","finished!"},
 	// T_Dateien_gefunden
 	{"Dateien gefunden: ","Files found: "},
+	// 	T_lab_k,
+	{"loeab","delfrom"},
+//		T_lab_l,
+	{"loescheab","deletefrom"},
+	// T_loescht_alle_Datensaetze_ab
+	{"loescht alle Datensaetze ab","deletes all data set beginning at"},
+	// T_Loescheab
+	{"Loesche ab " vorsilbe"dat ID: ","Deleting from " vorsilbe"dat id: "},
+	// T_Datensaetze_geloescht
+	{"Datensaetze geloescht","entries deleted"},
+	// T_fertig_mit_datid
+	{"fertig mit datid","finished with datid"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -616,7 +628,7 @@ void hhcl::prueflyaerzte(DB *My, const int obverb, const int oblog, const uchar 
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_zum_Bezug_fuer_Laborsaetze],1,1,0,string(),1),
 			Feld("Arztnr","varchar","1","",Tx[T_201_Arztnummer_Turbomed],1,0,1),
-			Feld("Arztname","varchar","41","",Tx[T_203_Arztname_Turbomed],1,0,1),
+			Feld("Arztname","varchar","51","",Tx[T_203_Arztname_Turbomed],1,0,1),
 			Feld("StraßePraxis","varchar","41","",Tx[T_205_Strasse_der_Praxis_Turbomed],0,0,1),
 			Feld("Arzt","varchar","41","",Tx[T_211_Ausfuehrender_Arzt],1,0,1),
 			Feld("LANR","varchar","11","",Tx[T_212_LANR],1,0,1),
@@ -949,7 +961,7 @@ void hhcl::prueflypgl(DB *My, const int obverb, const int oblog, const uchar dir
 void hhcl::fuellpql()
 {
 	pql.clear();
-	pql<<"SELECT pat_id FROM `"+tlyus+"` u WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND auftragsschlüssel = '"+auftrschl+"' AND pat_id<>0 GROUP BY pat_id";
+	pql<<"SELECT pat_id FROM `"+tlyus+"` u WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND auftragsschlüssel = "+sqlft(My->DBS,auftrschl)+" AND pat_id<>0 GROUP BY pat_id";
 	ergpql();
 }
 
@@ -962,7 +974,7 @@ void hhcl::pruefPatID(const int aktc,insv& rus)
 		if (!rspat.obfehl) {
 			hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+pql[i]+schwarz);
 			if (rspat.result->row_count==1){
-				char ***cerg;
+				char ***cerg{0};
 				if ((cerg=rspat.HolZeile())) {
 					if (*cerg) {
 					  hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
@@ -1003,6 +1015,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschab,/*art*/pdez,T_lab_k,T_lab_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Datensaetze_ab,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschab.empty());
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnach,/*art*/puchar,T_nurnach_k,T_nurnach_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	dhcl::virtinitopt(); //α
@@ -1069,6 +1082,13 @@ void hhcl::virtpruefweiteres()
 		RS d10(My,"DROP TABLE IF EXISTS "+tlyfehlt,aktc,ZDB);
 		RS d9(My,"DROP TABLE IF EXISTS "+tlydat,aktc,ZDB);
 		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsilbe,1,1);
+	} else if (!loeschab.empty()) {
+		fLog(blaus+Tx[T_Loescheab]+gruen+loeschab+schwarz,1,0);
+		my_ulonglong zahl=0;
+		ZDB=1;
+		RS loe(My,"DELETE FROM `"+tlydat+"` WHERE datid>='"+loeschab+"'",aktc,ZDB,0,0,0,&zahl);
+		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
+		exit(0);
 	} else if (entleer) {
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
 		RS d13(My,"TRUNCATE "+tlyhinw,aktc,ZDB);
@@ -1261,13 +1281,13 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	rlep->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 } // void hhcl::wertschreib
 
-void hhcl::dverarbeit(const string& datei)
+void hhcl::dverarbeit(const string& datei,string *datidp)
 {
 #define speichern
 #ifdef speichern
 	const size_t aktc=0;
 #endif 
-	string datid,satzid,arztid,satzart;
+	string satzid,arztid,satzart;
 	unsigned UsLfd=0;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen=0, usoffen=0;
@@ -1286,7 +1306,7 @@ void hhcl::dverarbeit(const string& datei)
 	}
 	reing.hz("Zp",&jetzt);
 #ifdef speichern
-	reing.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&datid);
+	reing.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/datidp);
 #endif 
 	insv raerzte(My,/*itab*/tlyaerzte,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rsaetze(My,/*itab*/tlysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
@@ -1705,7 +1725,7 @@ void hhcl::dverarbeit(const string& datei)
 		reing.ergaenz(datid,/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 	} // 	if (mdat.is_open())
 	//	exit(0);
-} // void hhcl::dverarbeit(const string& datei)
+} // void hhcl::dverarbeit
 
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
@@ -1730,13 +1750,14 @@ void hhcl::pvirtfuehraus()
 						memcpy(&minnachdat,localtime(&pfst.st_mtime),sizeof minnachdat);
 						pthread_mutex_unlock(&timemutex);
 					}
-					RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad='"+lrue[i]+"' AND fertig<>1",aktc,ZDB);
+					RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,lrue[i])+" AND fertig<>1",aktc,ZDB);
 					char ***cerg{0};
-					RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ='"+base_name(lrue[i])+"' AND pfad = '"+lrue[i]+"'",aktc,ZDB);
+					RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(lrue[i]))+" AND pfad = "+sqlft(My->DBS,lrue[i]),aktc,ZDB);
 					if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 						// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,lrue[i].c_str(),schwarz);
-						dverarbeit(lrue[i]);
+						yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,lrue[i].c_str(),schwarz,blau);
+						dverarbeit(lrue[i],&datid);
+						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,lrue[i].c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
 					}
 				}
 			}

@@ -520,8 +520,8 @@ struct insv
 	}
 	template<typename sT> void hz(const char* const feld, sT vwert)
 	{
-		instyp it(My->DBS,feld,vwert);
-		hz(it);
+		instyp inst(My->DBS,feld,vwert);
+		hz(inst);
 	}
 	inline insv& operator<<(const instyp it) {
 		this->hz(it);
