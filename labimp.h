@@ -208,7 +208,7 @@ class hhcl:public dhcl
 		const static string tlyhinw; /*=vorsil+"hinw"*/
 		string labind,pneuind,pnbid,hinwind;
 		string datid;
-		ic_cl *icp[2];
+		ic_cl *icp[3];
 		tm eingtm{0}, gebdat={0};
 		tm minnachdat{0}; // minimales Datum der Tabelle tlyus fuer die Nachbearbeitung
 		string nname,vname,titel,nvorsatz,sgschl,pat_id{"0"},auftrschl,baktid,hinwid,erklid,kommid;

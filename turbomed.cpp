@@ -30,12 +30,12 @@ class TxB Txt((const char* const* const* const*)tm_T);
 void hhcl::ergpql()
 {
 	hLog(violetts+Txt[T_ergpql_volle_Funktion]+schwarz);
-	pql.insert(pql.begin(),"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND vorname="+sqlft(My->DBS,vname)+" AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
-	pql.insert(pql.begin()+1,"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND vorname="+sqlft(My->DBS,vname)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
+	pql.insert(pql.begin(),"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
+	pql.insert(pql.begin()+1,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
 	pql.insert(pql.begin()+2,"SELECT pat_id FROM namen WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
 	pql.insert(pql.begin()+3,"SELECT pat_id FROM namen WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm));
-	pql.insert(pql.begin()+4,"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND gebdat="+sqlft(My->DBS,&gebdat)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm));
-	pql.insert(pql.begin()+5,"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
+	pql.insert(pql.begin()+4,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebdat)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm));
+	pql.insert(pql.begin()+5,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
 	// hier steht dann die Standardvorgabe
 	pql<<"SELECT n.pat_id FROM namen n LEFT JOIN laborneu l ON n.pat_id = l.pat_id WHERE n.gebdat="+sqlft(My->DBS,&gebdat)+" AND l.zeitpunkt BETWEEN "
 		"SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) GROUP BY n.pat_id";

@@ -1383,15 +1383,11 @@ KLZ // instyp::instyp(char* vfeld,struct tm zt) KLA
 
 void sqlft::ersetzalles()
 {
-	if (this->find("Amato")!=string::npos) {
-	caus<<"vor ersetzen: "<<blau<<c_str()<<schwarz;
-	}
+////	if (this->find("Amato")!=string::npos) { //// <<"vor ersetzen: "<<blau<<c_str()<<schwarz; }
   ersetze("\\","\\\\");
   ersetze("\'","\\\'");
-	if (this->find("Amato")!=string::npos) {
-	caus<<", nach ersetzen: "<<blau<<c_str()<<schwarz<<endl;
-	}
-}
+////	if (this->find("Amato")!=string::npos) { //// <<", nach ersetzen: "<<blau<<c_str()<<schwarz<<endl; }
+} // void sqlft::ersetzalles
 
 sqlft::sqlft(DBSTyp eDBS, const string& vwert):
   string(vwert) 

@@ -399,6 +399,7 @@ hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) 
 	// mitcron=0; //ω
 	icp[0]=new ic_cl("UTF8","ISO-8859-15");
 	icp[1]=new ic_cl("UTF8","CP850");
+	icp[2]=new ic_cl("UTF8","ISO-8859-1");
 } // hhcl::hhcl //α
 // Hier neue Funktionen speichern: //ω
 
@@ -1326,8 +1327,8 @@ void hhcl::dverarbeit(const string& datei,string *datidp)
 	if (mdat.is_open()) {
 		// Zeichensatz ermitteln und verwenden
 		uchar cp=0; // 0=utf-8, 1=iso-8859-15, 2=cp850
-		// ä,ö,ü,Ä,Ö,Ü,ß,µ, iso8859-15, cp850
-		const char* const sonder[2]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6"};
+		// ä,ö,ü,Ä,Ö,Ü,ß,µ,` iso8859-15, cp850, iso8859-1
+		const char* const sonder[]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
 		string zeile,altz;
 		struct tm berdat={0};
 		uchar oblaborda=0, arztnameda=0, /*in (Vor)zeile kommt Wort Keimzahl vor*/keimz=0,/*die Keimzahl wurde schon eingesetzt*/keimzda=0;
@@ -1338,7 +1339,7 @@ void hhcl::dverarbeit(const string& datei,string *datidp)
 			if (zeile.size()>3) cd=zeile.substr(3,4);
 			if (zeile.size()>7) {
 				if (!cp) {
-					for(unsigned p=0;p<2;p++) {
+					for(unsigned p=0;p<sizeof sonder/sizeof *sonder;p++) {
 						if (zeile.find_first_of(sonder[p],7)!=string::npos) {
 							cp=p+1;
 							break;
