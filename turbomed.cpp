@@ -8,7 +8,7 @@ enum Txt_ {
 	T_eingetragen,
 	T_Abfrage,
 	T_tmMAX,
-};
+}; // enum Txt_
 
 // const char *Txvgcl::TextC[T_vgMAX+1][SprachZahl]={
 const char *tm_T[T_tmMAX+1][SprachZahl]={
@@ -48,7 +48,7 @@ void hhcl::auswertpql(const size_t i,insv& rus)
 {
 	hLog(violetts+Txt[T_auswertpql_volle_Funktion]+schwarz);
 	rus.hz(("Pat_id_"+ltoan(i)).c_str(),pat_id);
-}
+} // void hhcl::auswertpql
 
 void hhcl::vordverarb(const size_t aktc)
 {
@@ -82,7 +82,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 	RS v2(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
 "SELECT u.id,u.pat_id,u.eingang zp FROM `"+tlyus+"` u INNER JOIN (\n"
 "SELECT GROUP_concat(concat(w.abkü,REPLACE(REPLACE(REPLACE(REPLACE(w.wert,'.',''),'<',''),':',''),'-','')) order BY w.abkü,w.wert) werte, "
-"u.id, u.pat_id, gesname(u.pat_id) name, eingang, befart "
+"u.id, u.pat_id"/*, gesname(u.pat_id) name*/", eingang, befart "
 "FROM `"+tlyus+"` u LEFT JOIN `"+tlywert+"` w ON w.usid=u.id AND w.wert REGEXP '^-?[0-9.,]+$' \n"
 "GROUP BY pat_id,eingang,befart\n"
 ") x ON u.pat_id=x.pat_id AND u.eingang=x.eingang AND u.befart=x.befart LEFT JOIN (\n"
@@ -167,7 +167,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 "SELECT i.*,n.zeitpunkt,COUNT(w.abkü) gleiche FROM "
 "(SELECT us.id, eingang, pat_id,BefArt, COUNT(w.id) zahl FROM `"+tlyus+"` us LEFT JOIN `"+tlywert+"` w "
 "ON us.id=w.usid AND w.wert<>'' "
-"WHERE ISNULL(pat_id_laborneu) AND pat_id<>0 "
+"WHERE ISNULL(pat_id_laborneu) "
 "GROUP BY us.id) i "
 "LEFT JOIN `"+tlywert+"` w ON w.usid=i.id AND w.wert<>'' "
 "INNER JOIN laborneu n ON n.pat_id<>i.pat_id AND n.abkü=w.abkü AND n.wert=w.wert AND n.fertigstgrad=i.Befart "
@@ -180,4 +180,4 @@ void hhcl::nachbearbeit(const size_t aktc)
 	fLog(dblaus+Txt[T_Abfrage]+schwarz+"7, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 	ZDB=altZDB;
-}
+} // void hhcl::nachbearbeit
