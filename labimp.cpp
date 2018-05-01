@@ -764,7 +764,7 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 			fdr<<new Feld("Pat_id_"+ltoan(i),"varchar","11","",ersetze(pql[i].c_str(),"'",""),/*obind*/1,/*obauto*/0,/*nnull*/0);
 		}
 		fdr<<new Feld("ZeitpunktLaborneu","datetime","0","0",Tx[T_Zeitpunkt_der_Untersuchung_die_in_Laborneu_zugeordnet_wurde],0,0,0);
-		fdr<<new Feld("Pat_id_Laborneu","varchar","1","",Tx[T_PatID_aus_Laborneu],0,0,0);
+		fdr<<new Feld("Pat_id_Laborneu","varchar","5","",Tx[T_PatID_aus_Laborneu],0,0,0);
 		/*
 		fdr<<new Feld("ZdüP","smallint","6","0",Tx[T_Zahl_der_verglichenen_Parameter],0,0,0);
 		fdr<<new Feld("ZdiP","int","10","0",Tx[T_Zahl_der_infragekommenden_Patienten],0,0,0);
