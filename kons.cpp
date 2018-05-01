@@ -726,6 +726,14 @@ char *ic_cl::convert(string& eing,size_t ab/*=0*/) {
 		*ergebnis=0;
 	}
 	return ergebnis;
+} // char *ic_cl::convert
+
+ztacl::ztacl(const time_t &pzt,const char* const pfmt/*="%d.%m.%Y %H.%M.%S"*/):zt(pzt),fmt(pfmt)
+{ 
+}
+// ztacl::ztacl(tm *const tm,const char* const pfmt/*="%d.%m.%Y %H.%M.%S %z %Z"*/):zt(mktime(tm)),fmt(pfmt) { }
+ztacl::ztacl(const tm *const tm,const char* const pfmt/*="%d.%m.%Y %H.%M.%S %z %Z"*/):tmloc(*tm),zt(mktime(&tmloc)),fmt(pfmt)
+{
 }
 ostream &ztacl::operator()(std::ostream& out) const {
 	pthread_mutex_lock(&timemutex);

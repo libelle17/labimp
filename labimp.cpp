@@ -23,6 +23,8 @@ const string hhcl::tlybakt=vorsil+"bakt";
 const string hhcl::tlyfehlt=vorsil+"fehlt";
 const string hhcl::tlyparameter=vorsil+"parameter";
 const string hhcl::tlyhinw=vorsil+"hinw";
+const tm hhcl::tmnull{0};
+const tm hhcl::tmmax{0,0,0,1,0,200,0,0,0};
 char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_virtVorgbAllg
 	{"virtVorgbAllg()","virtgeneralprefs()"},
@@ -421,6 +423,14 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Zeichensatz","code page"},
 	// T_fertig_
 	{"fertig","finished"},
+	// T_n_k
+	{"n","n"},
+	// T_dszahl_l
+	{"dszahl","reccount"},
+	// T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt
+	{"Zahl der aufzulistenden Datensaetze = <zahl> statt","No. of listed entries = <no> instead of"},
+	// T_Normbereich_ohne_bis
+	{"Normbereich ohne '-': ","normal range without '-': "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1056,6 +1066,7 @@ void hhcl::virtinitopt()
 
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnach,/*art*/puchar,T_nurnach_k,T_nurnach_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
 
@@ -1211,6 +1222,7 @@ void BDTtoDate(string& inh,struct tm *tm,int abjahr=1900)
 //	const char* const mu[]{"%d%m%Y","%Y%m%d"};
 	const char* const mu[]{"%Y%m%d","%d%m%Y"};
 	for(auto const& aktmu:mu) {
+		tm->tm_isdst=-1;
 		strptime(inh.c_str(),aktmu,tm);
 		// nehmen wir mal an, das Programm wird nach 2040 nicht mehr gebraucht
 		if (tm->tm_year>=abjahr-1900 && tm->tm_year<140 && tm->tm_mon>=0 && tm->tm_mon<12 && tm->tm_mday>0 && tm->tm_mday<32)
@@ -1321,7 +1333,6 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 			rbawep->hz("HinwID",hinwid);
 //			rbawep->hz("AuftrHinw",auftrhinw);
 		} // 						if (!auftrhinw.empty())
-		const struct tm tmnull{0};
 		if (memcmp(&abndat,&tmnull,sizeof abndat)) {
 			rbawep->hz("AbnDat",&abndat);
 		}
@@ -1580,6 +1591,12 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
 				BDTtoDate(inh,&eingtm,2000);
+				if (!memcmp(&minnachdat,&tmnull,sizeof minnachdat)|| difftime(mktime(&eingtm),mktime(&minnachdat))<0) {
+					memcpy(&minnachdat,&eingtm,sizeof minnachdat);
+				}
+				if (!memcmp(&maxnachdat,&tmmax,sizeof maxnachdat)|| difftime(mktime(&eingtm),mktime(&maxnachdat))>0) {
+					memcpy(&maxnachdat,&eingtm,sizeof maxnachdat);
+				}
 				rus.hz("Eingang",&eingtm);
 			} else if (cd=="8302") {
 				BDTtoDate(inh,&berdat,2000);
@@ -1742,7 +1759,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 							}
 						}
 					} else {
-						caus<<rot<<"Normbereich ohne '-': "<<violett<<nbn<<schwarz<<endl;
+						fLog(rots+Tx[T_Normbereich_ohne_bis]+violett+nbn+schwarz,1,1);
 						exit(47);
 					}
 				} else {
@@ -1800,8 +1817,8 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
-	const size_t aktc=0;
-	uchar obwelche=0;
+	const size_t aktc{0};
+	unsigned long verarbeitet{0};
 	if (!loeschalle && !loeschunvollst) {
 		if (!nurnach) {
 			pruefverz(fertigvz,obverb,oblog);
@@ -1815,12 +1832,14 @@ void hhcl::pvirtfuehraus()
 				for(size_t i=0;i<lrue.size();i++) {
           string *aktl{&lrue[i]};
 					//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+					/*//
 					struct stat pfst{0};
 					if (!lstat(aktl->c_str(),&pfst)) {
 						pthread_mutex_lock(&timemutex);
 						memcpy(&minnachdat,localtime(&pfst.st_mtime),sizeof minnachdat);
 						pthread_mutex_unlock(&timemutex);
 					}
+					*/
 					RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
 					char ***cerg{0};
 					RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))+" AND pfad = "+sqlft(My->DBS,*aktl),aktc,ZDB);
@@ -1828,17 +1847,18 @@ void hhcl::pvirtfuehraus()
 						// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
 						yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
 						if (!dverarbeit(*aktl,&datid)) {
-							obwelche=1;
+							verarbeitet++;
 							if (rename(aktl->c_str(),(fertigvz+'/'+base_name(*aktl)).c_str())) {
 								fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+*aktl+rot+Tx[T_nach_]+blau+fertigvz+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
 							}
 						}
 						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
+						if (dszahl && verarbeitet==dszahl) break;
 					}
 				}
 			}
 		}
-		if (nurnach || obwelche) nachbearbeit(aktc);
+		if (nurnach || verarbeitet) nachbearbeit(aktc);
 	} // 	if (!loeschalle)
 	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);
 } // void hhcl::pvirtfuehraus  //α

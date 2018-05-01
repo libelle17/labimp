@@ -201,6 +201,10 @@ enum T_
 	T_eingelesen,
 	T_Zeichensatz,
 	T_fertig_,
+	T_n_k,
+	T_dszahl_l,
+	T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,
+	T_Normbereich_ohne_bis,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -222,18 +226,22 @@ class hhcl:public dhcl
 		const static string tlyfehlt; /*=vorsil+"fehlt"*/
 		const static string tlyparameter; /*=vorsil+"parameter"*/
 		const static string tlyhinw; /*=vorsil+"hinw"*/
+		const static tm tmnull; // {0}
+		const static tm tmmax; // {0,0,0,1,0,200,0,0,0}
 		string labind,pneuind,pnbid,hinwind;
 		string datid;
 		ic_cl *icp[3];
 		tm eingtm{0}, gebdat={0};
 		tm minnachdat{0}; // minimales Datum der Tabelle tlyus fuer die Nachbearbeitung
+		tm maxnachdat{0,0,0,1,0,200,0,0,0}; // maximale Datum der Tabelle tlyus fuer die Nachbearbeitung
 		string nname,vname,titel,nvorsatz,sgschl,pat_id{"0"},auftrschl,baktid,hinwid,erklid,kommid;
 		svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
 		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
 		tm abndat{0};
 		uchar keimz{0},keimzda{0};
-	protected: //α
-		long listz=30; //ω
+	protected: //α //ω
+//		long listz=30; //ω
+    unsigned long dszahl=0; // Datensatzzahl fuer Tabellenausgaben
 		string p1;
 		int p2;
 		string p3;

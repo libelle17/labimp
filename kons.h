@@ -537,11 +537,14 @@ class mdatei: public fstream
 // Zeitausgabeklasse, um time_t-Variablen formatiert in ostream-Objekte ausgeben zu koennen, z.B. <<ztacl(zt,"%F %T")<<
 class ztacl {
 	private:
+		tm tmloc;
 		const time_t zt;
 		const char* const fmt;
 	public:
-		explicit ztacl(const time_t &pzt,const char* const pfmt="%d.%m.%Y %H.%M.%S"):zt(pzt),fmt(pfmt) { }
-		explicit ztacl(struct tm *const tm,const char* const pfmt="%d.%m.%Y %H.%M.%S"):zt(mktime(tm)),fmt(pfmt) { }
+		explicit ztacl(const time_t &pzt,const char* const pfmt="%d.%m.%Y %H.%M.%S");
+		// folgendes würde die Werte fuer nachfolgenden Wertvergleich mit memcmp verfälschen:
+		// explicit ztacl(tm *const tm,const char* const pfmt="%d.%m.%Y %H.%M.%S %z %Z");
+		explicit ztacl(const tm *const tm,const char* const pfmt="%d.%m.%Y %H.%M.%S %z %Z");
 		std::ostream &operator()(std::ostream& out) const;
 }; // ztacl
 ostream &operator<<(ostream &out,ztacl ztaus);
