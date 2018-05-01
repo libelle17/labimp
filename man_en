@@ -45,7 +45,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa')\fB or not\fR (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/labimp\fR(finish with ':qa')\fB or not\fR (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/labimp\fR(finish with ':qa')\fB or not\fR (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here)\fB or not\fR (\fB0\fR)
 .br
@@ -55,7 +55,9 @@
 .br
 \fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
 .br
-\fB -lddir, --laboratoryfiledir <path>\fR: directory of the fax files ('\fB\fR')
+\fB -lddir, --laboratoryfiledir <path>\fR: directory of the fax files ('\fB/home/schade/laboratory\fR')
+.br
+\fB -fddir, --processeddir <path>\fR: directory of the finished ('\fB/home/schade/laboratory/processed\fR')
 .br
 \fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
 .br
@@ -63,7 +65,7 @@
 .br
 \fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
 .br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBquelle\fR')
+\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBlabimp\fR')
 .br
 \fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
 .br

@@ -260,8 +260,14 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"ldvz","lddir"},
 	// T_ldvz_l
 	{"labordatenvz","laboratoryfiledir"},
+	// T_fgvz_k
+	{"fgvz","fddir"},
+	// T_fgvz_l
+	{"fertigvz","processeddir"},
 	// T_Verzeichnis_der_Faxdateien
 	{"Verzeichnis der Faxdateien","directory of the fax files"},
+	// T_Verzeichnis_der_Fertigen
+	{"Verzeichnis der Fertigen","directory of the finished"},
 	// T_vv_k
 	{"vonvorne","fromscratch"},
 	// T_vv_l
@@ -387,6 +393,18 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Datensaetze geloescht","entries deleted"},
 	// T_fertig_mit_datid
 	{"fertig mit datid","finished with datid"},
+	// T_Fehler_bei_sql
+	{"Fehler bei sql: ","Error at sql: "},
+	// T_labor
+	{"labor","laboratory"},
+	// T_fertige
+	{"fertige","processed"},
+	// T_Verzeichnis_der_fertig_Verarbeiteten
+	{"Verzeichnis der fertig Verarbeiteten","directory of the processed files"},
+	// T_Fehler_beim_Verschieben_von
+	{"Fehler beim Verschieben von: ","Error moving: "},
+	// T_nach_
+	{" nach: "," to: "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -394,9 +412,9 @@ class TxB Tx((const char* const* const* const*)DPROG_T);
 const char *logdt="/var/log/" DPROG "vorgabe.log";//darauf wird in kons.h verwiesen;
 
 using namespace std; //ω
-hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG) //α
+hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG,/*mitcron*/1) //α
 {
-	// mitcron=0; //ω
+	//ω
 	icp[0]=new ic_cl("UTF8","ISO-8859-15");
 	icp[1]=new ic_cl("UTF8","CP850");
 	icp[2]=new ic_cl("UTF8","ISO-8859-1");
@@ -982,12 +1000,12 @@ void hhcl::pruefPatID(const int aktc,insv& rus)
 						if (pat_id=="0" || pat_id.empty()) pat_id=**cerg;
 						auswertpql(i,rus);
 //						break;
-					}
-				}
-			}
+					} // 					if (*cerg)
+				} // 				if ((cerg=rspat.HolZeile()))
+			} // 			if (rspat.result->row_count==1)
 		} else {
-			caus<<rot<<"Fehler bei sql: "<<violett<<pql[i]<<schwarz<<endl;
-		}
+			fLog(rots+Tx[T_Fehler_bei_sql]+violett+pql[i]+schwarz,1,oblog);
+		} // 		if (!rspat.obfehl) else
 	}
 //	if (pat_id=="0") exit(97);
 } // void hhcl::virtVorgbAllg
@@ -1004,7 +1022,6 @@ void hhcl::virtVorgbAllg()
 void hhcl::pvirtVorgbSpeziell()
 {
 	hLog(violetts+Tx[T_pvirtVorgbSpeziell]+schwarz); //ω
-	dbq="quelle";
 	dhcl::pvirtVorgbSpeziell(); //α
 	virtMusterVorgb();
 } // void hhcl::pvirtVorgbSpeziell
@@ -1013,6 +1030,7 @@ void hhcl::pvirtVorgbSpeziell()
 void hhcl::virtinitopt()
 { //ω
 	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Faxdateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty());
+	opn<<new optcl(/*pname*/"fertigvz",/*pptr*/&fertigvz,/*art*/pverz,T_fgvz_k,T_fgvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Fertigen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!fertigvz.empty());
 	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -1034,6 +1052,9 @@ void hhcl::virtMusterVorgb()
 {
 	hLog(violetts+Tx[T_virtMusterVorgb]+schwarz); //ω
 	dhcl::virtMusterVorgb(); //α
+	dbq=DPROG;
+	ldatvz=gethome()+vtz+Tx[T_labor];
+	fertigvz=ldatvz+vtz+Tx[T_fertige];
 } // void hhcl::MusterVorgb
 
 // wird aufgerufen in lauf
@@ -1057,6 +1078,7 @@ void hhcl::virtrueckfragen()
 	hLog(violetts+Tx[T_virtrueckfragen]+schwarz);
 	if (rzf) { //ω
 		ldatvz=Tippverz(Tx[T_Verzeichnis_der_Faxdateien],&ldatvz);
+		fertigvz=Tippverz(Tx[T_Verzeichnis_der_fertig_Verarbeiteten],&fertigvz);
 	} //α
 	dhcl::virtrueckfragen();
 } // void hhcl::virtrueckfragen()
@@ -1282,7 +1304,8 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	rlep->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 } // void hhcl::wertschreib
 
-void hhcl::dverarbeit(const string& datei,string *datidp)
+// aufgerufen in pvirtfuehraus; // return 0 = fertig
+int hhcl::dverarbeit(const string& datei,string *datidp)
 {
 #define speichern
 #ifdef speichern
@@ -1724,15 +1747,15 @@ void hhcl::dverarbeit(const string& datei,string *datidp)
 		reing.hz("codepage",cp);
 		reing.hz("fertig",1);
 		reing.ergaenz(datid,/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
+		return reing.rsp->fnr;
 	} // 	if (mdat.is_open())
-	//	exit(0);
+	return 1;
 } // void hhcl::dverarbeit
 
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
 	const size_t aktc=0;
-	const string fertigvz=ldatvz+"/"+fertiguvz;
 	if (!loeschalle && !loeschunvollst) {
 		if (!nurnach) {
 			pruefverz(fertigvz,obverb,oblog);
@@ -1744,21 +1767,26 @@ void hhcl::pvirtfuehraus()
 			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);
 			if (1) {
 				for(size_t i=0;i<lrue.size();i++) {
+          string *aktl{&lrue[i]};
 					//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
 					struct stat pfst{0};
-					if (!lstat(lrue[i].c_str(),&pfst)) {
+					if (!lstat(aktl->c_str(),&pfst)) {
 						pthread_mutex_lock(&timemutex);
 						memcpy(&minnachdat,localtime(&pfst.st_mtime),sizeof minnachdat);
 						pthread_mutex_unlock(&timemutex);
 					}
-					RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,lrue[i])+" AND fertig<>1",aktc,ZDB);
+					RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
 					char ***cerg{0};
-					RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(lrue[i]))+" AND pfad = "+sqlft(My->DBS,lrue[i]),aktc,ZDB);
+					RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))+" AND pfad = "+sqlft(My->DBS,*aktl),aktc,ZDB);
 					if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
-						// caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-						yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,lrue[i].c_str(),schwarz,blau);
-						dverarbeit(lrue[i],&datid);
-						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,lrue[i].c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
+						// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
+						yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
+						if (!dverarbeit(*aktl,&datid)) {
+							if (rename(aktl->c_str(),(fertigvz+'/'+base_name(*aktl)).c_str())) {
+								fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+*aktl+rot+Tx[T_nach_]+blau+fertigvz+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
+							}
+						}
+						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
 					}
 				}
 			}

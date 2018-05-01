@@ -83,8 +83,8 @@ cuscl::cuscl()
  cusstr=passwd->pw_name;
 } // cuscl::cuscl()
 cuscl cus;
-const string sudc=(cus.cuid?"sudo ":nix);
-// const string sudhc=(cus.cuid?"sudo -H ":nix);
+const string sudc=(cus.cuid?"sudo ":string());
+// const string sudhc=(cus.cuid?"sudo -H ":string());
 
 const string sprachstr=string("Language/Sprache/Lingue/Lingua [")+blau+'d'+schwarz+"eutsch,"+blau+'e'+schwarz+"nglisch]"+"";
 const char* sprachcstr=&sprachstr.front();
@@ -1061,7 +1061,7 @@ void getstammext(const string *const ganz, string *stamm, string *exten)
     *exten=ganz->substr(posp+1);
     *stamm=ganz->substr(0,posp);
   } else {
-    *exten=nix;
+    *exten=string();
     *stamm=string(*ganz);
   } //   if (posp!=std::string::npos) else
 } // void getstammext(string *ganz, string *stamm, string *exten) 
@@ -2361,7 +2361,7 @@ std::string dir_name(const std::string& path)
 // cmd soll kein "sudo " am Anfang enthalten, falls noetig soll obsudc gesetzt werden. Innenliegende sudo-Befehle duerfen fuer den Cron-Aufruf 
 //  nur den Pfad /usr/bin:/bin (fedora und ubuntu) bzw. /usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin:/root/bin (opensuse) erwarten
 int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<string> *rueck/*=0*/, const uchar obsudc/*=0*/,
-    const int verbergen/*=0*/, int obergebnisanzeig/*wahr*/, const string& ueberschr/*=nix*/,vector<errmsgcl> *errm/*=0*/,uchar obincron/*=0*/,
+    const int verbergen/*=0*/, int obergebnisanzeig/*wahr*/, const string& ueberschr/*=string()*/,vector<errmsgcl> *errm/*=0*/,uchar obincron/*=0*/,
 		stringstream *ausgp/*=0*/,uchar obdirekt/*=0*/)
 {
 ////	caus<<rot<<"cmd: "<<violett<<cmd<<schwarz<<endl;
@@ -2558,7 +2558,8 @@ void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
 	const long smax=3600; // maximal tolerierte Sekundenzahl, bevor statt dem eigenen Prozess der andere abgebrochen wird
 	svec rueck;
 	const string iwen=wen.empty()?base_name(meinpfad()):wen;
-	systemrueck("ps -eo comm,cputime,pid|grep -P '^"+iwen+"([[:space:]]|\\z)'",obverb,0,&rueck,/*obsudc=*/0);
+	systemrueck("ps -eo comm,etimes,pid|grep -P '^"+iwen+"([[:space:]]|\\z)'",obverb,0,&rueck,/*obsudc=*/0);
+	long sek{0};
 	for(int aru=0;aru<3;aru++) {
 		if (rueck.size()==1) // ich
 			break;
@@ -2567,13 +2568,8 @@ void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
 				// z.B. 'autofax      18:02:48  2939'
 				svec pvec;
 				aufSplit(&pvec,rueck[iru],' ',/*auchleer=*/0); 
-				if (pvec.size()>2) {
-					long sek=0;
-					if (pvec[1].size()==8) {
-						int h,m,s;
-						sscanf(pvec[1].c_str(),"%2i:%2i:%2i",&h,&m,&s);
-						sek=3600*h+60*m+s;
-					} // 				if (pvec[1].size()==8)
+				if (pvec.size()>2 && pvec[2]!=ltoan(getpid())) {
+					sek=atol(pvec[1].c_str());
 					if (sek>smax) {    // wenn es mindestens eine Stunde laeuft
 						cout<<Txk[T_Program]<<blau<<iwen<<schwarz<<Txk[T_laueft_schon_einmal_aber]<<" "<<rot<<sek<<schwarz<<" s (> "<<blau<<smax<<schwarz<<" s), "<<Txk[T_wird_deshalb_abgebrochen]<<endl;
 						if (!systemrueck(string("kill ")+(aru?"-9 ":"")+pvec[2]+" 2>/dev/null",obverb,0,0,/*obsudc=*/1)) {
@@ -2584,10 +2580,10 @@ void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
 				} // 			if (pvec.size()>2)
 			} // 		for(int iru=0;iru<rueck.size();iru++)
 			// if (aru<2)
-		} else { 
+		} else {
 			if (obstumm)
 				exit(0);
-			cout<<Txk[T_Program]<<blau<<iwen<<schwarz<<Txk[T_laeuft_schon_einmal_seit]<<blau<<smax<<schwarz<<Txk[T_sec_Breche_ab]<<endl;
+			cout<<Txk[T_Program]<<blau<<iwen<<schwarz<<Txk[T_laeuft_schon_einmal_seit]<<blau<<sek<<" "<<schwarz<<Txk[T_sec_Breche_ab]<<endl;
 			exit(98);
 		} // if (aru<2) else
 	} // 	for(int aru=0;aru<3;aru++) 
@@ -2682,7 +2678,7 @@ int untersuser(const string& uname,__uid_t *uidp/*=0*/, __gid_t *gidp/*=0*/,vect
 // obunter = mit allen Unterverzeichnissen
 // obimmer = immer setzen, sonst nur, falls mit getfacl fuer datei Berechtigung fehlt (wichtig fuer Unterverzeichnisse)
 void setfaclggf(const string& datei,int obverb/*=0*/,int oblog/*=0*/,const binaer obunter/*=falsch*/,int mod/*=4*/,uchar obimmer/*=0*/,
-		uchar faclbak/*=1*/,const string& user/*=nix*/,uchar fake/*=0*/,stringstream *ausgp/*=0*/,const uchar obprot/*=1*/)
+		uchar faclbak/*=1*/,const string& user/*=string()*/,uchar fake/*=0*/,stringstream *ausgp/*=0*/,const uchar obprot/*=1*/)
 {
 	if (obverb && !ausgp) {
 		fLog(violetts+"setfaclggf()"+blau+Txk[T_Datei]+blau+datei+schwarz+Txk[T_obunter]+blau+(obunter?"1":"0")+schwarz+", mod: "+
@@ -2878,7 +2874,7 @@ int pruefberecht(const string& datei,const string& benutzer,const mode_t mod/*=0
 // falls Benutzer root
 // wenn !besitzer.empty(), dann wird das letzte und alle neu zu erstellenden Verzeichnisse diesem zugeordnet 
 int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfacl/*=0*/,uchar obmitcon/*=0*/, 
-		const string& besitzer/*=nix*/, const string& benutzer/*=nix*/,const uchar obmachen/*=1*/,const uchar obprot/*=1*/)
+		const string& besitzer/*=string()*/, const string& benutzer/*=string()*/,const uchar obmachen/*=1*/,const uchar obprot/*=1*/)
 {
 	if (obverb||oblog) fLog(violetts+"pruefverz("+blau+verz+schwarz+")",obverb,oblog);
 	static int obselinux=-1; // -1=ununtersucht, 0=kein Selinux da, 1=Selinux da
@@ -2909,7 +2905,7 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 				} else {
 					if (obmachen) {
 						// falls Datei mit Namen eines benoetigten Verzeichnisses und obmachen, dann loeschen
-						tuloeschen(stack[i],nix,obverb,oblog);
+						tuloeschen(stack[i],string(),obverb,oblog);
 					} // 					if (obmachen)
 				} // 				if(S_ISDIR(sverz.st_mode)) else
 			} // 				if (!lstat(stack[i].c_str(),&sverz))
@@ -3478,7 +3474,7 @@ void linst_cl::ziehraus(svec srueck, string *ustringp)
 } // void linst_cl::ziehraus(svec srueck, string *ustringp)
 
 // Problem: bei obyes erscheint die Rueckfrage dem Benutzer nicht, statt dessen wartet das Programm
-int linst_cl::doinst(const string& prog,int obverb/*=0*/,int oblog/*=0*/,const string& fallsnichtda/*=nix*/,uchar ohneabh/*=0*/)
+int linst_cl::doinst(const string& prog,int obverb/*=0*/,int oblog/*=0*/,const string& fallsnichtda/*=string()*/,uchar ohneabh/*=0*/)
 	////,uchar obyes/*=1*/)
 {
 	//// <<rot<<"doinst 1: "<<violett<<prog<<schwarz<<" obverb: "<<(int)obverb<<endl;
@@ -3693,7 +3689,7 @@ int linst_cl::doggfinst(const string& prog,int obverb,int oblog,uchar ohneabh/*=
 {
 	if (!(eprog=ersetzeprog(prog)).empty()) {
 		if (obfehlt(eprog,obverb,oblog)) {
-			return doinst(prog,obverb,oblog,nix,ohneabh);
+			return doinst(prog,obverb,oblog,string(),ohneabh);
 		}
 		eprog.clear();
 	} // if (!(eprog=ersetzeprog(prog)).empty()) 
@@ -4211,7 +4207,7 @@ void servc::daemon_reload(int obverb/*=0*/, int oblog/*=0*/)
 
 // Rueckgabe: Zahl der nicht Geloeschten
 // wird aufgerufen in: loeschecapi, untersuchespool, lauf
-int tuloeschen(const string& zuloe,const string& cuser/*=nix*/, int obverb/*=0*/, int oblog/*=0*/,stringstream *ausgp/*=0*/)
+int tuloeschen(const string& zuloe,const string& cuser/*=string()*/, int obverb/*=0*/, int oblog/*=0*/,stringstream *ausgp/*=0*/)
 {
 	////  fLog(violetts+Txk[T_tuloeschen]+schwarz,obverb,oblog);
 	string meld;
@@ -4225,7 +4221,7 @@ int tuloeschen(const string& zuloe,const string& cuser/*=nix*/, int obverb/*=0*/
 				if(cuser.empty()) iru++;
 				if(iru==1) {
 					setfaclggf(zuloe,obverb>1?obverb-1:0,oblog,/*obunter=*/falsch,/*mod=*/6,/*obimmer=*/falsch,
-							/*faclbak=*/0,/*user=*/nix/*cuser*/,/*fake=*/0,ausgp);
+							/*faclbak=*/0,/*user=*/string()/*cuser*/,/*fake=*/0,ausgp);
 				} else {
 					if (errno) if (errno!=13) perror((string(Txk[T_Fehler_beim_Loeschen])+" "+ltoan(errno)).c_str()); // Permission denied
 					const string cmd="rm -rf \""+zuloe+"\"";
@@ -4522,7 +4518,7 @@ void find2cl::ausgeb()
 	} // 	if (ergp)
 } // void find2cl::ausgeb()
 
-int find2cl::finde(svec *wovp,const string& muster/*=nix*/,const long tiefe/*=-1*/,int typbit/*=B_Alle*/,int folge/*=Fol_Dat*/,
+int find2cl::finde(svec *wovp,const string& muster/*=string()*/,const long tiefe/*=-1*/,int typbit/*=B_Alle*/,int folge/*=Fol_Dat*/,
 		time_t ab/*=0*/, time_t bis/*=0*/,int obicase/*=0*/,int nurexec/*=0*/,int obnoext/*=0*/)
 {
 	regex_t reg;
@@ -4543,7 +4539,7 @@ int find2cl::finde(svec *wovp,const string& muster/*=nix*/,const long tiefe/*=-1
 	} // 	if (obverb|oblog)
 	if (obverb>1) ausgeb();
 	return 0;
-} // int find2cl::finde(svec *wovp,string& muster/*=nix*/,const long tiefe/*=-1*/,int typbit/*=B_Alle*/,int folge/*=Fol_Dat*/,
+} // int find2cl::finde(svec *wovp,string& muster/*=string()*/,const long tiefe/*=-1*/,int typbit/*=B_Alle*/,int folge/*=Fol_Dat*/,
 
 void find2cl::zuvec(svec *zu,uchar anteil/*=0*/)
 {
@@ -4693,7 +4689,7 @@ int find3cl::ausgeb()
 	return 0;
 } //     int ausgeb()
 
-int find3cl::finde(svec *wovp,const string& muster/*=nix*/,long tiefe/*=-1*/,
+int find3cl::finde(svec *wovp,const string& muster/*=string()*/,long tiefe/*=-1*/,
 		int _typbit/*=B_Alle*/,int _folge/*=Fol_Dat*/,time_t _mab/*=0*/,time_t _mbis/*=0*/,int obicase/*=0*/,int _nurexec/*=0*/,int obnoext/*=0*/)
 {
 	int ret=0;
@@ -4753,7 +4749,7 @@ void find3cl::zuvec(svec *zu,uchar anteil/*=0*/)
 
 #if defined(altfind) && defined(neufind)
 void findfile(svec *qrueckp,uchar findv,int obverb/*=0*/,int oblog/*=0*/,uchar anteil/*=0*/,
-		const string& wo/*="."*/,const string& muster/*=nix*/,long tiefe/*=-1*/,int _typbit/*=B_Alle*/,
+		const string& wo/*="."*/,const string& muster/*=string()*/,long tiefe/*=-1*/,int _typbit/*=B_Alle*/,
 		int _folge/*=Fol_Dat*/, time_t _mab/*=0*/,time_t _mbis/*=0*/,int obicase/*=0*/,int nurexec/*=0*/,int obnoext/*=0*/,uchar nureins/*=0*/)
 {
 	svec wov;
@@ -4839,7 +4835,7 @@ const string& defvors="https://github.com/"+gitv+"/";
 const string& defnachs="/archive/master.tar.gz";
 
 // wird aufgerufen in main
-hcl::hcl(const int argc, const char *const *const argv,const char* const DPROG):DPROG(DPROG)
+hcl::hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron):DPROG(DPROG),mitcron(mitcron)
 {
 	tstart=clock();
 	holbefz0(argc,argv);
@@ -4905,7 +4901,7 @@ void hcl::lauf()
 		hLog(Txk[T_Logpfad]+drots+loggespfad+schwarz+Txk[T_oblog]+drot+ltoan((int)oblog)+schwarz+")");
 		virtpruefweiteres();
 	} // 	if (!keineverarbeitung)
-	if (mitcron) pruefcron(nix); // soll vor Log(Tx[T_Verwende ... stehen
+	if (mitcron) pruefcron(string()); // soll vor Log(Tx[T_Verwende ... stehen
 	if (!keineverarbeitung) {
 		pvirtfuehraus();
 	} //  if (!keineverarbeitung)
@@ -5025,32 +5021,42 @@ void hcl::virtVorgbAllg()
 {
 	cronminut="0";
 	autoupd=1;
+	// um z.B. spezielle Vorgaben (s. VorgbSpeziell) vom Server abhaengig machen zu koennen
+#ifdef _WIN32
+	//// char lpszUsername[255]; DWORD dUsername = sizeof(lpszUsername); GetUserName(lpszUsername, &dUsername);
+	dcpt = sizeof(cpt);
+	GetComputerName(cpt,&dcpt);
+#elif linux // WIN32
+	//// uid_t userId = getuid(); passwd* pw = getpwuid(userId); pw->pw_name<<endl;
+	cptlen = MAXHOSTNAMELEN;
+	gethostname(cpt, cptlen);
+#endif // WIN32 else
 } // void hhcl::virtVorgbAllg
 
 
 // wird aufgerufen in lauf
 void hcl::virtinitopt()
 {
-	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lg_k,T_language_l,/*TxBp*/&Txk,/*Txi*/T_sprachstr,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
-	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lang_k,T_lingue_l,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&obverb,/*art*/puchar,T_v_k,T_verbose_l,/*TxBp*/&Txk,/*Txi*/T_Bildschirmausgabe_gespraechiger,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"logvz",/*pptr*/&logvz,/*art*/pverz,T_lvz_k,T_logvz_l,/*TxBp*/&Txk,/*Txi*/T_waehlt_als_Logverzeichnis_pfad_derzeit,/*wi*/0,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!logvz.empty());
+	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lg_k,T_language_l,/*TxBp*/&Txk,/*Txi*/T_sprachstr,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
+	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lang_k,T_lingue_l,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&obverb,/*art*/puchar,T_v_k,T_verbose_l,/*TxBp*/&Txk,/*Txi*/T_Bildschirmausgabe_gespraechiger,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"logvz",/*pptr*/&logvz,/*art*/pverz,T_lvz_k,T_logvz_l,/*TxBp*/&Txk,/*Txi*/T_waehlt_als_Logverzeichnis_pfad_derzeit,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!logvz.empty());
 	opn<<new optcl(/*pname*/"logdname",/*pptr*/&logdname,/*art*/pstri,T_ld_k,T_logdname_l,/*TxBp*/&Txk,/*Txi*/T_logdatei_string_im_Pfad,/*wi*/0,/*Txi2*/T_wird_verwendet_anstatt,/*rottxt*/logvz,/*wert*/-1,/*woher*/!logdname.empty());
 	opn<<new optcl(/*pname*/"oblog",/*pptr*/&oblog,/*art*/pint,T_l_k,T_log_l,/*TxBp*/&Txk,/*Txi*/T_protokolliert_ausfuehrlich_in_Datei,/*wi*/1,/*Txi2*/T_sonst_knapper,/*rottxt*/loggespfad,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&logdateineu,/*art*/puchar,T_ldn_k,T_logdateineu_l,/*TxBp*/&Txk,/*Txi*/T_logdatei_vorher_loeschen,/*wi*/0,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&akonfdt,/*art*/pfile,T_kd_k,T_konfdatei_l,/*TxBp*/&Txk,/*Txi*/T_verwendet_Konfigurationsdatei_string_anstatt,/*wi*/0,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_h_k,T_hilfe_l,/*TxBp*/&Txk,/*Txi*/T_Erklaerung_haeufiger_Optionen,/*wi*/255,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_lh_k,T_lhilfe_l,/*TxBp*/&Txk,/*Txi*/T_Erklaerung_aller_Optionen,/*wi*/255,/*Txi2*/-1,/*rottxt*/nix,/*wert*/2,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_fgz_k,T_fgz_l,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_sh,T_standardhilfe,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/nix,/*wert*/3,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_libtest,T_libtest,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/nix,/*wert*/4,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&logdateineu,/*art*/puchar,T_ldn_k,T_logdateineu_l,/*TxBp*/&Txk,/*Txi*/T_logdatei_vorher_loeschen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&akonfdt,/*art*/pfile,T_kd_k,T_konfdatei_l,/*TxBp*/&Txk,/*Txi*/T_verwendet_Konfigurationsdatei_string_anstatt,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_h_k,T_hilfe_l,/*TxBp*/&Txk,/*Txi*/T_Erklaerung_haeufiger_Optionen,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_lh_k,T_lhilfe_l,/*TxBp*/&Txk,/*Txi*/T_Erklaerung_aller_Optionen,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/2,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_fgz_k,T_fgz_l,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_sh,T_standardhilfe,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/3,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&obhilfe,/*art*/puchar,T_libtest,T_libtest,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/4,/*woher*/1);
 	opn<<new optcl(/*pname*/"cronminut",/*pptr*/&cronminut,/*art*/pdez,T_cm_k,T_cronminuten_l,/*TxBp*/&Txk,/*Txi*/T_Alle_wieviel_Minuten_soll,/*wi*/1,/*Txi2*/T_aufgerufen_werden_0_ist_gar_nicht,/*rottxt*/meinname,/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pname*/"",/*pptr*/&obvi,/*art*/puchar,T_vi_k,T_vi_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdatei,/*wi*/0,/*Txi2*/T_Logdatei_usw_bearbeiten_sehen,/*rottxt*/akonfdt,/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/"",/*pptr*/&obvs,/*art*/puchar,T_vs_k,T_vs_l,/*TxBp*/&Txk,/*Txi*/T_Quelldateien_in,/*wi*/0,/*Txi2*/T_bearbeiten_sehen,/*rottxt*/instvz,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"autoupd",/*pptr*/&autoupd,/*art*/pint,T_autoupd_k,T_autoupd_l,/*TxBp*/&Txk,/*Txi*/T_Programm_automatisch_aktualisieren,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&rzf,/*art*/puchar,T_rf_k,T_rueckfragen_l,/*TxBp*/&Txk,/*Txi*/T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&nrzf,/*art*/puchar,T_krf_k,T_keinerueckfragen_l,/*TxBp*/&Txk,/*Txi*/T_keine_Rueckfragen_zB_aus_Cron,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&zeigvers,/*art*/puchar,T_info_k,T_version_l,/*TxBp*/&Txk,/*Txi*/T_Zeigt_die_Programmversion_an,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"autoupd",/*pptr*/&autoupd,/*art*/pint,T_autoupd_k,T_autoupd_l,/*TxBp*/&Txk,/*Txi*/T_Programm_automatisch_aktualisieren,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&rzf,/*art*/puchar,T_rf_k,T_rueckfragen_l,/*TxBp*/&Txk,/*Txi*/T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&nrzf,/*art*/puchar,T_krf_k,T_keinerueckfragen_l,/*TxBp*/&Txk,/*Txi*/T_keine_Rueckfragen_zB_aus_Cron,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&zeigvers,/*art*/puchar,T_info_k,T_version_l,/*TxBp*/&Txk,/*Txi*/T_Zeigt_die_Programmversion_an,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 
 	//  for(int i=argc-1;i>0;i--) KLA if (argv[i][0]==0) argc--; KLZ // damit fuer das Compilermakro auch im bash-script argc stimmt
 	//// <<"Ende virtinitopt"<<endl;
@@ -5123,8 +5129,8 @@ void hcl::parsecl()
 										keineverarbeitung=1;
 										cmeingegeben=1;
 									}
-									opn.setzbemerkwoher(trick,/*ibemerk=*/nix,/*vwoher=*/3);
-									//opn.setzbemerkwoher(omit->second,/*ibemerk=*/nix,/*vwoher=*/3);
+									opn.setzbemerkwoher(trick,/*ibemerk=*/string(),/*vwoher=*/3);
+									//opn.setzbemerkwoher(omit->second,/*ibemerk=*/string(),/*vwoher=*/3);
 								} else {
 									if (!obhilfe) obhilfe=1;
 								} // 								if (wiefalsch<=0) else
@@ -5271,7 +5277,7 @@ void hcl::dovi()
 } // void hcl::dovi()
 
 // wird aufgerufen in lauf
-void hcl::virtzeigversion(const string& ltiffv/*=nix*/)
+void hcl::virtzeigversion(const string& ltiffv/*=string()*/)
 {
 	struct tm tm={0};
 	//// char buf[100];
@@ -5333,7 +5339,7 @@ uchar hcl::pruefcron(const string& cm)
 {
 	uchar obschreib=0;
 	// damit nicht nur deshalb das root-Passwort abgefragt werden muss => cronminuten nur ueberpruefen/aendern, wenn etweder ohnehin root oder ueber Befehlszeile neue Minutenzahl gewuenscht
-////	<<"opn.olmap[Txk[T_cronminuten_l]]->woher: "<<(int)opn.olmap[Txk[T_cronminuten_l]]->woher<<", !cus.cuid: "<<cus.cuid<<endl;
+////	<<"opn.olmap[Txk[T_cronminuten_l]]->woher: "<<(int)opn.olmap[Txk[T_cronminuten_l]]->woher<<", cus.cuid: "<<cus.cuid<<endl;
 	if (opn.olmap[Txk[T_cronminuten_l]]->woher==3 ||!cus.cuid) {
 		const string& cmhier=cm.empty()?cronminut:cm;
 		crongeprueft=1;
@@ -5471,7 +5477,7 @@ void hcl::update(const string& DPROG)
 			} else {
 				////  struct stat entwst={0};
 				//// entwickeln muss genauso definiert sein wie in Makefile
-				////  const string ziel=instvz+(lstat((instvz+"/entwickeln").c_str(),&entwst)?nix:"/nvers");
+				////  const string ziel=instvz+(lstat((instvz+"/entwickeln").c_str(),&entwst)?string():"/nvers");
 				const string ziel=instvz;
 				pruefverz(ziel,obverb,oblog);
 				fLog(violett+DPROG+blau+Txk[T_wird_aktualisiert_bitte_ggf_neu_starten]+schwarz,1,oblog);
@@ -5497,7 +5503,7 @@ void hcl::update(const string& DPROG)
 } // void hcl::update(const string& DPROG)
 
 // wird aufgerufen in lauf
-int wartaufpids(pidvec *pidv,const ulong runden/*=0*/,const int obverb/*=0*/,const int oblog/*=0*/,const string& wo/*=nix*/)
+int wartaufpids(pidvec *pidv,const ulong runden/*=0*/,const int obverb/*=0*/,const int oblog/*=0*/,const string& wo/*=string()*/)
 {
 	////	int* ovp=(int*)&obverb; *ovp=0;
 	ulong aktru=0; 
@@ -5620,7 +5626,7 @@ int hcl::kompilbase(const string& was, const string& endg)
 	return 1;
 } // int hcl::kompilbase(const string& was,const string& endg)
 
-int hcl::kompilfort(const string& was,const string& vorcfg/*=nix*/, const string& cfgbismake/*==s_dampand*/,uchar ohneconf/*=0*/)
+int hcl::kompilfort(const string& was,const string& vorcfg/*=string()*/, const string& cfgbismake/*==s_dampand*/,uchar ohneconf/*=0*/)
 {
 	int ret=1;
 	if (!pruefinstv()) {
@@ -5646,7 +5652,7 @@ int hcl::kompilfort(const string& was,const string& vorcfg/*=nix*/, const string
 		const string b4="ldconfig /usr";
 		int erg1;
 		if (!(erg1=systemrueck(b1,obverb,oblog,/*rueck=*/0,/*obsudc=*/0))) {
-			////if (!(erg1=systemrueck(b1,obverb,oblog,/*rueck=*/0,/*obsudc=*/0,/*verbergen=*/0,/*obergebnisanzeig=*/wahr,/*ueberschr=*/nix,
+			////if (!(erg1=systemrueck(b1,obverb,oblog,/*rueck=*/0,/*obsudc=*/0,/*verbergen=*/0,/*obergebnisanzeig=*/wahr,/*ueberschr=*/string(),
 			////				/*errm=*/0,/*obincron=*/0,/*ausgp=*/0,/*obdirekt=*/0))) KLZ
 			ret=systemrueck(b2,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
 		} else {
@@ -5663,7 +5669,7 @@ int hcl::kompilfort(const string& was,const string& vorcfg/*=nix*/, const string
 				"&&"+sudc+"make uninstall; cd \"$H\"",b1+" && "+b2+" || "+b3,obverb,oblog);
 	} // 		if (!pruefinstv())
 	return ret;
-} // int hcl::kompilfort(const string& was,const string& vorcfg/*=nix*/, const string& cfgbismake/*==s_dampand*/,uchar ohneconf/*=0*/)
+} // int hcl::kompilfort(const string& was,const string& vorcfg/*=string()*/, const string& cfgbismake/*==s_dampand*/,uchar ohneconf/*=0*/)
 
 const string tiffmark="/usr/local/sclibtiff";
 
@@ -5729,7 +5735,7 @@ const int altobverb=obverb;
 	} // void paramcl::prueftif()
  */
 
-int hcl::kompiliere(const string& was,const string& endg, const string& vorcfg/*=nix*/, const string& cfgbismake/*==s_dampand*/)
+int hcl::kompiliere(const string& was,const string& endg, const string& vorcfg/*=string()*/, const string& cfgbismake/*==s_dampand*/)
 {
 	if (!kompilbase(was,endg)) {
 		return kompilfort(was,vorcfg,cfgbismake);
@@ -5830,7 +5836,6 @@ const string& wpgcl::virtmachbemerk(const Sprache lg,const binaer obfarbe/*=wahr
 
 const string& optcl::virtmachbemerk(const Sprache lg,const binaer obfarbe/*=wahr*/)
 {
-	static const string nix; // =string()
 	const uchar obnum=(part==plong||part==pint||part==puchar);
 	const uchar geheim=(part==ppwd);
 	bemerk.clear();
@@ -5839,12 +5844,12 @@ const string& optcl::virtmachbemerk(const Sprache lg,const binaer obfarbe/*=wahr
 			if (TxBp->TCp[Txi][lg]) {
 				TCtp *hilf = reinterpret_cast<TCtp*>(TxBp->TCp);
 				bemerk= (const char*)hilf[Txi][lg];
-				if (!rottxt.empty()) bemerk+=(obfarbe?blaus:nix)+rottxt+(obfarbe?schwarz:nix);
+				if (!rottxt.empty()) bemerk+=(obfarbe?blaus:string())+rottxt+(obfarbe?schwarz:string());
 				if (Txi2!=-1) bemerk+=(const char*)hilf[Txi2][lg]; 
-				////        if (zptr && !strstr(pname,"pwd")) bemerk+=" '"+(obfarbe?blaus:nix)+*zptr+(obfarbe?schwarz:nix)+"'"; // pname==0
-				if (obno) bemerk+=(obfarbe?violetts:nix)+Txk[T_oder_nicht]+(obfarbe?schwarz:nix);
+				////        if (zptr && !strstr(pname,"pwd")) bemerk+=" '"+(obfarbe?blaus:string())+*zptr+(obfarbe?schwarz:string())+"'"; // pname==0
+				if (obno) bemerk+=(obfarbe?violetts:string())+Txk[T_oder_nicht]+(obfarbe?schwarz:string());
 				if (!geheim && pptr/*&&bemerk.find("assw")==string::npos*/) 
-					bemerk+=string(" (")+(obnum?"":"'")+(obfarbe?blaus:nix)+(obnum?ltoan(part==plong?*(long*)pptr:part==pint?*(int*)pptr:*(uchar*)pptr):*(string*)pptr)+(obfarbe?schwarz:nix)+(obnum?"":"'")+")";
+					bemerk+=string(" (")+(obnum?"":"'")+(obfarbe?blaus:string())+(obnum?ltoan(part==plong?*(long*)pptr:part==pint?*(int*)pptr:*(uchar*)pptr):*(string*)pptr)+(obfarbe?schwarz:string())+(obnum?"":"'")+")";
 			} // if (TxBp->TCp[Txi][lg])
 		} // if (Txi!=-1)
 	} // if (TxBp)

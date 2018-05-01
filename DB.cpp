@@ -1047,6 +1047,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 	return 0;
 } // int DB::machind(const string& tbname, Index* indx,int obverb/*=0*/, int oblog/*=0*/)
 
+// ob Tabellenspalte da
 uchar DB::obtabspda(const char* const tab,const char* const sp)
 {
 	uchar obda=0;
@@ -2400,7 +2401,7 @@ void dhcl::virtinitopt()
 	hcl::virtinitopt();
 } // void hhcl::virtinitopt
 
-dhcl::dhcl(const int argc, const char *const *const argv,const char* const DPROG):hcl(argc,argv,DPROG)
+dhcl::dhcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron):hcl(argc,argv,DPROG,mitcron)
 {
 }
 

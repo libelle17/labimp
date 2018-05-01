@@ -7,6 +7,7 @@ enum Txt_ {
 	T_auswertpql_volle_Funktion,
 	T_eingetragen,
 	T_Abfrage,
+	T_pvirtVorgbSpeziellvoll,
 	T_tmMAX,
 }; // enum Txt_
 
@@ -20,11 +21,27 @@ const char *tm_T[T_tmMAX+1][SprachZahl]={
 	{"eintragen: ","entered: "},
 	// 	T_Abfrage
 	{"Abfrage: ","Query: "},
+	// T_pvirtVorgbSpeziellvoll
+	{"pvirtVorgbSpeziell() (ueberladen)","pvirtVorgbSpeziell() (overloaded)"},
 	{"",""}
 }; // const char *Txvgcl::TextC[T_vgMAX+1][SprachZahl]=
 
 // class Txvgcl Txv;
 class TxB Txt((const char* const* const* const*)tm_T);
+
+// wird aufgerufen in lauf
+void hhcl::pvirtVorgbSpeziell()
+{
+	hLog(violetts+Txt[T_pvirtVorgbSpeziellvoll]+schwarz); //ω
+	dbq="quelle";
+	dhcl::pvirtVorgbSpeziell(); //α
+	if (strstr(cpt,"linux1")) {
+		ldatvz="/opt/turbomed/labor/backup";
+	} else {
+		ldatvz=gethome()+vtz+Tx[T_labor];
+	}
+	fertigvz=ldatvz+vtz+Tx[T_fertige];
+} // void hhcl::pvirtVorgbSpeziell
 
 
 void hhcl::ergpql()

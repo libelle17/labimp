@@ -121,7 +121,10 @@ enum T_
 	T_8411_Testbezeichnung_Turbomed,
 	T_ldvz_k,
 	T_ldvz_l,
+	T_fgvz_k,
+	T_fgvz_l,
 	T_Verzeichnis_der_Faxdateien,
+	T_Verzeichnis_der_Fertigen,
 	T_vv_k,
 	T_vv_l,
 	T_tr_k,
@@ -184,9 +187,14 @@ enum T_
 	T_Loescheab,
 	T_Datensaetze_geloescht,
 	T_fertig_mit_datid,
+	T_Fehler_bei_sql,
+	T_labor,
+	T_fertige,
+	T_Verzeichnis_der_fertig_Verarbeiteten,
+	T_Fehler_beim_Verschieben_von,
+	T_nach_,
 	T_MAX //α
 }; // enum T_ //ω
-const string fertiguvz="fertig";
 //α
 class hhcl:public dhcl
 {
@@ -217,6 +225,7 @@ class hhcl:public dhcl
 		tm abndat{0};
 		uchar keimz{0},keimzda{0};
 	protected: //α
+		long listz=30; //ω
 		string p1;
 		int p2;
 		string p3;
@@ -227,8 +236,8 @@ class hhcl:public dhcl
 		uchar loeschunvollst=0;
 		uchar nurnach=0;
 		string loeschab;
-		long listz=30; //ω
 		string ldatvz;   // Verzeichnis der Labordateien
+		string fertigvz; // Verzeichnis der fertig bearbeiteten
 	public: //α //ω
 	private: //α //ω
 		void prueflydat(DB *My, const int obverb, const int oblog, const uchar direkt=0);
@@ -248,7 +257,7 @@ class hhcl:public dhcl
 		void virttesterg(); //α
 		void virtlieskonfein();
 		void virtautokonfschreib();
-		void dverarbeit(const string& datei,string *datidp);
+		int dverarbeit(const string& datei,string *datidp);
 		void usreset();
 		void wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep);
 	protected: 

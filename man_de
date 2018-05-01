@@ -45,7 +45,7 @@
 .br
 \fB -vi, --vi\fR: Konfigurationsdatei , Logdatei usw. bearbeiten/sehen (beenden mit ':qa')\fB oder nicht\fR (\fB0\fR)
 .br
-\fB -vs, --vs\fR: Quelldateien in \fB/root/labimp\fR bearbeiten/sehen (beenden mit ':qa')\fB oder nicht\fR (\fB0\fR)
+\fB -vs, --vs\fR: Quelldateien in \fB/home/schade/labimp\fR bearbeiten/sehen (beenden mit ':qa')\fB oder nicht\fR (\fB0\fR)
 .br
 \fB -rf, --rueckfragen\fR: alle Parameter werden abgefragt (darunter einige hier nicht gezeigte)\fB oder nicht\fR (\fB0\fR)
 .br
@@ -55,7 +55,9 @@
 .br
 \fBOptionen z.Speich. i.Konfigur'datei (vorausg. '1'=doch nicht speichern, 'no'=Gegenteil, z.B. '-noocra','-1noocri'):\fR
 .br
-\fB -ldvz, --labordatenvz <pfad>\fR: Verzeichnis der Faxdateien ('\fB\fR')
+\fB -ldvz, --labordatenvz <pfad>\fR: Verzeichnis der Faxdateien ('\fB/home/schade/labor\fR')
+.br
+\fB -fgvz, --fertigvz <pfad>\fR: Verzeichnis der Fertigen ('\fB/home/schade/labor/fertige\fR')
 .br
 \fB -host, --host <string>\fR: verwendet die Datenbank auf Host <string> anstatt auf ('\fBlocalhost\fR')
 .br
@@ -63,7 +65,7 @@
 .br
 \fB -mpwd, --mpwd <string>\fR: verwendet fuer MySQL/MariaDB das Passwort <string>
 .br
-\fB -db, --datenbank <string>\fR: verwendet die Datenbank <string> anstatt ('\fBquelle\fR')
+\fB -db, --datenbank <string>\fR: verwendet die Datenbank <string> anstatt ('\fBlabimp\fR')
 .br
 \fB -sp, --sprache <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBd\fR')
 .br

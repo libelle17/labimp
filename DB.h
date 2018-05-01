@@ -561,7 +561,7 @@ class dhcl:public hcl
 	//  void pvirtfuehraus();
 	void virtschlussanzeige();
  public:
-	dhcl(const int argc, const char *const *const argv,const char* const DPROG);
+	dhcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron);
 	~dhcl();
 	int  initDB();
 	int  pruefDB(const string& db);

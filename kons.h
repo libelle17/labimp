@@ -1214,7 +1214,14 @@ class hcl
 		string muser; // Benutzer fuer Mysql/MariaDB
 		string mpwd;  // Passwort fuer Mysql/MariaDB //ω
 		stringstream uebers; // Ueberschrift fuer Verarbeitungslauf
-		uchar mitcron=0; // ob Programm auch in Cron eingetragen werden kann
+		const uchar mitcron; // ob Programm auch in Cron eingetragen werden kann; kann im Konstruktor angegeben werden
+#ifdef _WIN32
+    char cpt[255];
+    DWORD dcpt;
+#elif linux // _WIN32
+    char cpt[MAXHOSTNAMELEN]; 
+    size_t cptlen;
+#endif // _WIN32 else
 	public:
 		int obverb=0; // verbose
 		int oblog=0;  // mehr Protokollieren
@@ -1301,7 +1308,7 @@ class hcl
 	public:
 		void optausg(const char *farbe); // Optionen ausgeben
 		void pruefcl(); // commandline mit omap und mit argcmv parsen
-		hcl(const int argc, const char *const *const argv,const char* const DPROG);
+		hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron);
 		~hcl();
 		void lauf();
 		int hLog(const string& text,const bool oberr=0,const short klobverb=0) const;
