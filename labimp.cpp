@@ -501,11 +501,11 @@ void hhcl::prueflyparameter(DB *My, const int obverb, const int oblog, const uch
 			Feld("Einheit","varchar","12","",Tx[T_8421],0,0,1,"kA"),
 			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 			Feld("Reihe","int","10","",Tx[T_Reihenfolge_innerhalb_der_Gruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
-			Feld("uNm","varchar","11","",Tx[T_unterer_Normwert_maennlich],0,0,1),
-			Feld("oNm","varchar","11","",Tx[T_oberer_Normwert_maennlich],0,0,1),
-			Feld("uNw","varchar","11","",Tx[T_unterer_Normwert_weiblich],0,0,1),
-			Feld("oNw","varchar","11","",Tx[T_oberer_Normwert_weiblich],0,0,1),
-			Feld("NB","varchar","1330","",Tx[T_Normbereich_aus_lywert],0,0,1),
+			Feld("uNm","varchar","5","",Tx[T_unterer_Normwert_maennlich],0,0,1),
+			Feld("oNm","varchar","6","",Tx[T_oberer_Normwert_maennlich],0,0,1),
+			Feld("uNw","varchar","5","",Tx[T_unterer_Normwert_weiblich],0,0,1),
+			Feld("oNw","varchar","6","",Tx[T_oberer_Normwert_weiblich],0,0,1),
+			Feld("NB","varchar","1342","",Tx[T_Normbereich_aus_lywert],0,0,1),
 			Feld("Aktzeit","datetime","0","0",Tx[T_Aktualisierungszeitpunt],1,0,1),
 			Feld("StByte","int","10","",Tx[T_Ordnungsnummer_der_Dateiuebertragung],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
@@ -534,8 +534,8 @@ void hhcl::prueflydat(DB *My, const int obverb, const int oblog, const uchar dir
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("DatID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
-			Feld("Pfad","varchar","60","",Tx[T_Pfadname],1,0,1),
-			Feld("Name","varchar","31","",Tx[T_Name_der_eingelesenen_Labordatei_ohne_Endung],1,0,1),
+			Feld("Pfad","varchar","78","",Tx[T_Pfadname],1,0,1),
+			Feld("Name","varchar","51","",Tx[T_Name_der_eingelesenen_Labordatei_ohne_Endung],1,0,1),
 			Feld("geändert","datetime","","",Tx[T_letzte_Aenderung],1,0,1),
 			Feld("Größe","int","10","",Tx[T_Groesse],0,0,1),
 			Feld("Zp","datetime","0","0",Tx[T_Einlesezeitpunkt],0,0,1),
@@ -563,10 +563,10 @@ void hhcl::prueflyplab(DB *My, const int obverb, const int oblog, const uchar di
 	if (!direkt) {
 		Feld felder[] = {
 			Feld(/*name*/"ID",/*typ*/"int",/*lenge*/"10",/*prec*/string(),/*comment*/Tx[T_eindeutige_Identifikation],/*obind*/1,/*obaut*/1,/*nnull*/0,/*defa*/string(),/*unsig*/1),
-			Feld("Labor","varchar","21","",Tx[T_8300_maximale_Laenge_36],0,0,1),
-			Feld("StraßeLabor","varchar","1","",Tx[T_8321_Strasse_der_Laboradresse_Turbomed],0,0,1),
-			Feld("PLZLabor","varchar","1","",Tx[T_8322_PLZ_der_Laboradresse_Turbomed],0,0,1),
-			Feld("OrtLabor","varchar","1","",Tx[T_8323_Ort_der_Laboradresse_Turbomed],0,0,1),
+			Feld("Labor","varchar","43","",Tx[T_8300_maximale_Laenge_36],0,0,1),
+			Feld("StraßeLabor","varchar","22","",Tx[T_8321_Strasse_der_Laboradresse_Turbomed],0,0,1),
+			Feld("PLZLabor","varchar","5","",Tx[T_8322_PLZ_der_Laboradresse_Turbomed],0,0,1),
+			Feld("OrtLabor","varchar","16","",Tx[T_8323_Ort_der_Laboradresse_Turbomed],0,0,1),
 		};
 		Index indices[]{Index("Labor",new Feld[4]{Feld("Labor"),Feld("StraßeLabor"),Feld("PLZLabor"),Feld("OrtLabor")},4,/*unique*/1)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
@@ -635,9 +635,9 @@ void hhcl::prueflypnb(DB *My, const int obverb, const int oblog, const uchar dir
 			Feld("PNEUID","int","10","",Tx[T_Bezug_auf_laborxpneu],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 //			Feld("Geschlecht","int","10","",Tx[T_1_Mann_2_Frau_3_unbek_4_Knabe_5_Maedchen_0_Name_fehlt_9_beide],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 //			Feld("Eingang","datetime","0","0",Tx[T_Eingangsdatum_im_Labor],0,0,1),
-			Feld("uNg","varchar","11","",Tx[T_untere_Normgrenze],0,0,1),
-			Feld("oNg","varchar","11","",Tx[T_obere_Normgrenze],0,0,1),
-			Feld("NB","varchar","1330","",Tx[T_Normbereich],0,0,1),
+			Feld("uNg","varchar","5","",Tx[T_untere_Normgrenze],0,0,1),
+			Feld("oNg","varchar","6","",Tx[T_obere_Normgrenze],0,0,1),
+			Feld("NB","varchar","1342","",Tx[T_Normbereich],0,0,1),
 			Feld("zahl","int","10","",Tx[T_Haeufigkeit_eines_Laborparameters],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 			Feld("uid","int","10","",Tx[T_laborxus_id_des_ersten_Eintrags],/*obind*/0,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 		};
@@ -662,13 +662,13 @@ void hhcl::prueflyaerzte(DB *My, const int obverb, const int oblog, const uchar 
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_zum_Bezug_fuer_Laborsaetze],1,1,0,string(),1),
-			Feld("Arztnr","varchar","1","",Tx[T_201_Arztnummer_Turbomed],1,0,1),
-			Feld("Arztname","varchar","51","",Tx[T_203_Arztname_Turbomed],1,0,1),
-			Feld("StraßePraxis","varchar","41","",Tx[T_205_Strasse_der_Praxis_Turbomed],0,0,1),
-			Feld("Arzt","varchar","41","",Tx[T_211_Ausfuehrender_Arzt],1,0,1),
-			Feld("LANR","varchar","11","",Tx[T_212_LANR],1,0,1),
-			Feld("PLZPraxis","varchar","11","",Tx[T_215_PLZ_der_Praxis_Turbomed],0,0,1),
-			Feld("OrtPraxis","varchar","11","",Tx[T_216_Ort_der_Praxis_Turbomed],0,0,1),
+			Feld("Arztnr","varchar","9","",Tx[T_201_Arztnummer_Turbomed],1,0,1),
+			Feld("Arztname","varchar","50","",Tx[T_203_Arztname_Turbomed],1,0,1),
+			Feld("StraßePraxis","varchar","18","",Tx[T_205_Strasse_der_Praxis_Turbomed],0,0,1),
+			Feld("Arzt","varchar","50","",Tx[T_211_Ausfuehrender_Arzt],1,0,1),
+			Feld("LANR","varchar","9","",Tx[T_212_LANR],1,0,1),
+			Feld("PLZPraxis","varchar","5","",Tx[T_215_PLZ_der_Praxis_Turbomed],0,0,1),
+			Feld("OrtPraxis","varchar","8","",Tx[T_216_Ort_der_Praxis_Turbomed],0,0,1),
 		};
 		Index indices[]{
 			Index("eindeutig",new Feld[7]{Feld("Arztnr"),Feld("Arztname"),Feld("StraßePraxis"),Feld("Arzt"),Feld("LANR"),Feld("PLZPraxis"),Feld("OrtPraxis")},7,/*unique*/1),
@@ -692,17 +692,17 @@ void hhcl::prueflysaetze(DB *My, const int obverb, const int oblog, const uchar 
 		Feld felder[] = {
 			Feld("SatzID","int","10","",Tx[T_zum_Bezug_fuer_LaborUS],1,1,0,string(),1),
 			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborDat],1,0,0,string(),1),
-			Feld("Satzart","varchar","11","",Tx[T_8000_Satzart_Turbomed],0,0,1),
-			Feld("Satzlänge","varchar","11","",Tx[T_8100_Satzlaenge_Turbomed],0,0,1),
-			Feld("SatzlängeSchluss","varchar","11","",Tx[T_8100_Satzlaenge_Turbomed_nach_8221_in_Feld_8000],0,0,1),
+			Feld("Satzart","varchar","4","",Tx[T_8000_Satzart_Turbomed],0,0,1),
+			Feld("Satzlänge","varchar","5","",Tx[T_8100_Satzlaenge_Turbomed],0,0,1),
+			Feld("SatzlängeSchluss","varchar","5","",Tx[T_8100_Satzlaenge_Turbomed_nach_8221_in_Feld_8000],0,0,1),
 			Feld("VersionSatzb","varchar","11","",Tx[T_9212_Version_der_Satzbeschreibung_Turbomed],0,0,1),
 			Feld("ArztID","int","10","",Tx[T_Bezug_auf_lyaerzte],0,0,1,string(),1),
 			Feld("LabID","int","10","",Tx[T_Bezug_auf_lyplab],0,0,1,string(),1),
-			Feld("KBVPrüfnr","varchar","21","",Tx[T_101_KBV_Pruefnummer_Turbomed],0,0,1),
+			Feld("KBVPrüfnr","varchar","16","",Tx[T_101_KBV_Pruefnummer_Turbomed],0,0,1),
 			Feld("Zeichensatz","varchar","1","",Tx[T_9106_verwendeter_Zeichensatz_Turbomed],0,0,1),
-			Feld("Kundenarztnr","varchar","11","",Tx[T_8312_Kundenarztnummer_Turbomed],0,0,1),
+			Feld("Kundenarztnr","varchar","8","",Tx[T_8312_Kundenarztnummer_Turbomed],0,0,1),
 			Feld("Erstellungsdatum","date","","",Tx[T_9103_Erstellungsdatum_Turbomed],0,0,1),
-			Feld("Gesamtlänge","varchar","1","",Tx[T_9202_Gesamtlaenge_des_Datenpaketes_Turbomed],0,0,1),
+			Feld("Gesamtlänge","varchar","8","",Tx[T_9202_Gesamtlaenge_des_Datenpaketes_Turbomed],0,0,1),
 		};
 		Constraint csts[]{
 			Constraint(tlysaetze+tlydat,new Feld{Feld("datid")},1,tlydat,new Feld{Feld("DatID")},1,cascade,cascade),
@@ -730,27 +730,28 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 		fdr<<new Feld("UsLfd","int","10","",Tx[T_Bezug_auf_LaborWert],1,0,0,string(),1);
 		fdr<<new Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborDat],1,0,1,string(),1);
 		fdr<<new Feld("SatzID","int","10","",Tx[T_Bezug_auf_LaborXSaetze],1,0,1,string(),1);
-		fdr<<new Feld("Satzart","varchar","11","",Tx[T_8000_Satzart_Turbomed],0,0,0);
-		fdr<<new Feld("Satzlänge","varchar","11","",Tx[T_8100_Satzlaenge_Turbomed],0,0,0);
-		fdr<<new Feld("Auftragsnummer","varchar","11","",Tx[T_8310_Anforderungsident_Turbomed],0,0,0);
-		fdr<<new Feld("Auftragsschlüssel","varchar","11","",Tx[T_8311_Anforderungsnr_d_Labors_Turbomed],/*obind*/1,0,0);
+		fdr<<new Feld("Satzart","varchar","4","",Tx[T_8000_Satzart_Turbomed],0,0,0);
+		fdr<<new Feld("Satzlänge","varchar","5","",Tx[T_8100_Satzlaenge_Turbomed],0,0,0);
+		fdr<<new Feld("Auftragsnummer","varchar","10","",Tx[T_8310_Anforderungsident_Turbomed],0,0,0);
+		fdr<<new Feld("Auftragsschlüssel","varchar","15","",Tx[T_8311_Anforderungsnr_d_Labors_Turbomed],/*obind*/1,0,0);
 		fdr<<new Feld("Eingang","date","0","0",Tx[T_Eingangsdatum_im_Labor],1,0,0);
-		fdr<<new Feld("Berichtsdatum","varchar","21","",Tx[T_8302_Berichtsdatum],0,0,0);
-		fdr<<new Feld("Pat_id","int","10","","",1,0,1,string(),1);
-		fdr<<new Feld("Nachname","varchar","31","","3101",0,0,0);
-		fdr<<new Feld("Vorname","varchar","31","","3102",0,0,0);
+		fdr<<new Feld("Berichtsdatum","datetime","0","0",Tx[T_8302_Berichtsdatum],0,0,0);
+		fdr<<new Feld("Pat_id","int","5","","",1,0,1,string(),1);
+		fdr<<new Feld("Nachname","varchar","25","","3101",0,0,0);
+		fdr<<new Feld("Vorname","varchar","25","","3102",0,0,0);
 		fdr<<new Feld("GebDat","date","","","3103",0,0,0);
 		fdr<<new Feld("Titel","varchar","1","","3104",0,0,0);
-		fdr<<new Feld("NVorsatz","varchar","1","","3105",0,0,0);
+		fdr<<new Feld("NVorsatz","varchar","7","","3105",0,0,0);
+		fdr<<new Feld("NVors2","varchar","3","","3120",0,0,0);
 		fdr<<new Feld("BefArt","varchar","1","",Tx[T_8401_Befundart_Turbomed__Fertigstellungsgrad_EEndbefund_T__Teilbefund],0,0,0);
 		fdr<<new Feld("Abrechnungstyp","varchar","1","",Tx[T_8609_Abrechnungstyp_Kasse_Privat_X_anderer_RE_Einsender_Turbomed],0,0,0);
 		fdr<<new Feld("GebüOrd","varchar","1","",Tx[T_8403_Gebuehrenordnung_Turbomed],0,0,0);
-		fdr<<new Feld("Auftraggeber","varchar","1","",Tx[T_8615_Auftraggeber_LANR],0,0,0);
-		fdr<<new Feld("Patienteninformation","varchar","1","",Tx[T_8405_Patienteninformation_Turbomed],0,0,0);
+		fdr<<new Feld("Auftraggeber","varchar","9","",Tx[T_8615_Auftraggeber_LANR],0,0,0);
+		fdr<<new Feld("Patienteninformation","varchar","10","",Tx[T_8405_Patienteninformation_Turbomed],0,0,0);
 		fdr<<new Feld("Geschlecht","varchar","1","",Tx[T_8407_Geschlecht_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/1);
 		fuellpql();
 		for(size_t i=0;i<pql.size();i++) {
-			fdr<<new Feld("Pat_id_"+ltoan(i),"varchar","1","",ersetze(pql[i].c_str(),"'",""),/*obind*/1,/*obauto*/0,/*nnull*/0);
+			fdr<<new Feld("Pat_id_"+ltoan(i),"varchar","11","",ersetze(pql[i].c_str(),"'",""),/*obind*/1,/*obauto*/0,/*nnull*/0);
 		}
 		fdr<<new Feld("ZeitpunktLaborneu","datetime","0","0",Tx[T_Zeitpunkt_der_Untersuchung_die_in_Laborneu_zugeordnet_wurde],0,0,0);
 		fdr<<new Feld("Pat_id_Laborneu","varchar","1","",Tx[T_PatID_aus_Laborneu],0,0,0);
@@ -778,7 +779,7 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 			Feld("Auftragsnummer","varchar","11","",Tx[T_8310_Anforderungsident_Turbomed],0,0,0),
 			Feld("Auftragsschlüssel","varchar","11","",Tx[T_8311_Anforderungsnr_d_Labors_Turbomed],/*obind*/1,0,0),
 			Feld("Eingang","date","0","0",Tx[T_Eingangsdatum_im_Labor],1,0,0),
-			Feld("Berichtsdatum","varchar","21","",Tx[T_8302_Berichtsdatum],0,0,0),
+			Feld("Berichtsdatum","datetime","0","0",Tx[T_8302_Berichtsdatum],0,0,0),
 			Feld("Pat_id","int","10","","",1,0,1,string(),1),
 			Feld("Nachname","varchar","31","","3101",0,0,0),
 			Feld("Vorname","varchar","31","","3102",0,0,0),
@@ -830,10 +831,10 @@ void hhcl::prueflybakt(DB *My, const int obverb, const int oblog, const uchar di
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,1,string(),1),
 			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 			Feld("NBID","int","10","",Tx[T_Bezug_zu_laborynb],/*obind*/1,/*obauto*/0,/*nnull*/0),
-			Feld("Verf","varchar","41","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
-			Feld("KuQu","varchar","1","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
-			Feld("Quelle","varchar","1","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
-			Feld("QSpez","varchar","11","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
+			Feld("Verf","varchar","42","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
+			Feld("KuQu","varchar","6","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
+			Feld("Quelle","varchar","22","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
+			Feld("QSpez","varchar","29","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
 			Feld("AbnDat","datetime","0","0",Tx[T_8432_Abnahmedatum_Turbomed],0,0,1),
 //			Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
 			Feld("KommID","int","10","",Tx[T_Kommentar_Bezug_auf_lyhinw],1,0,0,"0",1),
@@ -841,7 +842,7 @@ void hhcl::prueflybakt(DB *My, const int obverb, const int oblog, const uchar di
 			Feld("ErklID","int","10","",Tx[T_Erklaerung_Bezug_auf_lyhinw],1,0,0,"0",1),
 //			Feld("AuftrHinw","LONGTEXT","","",Tx[T_8490_Auftragsbezogene_Hinweise_Turbomed],/*obind*/0,/*obauto*/0,/*nnull*/0),
 			Feld("HinwID","int","10","",Tx[T_Auftragshinweis_Bezug_auf_lyhinw],1,0,0,"0",1),
-			Feld("Keimzahl","varchar","1","","",0,0,1),
+			Feld("Keimzahl","varchar","16","","",0,0,1),
 			Feld("abrd","varchar","1","",Tx[T_8614_Abrechnung_durch_1_Labor_2_Einweiser],0,0,1),
 		};
 		Constraint csts[]{Constraint(tlyus+tlybakt,new Feld{Feld("UsID")},1,tlyus,new Feld{Feld("id")},1,cascade,cascade)};
@@ -865,9 +866,9 @@ void hhcl::prueflyleist(DB *My, const int obverb, const int oblog, const uchar d
 			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,string(),/*unsigned*/1),
 			Feld("Abkü","varchar","8","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
 			Feld("Verf","varchar","42","",Tx[T_8434],0,0,1),
-			Feld("EBM","varchar","11","",Tx[T_5001_GNR_Turbomed],0,0,1),
-			Feld("goä","varchar","11","",Tx[T_8406],0,0,1),
-			Feld("Anzahl","varchar","1","",Tx[T_5005],0,0,1),
+			Feld("EBM","varchar","6","",Tx[T_5001_GNR_Turbomed],0,0,1),
+			Feld("goä","varchar","4","",Tx[T_8406],0,0,1),
+			Feld("Anzahl","varchar","2","",Tx[T_5005],0,0,1),
 		};
 ////		Feld ifelder0[] = {Feld("UsID")};   Index i0("UsID",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 ////		Index indices[]={i0};
@@ -898,13 +899,13 @@ void hhcl::prueflywert(DB *My, const int obverb, const int oblog, const uchar di
 			Feld("NBID","int","10","",Tx[T_Bezug_zu_laborynb],/*obind*/1,/*obauto*/0,/*nnull*/0),
 			Feld("Abkü","varchar","8","",Tx[T_8410_maximale_Laenge_8],0,0,1),
 			Feld("Langtext","varchar","41","",Tx[T_8411_Testbezeichnung_Turbomed],0,0,1),
-			Feld("KuQu","varchar","11","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
-			Feld("Quelle","varchar","21","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
-			Feld("QSpez","varchar","161","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
+			Feld("KuQu","varchar","4","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
+			Feld("Quelle","varchar","22","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
+			Feld("QSpez","varchar","158","",Tx[T_8431_Probenmaterial_Spezifikation_Turbomed],0,0,1),
 			Feld("AbnDat","datetime","0","0",Tx[T_8432_Abnahmedatum_Turbomed],0,0,1),
-			Feld("Wert","varchar","11","0",Tx[T_8420_Ergebniswert_Turbomed],0,0,1),
+			Feld("Wert","varchar","8","0",Tx[T_8420_Ergebniswert_Turbomed],0,0,1),
 			Feld("Einheit","varchar","12","",Tx[T_8421_maximale_Laenge_12],0,0,1,"kA"),
-			Feld("Grenzwerti","varchar","1","",Tx[T_8422_Grenzwertindikator_Turbomed],0,0,1),
+			Feld("Grenzwerti","varchar","2","",Tx[T_8422_Grenzwertindikator_Turbomed],0,0,1),
 			//Feld("Kommentar","LONGTEXT","","",Tx[T_8480_Ergebnistest_Turbomed],0,0),
 			Feld("KommID","int","10","",Tx[T_Kommentar_Bezug_auf_lyhinw],1,0,0,"0",1),
 			Feld("Teststatus","varchar","1","",Tx[T_8418_Teststatus_Turbomed],0,0,1),
@@ -937,7 +938,7 @@ void hhcl::prueflyfehlt(DB *My, const int obverb, const int oblog, const uchar d
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,1,string(),1),
 			Feld("DatID","int","10","",Tx[T_eindeutige_Identifikation],1,0,0,string(),1),
 			Feld("Kennung","varchar","4","",Tx[T_Kennung],0,0,1),
-			Feld("Inhalt","varchar","1","",Tx[T_Inhalt],0,0,1),
+			Feld("Inhalt","varchar","3","",Tx[T_Inhalt],0,0,1),
 		};
 		Constraint csts[]{
 			Constraint(tlydat+tlyfehlt,new Feld{Feld("DatID")},1,tlydat,new Feld{Feld("DatID")},1,cascade,cascade)
@@ -1122,7 +1123,7 @@ void hhcl::virtpruefweiteres()
 		RS d8(My,"DROP TABLE IF EXISTS "+tlyplab,aktc,ZDB);
 		RS d10(My,"DROP TABLE IF EXISTS "+tlyfehlt,aktc,ZDB);
 		RS d9(My,"DROP TABLE IF EXISTS "+tlydat,aktc,ZDB);
-		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsilbe,1,1);
+		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsilbe+schwarz,1,1);
 	} else if (!loeschab.empty()) {
 		fLog(blaus+Tx[T_Loescheab]+gruen+loeschab+schwarz,1,0);
 		my_ulonglong zahl=0;
@@ -1176,11 +1177,10 @@ void hhcl::virtpruefweiteres()
 
 #endif
 			exit(0);
-
-		}
-		if (!loeschalle) {
-			prueflyhinw(My, obverb, oblog, /*direkt*/0);
-			prueflyplab(My, obverb, oblog, /*direkt*/0);
+	}
+	if (!loeschalle) {
+		prueflyhinw(My, obverb, oblog, /*direkt*/0);
+		prueflyplab(My, obverb, oblog, /*direkt*/0);
 		prueflyparameter(My, obverb, oblog, /*direkt*/0);
 		prueflypneu(My, obverb, oblog, /*direkt*/0);
 		prueflypnb(My, obverb, oblog, /*direkt*/0);
@@ -1200,7 +1200,7 @@ void hhcl::virtpruefweiteres()
 // wird aufgerufen in lauf
 void hhcl::virtzeigueberschrift()
 { //ω
-  // hier ggf. noch etwas an 'uebers' anhaengen //α
+	// hier ggf. noch etwas an 'uebers' anhaengen //α
 	uebers<<" (Laborimport) ";
 	hcl::virtzeigueberschrift();
 } // void hhcl::virtzeigueberschrift
