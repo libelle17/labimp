@@ -2555,7 +2555,7 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
 // ob das aktuelle Programm mehrfach laeuft; bei obstumm Exit-Code 0
 void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
 {
-	const long smax=3600; // maximal tolerierte Sekundenzahl, bevor statt dem eigenen Prozess der andere abgebrochen wird
+	const long smax{3600}; // maximal tolerierte Sekundenzahl, bevor statt dem eigenen Prozess der andere abgebrochen wird
 	svec rueck;
 	const string iwen=wen.empty()?base_name(meinpfad()):wen;
 	systemrueck("ps -eo comm,etimes,pid|grep -P '^"+iwen+"([[:space:]]|\\z)'",obverb,0,&rueck,/*obsudc=*/0);
@@ -2565,10 +2565,10 @@ void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
 			break;
 		if (aru<2) {
 			for(unsigned iru=0;iru<rueck.size();iru++) {
-				// z.B. 'autofax      18:02:48  2939'
+				// z.B. 'autofax      57  2939'
 				svec pvec;
 				aufSplit(&pvec,rueck[iru],' ',/*auchleer=*/0); 
-				if (pvec.size()>2 && pvec[2]!=ltoan(getpid())) {
+				if (pvec.size()>2 && pvec[2]!=ltoan(getpid())) { // und wenn nicht ich
 					sek=atol(pvec[1].c_str());
 					if (sek>smax) {    // wenn es mindestens eine Stunde laeuft
 						cout<<Txk[T_Program]<<blau<<iwen<<schwarz<<Txk[T_laueft_schon_einmal_aber]<<" "<<rot<<sek<<schwarz<<" s (> "<<blau<<smax<<schwarz<<" s), "<<Txk[T_wird_deshalb_abgebrochen]<<endl;
