@@ -200,5 +200,21 @@ void hhcl::nachbearbeit(const size_t aktc)
 "WHERE ISNULL(pat_id_laborneu) AND u.eingang>=date("+sqlft(My->DBS,&minnachdat)+");",aktc,ZDB,0,0,0,&zahl);
 	fLog(dblaus+Txt[T_Abfrage]+schwarz+"7, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
+RS view(My,"DROP VIEW IF EXISTS `labor2a`;"
+		"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`praxis`@`%` SQL SECURITY DEFINER VIEW `labor2a` AS "
+		"SELECT Pat_id, eingang Zeitpunkt,befart FertigStGrad, Abkü,w.abkü abk_ur,w.langtext Langtext, Wert,Einheit, Einheit Einheit_ur "
+		",concat(if(e.text rlike '^:[ /\\*:]*$','',if(e.text rlike '^:[ /\\*]*:',concat(mid(e.text,locate(':',e.text,2)+1),';'),if(e.text='.','',if(e.text='','',concat(e.text,';'))))),k.text) Kommentar "
+		",NB, nb NB_ur,uNg,uNg uNg_ur, "
+		"IF(abkü = 'LDL' AND einheit = 'mg/dl','100',oNg) oNg,"
+		"oNg oNg_ur, Labor,Pfad "
+		"FROM `"+tlyus+"` u "
+		"LEFT JOIN `"+tlywert+"` w on u.id=w.usid "
+		"LEFT JOIN `"+tlyhinw+"` e on w.erklid=e.id "
+		"LEFT JOIN `"+tlyhinw+"` k on w.kommid=k.id "
+		"LEFT JOIN `"+tlypnb+"` n on w.nbid=n.id "
+		"LEFT JOIN `"+tlysaetze+"` s on u.satzid=s.satzid "
+		"LEFT JOIN `"+tlydat+"` d on s.datid=d.datid "
+		"LEFT JOIN `"+tlyplab+"` l on s.labid=l.id;",aktc,ZDB);
+
 	ZDB=altZDB;
 } // void hhcl::nachbearbeit

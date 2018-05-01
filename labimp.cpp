@@ -405,6 +405,22 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Fehler beim Verschieben von: ","Error moving: "},
 	// T_nach_
 	{" nach: "," to: "},
+	// T_listdat_k
+	{"listdat","listfil"},
+	// T_listdat_l
+	{"listdateien","listfiles"},
+	// T_listet_alle_eingelesenen_Dateien_auf
+	{"listet alle eingelesenen Dateien auf","lists all processed files"},
+	// T_Pfad_
+	{"Pfad","Path"},
+	// T_Eingang
+	{"Eingang","Entry"},
+	// T_eingelesen
+	{"eingelesen","processed"},
+	// T_Zeichensatz
+	{"Zeichensatz","code page"},
+	// T_fertig_
+	{"fertig","finished"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -478,8 +494,8 @@ void hhcl::prueflyparameter(DB *My, const int obverb, const int oblog, const uch
 	const size_t aktc=0;
 	if (!direkt) {
 		Feld felder[] = {
-			Feld(/*name*/"Abkü",/*typ*/"varchar",/*lenge*/"31",/*prec*/"",/*comment*/Tx[T_8410_maximale_Laenge_8],/*obind*/0,/*obaut*/0,/*nnull*/1),
-			Feld("AbküN","varchar","1","",Tx[T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich],0,0,1),
+			Feld(/*name*/"Abkü",/*typ*/"varchar",/*lenge*/"42",/*prec*/"",/*comment*/Tx[T_8410_maximale_Laenge_8],/*obind*/0,/*obaut*/0,/*nnull*/1),
+			Feld("AbküN","varchar","8","",Tx[T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich],0,0,1),
 			Feld("LabID","int","10","",Tx[T_Bezug_auf_lyplab],0,0,1,string(),1),
 			Feld("Langtext","varchar","41","",Tx[T_8411_maximale_Laenge_40],0,0,1),
 			Feld("Einheit","varchar","12","",Tx[T_8421],0,0,1,"kA"),
@@ -577,10 +593,10 @@ void hhcl::prueflypneu(DB *My, const int obverb, const int oblog, const uchar di
 	if (!direkt) {
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
-			Feld("Abkü","varchar","31","",Tx[T_8410_maximale_Laenge_8],1,0,1),
-			Feld("AbküN","varchar","1","",Tx[T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich],0,0,1),
+			Feld("Abkü","varchar","42","",Tx[T_8410_maximale_Laenge_8],1,0,1),
+			Feld("AbküN","varchar","8","",Tx[T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich],0,0,1),
 			Feld("LabID","int","10","",Tx[T_Bezug_auf_lyplab],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa,NULL*/string(),/*unsig*/1),
-			Feld("Langtext","varchar","50","",Tx[T_8411_maximale_Laenge_40],0,0,1),
+			Feld("Langtext","varchar","41","",Tx[T_8411_maximale_Laenge_40],0,0,1),
 			Feld("Einheit","varchar","12","",Tx[T_8421_maximale_Laenge_12],0,0,1,"kA"),
 			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
 			Feld("Reihe","int","10","",Tx[T_Reihenfolge_innerhalb_der_Gruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
@@ -847,8 +863,8 @@ void hhcl::prueflyleist(DB *My, const int obverb, const int oblog, const uchar d
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],/*obind*/1,/*obauto*/0,0,string(),/*unsigned*/1),
-			Feld("Abkü","varchar","11","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
-			Feld("Verf","varchar","41","",Tx[T_8434],0,0,1),
+			Feld("Abkü","varchar","8","",Tx[T_8410_Test_Ident_Turbomed],0,0,1),
+			Feld("Verf","varchar","42","",Tx[T_8434],0,0,1),
 			Feld("EBM","varchar","11","",Tx[T_5001_GNR_Turbomed],0,0,1),
 			Feld("goä","varchar","11","",Tx[T_8406],0,0,1),
 			Feld("Anzahl","varchar","1","",Tx[T_5005],0,0,1),
@@ -880,7 +896,7 @@ void hhcl::prueflywert(DB *My, const int obverb, const int oblog, const uchar di
 			Feld("UsID","int","10","",Tx[T_Bezug_auf_LaborUS],1,0,0,string(),1),
 			Feld("BaktID","int","10","",Tx[T_Bezug_auf_LaborBakt],1,0,0,"0",1),
 			Feld("NBID","int","10","",Tx[T_Bezug_zu_laborynb],/*obind*/1,/*obauto*/0,/*nnull*/0),
-			Feld("Abkü","varchar","11","",Tx[T_8410_maximale_Laenge_8],0,0,1),
+			Feld("Abkü","varchar","8","",Tx[T_8410_maximale_Laenge_8],0,0,1),
 			Feld("Langtext","varchar","41","",Tx[T_8411_Testbezeichnung_Turbomed],0,0,1),
 			Feld("KuQu","varchar","11","",Tx[T_8428_Probenmaterial_Ident_Turbomed],0,0,1),
 			Feld("Quelle","varchar","21","",Tx[T_8430_Probenmaterial_Bezeichnung_Turbomed],0,0,1),
@@ -1035,6 +1051,8 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschab,/*art*/pdez,T_lab_k,T_lab_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Datensaetze_ab,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschab.empty());
+	opn<<new optcl(/*pname*/string(),/*pptr*/&listdat,/*art*/puchar,T_listdat_k,T_listdat_l,/*TxBp*/&Tx,/*Txi*/T_listet_alle_eingelesenen_Dateien_auf,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnach,/*art*/puchar,T_nurnach_k,T_nurnach_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	dhcl::virtinitopt(); //α
@@ -1133,10 +1151,36 @@ void hhcl::virtpruefweiteres()
 		fLog(blaus+Tx[T_Entleert_alle_Tabellen_und_faengt_von_vorne_an]+schwarz,1,1);
 	} else if (loeschunvollst||nurnach) {
 		RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE fertig<>1",aktc,ZDB);
-	}
-	if (!loeschalle) {
-		prueflyhinw(My, obverb, oblog, /*direkt*/0);
-		prueflyplab(My, obverb, oblog, /*direkt*/0);
+	} else if (listdat) {
+#ifdef sqlos
+		svec datr;
+		systemrueck("mysql -u"+muser+" -p"+mpwd+" "+dbq+" -e'select datid,pfad,geändert,größe,zp,codepage,!!fertig from `"+tlydat+"`'",obverb,oblog,&datr);
+		for(size_t i=0;i<datr.size();i++) {
+			caus<<datr[i]<<endl;
+		}
+#else
+		char*** cerg{0};
+		RS li(My,"SELECT datid,pfad,geändert,größe,zp,codepage,!!fertig FROM `"+tlydat+"`",aktc,ZDB);
+		if (!li.obfehl) {
+			size_t zru=0;
+			while (cerg=li.HolZeile(),cerg?*cerg:0) {
+				if (!zru++) {
+					cout<<violett<<Tx[T_listet_alle_eingelesenen_Dateien_auf]<<schwarz<<endl;
+					cout<<schwarz<<setw(7)<<"DATID"<<"|"<<setw(70)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T_Eingang]<<"|"<<setw(11)<<Tx[T_Groesse]<<"|"<<setw(19)<<Tx[T_eingelesen]<<"|"<<setw(4)<<Tx[T_Zeichensatz]<<"|"<<setw(3)<<Tx[T_fertig_]<<"|"<<schwarz<<endl;
+				} // 								if (!zru++)
+				cout<<blau<<setw(7)<<cjj(cerg,0)<<"|"<<violett<<setw(70)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"
+					<<schwarz<<setw(9)<<cjj(cerg,3)<<"|"<<blau<<setw(19)<<cjj(cerg,4)<<"|"<<violett<<setw(4)<<cjj(cerg,5)<<"|"
+					<<blau<<setw(3)<<cjj(cerg,6)<<"|"<<endl;
+			} // while (cerg=li.HolZeile(),cerg?*cerg:0) 
+		}
+
+#endif
+			exit(0);
+
+		}
+		if (!loeschalle) {
+			prueflyhinw(My, obverb, oblog, /*direkt*/0);
+			prueflyplab(My, obverb, oblog, /*direkt*/0);
 		prueflyparameter(My, obverb, oblog, /*direkt*/0);
 		prueflypneu(My, obverb, oblog, /*direkt*/0);
 		prueflypnb(My, obverb, oblog, /*direkt*/0);
@@ -1161,14 +1205,15 @@ void hhcl::virtzeigueberschrift()
 	hcl::virtzeigueberschrift();
 } // void hhcl::virtzeigueberschrift
 
-void BDTtoDate(string& inh,struct tm *tm)
+void BDTtoDate(string& inh,struct tm *tm,int abjahr=1900)
 {
 	memset(tm,0,sizeof *tm);
 //	const char* const mu[]{"%d%m%Y","%Y%m%d"};
 	const char* const mu[]{"%Y%m%d","%d%m%Y"};
 	for(auto const& aktmu:mu) {
 		strptime(inh.c_str(),aktmu,tm);
-		if (tm->tm_year && tm->tm_year<200 && tm->tm_mon<12 && tm->tm_mday && tm->tm_mday<32)
+		// nehmen wir mal an, das Programm wird nach 2040 nicht mehr gebraucht
+		if (tm->tm_year>=abjahr-1900 && tm->tm_year<140 && tm->tm_mon>=0 && tm->tm_mon<12 && tm->tm_mday>0 && tm->tm_mday<32)
 			break;
 	} // 	for(auto& aktmu:mu)
 } // void BDTtoDate
@@ -1507,7 +1552,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 					qspez+=inh;
 				}
 			} else if (cd=="8432") { // Abnahmedatum
-				BDTtoDate(inh,&abndat);
+				BDTtoDate(inh,&abndat,2000);
 			} else if (cd=="8433") {
 				strptime(inh.c_str(),"%H%M",&abndat);
 			} else if (cd=="8470") {
@@ -1534,10 +1579,10 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			} else if (cd=="8422") {
 				rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
-				BDTtoDate(inh,&eingtm);
+				BDTtoDate(inh,&eingtm,2000);
 				rus.hz("Eingang",&eingtm);
 			} else if (cd=="8302") {
-				BDTtoDate(inh,&berdat);
+				BDTtoDate(inh,&berdat,2000);
 			} else if (cd=="8303") {
 				strptime(inh.c_str(),"%H%M",&berdat);
 				rus.hz("Berichtsdatum",&berdat);
@@ -1566,7 +1611,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			} else if (cd=="3102") {
 				vname=inh;
 			} else if (cd=="3103") {
-				BDTtoDate(inh,&gebdat);
+				BDTtoDate(inh,&gebdat,1900);
 			} else if (cd=="3110") {
 				sgschl=(inh=="W"?"2":inh=="M"?"1":inh=="X"?"3":inh);
 			} else if (cd=="3104") {
@@ -1727,7 +1772,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				rsaetze.hz("Kundenarztnr",inh);
 			} else if (cd=="9103") {
 				tm erstd;
-				BDTtoDate(inh,&erstd);
+				BDTtoDate(inh,&erstd,2000);
 				rsaetze.hz("Erstellungsdatum",&erstd);
 			} else if (cd=="9202") {
 				rsaetze.hz("Gesamtlänge",inh);
@@ -1756,6 +1801,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 void hhcl::pvirtfuehraus()
 { //ω
 	const size_t aktc=0;
+	uchar obwelche=0;
 	if (!loeschalle && !loeschunvollst) {
 		if (!nurnach) {
 			pruefverz(fertigvz,obverb,oblog);
@@ -1782,6 +1828,7 @@ void hhcl::pvirtfuehraus()
 						// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
 						yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
 						if (!dverarbeit(*aktl,&datid)) {
+							obwelche=1;
 							if (rename(aktl->c_str(),(fertigvz+'/'+base_name(*aktl)).c_str())) {
 								fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+*aktl+rot+Tx[T_nach_]+blau+fertigvz+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
 							}
@@ -1791,7 +1838,7 @@ void hhcl::pvirtfuehraus()
 				}
 			}
 		}
-		nachbearbeit(aktc);
+		if (nurnach || obwelche) nachbearbeit(aktc);
 	} // 	if (!loeschalle)
 	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);
 } // void hhcl::pvirtfuehraus  //α

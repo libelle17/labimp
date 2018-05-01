@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "01.05.18" "Version 0.11075" "\fB²DPROG²\fR man page"
+.TH man 1 "01.05.18" "Version 0.11091" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -15,7 +15,7 @@
 .SH OPTIONS 
 .SH PRECONDITIONS
 .br
-\fRProgramm: \fB/home/schade/labimp/labimp\fR, V: \fB0.11075\fR (Laborimport) 
+\fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11088\fR (Laborimport) 
 .br
 \fBOptions which are not saved: \fR
 .br
@@ -26,6 +26,8 @@
 \fB -deleteall, --deleteall\fR: deletes all tables\fB or not\fR (\fB0\fR)
 .br
 \fB -delfrom, --deletefrom <string>\fR: deletes all data set beginning at ('\fB\fR')
+.br
+\fB -listfil, --listfiles\fR: lists all processed files\fB or not\fR (\fB0\fR)
 .br
 \fB -delincomp, --deleteincomplete\fR: deletes entries from incompletely read files\fB or not\fR (\fB0\fR)
 .br
@@ -45,7 +47,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa')\fB or not\fR (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/labimp\fR(finish with ':qa')\fB or not\fR (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/root/labimp\fR(finish with ':qa')\fB or not\fR (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here)\fB or not\fR (\fB0\fR)
 .br
@@ -55,9 +57,9 @@
 .br
 \fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
 .br
-\fB -lddir, --laboratoryfiledir <path>\fR: directory of the fax files ('\fB/home/schade/laboratory\fR')
+\fB -lddir, --laboratoryfiledir <path>\fR: directory of the fax files ('\fB/root/laboratory\fR')
 .br
-\fB -fddir, --processeddir <path>\fR: directory of the finished ('\fB/home/schade/laboratory/processed\fR')
+\fB -fddir, --processeddir <path>\fR: directory of the finished ('\fB/root/laboratory/processed\fR')
 .br
 \fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
 .br

@@ -193,6 +193,14 @@ enum T_
 	T_Verzeichnis_der_fertig_Verarbeiteten,
 	T_Fehler_beim_Verschieben_von,
 	T_nach_,
+	T_listdat_k,
+	T_listdat_l,
+	T_listet_alle_eingelesenen_Dateien_auf,
+	T_Pfad_,
+	T_Eingang,
+	T_eingelesen,
+	T_Zeichensatz,
+	T_fertig_,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -236,6 +244,7 @@ class hhcl:public dhcl
 		uchar loeschunvollst=0;
 		uchar nurnach=0;
 		string loeschab;
+		uchar listdat=0;
 		string ldatvz;   // Verzeichnis der Labordateien
 		string fertigvz; // Verzeichnis der fertig bearbeiteten
 	public: //α //ω
