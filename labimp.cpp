@@ -373,9 +373,9 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Pat_id fuer ","Pat_id for"},
 	// T_Zahl
 	{"Zahl: ","no: "},
-	// T_nurnach_k
-	{"nurnach","onlyafter"},
-	// T_nurnach_l
+	// T_nurnachb_k
+	{"nurnachb","onlyafterw"},
+	// T_nurnachb_l
 	{"nurnachbearbeitung","onlyafterwork"},
 	// T_nur_Nachbearbeitung
 	{"nur Nachbearbeitung","only afterwork"},
@@ -431,6 +431,24 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Zahl der aufzulistenden Datensaetze = <zahl> statt","No. of listed entries = <no> instead of"},
 	// T_Normbereich_ohne_bis
 	{"Normbereich ohne '-': ","normal range without '-': "},
+	//T_Soll_ich_wirklich_alle_Tabellen_mit
+	{"Soll ich wirklich alle Tabellen mit ","Shall I in fact delete all tables with "},
+	//T_Soll_ich_wirklich_alle_Tabellen_mit_
+	{"Soll ich wirklich alle Tabellen mit ","Shall I in fact truncate all tables with "},
+	//T_Soll_ich_wirklich_alle_Tabellen_mit__
+	{"Soll ich wirklich alle Tabellen mit ","Shall I in fact delete in all tables with "},
+	// T_loeschen_und_von_vorne_anfangen
+	{" loeschen und von vorne anfangen?"," and start from scratch?"},
+	// T_Aktion_abgebrochen
+	{"Aktion abgebrochen","action stopped"},
+	// T_loeschen
+	{" loeschen?","?"},
+	// T_ab_DATID
+	{" ab DATID "," from DATID "},
+	// T_entleeren_und_von_vorne_anfangen
+	{" entleeren und von vorne anfangen? "," and start from scratch?"},
+	// T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden
+	{" um Datensaetze aus nicht fertig eingelesenen Dateien bereinigt werden?"," all data sets from incompletely read files?"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1065,7 +1083,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&listdat,/*art*/puchar,T_listdat_k,T_listdat_l,/*TxBp*/&Tx,/*Txi*/T_listet_alle_eingelesenen_Dateien_auf,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnach,/*art*/puchar,T_nurnach_k,T_nurnach_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/"",/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
@@ -1119,6 +1137,10 @@ void hhcl::virtpruefweiteres()
 	initDB();
 	const size_t aktc=0;
 	if (vonvorne||loeschalle) {
+		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit]+blau+vorsil+rot+(vonvorne?Tx[T_loeschen_und_von_vorne_anfangen]:Tx[T_loeschen])+schwarz,"n")) {
+			fLog(Tx[T_Aktion_abgebrochen],1,1);
+			exit(0);
+		}
 		RS d13(My,"DROP TABLE IF EXISTS "+tlyhinw,aktc,ZDB);
 		RS d0(My,"DROP TABLE IF EXISTS "+tlypgl,aktc,ZDB);
 		RS d1(My,"DROP TABLE IF EXISTS "+tlywert,aktc,ZDB);
@@ -1136,6 +1158,10 @@ void hhcl::virtpruefweiteres()
 		RS d9(My,"DROP TABLE IF EXISTS "+tlydat,aktc,ZDB);
 		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsilbe+schwarz,1,1);
 	} else if (!loeschab.empty()) {
+		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit]+blau+vorsil+rot+Tx[T_ab_DATID]+blau+loeschab+rot+Tx[T_loeschen]+schwarz,"n")) {
+			fLog(Tx[T_Aktion_abgebrochen],1,1);
+			exit(0);
+		}
 		fLog(blaus+Tx[T_Loescheab]+gruen+loeschab+schwarz,1,0);
 		my_ulonglong zahl=0;
 		ZDB=1;
@@ -1143,6 +1169,10 @@ void hhcl::virtpruefweiteres()
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		exit(0);
 	} else if (entleer) {
+		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit_]+blau+vorsil+rot+Tx[T_entleeren_und_von_vorne_anfangen]+schwarz,"n")) {
+			fLog(Tx[T_Aktion_abgebrochen],1,1);
+			exit(0);
+		}
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
 		RS d13(My,"TRUNCATE "+tlyhinw,aktc,ZDB);
 		RS d0(My,"TRUNCATE "+tlypgl,aktc,ZDB);
@@ -1161,7 +1191,13 @@ void hhcl::virtpruefweiteres()
 		RS d9(My,"TRUNCATE "+tlydat,aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleert_alle_Tabellen_und_faengt_von_vorne_an]+schwarz,1,1);
-	} else if (loeschunvollst||nurnach) {
+	} else if (loeschunvollst||nurnachb) {
+		if (loeschunvollst) {
+			if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit__]+blau+vorsil+rot+Tx[T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden]+schwarz,"n")) {
+				fLog(Tx[T_Aktion_abgebrochen],1,1);
+				exit(0);
+			}
+		}
 		RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE fertig<>1",aktc,ZDB);
 	} else if (listdat) {
 #ifdef sqlos
@@ -1820,7 +1856,7 @@ void hhcl::pvirtfuehraus()
 	const size_t aktc{0};
 	unsigned long verarbeitet{0};
 	if (!loeschalle && !loeschunvollst) {
-		if (!nurnach) {
+		if (!nurnachb) {
 			pruefverz(fertigvz,obverb,oblog);
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 			systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
@@ -1858,7 +1894,7 @@ void hhcl::pvirtfuehraus()
 				}
 			}
 		}
-		if (nurnach || verarbeitet) nachbearbeit(aktc);
+		if (nurnachb || verarbeitet) nachbearbeit(aktc);
 	} // 	if (!loeschalle)
 	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);
 } // void hhcl::pvirtfuehraus  //α

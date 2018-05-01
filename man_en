@@ -31,7 +31,7 @@
 .br
 \fB -delincomp, --deleteincomplete\fR: deletes entries from incompletely read files\fB or not\fR (\fB0\fR)
 .br
-\fB -onlyafter, --onlyafterwork\fR: only afterwork\fB or not\fR (\fB0\fR)
+\fB -onlyafterw, --onlyafterwork\fR: only afterwork\fB or not\fR (\fB0\fR)
 .br
 \fB -n, --reccount <zahl>\fR: No. of listed entries = <no> instead of (\fB0\fR)
 .br

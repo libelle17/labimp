@@ -31,7 +31,7 @@
 .br
 \fB -loeunv, --loeschunvollstaendige\fR: loescht Datensaetze aus unvollstaendig eingelesenen Dateien\fB oder nicht\fR (\fB0\fR)
 .br
-\fB -nurnach, --nurnachbearbeitung\fR: nur Nachbearbeitung\fB oder nicht\fR (\fB0\fR)
+\fB -nurnachb, --nurnachbearbeitung\fR: nur Nachbearbeitung\fB oder nicht\fR (\fB0\fR)
 .br
 \fB -n, --dszahl <zahl>\fR: Zahl der aufzulistenden Datensaetze = <zahl> statt (\fB0\fR)
 .br
