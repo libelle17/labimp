@@ -223,6 +223,7 @@ enum T_
 	T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden,
 	T_Nachbearbeitung_von_vorne,
 	T_Soll_ich_wirklich_alle_Nachbearbeitungen_von_vorne_angefangen_werden,
+	T_Eintraege_aus,
 	T_MAX //α
 }; // enum T_ //ω
 //α
