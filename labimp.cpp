@@ -377,6 +377,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"nurnachb","onlyafterw"},
 	// T_nurnachb_l
 	{"nurnachbearbeitung","onlyafterwork"},
+	// T_nachbneu_k
+	{"nachbneu","afterwnew"},
+	// T_nachbneu_l
+	{"nachbearbeitungneu","afterworknew"},
 	// T_nur_Nachbearbeitung
 	{"nur Nachbearbeitung","only afterwork"},
 	// T_fertig
@@ -449,6 +453,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{" entleeren und von vorne anfangen? "," and start from scratch?"},
 	// T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden
 	{" um Datensaetze aus nicht fertig eingelesenen Dateien bereinigt werden?"," all data sets from incompletely read files?"},
+	// T_Nachbearbeitung_von_vorne
+	{"Nachbearbeitung von vorne","afterwork new"},
+	// T_Soll_ich_wirklich_alle_Nachbearbeitungen_von_vorne_angefangen_werden
+	{"Sollen wirklich alle Nachbearbeitungen von vorne angefangen werden?","Shall all after work really be done from scratch?"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1084,6 +1092,7 @@ void hhcl::virtinitopt()
 
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&nachbneu,/*art*/puchar,T_nachbneu_k,T_nachbneu_l,/*TxBp*/&Tx,/*Txi*/T_Nachbearbeitung_von_vorne,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/"",/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
@@ -1191,14 +1200,26 @@ void hhcl::virtpruefweiteres()
 		RS d9(My,"TRUNCATE "+tlydat,aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleert_alle_Tabellen_und_faengt_von_vorne_an]+schwarz,1,1);
-	} else if (loeschunvollst||nurnachb) {
-		if (loeschunvollst) {
+	} else if (loeschunvollst||nurnachb||nachbneu) {
+		if (nachbneu) {
+			if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Nachbearbeitungen_von_vorne_angefangen_werden]+schwarz,"n")) {
+				fLog(Tx[T_Aktion_abgebrochen],1,1);
+				exit(0);
+			}
+		}
+		if (loeschunvollst||nachbneu) {
 			if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit__]+blau+vorsil+rot+Tx[T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden]+schwarz,"n")) {
 				fLog(Tx[T_Aktion_abgebrochen],1,1);
 				exit(0);
 			}
 		}
+		const uchar altZDB{ZDB};
+		ZDB=1;
 		RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE fertig<>1",aktc,ZDB);
+		if (nachbneu) {
+			RS nachloesch(My,"UPDATE `"+tlyus+"` SET pat_id_laborneu=null",aktc,ZDB);
+		}
+		ZDB=altZDB;
 	} else if (listdat) {
 #ifdef sqlos
 		svec datr;
@@ -1856,7 +1877,7 @@ void hhcl::pvirtfuehraus()
 	const size_t aktc{0};
 	unsigned long verarbeitet{0};
 	if (!loeschalle && !loeschunvollst) {
-		if (!nurnachb) {
+		if (!nurnachb && !nachbneu) {
 			pruefverz(fertigvz,obverb,oblog);
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 			systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
@@ -1894,7 +1915,7 @@ void hhcl::pvirtfuehraus()
 				}
 			}
 		}
-		if (nurnachb || verarbeitet) nachbearbeit(aktc);
+		if (nurnachb || nachbneu|| verarbeitet) nachbearbeit(aktc);
 	} // 	if (!loeschalle)
 	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);
 } // void hhcl::pvirtfuehraus  //α

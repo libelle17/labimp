@@ -178,6 +178,8 @@ enum T_
 	T_Zahl,
 	T_nurnachb_k,
 	T_nurnachb_l,
+	T_nachbneu_k,
+	T_nachbneu_l,
 	T_nur_Nachbearbeitung,
 	T_fertig,
 	T_Dateien_gefunden,
@@ -214,6 +216,8 @@ enum T_
 	T_ab_DATID,
 	T_entleeren_und_von_vorne_anfangen,
 	T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden,
+	T_Nachbearbeitung_von_vorne,
+	T_Soll_ich_wirklich_alle_Nachbearbeitungen_von_vorne_angefangen_werden,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -260,6 +264,7 @@ class hhcl:public dhcl
 		uchar loeschalle=0;
 		uchar loeschunvollst=0;
 		uchar nurnachb=0;
+		uchar nachbneu=0;
 		string loeschab;
 		uchar listdat=0;
 		string ldatvz;   // Verzeichnis der Labordateien

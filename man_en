@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "02.05.18" "Version 0.11094" "\fB²DPROG²\fR man page"
+.TH man 1 "02.05.18" "Version 0.11096" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -32,6 +32,8 @@
 \fB -delincomp, --deleteincomplete\fR: deletes entries from incompletely read files\fB or not\fR (\fB0\fR)
 .br
 \fB -onlyafterw, --onlyafterwork\fR: only afterwork\fB or not\fR (\fB0\fR)
+.br
+\fB -afterwnew, --afterworknew\fR: afterwork new\fB or not\fR (\fB0\fR)
 .br
 \fB -n, --reccount <zahl>\fR: No. of listed entries = <no> instead of (\fB0\fR)
 .br
