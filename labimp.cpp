@@ -389,12 +389,20 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Dateien gefunden: ","Files found: "},
 	// 	T_lab_k,
 	{"loeab","delfrom"},
-//		T_lab_l,
+	//	T_lab_l,
 	{"loescheab","deletefrom"},
 	// T_loescht_alle_Datensaetze_ab
-	{"loescht alle Datensaetze ab","deletes all data set beginning at"},
+	{"loescht alle Datensaetze ab","deletes all data sets beginning at"},
 	// T_Loescheab
-	{"Loesche ab " vorsilbe"dat ID: ","Deleting from " vorsilbe"dat id: "},
+	{"Loesche ab " vorsilbe"dat ID: ","Deleting from " vorsilbe"dat ID: "},
+	// T_lid_k,
+	{"loeid","delid"},
+	// T_lid_l,
+	{"loeschid","deleteid"},
+	// T_loescht_Datensatz_id,
+	{"loescht Datensatz mit DATID ","deletes data set with DATID "},
+	// T_Loescheid,
+	{"Loesche " vorsilbe"dat ID: ","Deleting " vorsilbe"dat ID: "},
 	// T_Datensaetze_geloescht
 	{"Datensaetze geloescht","entries deleted"},
 	// T_fertig_mit_datid
@@ -449,6 +457,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{" loeschen?","?"},
 	// T_ab_DATID
 	{" ab DATID "," from DATID "},
+	// T_mit_DATID
+	{" mit DATID "," with DATID "},
 	// T_entleeren_und_von_vorne_anfangen
 	{" entleeren und von vorne anfangen? "," and start from scratch?"},
 	// T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden
@@ -1088,6 +1098,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschab,/*art*/pdez,T_lab_k,T_lab_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Datensaetze_ab,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschab.empty());
+	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschid,/*art*/pdez,T_lid_k,T_lid_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensatz_id,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschid.empty());
 	opn<<new optcl(/*pname*/string(),/*pptr*/&listdat,/*art*/puchar,T_listdat_k,T_listdat_l,/*TxBp*/&Tx,/*Txi*/T_listet_alle_eingelesenen_Dateien_auf,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -1175,6 +1186,17 @@ void hhcl::virtpruefweiteres()
 		my_ulonglong zahl=0;
 		ZDB=1;
 		RS loe(My,"DELETE FROM `"+tlydat+"` WHERE datid>='"+loeschab+"'",aktc,ZDB,0,0,0,&zahl);
+		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
+		exit(0);
+	} else if (!loeschid.empty()) {
+		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit]+blau+vorsil+rot+Tx[T_mit_DATID]+blau+loeschid+rot+Tx[T_loeschen]+schwarz,"n")) {
+			fLog(Tx[T_Aktion_abgebrochen],1,1);
+			exit(0);
+		}
+		fLog(blaus+Tx[T_Loescheid]+gruen+loeschid+schwarz,1,0);
+		my_ulonglong zahl=0;
+		ZDB=1;
+		RS loe(My,"DELETE FROM `"+tlydat+"` WHERE datid='"+loeschid+"'",aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		exit(0);
 	} else if (entleer) {

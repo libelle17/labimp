@@ -187,6 +187,10 @@ enum T_
 	T_lab_l,
 	T_loescht_alle_Datensaetze_ab,
 	T_Loescheab,
+	T_lid_k,
+	T_lid_l,
+	T_loescht_Datensatz_id,
+	T_Loescheid,
 	T_Datensaetze_geloescht,
 	T_fertig_mit_datid,
 	T_Fehler_bei_sql,
@@ -214,6 +218,7 @@ enum T_
 	T_Aktion_abgebrochen,
 	T_loeschen,
 	T_ab_DATID,
+	T_mit_DATID,
 	T_entleeren_und_von_vorne_anfangen,
 	T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden,
 	T_Nachbearbeitung_von_vorne,
@@ -266,6 +271,7 @@ class hhcl:public dhcl
 		uchar nurnachb=0;
 		uchar nachbneu=0;
 		string loeschab;
+		string loeschid;
 		uchar listdat=0;
 		string ldatvz;   // Verzeichnis der Labordateien
 		string fertigvz; // Verzeichnis der fertig bearbeiteten
