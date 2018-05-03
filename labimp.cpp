@@ -1157,7 +1157,7 @@ void hhcl::pvirtvorrueckfragen()
 			caus<<datr[i]<<endl;
 		}
 #else
-		initDB();
+		if (!My) initDB();
 		char*** cerg{0};
 		RS li(My,"SELECT d.datid,pfad,geändert,größe,zp,codepage,!!fertig,(SELECT count(0) from `"+tlysaetze+"` WHERE datid=d.datid),(SELECT COUNT(0) FROM `"+tlyus+"` WHERE datid=d.datid),SUM((SELECT COUNT(0) FROM `"+tlywert+"` WHERE usid=u.id)),SUM((SELECT COUNT(0) FROM `"+tlybakt+"` WHERE usid=u.id)) FROM `"+tlydat+"` d LEFT JOIN `"+tlyus+"` u ON d.datid = u.datid GROUP BY d.datid",aktc,ZDB);
 		if (!li.obfehl) {
@@ -1169,7 +1169,7 @@ cout<<schwarz<<setw(6)<<"DATID"<<"|"<<setw(60)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T
 				} // 								if (!zru++)
 				cout<<blau<<setw(6)<<cjj(cerg,0)<<"|"<<violett<<setw(60)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"
 					<<schwarz<<setw(9)<<cjj(cerg,3)<<"|"<<blau<<setw(19)<<cjj(cerg,4)<<"|"<<violett<<setw(2)<<cjj(cerg,5)<<"|"
-					<<blau<<setw(1)<<cjj(cerg,6)<<"|"<<setw(4)<<cjj(cerg,7)<<"|"<<setw(4)<<cjj(cerg,8)<<"|"<<setw(5)<<cjj(cerg,9)<<"|"<<setw(4)<<cjj(cerg,10)<<endl;
+					<<blau<<setw(1)<<cjj(cerg,6)<<"|"<<setw(4)<<cjj(cerg,7)<<"|"<<setw(4)<<cjj(cerg,8)<<"|"<<setw(5)<<cjj(cerg,9)<<"|"<<setw(4)<<cjj(cerg,10)<<schwarz<<endl;
 			} // while (cerg=li.HolZeile(),cerg?*cerg:0) 
 		}
 
@@ -1193,13 +1193,14 @@ void hhcl::virtrueckfragen()
 // wird aufgerufen in lauf
 void hhcl::virtpruefweiteres()
 { //ω
-	const size_t aktc=0;
-	initDB();
+	const size_t aktc{0};
+	my_ulonglong zahl{0};
 	if (vonvorne||loeschalle) {
 		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit]+blau+vorsil+rot+(vonvorne?Tx[T_loeschen_und_von_vorne_anfangen]:Tx[T_loeschen])+schwarz,"n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
 			exit(0);
 		}
+		if (!My) initDB();
 		RS d13(My,"DROP TABLE IF EXISTS "+tlyhinw,aktc,ZDB);
 		RS d0(My,"DROP TABLE IF EXISTS "+tlypgl,aktc,ZDB);
 		RS d1(My,"DROP TABLE IF EXISTS "+tlywert,aktc,ZDB);
@@ -1217,6 +1218,7 @@ void hhcl::virtpruefweiteres()
 		RS d9(My,"DROP TABLE IF EXISTS "+tlydat,aktc,ZDB);
 		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsilbe+schwarz,1,1);
 	} else if (!loeschab.empty() || !loeschid.empty()) {
+		if (!My) initDB();
     my_ulonglong szahl{0},uzahl{0};
     RS satzzahl(My,"SELECT datid FROM `"+tlysaetze+"` WHERE datid='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&szahl);
     RS uszahl(My,"SELECT datid FROM `"+tlyus+"` WHERE datid='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&uzahl);
@@ -1227,7 +1229,6 @@ void hhcl::virtpruefweiteres()
 			exit(0);
 		}
 		fLog(blaus+Tx[(loeschab.empty()?T_Loescheid:T_Loescheab)]+gruen+(loeschab.empty()?loeschid:loeschab)+schwarz,1,0);
-		my_ulonglong zahl=0;
 		ZDB=1;
 		RS loe(My,"DELETE FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
@@ -1237,6 +1238,7 @@ void hhcl::virtpruefweiteres()
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
 			exit(0);
 		}
+		if (!My) initDB();
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
 		RS d13(My,"TRUNCATE "+tlyhinw,aktc,ZDB);
 		RS d0(My,"TRUNCATE "+tlypgl,aktc,ZDB);
@@ -1270,28 +1272,14 @@ void hhcl::virtpruefweiteres()
 		}
 		const uchar altZDB{ZDB};
 		ZDB=1;
-		RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE fertig<>1",aktc,ZDB);
+		if (!My) initDB();
+		RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE fertig<>1",aktc,ZDB,0,0,0,&zahl);
+		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (nachbneu) {
 			RS nachloesch(My,"UPDATE `"+tlyus+"` SET pat_id_laborneu=null",aktc,ZDB);
 		}
 		ZDB=altZDB;
-	}
-	if (!loeschalle) {
-		prueflyhinw(My, obverb, oblog, /*direkt*/0);
-		prueflyplab(My, obverb, oblog, /*direkt*/0);
-		prueflyparameter(My, obverb, oblog, /*direkt*/0);
-		prueflypneu(My, obverb, oblog, /*direkt*/0);
-		prueflypnb(My, obverb, oblog, /*direkt*/0);
-		prueflydat(My, obverb, oblog, /*direkt*/0);
-		prueflyfehlt(My, obverb, oblog, /*direkt*/0);
-		prueflyaerzte(My, obverb, oblog, /*direkt*/0);
-		prueflysaetze(My, obverb, oblog, /*direkt*/0);
-		prueflyus(My, obverb, oblog, /*direkt*/0);
-		prueflybakt(My, obverb, oblog, /*direkt*/0);
-		prueflyleist(My, obverb, oblog, /*direkt*/0);
-		prueflywert(My, obverb, oblog, /*direkt*/0);
-		prueflypgl(My, obverb, oblog, /*direkt*/0);
-	}
+	} // if (vonvorne||loeschalle) else if ..  else if (loeschunvollst||nurnachb||nachbneu)
 	hcl::virtpruefweiteres(); // z.Zt. leer //α
 } // void hhcl::virtpruefweiteres
 
@@ -1915,36 +1903,51 @@ void hhcl::pvirtfuehraus()
 			systemrueck("find "+ldatvz+" -maxdepth 1 -type f \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 			//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);
-			if (1) {
-				for(size_t i=0;i<lrue.size();i++) {
-          string *aktl{&lrue[i]};
-					//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
-					/*//
+			for(size_t i=0;i<lrue.size();i++) {
+				if (!i) {
+					if (!My) initDB();
+					prueflyhinw(My, obverb, oblog, /*direkt*/0);
+					prueflyplab(My, obverb, oblog, /*direkt*/0);
+					prueflyparameter(My, obverb, oblog, /*direkt*/0);
+					prueflypneu(My, obverb, oblog, /*direkt*/0);
+					prueflypnb(My, obverb, oblog, /*direkt*/0);
+					prueflydat(My, obverb, oblog, /*direkt*/0);
+					prueflyfehlt(My, obverb, oblog, /*direkt*/0);
+					prueflyaerzte(My, obverb, oblog, /*direkt*/0);
+					prueflysaetze(My, obverb, oblog, /*direkt*/0);
+					prueflyus(My, obverb, oblog, /*direkt*/0);
+					prueflybakt(My, obverb, oblog, /*direkt*/0);
+					prueflyleist(My, obverb, oblog, /*direkt*/0);
+					prueflywert(My, obverb, oblog, /*direkt*/0);
+					prueflypgl(My, obverb, oblog, /*direkt*/0);
+				}
+				string *aktl{&lrue[i]};
+				//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
+				/*//
 					struct stat pfst{0};
 					if (!lstat(aktl->c_str(),&pfst)) {
-						pthread_mutex_lock(&timemutex);
-						memcpy(&minnachdat,localtime(&pfst.st_mtime),sizeof minnachdat);
-						pthread_mutex_unlock(&timemutex);
+					pthread_mutex_lock(&timemutex);
+					memcpy(&minnachdat,localtime(&pfst.st_mtime),sizeof minnachdat);
+					pthread_mutex_unlock(&timemutex);
 					}
-					*/
-					RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
-					char ***cerg{0};
-					RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))+" AND pfad = "+sqlft(My->DBS,*aktl),aktc,ZDB);
-					if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
-						// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
-						yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
-						if (!dverarbeit(*aktl,&datid)) {
-							verarbeitet++;
-							if (rename(aktl->c_str(),(fertigvz+'/'+base_name(*aktl)).c_str())) {
-								fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+*aktl+rot+Tx[T_nach_]+blau+fertigvz+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
-							}
+				 */
+				RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
+				char ***cerg{0};
+				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))+" AND pfad = "+sqlft(My->DBS,*aktl),aktc,ZDB);
+				if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
+					// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
+					yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
+					if (!dverarbeit(*aktl,&datid)) {
+						verarbeitet++;
+						if (rename(aktl->c_str(),(fertigvz+'/'+base_name(*aktl)).c_str())) {
+							fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+*aktl+rot+Tx[T_nach_]+blau+fertigvz+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
 						}
-						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
-						if (dszahl && verarbeitet==dszahl) break;
 					}
-				}
-			}
-		}
+					yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
+					if (dszahl && verarbeitet==dszahl) break;
+				} // 				if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1)
+			} // 			for(size_t i=0;i<lrue.size();i++)
+		} // 		if (!nurnachb && !nachbneu)
 		if (nurnachb || nachbneu|| verarbeitet) nachbearbeit(aktc);
 	} // 	if (!loeschalle)
 	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);

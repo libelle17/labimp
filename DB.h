@@ -542,9 +542,9 @@ class dhcl:public hcl
 		string host;  // fuer MySQL/MariaDB
 		string dbq; // Datenbank
  public:
-	 uchar ZDB=0; // fuer Zusatz-Debugging (SQL): ZDB 1, sonst: 0
-	 DB* My=0;
-	const size_t maxconz=12;//aktc: 0=... //α
+	 uchar ZDB{0}; // fuer Zusatz-Debugging (SQL): ZDB 1, sonst: 0
+	 DB* My{0};
+	const size_t maxconz{12};//aktc: 0=... //α
  private:
  protected:
 	void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
