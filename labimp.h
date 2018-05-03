@@ -224,6 +224,10 @@ enum T_
 	T_Nachbearbeitung_von_vorne,
 	T_Soll_ich_wirklich_alle_Nachbearbeitungen_von_vorne_angefangen_werden,
 	T_Eintraege_aus,
+	T_saetze,
+	T_unters,
+	T_werte,
+	T_bakt,
 	T_MAX //α
 }; // enum T_ //ω
 //α

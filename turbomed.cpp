@@ -90,7 +90,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"usi.id, usi.pat_id, gesname(usi.pat_id) name, eingang, befart "
 				"FROM `"+tlyus+"` usi LEFT JOIN `"+tlywert+"` w ON w.usid=usi.id \n"
 				"GROUP BY pat_id,eingang,befart\n"
-				") x ON u.pat_id=x.pat_id AND u.eingang=x.eingang AND u.befart=x.befart LEFT JOIN (\n"
+				") x ON us.pat_id=x.pat_id AND us.eingang=x.eingang AND us.befart=x.befart LEFT JOIN (\n"
 				"SELECT GROUP_concat(concat(abkü,REPLACE(REPLACE(REPLACE(REPLACE(wert,'.',''),'<',''),':',''),'-','')) order BY abkü,wert) werte, "
 				"pat_id, DATE(zeitpunkt) zp, fertigstgrad "
 				"FROM laborneu\n"
@@ -98,16 +98,16 @@ void hhcl::nachbearbeit(const size_t aktc)
 				") y ON x.werte=y.werte AND x.eingang =y.zp AND x.pat_id=y.pat_id AND x.befart=y.fertigstgrad "
 				"WHERE NOT ISNULL(y.pat_id) "
 				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zp, u.verglichen=now() "
-				"WHERE ISNULL(pat_id_laborneu) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
+				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"1, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 		RS v2(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
-				"SELECT u.id,u.pat_id,u.eingang zp FROM `"+tlyus+"` u INNER JOIN (\n"
+				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
 				"SELECT GROUP_concat(concat(w.abkü,REPLACE(REPLACE(REPLACE(REPLACE(w.wert,'.',''),'<',''),':',''),'-','')) order BY w.abkü,w.wert) werte, "
-				"u.id, u.pat_id"/*, gesname(u.pat_id) name*/", eingang, befart "
-				"FROM `"+tlyus+"` u LEFT JOIN `"+tlywert+"` w ON w.usid=u.id AND w.wert REGEXP '^-?[0-9.,]+$' \n"
+				"us.id, us.pat_id"/*, gesname(us.pat_id) name*/", eingang, befart "
+				"FROM `"+tlyus+"` u LEFT JOIN `"+tlywert+"` w ON w.usid=us.id AND w.wert REGEXP '^-?[0-9.,]+$' \n"
 				"GROUP BY pat_id,eingang,befart\n"
-				") x ON u.pat_id=x.pat_id AND u.eingang=x.eingang AND u.befart=x.befart LEFT JOIN (\n"
+				") x ON uns.pat_id=x.pat_id AND us.eingang=x.eingang AND us.befart=x.befart LEFT JOIN (\n"
 				"SELECT pat_id, DATE(zeitpunkt) zp, fertigstgrad, "
 				"GROUP_concat(concat(abkü,REPLACE(REPLACE(REPLACE(REPLACE(wert,'.',''),'<',''),':',''),'-','')) order BY abkü,wert) werte "
 				"FROM laborneu WHERE wert REGEXP '^-?[0-9.,]+$' \n"
@@ -115,16 +115,16 @@ void hhcl::nachbearbeit(const size_t aktc)
 				") y ON x.werte=y.werte AND x.eingang =y.zp AND x.pat_id=y.pat_id AND x.befart=y.fertigstgrad "
 				"WHERE NOT ISNULL(y.pat_id) "
 				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zp, u.verglichen=now() "
-				"WHERE ISNULL(pat_id_laborneu) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
+				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"2, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 		RS v3(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
-				"SELECT u.id,u.pat_id,u.eingang zp FROM `"+tlyus+"` u INNER JOIN (\n"
+				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
 				"SELECT GROUP_concat(concat(w.abkü,REPLACE(REPLACE(REPLACE(REPLACE(w.wert,'.',''),'<',''),':',''),'-','')) order BY w.abkü,w.wert) werte, "
-				"u.id, u.pat_id, gesname(u.pat_id) name, eingang, befart "
-				"FROM `"+tlyus+"` u LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` union SELECT usid,verf,'' FROM `"+tlybakt+"`) w ON w.usid=u.id AND w.wert = '' \n"
+				"us.id, us.pat_id, gesname(us.pat_id) name, eingang, befart "
+				"FROM `"+tlyus+"` u LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` union SELECT usid,verf,'' FROM `"+tlybakt+"`) w ON w.usid=us.id AND w.wert = '' \n"
 				"GROUP BY pat_id,eingang,befart\n"
-				") x ON u.pat_id=x.pat_id AND u.eingang=x.eingang AND u.befart=x.befart LEFT JOIN (\n"
+				") x ON us.pat_id=x.pat_id AND us.eingang=x.eingang AND us.befart=x.befart LEFT JOIN (\n"
 				"SELECT pat_id, DATE(zeitpunkt) zp, fertigstgrad, "
 				"GROUP_concat(concat(abkü,REPLACE(REPLACE(REPLACE(REPLACE(wert,'.',''),'<',''),':',''),'-','')) order BY abkü,wert) werte "
 				"FROM laborneu WHERE wert ='' \n"
@@ -132,17 +132,17 @@ void hhcl::nachbearbeit(const size_t aktc)
 				") y ON x.werte=y.werte AND x.eingang =y.zp AND x.pat_id=y.pat_id AND x.befart=y.fertigstgrad "
 				"WHERE NOT ISNULL(y.pat_id) "
 				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zp, u.verglichen=now() "
-				"WHERE ISNULL(pat_id_laborneu) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
+				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"3, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 		RS v4(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
-				"SELECT u.id,u.pat_id,u.eingang zp FROM `"+tlyus+"` u INNER JOIN (\n"
+				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
 				"SELECT GROUP_concat(w.abkü order BY w.abkü) werte, "
-				"u.id, u.pat_id, gesname(u.pat_id) name, eingang, befart "
+				"us.id, us.pat_id, gesname(us.pat_id) name, eingang, befart "
 				"FROM `"+tlyus+"` u LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` union SELECT usid,verf,'' FROM `"+tlybakt+"`) w "
-				"ON w.usid=u.id AND (w.wert = '' OR w.wert regexp '[0-9.,:<>]') \n"
+				"ON w.usid=us.id AND (w.wert = '' OR w.wert regexp '[0-9.,:<>]') \n"
 				"GROUP BY pat_id,eingang,befart\n"
-				") x ON u.pat_id=x.pat_id AND u.eingang=x.eingang AND u.befart=x.befart LEFT JOIN (\n"
+				") x ON us.pat_id=x.pat_id AND us.eingang=x.eingang AND us.befart=x.befart LEFT JOIN (\n"
 				"SELECT pat_id, DATE(zeitpunkt) zp, fertigstgrad, "
 				"GROUP_concat(abkü order BY abkü) werte "
 				"FROM laborneu WHERE (wert ='' OR wert regexp '[0-9.,:<>]') \n"
@@ -150,7 +150,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				") y ON x.werte=y.werte AND x.eingang =y.zp AND x.pat_id=y.pat_id AND x.befart=y.fertigstgrad "
 				"WHERE NOT ISNULL(y.pat_id) "
 				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zp, u.verglichen=now() "
-				"WHERE ISNULL(pat_id_laborneu) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
+				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"4, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 		RS v5(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
@@ -164,7 +164,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"WHERE zahl>2 "
 				"GROUP BY i.id,i.eingang,i.pat_id,i.befart"
 				") j ON u.id=j.id set u.pat_id_laborneu=j.pat_id, u.zeitpunktlaborneu=j.eingang, u.verglichen=now() "
-				"WHERE ISNULL(pat_id_laborneu) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
+				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"5, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 		RS v6(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
@@ -181,9 +181,10 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"GROUP BY i.id,i.eingang,i.pat_id,n.pat_id,DATE(n.zeitpunkt), i.befart) j "
 				"WHERE gleiche>2"
 				") j ON u.id=j.id set u.pat_id_laborneu=j.pat_id, u.zeitpunktlaborneu=j.eingang, u.verglichen=now() "
-				"WHERE ISNULL(pat_id_laborneu) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
+				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"6, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
+#define echt
 #ifdef echt
 		RS v7(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
 				"SELECT * FROM ("
@@ -199,7 +200,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"GROUP BY i.id,i.eingang,i.pat_id,n.pat_id,DATE(n.zeitpunkt), i.befart) j "
 				"WHERE gleiche>2"
 				") j ON u.id=j.id set u.pat_id_laborneu=j.pat_id, u.zeitpunktlaborneu=j.eingang, u.verglichen=now() "
-				"WHERE ISNULL(pat_id_laborneu) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
+				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"7, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 #endif
 	} // 	if (My->obtabspda("laborneu","wert"))

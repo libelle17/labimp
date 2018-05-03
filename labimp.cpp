@@ -469,6 +469,14 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Sollen wirklich alle Nachbearbeitungen von vorne angefangen werden?","Shall all after work really be done from scratch?"},
 	// T_Eintraege_aus
 	{" Eintraege aus "," entries from "},
+	// T_saetze
+	{"Saetze","Sets"},
+	// T_unters
+	{"unters","examin"},
+	// T_werte
+	{"werte","values"},
+	// T_bakt
+	{"bakt","bact"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1151,17 +1159,17 @@ void hhcl::pvirtvorrueckfragen()
 #else
 		initDB();
 		char*** cerg{0};
-		RS li(My,"SELECT datid,pfad,geändert,größe,zp,codepage,!!fertig FROM `"+tlydat+"`",aktc,ZDB);
+		RS li(My,"SELECT d.datid,pfad,geändert,größe,zp,codepage,!!fertig,(SELECT count(0) from `"+tlysaetze+"` WHERE datid=d.datid),(SELECT COUNT(0) FROM `"+tlyus+"` WHERE datid=d.datid),SUM((SELECT COUNT(0) FROM `"+tlywert+"` WHERE usid=u.id)),SUM((SELECT COUNT(0) FROM `"+tlybakt+"` WHERE usid=u.id)) FROM `"+tlydat+"` d LEFT JOIN `"+tlyus+"` u ON d.datid = u.datid GROUP BY d.datid",aktc,ZDB);
 		if (!li.obfehl) {
 			size_t zru=0;
 			while (cerg=li.HolZeile(),cerg?*cerg:0) {
 				if (!zru++) {
 					cout<<violett<<Tx[T_listet_alle_eingelesenen_Dateien_auf]<<schwarz<<endl;
-cout<<schwarz<<setw(7)<<"DATID"<<"|"<<setw(70)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T_Eingang]<<"|"<<setw(11)<<Tx[T_Groesse]<<"|"<<setw(19)<<Tx[T_eingelesen]<<"|"<<setw(4)<<Tx[T_Zeichensatz]<<"|"<<setw(3)<<Tx[T_fertig_]<<"|"<<schwarz<<endl;
+cout<<schwarz<<setw(6)<<"DATID"<<"|"<<setw(60)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T_Eingang]<<"|"<<setw(9)<<Tx[T_Groesse]<<"|"<<setw(19)<<Tx[T_eingelesen]<<"|"<<setw(2)<<Tx[T_Zeichensatz]<<"|"<<setw(1)<<Tx[T_fertig_]<<"|"<<setw(4)<<Tx[T_saetze]<<"|"<<setw(4)<<Tx[T_unters]<<"|"<<setw(5)<<Tx[T_werte]<<"|"<<setw(4)<<Tx[T_bakt]<<schwarz<<endl;
 				} // 								if (!zru++)
-				cout<<blau<<setw(7)<<cjj(cerg,0)<<"|"<<violett<<setw(70)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"
-					<<schwarz<<setw(9)<<cjj(cerg,3)<<"|"<<blau<<setw(19)<<cjj(cerg,4)<<"|"<<violett<<setw(4)<<cjj(cerg,5)<<"|"
-					<<blau<<setw(3)<<cjj(cerg,6)<<"|"<<endl;
+				cout<<blau<<setw(6)<<cjj(cerg,0)<<"|"<<violett<<setw(60)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"
+					<<schwarz<<setw(9)<<cjj(cerg,3)<<"|"<<blau<<setw(19)<<cjj(cerg,4)<<"|"<<violett<<setw(2)<<cjj(cerg,5)<<"|"
+					<<blau<<setw(1)<<cjj(cerg,6)<<"|"<<setw(4)<<cjj(cerg,7)<<"|"<<setw(4)<<cjj(cerg,8)<<"|"<<setw(5)<<cjj(cerg,9)<<"|"<<setw(4)<<cjj(cerg,10)<<endl;
 			} // while (cerg=li.HolZeile(),cerg?*cerg:0) 
 		}
 
