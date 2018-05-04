@@ -102,7 +102,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"1, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 		RS v2(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
-				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` u INNER JOIN (\n"
+				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
 				"SELECT GROUP_concat(concat(w.abkü,REPLACE(REPLACE(REPLACE(REPLACE(w.wert,'.',''),'<',''),':',''),'-','')) order BY w.abkü,w.wert) werte, "
 				"us.id, us.pat_id"/*, gesname(us.pat_id) name*/", eingang, befart "
 				"FROM `"+tlyus+"` us LEFT JOIN `"+tlywert+"` w ON w.usid=us.id AND w.wert REGEXP '^-?[0-9.,]+$' \n"
@@ -119,10 +119,10 @@ void hhcl::nachbearbeit(const size_t aktc)
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"2, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 		RS v3(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
-				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` u INNER JOIN (\n"
+				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
 				"SELECT GROUP_concat(concat(w.abkü,REPLACE(REPLACE(REPLACE(REPLACE(w.wert,'.',''),'<',''),':',''),'-','')) order BY w.abkü,w.wert) werte, "
-				"us.id, us.pat_id, gesname(us.pat_id) name, eingang, befart "
-				"FROM `"+tlyus+"` us LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` union SELECT usid,verf,'' FROM `"+tlybakt+"`) w ON w.usid=us.id AND w.wert = '' \n"
+				"usi.id, usi.pat_id, gesname(usi.pat_id) name, eingang, befart "
+				"FROM `"+tlyus+"` usi LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` union SELECT usid,verf,'' FROM `"+tlybakt+"`) w ON w.usid=usi.id AND w.wert = '' \n"
 				"GROUP BY pat_id,eingang,befart\n"
 				") x ON us.pat_id=x.pat_id AND us.eingang=x.eingang AND us.befart=x.befart LEFT JOIN (\n"
 				"SELECT pat_id, DATE(zeitpunkt) zp, fertigstgrad, "
@@ -138,9 +138,9 @@ void hhcl::nachbearbeit(const size_t aktc)
 		RS v4(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
 				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
 				"SELECT GROUP_concat(w.abkü order BY w.abkü) werte, "
-				"us.id, us.pat_id, gesname(us.pat_id) name, eingang, befart "
-				"FROM `"+tlyus+"` us LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` union SELECT usid,verf,'' FROM `"+tlybakt+"`) w "
-				"ON w.usid=us.id AND (w.wert = '' OR w.wert regexp '[0-9.,:<>]') \n"
+				"usi.id, usi.pat_id, gesname(usi.pat_id) name, eingang, befart "
+				"FROM `"+tlyus+"` usi LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` union SELECT usid,verf,'' FROM `"+tlybakt+"`) w "
+				"ON w.usid=usi.id AND (w.wert = '' OR w.wert regexp '[0-9.,:<>]') \n"
 				"GROUP BY pat_id,eingang,befart\n"
 				") x ON us.pat_id=x.pat_id AND us.eingang=x.eingang AND us.befart=x.befart LEFT JOIN (\n"
 				"SELECT pat_id, DATE(zeitpunkt) zp, fertigstgrad, "

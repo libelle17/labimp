@@ -1219,12 +1219,14 @@ void hhcl::virtpruefweiteres()
 		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsilbe+schwarz,1,1);
 	} else if (!loeschab.empty() || !loeschid.empty()) {
 		if (!My) initDB();
-    my_ulonglong szahl{0},uzahl{0};
-    RS satzzahl(My,"SELECT datid FROM `"+tlysaetze+"` WHERE datid='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&szahl);
-    RS uszahl(My,"SELECT datid FROM `"+tlyus+"` WHERE datid='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&uzahl);
+    my_ulonglong dzahl{0},szahl{0},uzahl{0};
+    RS datzahl(My,"SELECT datid FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&dzahl);
+    RS satzzahl(My,"SELECT datid FROM `"+tlysaetze+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&szahl);
+    RS uszahl(My,"SELECT datid FROM `"+tlyus+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&uzahl);
+		string dzahls{ltoan(dzahl)};
 		string szahls{ltoan(szahl)};
 		string uzahls{ltoan(uzahl)};
-		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit]+blau+vorsil+rot+Tx[(loeschab.empty()?T_mit_DATID:T_ab_DATID)]+blau+(loeschab.empty()?loeschid:loeschab)+rot+Tx[T_loeschen]+schwarz+"("+gruen+szahls+schwarz+Tx[T_Eintraege_aus]+blau+tlysaetze+schwarz+", "+gruen+uzahls+schwarz+Tx[T_Eintraege_aus]+blau+tlyus+schwarz+")","n")) {
+		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit]+blau+vorsil+rot+Tx[(loeschab.empty()?T_mit_DATID:T_ab_DATID)]+blau+(loeschab.empty()?loeschid:loeschab)+rot+Tx[T_loeschen]+schwarz+"("+gruen+dzahls+schwarz+Tx[T_Eintraege_aus]+blau+tlydat+schwarz+", "+gruen+szahls+schwarz+Tx[T_Eintraege_aus]+blau+tlysaetze+schwarz+", "+gruen+uzahls+schwarz+Tx[T_Eintraege_aus]+blau+tlyus+schwarz+")","n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
 			exit(0);
 		}
