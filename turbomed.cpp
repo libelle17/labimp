@@ -102,7 +102,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"1, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 		RS v2(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
-				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
+				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` u INNER JOIN (\n"
 				"SELECT GROUP_concat(concat(w.abkü,REPLACE(REPLACE(REPLACE(REPLACE(w.wert,'.',''),'<',''),':',''),'-','')) order BY w.abkü,w.wert) werte, "
 				"us.id, us.pat_id"/*, gesname(us.pat_id) name*/", eingang, befart "
 				"FROM `"+tlyus+"` u LEFT JOIN `"+tlywert+"` w ON w.usid=us.id AND w.wert REGEXP '^-?[0-9.,]+$' \n"
@@ -119,7 +119,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"2, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
 		RS v3(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
-				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
+				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` u INNER JOIN (\n"
 				"SELECT GROUP_concat(concat(w.abkü,REPLACE(REPLACE(REPLACE(REPLACE(w.wert,'.',''),'<',''),':',''),'-','')) order BY w.abkü,w.wert) werte, "
 				"us.id, us.pat_id, gesname(us.pat_id) name, eingang, befart "
 				"FROM `"+tlyus+"` u LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` union SELECT usid,verf,'' FROM `"+tlybakt+"`) w ON w.usid=us.id AND w.wert = '' \n"
