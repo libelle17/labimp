@@ -107,7 +107,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"us.id, us.pat_id"/*, gesname(us.pat_id) name*/", eingang, befart "
 				"FROM `"+tlyus+"` us LEFT JOIN `"+tlywert+"` w ON w.usid=us.id AND w.wert REGEXP '^-?[0-9.,]+$' \n"
 				"GROUP BY pat_id,eingang,befart\n"
-				") x ON uns.pat_id=x.pat_id AND us.eingang=x.eingang AND us.befart=x.befart LEFT JOIN (\n"
+				") x ON us.pat_id=x.pat_id AND us.eingang=x.eingang AND us.befart=x.befart LEFT JOIN (\n"
 				"SELECT pat_id, DATE(zeitpunkt) zp, fertigstgrad, "
 				"GROUP_concat(concat(abkü,REPLACE(REPLACE(REPLACE(REPLACE(wert,'.',''),'<',''),':',''),'-','')) order BY abkü,wert) werte "
 				"FROM laborneu WHERE wert REGEXP '^-?[0-9.,]+$' \n"
