@@ -184,13 +184,13 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"6, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
-#define echt
-#ifdef echt
+//#define fremde
+#ifdef fremde
 		RS v7(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
 				"SELECT * FROM ("
 				"SELECT i.*,n.zeitpunkt,COUNT(w.abkü) gleiche FROM "
-				"(SELECT us.id, eingang, pat_id,BefArt, COUNT(w.id) zahl FROM `"+tlyus+"` us LEFT JOIN `"+tlywert+"` w "
-				"ON us.id=w.usid AND w.wert<>'' "
+				"(SELECT us.id, eingang, pat_id,BefArt, COUNT(wi.id) zahl FROM `"+tlyus+"` us LEFT JOIN `"+tlywert+"` wi "
+				"ON us.id=wi.usid AND wi.wert<>'' "
 				"WHERE ISNULL(pat_id_laborneu) "
 				"GROUP BY us.id) i "
 				"LEFT JOIN `"+tlywert+"` w ON w.usid=i.id AND w.wert<>'' "

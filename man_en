@@ -2,9 +2,9 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "04.05.18" "Version 0.11124" "\fB²DPROG²\fR man page"
+.TH man 1 "06.05.18" "Version 0.11128" "\fB²DPROG²\fR man page"
 .SH NAME
-\fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
+\fB²DPROG² \- Laboratory import\fR: imports laboratory files into self mad mariadb tables from the laboratory transmission files
 .br
 (manpage-Hilfe in deutsch verfügbar: 'man ²DPROG²' oder 'man -Lde ²DPROG²')
 .SH SYNOPSIS
@@ -32,6 +32,8 @@
 \fB -listfil, --listfiles\fR: lists all processed files\fB or not\fR (\fB0\fR)
 .br
 \fB -delincomp, --deleteincomplete\fR: deletes entries from incompletely read files\fB or not\fR (\fB0\fR)
+.br
+\fB -initdb, --initdb\fR: initializes only the tables\fB or not\fR (\fB0\fR)
 .br
 \fB -onlyafterw, --onlyafterwork\fR: only afterwork\fB or not\fR (\fB0\fR)
 .br

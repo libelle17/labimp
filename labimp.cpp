@@ -424,6 +424,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_listdat_l
 	{"listdateien","listfiles"},
 	// T_listet_alle_eingelesenen_Dateien_auf
+	// T_initdb_k,
+	{"initdb","initdb"},
+	// T_initdb_l,
+	{"initdb","initdb"},
 	{"listet alle eingelesenen Dateien auf","lists all processed files"},
 	// T_Pfad_
 	{"Pfad","Path"},
@@ -477,6 +481,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"werte","values"},
 	// T_bakt
 	{"bakt","bact"},
+	// T_initialisiert_nur_die_Tabellen
+	{"initialisiert nur die Tabellen","initializes only the tables"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -974,7 +980,8 @@ void hhcl::prueflywert(DB *My, const int obverb, const int oblog, const uchar di
 		Feld ifelder0[] = {Feld("Abkü"),Feld("Einheit")};   Index i0("LaborXWertAbkü",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Feld ifelder1[] = {Feld("UsID"),Feld("BaktID"),Feld("Abkü"),Feld("Langtext"),Feld("Quelle"),Feld("QSpez"),Feld("AbnDat"),Feld("Wert"),Feld("Einheit"),Feld("Grenzwerti"),Feld("Teststatus"),Feld("nbid"),Feld("HinwID"),Feld("KommID"),Feld("ErklID")};   
 				Index i1("doppelte",ifelder1,sizeof ifelder1/sizeof* ifelder1,/*unique*/1);
-		Index indices[]={i0,i1};
+		Feld ifelder2[] = {Feld("Wert")};   Index i2("Wert",ifelder2,sizeof ifelder2/sizeof* ifelder2);
+		Index indices[]={i0,i1,i2};
 		Constraint csts[]{Constraint(tlyus+tlywert,new Feld{Feld("UsID")},1,tlyus,new Feld{Feld("id")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlywert,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborwert]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
@@ -1112,6 +1119,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&listdat,/*art*/puchar,T_listdat_k,T_listdat_l,/*TxBp*/&Tx,/*Txi*/T_listet_alle_eingelesenen_Dateien_auf,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&initdb,/*art*/puchar,T_initdb_k,T_initdb_l,/*TxBp*/&Tx,/*Txi*/T_initialisiert_nur_die_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nachbneu,/*art*/puchar,T_nachbneu_k,T_nachbneu_l,/*TxBp*/&Tx,/*Txi*/T_Nachbearbeitung_von_vorne,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/"",/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
@@ -1891,12 +1899,33 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 	return 1;
 } // void hhcl::dverarbeit
 
+void hhcl::prueftab()
+{
+	if (!My) initDB();
+	prueflyhinw(My, obverb, oblog, /*direkt*/0);
+	prueflyplab(My, obverb, oblog, /*direkt*/0);
+	prueflyparameter(My, obverb, oblog, /*direkt*/0);
+	prueflypneu(My, obverb, oblog, /*direkt*/0);
+	prueflypnb(My, obverb, oblog, /*direkt*/0);
+	prueflydat(My, obverb, oblog, /*direkt*/0);
+	prueflyfehlt(My, obverb, oblog, /*direkt*/0);
+	prueflyaerzte(My, obverb, oblog, /*direkt*/0);
+	prueflysaetze(My, obverb, oblog, /*direkt*/0);
+	prueflyus(My, obverb, oblog, /*direkt*/0);
+	prueflybakt(My, obverb, oblog, /*direkt*/0);
+	prueflyleist(My, obverb, oblog, /*direkt*/0);
+	prueflywert(My, obverb, oblog, /*direkt*/0);
+	prueflypgl(My, obverb, oblog, /*direkt*/0);
+} // void hhcl::prueftab
+
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
 	const size_t aktc{0};
 	unsigned long verarbeitet{0};
-	if (!loeschalle && !loeschunvollst) {
+	if (initdb) {
+		prueftab();
+	} else if (!loeschalle && !loeschunvollst) {
 		if (!nurnachb && !nachbneu) {
 			pruefverz(fertigvz,obverb,oblog);
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
@@ -1907,21 +1936,7 @@ void hhcl::pvirtfuehraus()
 			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);
 			for(size_t i=0;i<lrue.size();i++) {
 				if (!i) {
-					if (!My) initDB();
-					prueflyhinw(My, obverb, oblog, /*direkt*/0);
-					prueflyplab(My, obverb, oblog, /*direkt*/0);
-					prueflyparameter(My, obverb, oblog, /*direkt*/0);
-					prueflypneu(My, obverb, oblog, /*direkt*/0);
-					prueflypnb(My, obverb, oblog, /*direkt*/0);
-					prueflydat(My, obverb, oblog, /*direkt*/0);
-					prueflyfehlt(My, obverb, oblog, /*direkt*/0);
-					prueflyaerzte(My, obverb, oblog, /*direkt*/0);
-					prueflysaetze(My, obverb, oblog, /*direkt*/0);
-					prueflyus(My, obverb, oblog, /*direkt*/0);
-					prueflybakt(My, obverb, oblog, /*direkt*/0);
-					prueflyleist(My, obverb, oblog, /*direkt*/0);
-					prueflywert(My, obverb, oblog, /*direkt*/0);
-					prueflypgl(My, obverb, oblog, /*direkt*/0);
+					prueftab();
 				}
 				string *aktl{&lrue[i]};
 				//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;

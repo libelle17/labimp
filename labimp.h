@@ -201,6 +201,8 @@ enum T_
 	T_nach_,
 	T_listdat_k,
 	T_listdat_l,
+	T_initdb_k,
+	T_initdb_l,
 	T_listet_alle_eingelesenen_Dateien_auf,
 	T_Pfad_,
 	T_Eingang,
@@ -228,6 +230,7 @@ enum T_
 	T_unters,
 	T_werte,
 	T_bakt,
+	T_initialisiert_nur_die_Tabellen,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -278,6 +281,7 @@ class hhcl:public dhcl
 		string loeschab;
 		string loeschid;
 		uchar listdat=0;
+		uchar initdb=0;
 		string ldatvz;   // Verzeichnis der Labordateien
 		string fertigvz; // Verzeichnis der fertig bearbeiteten
 	public: //α //ω
@@ -296,6 +300,7 @@ class hhcl:public dhcl
 		void prueflyfehlt(DB *My, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyparameter(DB *My, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyhinw(DB *My, const int obverb, const int oblog, const uchar direkt=0);
+		void prueftab();
 		void virttesterg(); //α
 		void virtlieskonfein();
 		void virtautokonfschreib();

@@ -2,9 +2,9 @@
 .\" Manual-Seite für ²DPROG²
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH man 1 "04.05.18" "Version 0.11124" "Manual-Seite für ²DPROG²"
+.TH man 1 "06.05.18" "Version 0.11128" "Manual-Seite für ²DPROG²"
 .SH NAME
-\fB²DPROG² \- FaxServer-Funktionalität\fR: veranlasst automatischen Faxversand von Dateien, Benennung empfangener Faxe und Protokollierung aller Faxe in einer Datenbank 
+\fB²DPROG² \- Labordatenimport\fR: importiert Labordaten in selbst verwaltete Mariadb-Tabellen aus den Uebertragungsdateien des Labors 
 .br
 (manpage available in english: 'man ²DPROG²' or 'man -Len ²DPROG²')
 .SH SYNOPSIS
@@ -32,6 +32,8 @@
 \fB -listdat, --listdateien\fR: listet alle eingelesenen Dateien auf\fB oder nicht\fR (\fB0\fR)
 .br
 \fB -loeunv, --loeschunvollstaendige\fR: loescht Datensaetze aus unvollstaendig eingelesenen Dateien\fB oder nicht\fR (\fB0\fR)
+.br
+\fB -initdb, --initdb\fR: initialisiert nur die Tabellen\fB oder nicht\fR (\fB0\fR)
 .br
 \fB -nurnachb, --nurnachbearbeitung\fR: nur Nachbearbeitung\fB oder nicht\fR (\fB0\fR)
 .br
