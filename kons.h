@@ -782,14 +782,14 @@ struct optcl:wpgcl
 //    schAcl<WPcl> *cpA=0; // Konfigurationsarray, das ggf. geschrieben werden muss
 //    uchar ogefunden=0; // braucht man nicht, ist in argcl
 		// ermittelte Optionen:
-    const uchar obno=0; // ob auch die Option mit vorangestelltem 'no' eingefuegt werden soll
 		uchar woher=0; // 1= ueber Vorgaben, 2= ueber Konfigurationsdatei, 3= ueber Befehlszeile gesetzt
+    const uchar obno=0; // ob auch die Option mit vorangestelltem 'no' eingefuegt werden soll
 		uchar gegenteil=0;
 		uchar nichtspeichern=0;
 		const uchar virteinzutragen(/*schAcl<optcl>**/void *schlp,int obverb);
 		void virtweisomapzu(/*schAcl<optcl>**/void *schlp);
 		optcl(const string& pname,const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-				         const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher);
+				         const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher,const uchar obno=0);
 		void setzwert();
 		int setzstr(const char* const neuw,uchar *const obzuschreib=0,const uchar ausDatei=0);
 		void virttusetzbemerkwoher(const string& ibemerk,const uchar vwoher);

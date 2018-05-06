@@ -3281,6 +3281,7 @@ void optcl::hilfezeile(Sprache lg)
 	if (TxBp) {
 		if (Txi!=-1) {
 			if (TxBp->TCp[Txi][lg]) {
+				(*TxBp).lgn=lg;
 				cout<<drot<<" -"<<(kurzi<0?ltoan(kurzi):(*TxBp)[kurzi])<<", --"<<(langi<0?ltoan(langi):(*TxBp)[langi]);
 				if (pptr) {if (part==pstri||part==pdez||part==ppwd||part==pfile) cout<<" <string>"; else if (part==pverz) cout<<" <"<<Txk[T_pfad]<<">"; else if (part!=puchar) cout<<" <zahl>";}
 				cout<<schwarz<<": "<< virtmachbemerk(lg)<<endl;
@@ -5233,8 +5234,9 @@ int hcl::zeighilfe(const stringstream *const erkl)
 		}
 		cout<<blau<<Txk[T_Optionen_die_nicht_gespeichert_werden]<<schwarz<<endl;
 		for(size_t j=0;j<opn.size();j++) {
-			if (opn[j]->pname.empty() && (obhilfe>1 || opn[j]->wi))
+			if (opn[j]->pname.empty() && (obhilfe>1 || opn[j]->wi)) {
 				opn[j]->hilfezeile(Txk.lgn);
+			}
 		} //     for(size_t j=0;j<opn.size();j++)
 		cout<<blau<<Txk[T_Optionen_die_in_der_Konfigurationsdatei_gespeichert_werden]<<schwarz<<endl;
 		for(size_t j=0;j<opn.size();j++) {
@@ -6072,9 +6074,9 @@ int optcl::pzuweis(const char *const nacstr, const uchar vgegenteil/*=0*/, const
 } // int optcl::pzuweis
 
 optcl::optcl(const string& pname,const void* pptr,const par_t part, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-		const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher):wpgcl(pname,pptr,part),
+		const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher,const uchar obno):wpgcl(pname,pptr,part),
 	kurzi(kurzi),langi(langi),TxBp(TxBp),Txi(Txi),wi(wi),Txi2(Txi2),rottxt(rottxt),iwert(iwert),
-	obno(iwert!=-1),woher(woher)//,eingetragen(0)
+	woher(woher),obno(obno)/*=0*///,eingetragen(0)
 {
 ////	caus<<gruen<<"Erstelle optcl, pname: "<<schwarz<<violett<<pname<<endl;
 }

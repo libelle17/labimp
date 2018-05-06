@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "06.05.18" "Version 0.11129" "\fB²DPROG²\fR man page"
+.TH man 1 "06.05.18" "Version 0.11135" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Laboratory import\fR: imports laboratory files into self mad mariadb tables from the laboratory transmission files
 .br
@@ -28,53 +28,53 @@ Ideally, the program should have installed itsself after the first call(s) (see 
 .SH OPTIONS 
 .br
 .br
-\fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11097\fR (Laborimport) 
+\fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11135\fR (Laborimport) 
 .br
 \fBOptions which are not saved: \fR
 .br
-\fB -fromscratch, --fromscratch\fR: Deleting all tables and starting from scatch\fB or not\fR (\fB0\fR)
+\fB -fromscratch, --fromscratch\fR: Deleting all tables and starting from scatch (\fB0\fR)
 .br
-\fB -trunc, --truncate\fR: Truncating all tables and starting from scatch\fB or not\fR (\fB0\fR)
+\fB -trunc, --truncate\fR: Truncating all tables and starting from scatch (\fB0\fR)
 .br
-\fB -deleteall, --deleteall\fR: deletes all tables\fB or not\fR (\fB0\fR)
+\fB -deleteall, --deleteall\fR: deletes all tables (\fB0\fR)
 .br
 \fB -delfrom, --deletefrom <string>\fR: deletes all data sets beginning at laborydat ID:  ('\fB\fR')
 .br
 \fB -delid, --deleteid <string>\fR: deletes data set with DATID  ('\fB\fR')
 .br
-\fB -listfil, --listfiles\fR: lists all processed files\fB or not\fR (\fB0\fR)
+\fB -listfil, --listfiles\fR: lists all processed files (\fB0\fR)
 .br
-\fB -delincomp, --deleteincomplete\fR: deletes entries from incompletely read files\fB or not\fR (\fB0\fR)
+\fB -delincomp, --deleteincomplete\fR: deletes entries from incompletely read files (\fB0\fR)
 .br
-\fB -initdb, --initdb\fR: initializes only the tables\fB or not\fR (\fB0\fR)
+\fB -initdb, --initdb\fR: initializes only the tables (\fB0\fR)
 .br
-\fB -onlyafterw, --onlyafterwork\fR: only afterwork\fB or not\fR (\fB0\fR)
+\fB -onlyafterw, --onlyafterwork\fR: only afterwork (\fB0\fR)
 .br
-\fB -afterwnew, --afterworknew\fR: afterwork new\fB or not\fR (\fB0\fR)
+\fB -afterwnew, --afterworknew\fR: afterwork new (\fB0\fR)
 .br
 \fB -n, --reccount <zahl>\fR: No. of listed entries = <no> instead of (\fB0\fR)
 .br
 \fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
 .br
-\fB -v, --verbose\fR: screen output more verbose\fB or not\fR (\fB0\fR)
+\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
 .br
-\fB -lfn, --logfilenew\fR: delete log file afore\fB or not\fR (\fB0\fR)
+\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
 .br
 \fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
 .br
-\fB -h, --help\fR: Explanation of frequent options\fB or not\fR (\fB3\fR)
+\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
 .br
-\fB -lh, --longhelp\fR: Explanation of all options\fB or not\fR (\fB3\fR)
+\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
 .br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa')\fB or not\fR (\fB0\fR)
+\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/labimp\fR(finish with ':qa')\fB or not\fR (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/root/labimp\fR(finish with ':qa') (\fB0\fR)
 .br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here)\fB or not\fR (\fB0\fR)
+\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron\fB or not\fR (\fB0\fR)
+\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
 .br
-\fB -info, --version\fR: shows the program version\fB or not\fR (\fB0\fR)
+\fB -info, --version\fR: shows the program version (\fB0\fR)
 .br
 \fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
 .br
@@ -96,11 +96,11 @@ Ideally, the program should have installed itsself after the first call(s) (see 
 .br
 \fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBlabimp.log\fR')
 .br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/labimp.log\fR' (otherwise shorter)\fB or not\fR (\fB0\fR)
+\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/labimp.log\fR' (otherwise shorter) (\fB0\fR)
 .br
 \fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBlabimp\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
 .br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically\fB or not\fR (\fB1\fR)
+\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .SH FUNCTIONALITY
 .SH PRECONDITIONS
 \fBSoftware\fR: The program was adjusted to an installation of Opensuse >= 42.1, Debian >= 9.10, Ubuntu >= 16.04, Mint >= 18 or Fedora >= 24 with standard options. System D has to be installed, i.e., "systemctl" has to run, which is the case in the mentioned  program versions. One of the packet managers rpm or dpkg and apt, dnf, yum or zypper has to be installed, respectively, as is the case per default in the mentioned linux distributions. The program '\fBwget\fR' must be installed. Uninstalling of the programs added by ²DPROG² by \fBmake uninstall\fR works currently only with the english and the german versions of the packet manager.
