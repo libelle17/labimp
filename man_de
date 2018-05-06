@@ -2,7 +2,7 @@
 .\" Manual-Seite für ²DPROG²
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH man 1 "06.05.18" "Version 0.11128" "Manual-Seite für ²DPROG²"
+.TH man 1 "06.05.18" "Version 0.11129" "Manual-Seite für ²DPROG²"
 .SH NAME
 \fB²DPROG² \- Labordatenimport\fR: importiert Labordaten in selbst verwaltete Mariadb-Tabellen aus den Uebertragungsdateien des Labors 
 .br
@@ -11,9 +11,23 @@
 \fB²DPROG² [-<kurzopt>|--<langopt> [<ergänzung>]] ...\fR
 .SH KURZBESCHREIBUNG
 .SH INSTALLATION
+.br
+Zunächst lesen Sie bitte die untenstehenden Kapitel 'Funktionsweise','Voraussetzungen','Automatisch installierte Programmpakete' und 'Auswirkungen des Programmablaufs'.
+.br
+Anschließend verbinden Sie den Rechner falls nötig mit dem Internet und rufen Sie auf (z.B. durch Kopieren der Zeile in die Zwischenablage und Einfügen in einem Terminal):
+.br
+\fBN=²DPROG²;P=${N}_inst.sh;cd ~;wget https://raw.githubusercontent.com/²gitv²/$N/master/install.sh -O$P&&sh $P\fR
+.br
+Zuletzt rufen Sie auf:
+.br
+ \fB²DPROG²\fR
+.br
+und beantworten einige Rueckfragen des Programms.
+.br
 .SH GEBRAUCH
+Im Idealfall sollte sich das Programm nach dem/n erstem/n Aufruf/en (s.o.) und Beantworten einmaliger Rückfragen so eingerichtet haben, dass es von selbst weiter läuft.
 .SH OPTIONEN 
-.SH VORAUSSETZUNGEN
+.br
 .br
 \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11097\fR (Laborimport) 
 .br
@@ -25,7 +39,7 @@
 .br
 \fB -loeschalle, --loeschalle\fR: loescht alle Tabellen\fB oder nicht\fR (\fB0\fR)
 .br
-\fB -loeab, --loescheab <string>\fR: loescht alle Datensaetze ab ('\fB\fR')
+\fB -loeab, --loescheab <string>\fR: loescht alle Datensaetze ab laborydat ID:  ('\fB\fR')
 .br
 \fB -loeid, --loeschid <string>\fR: loescht Datensatz mit DATID  ('\fB\fR')
 .br
@@ -88,3 +102,36 @@
 \fB -cm, --cronminuten <string>\fR: alle wieviel Minuten soll \fBlabimp\fR ueber crontab aufgerufen werden (0=gar nicht), anstatt  ('\fB0\fR')
 .br
 \fB -autoakt, --autoaktual <zahl>\fR: Programm automatisch aktualisieren\fB oder nicht\fR (\fB1\fR)
+.SH FUNKTIONSWEISE
+.SH VORAUSSETZUNGEN
+\fBSoftware\fR: Das Programm wurde auf eine Installation von Opensuse >= 42.1, Debian >= 9.10, Ubuntu >= 16.04, Mint >= 18 oder Fedora >= 24 mit jeweils Standardoptionen abgestimmt. System D muss installiert sein bzw. systemctl muss laufen, was in den genannten Programmversionen der Fall ist. Jeweils einer der Paketmanager rpm oder dpkg sowie apt, dnf, yum oder zypper muss installiert sein, wie in den genannten Linuxdistributionen standardmäßig der Fall. Das Programm '\fBwget\fR' wird vorausgesetzt. Die Deinstallation der durch ²DPROG² hinzugefügten Programme mit \fBmake uninstall\fR ist gegenwärtig nur für englische und deutsche Versionen der Paketmanager eingerichtet.
+.SH AUTOMATISCH INSTALLIERTE PROGRAMMPAKETE
+.SH AUSWIRKUNGEN DES PROGRAMMABLAUFS
+.SH DEINSTALLATION
+Wechseln Sie in einem Terminal in das Installationsverzeichnis (beim selben eingeloggten Benutzer: \fBcd ~/²DPROG²\fR, ansonsten wird es über \fB²DPROG² -info\fR angezeigt).
+.br
+Rufen Sie dort \fBmake uninstall\fR auf.
+.br
+Dadurch wird das installierte \fB²DPROG²\fR gelöscht und das Script \fBuninstallinv\fR in umgekehrter Reihenfolge abgearbeitet, das bei der Installation und beim Aufruf von ²DPROG² erstellt wurde. 
+.br
+Dadurch werden zusätzlich installierte Programmpakete, zusätzlich erteilte Berechtigungen, für ²DPROG² eingerichtete Sambafreigaben und Firewallausnahmen wieder gelöscht. 
+.br
+Auf die Deinstallation der Konfigurationsdateien, der angesammelten Daten und systemrelevanter Programme wie libgcc und selinux wird dabei verzichtet.
+.br
+Etwaige Fehlermeldungen beziehen sich meist auf einen Deinstallationsversuch bereits entfernter Programme und können ignoriert werden.
+.br
+.SH RUECKGABEWERTE
+.SH FEHLER
+Fehler bitte mit u.a. dem Wort '²DPROG²' in der Email-Ueberschrift melden. 
+.br
+Bitte auch melden, wenn sich Änderungsbedarf durch andere Hard- bzw. Software ergeben.
+.SH PROGRAMMÄNDERUNG
+Durch Aufruf von '\fBsh viall\fR' mit den üblichen '\fBvim\fR'-Befehlen, gefolgt von '\fBmake\fR' und '\fBmake install\fR' vom Installationsverzeichnis ('\fB~/²DPROG²\fR) aus können Sie das Programm ändern.
+
+.SH HAFTUNG
+Das Programm wurde mit bester Absicht entwickelt und durch den Autor getestet.
+.br
+Trotzdem kann der Autor für keine Schäden haften, die durch das Programm entstehen könnten
+
+.SH AUTOR
+Gerald Schade (geraldschade@gmx.de; www.diabdachau.de)

@@ -392,7 +392,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	//	T_lab_l,
 	{"loescheab","deletefrom"},
 	// T_loescht_alle_Datensaetze_ab
-	{"loescht alle Datensaetze ab","deletes all data sets beginning at"},
+	{"loescht alle Datensaetze ab " vorsilbe"dat ID: ","deletes all data sets beginning at " vorsilbe"dat ID: "},
 	// T_Loescheab
 	{"Loesche ab " vorsilbe"dat ID: ","Deleting from " vorsilbe"dat ID: "},
 	// T_lid_k,

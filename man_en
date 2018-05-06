@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "06.05.18" "Version 0.11128" "\fB²DPROG²\fR man page"
+.TH man 1 "06.05.18" "Version 0.11129" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Laboratory import\fR: imports laboratory files into self mad mariadb tables from the laboratory transmission files
 .br
@@ -11,9 +11,22 @@
 \fB²DPROG² [-<shortopt>|--<longopt> [<supplement>]] ...\fR
 .SH SHORT DESCRIPTION 
 .SH INSTALLATION
+First, please read the chapters 'functionality', 'preconditions','automatically installed software packages' and 'implications' below. Then, if connected to the internet, call (e.g. by coying the line and pasting it into a terminal):
+.br
+\fBN=²DPROG²;P=${N}_inst.sh;cd ~;wget https://raw.githubusercontent.com/²gitv²/$N/master/install.sh -O$P&&sh $P\fR
+.br
+At last, call:
+.br
+ \fB²DPROG²\fR
+.br
+and answer some questions of the program.
+.br
+The first execution and the first processing of a sent/received fax with each of hylafax and/or capisuite may take some time and need some additional input, respectively.
+.br
 .SH USAGE
+Ideally, the program should have installed itsself after the first call(s) (see above) and one-time answering of some questions in a self-running way.
 .SH OPTIONS 
-.SH PRECONDITIONS
+.br
 .br
 \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11097\fR (Laborimport) 
 .br
@@ -25,7 +38,7 @@
 .br
 \fB -deleteall, --deleteall\fR: deletes all tables\fB or not\fR (\fB0\fR)
 .br
-\fB -delfrom, --deletefrom <string>\fR: deletes all data sets beginning at ('\fB\fR')
+\fB -delfrom, --deletefrom <string>\fR: deletes all data sets beginning at laborydat ID:  ('\fB\fR')
 .br
 \fB -delid, --deleteid <string>\fR: deletes data set with DATID  ('\fB\fR')
 .br
@@ -88,3 +101,36 @@
 \fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBlabimp\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
 .br
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically\fB or not\fR (\fB1\fR)
+.SH FUNCTIONALITY
+.SH PRECONDITIONS
+\fBSoftware\fR: The program was adjusted to an installation of Opensuse >= 42.1, Debian >= 9.10, Ubuntu >= 16.04, Mint >= 18 or Fedora >= 24 with standard options. System D has to be installed, i.e., "systemctl" has to run, which is the case in the mentioned  program versions. One of the packet managers rpm or dpkg and apt, dnf, yum or zypper has to be installed, respectively, as is the case per default in the mentioned linux distributions. The program '\fBwget\fR' must be installed. Uninstalling of the programs added by ²DPROG² by \fBmake uninstall\fR works currently only with the english and the german versions of the packet manager.
+.br
+.\"In Manjaro, before installation, the commands 'sudo pacman -S wget vi' and 'sudo pacman -Syu' can be necessary.
+.SH AUTOMATICALLY INSTALLED SOFTWARE PACKAGES 
+.SH IMPLICATIONS
+.SH UNINSTALLING
+Change in a terminal to the installation directory (for the same installed user, it's \fBcd ~/²DPROG²\fR, otherwise it will be displayed by \fB²DPROG² -info\fR).
+.br
+Call \fBmake uninstall\fR. 
+.br
+Then the installed \fB²DPROG²\fR will be deleted and the script \fBuninstallinv\fR will be executed in reverse order which has been generated during the installation and execution of ²DPROG².
+.br
+Thereby additionally installed program packets, permissions, samba shares and firewall exceptions are deleted.  
+.br
+Configuration files, data, and system relevant programs like libgcc and selinux will not be deleted.
+.br
+Error messages originate mostly in efforts to delete a program already missing and can then be ignored.
+
+.SH RETURN CODES
+.SH ERRORS
+Please report any errors with the word '²DPROG²' included in the email headline. 
+.br
+Please report as well, if different hard- or software yields a requirement for a program modification.
+.SH PROGRAM MODIFICATION
+By calling '\fBsh viall\fR' and application of the usual '\fBvim\fR'-commands, followed by '\fBmake\fR' and '\fBmake install\fR' from the installation directory ('\fB~/²DPROG²\fR), You may alter the program.
+.SH LIABILITY
+The program has been written with the best aim and has been tested by the author.
+.br
+Nevertheless the author cannot be liable for any damage caused by the program.
+.SH AUTHOR
+Gerald Schade (geraldschade@gmx.de; www.diabdachau.de)
