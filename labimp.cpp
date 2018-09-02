@@ -1,6 +1,9 @@
 // '//α' oder '//ω' als Kommentar sind nur fuer die Verwendung dieses Programms als Programmvorlage wichtig
 // sed -n '/\/\/α/,/\/\/ω/p;/\/\/ω/a\\' test
 // sed -n '/\/\/α/,/\/\/ω/p' test
+const double& versnr= //α
+#include "versdt"
+;
 #include "kons.h" //α
 #include "DB.h" 
 #include <tiffio.h>
@@ -1144,6 +1147,12 @@ void hhcl::virtMusterVorgb()
 } // void hhcl::MusterVorgb
 
 // wird aufgerufen in lauf
+void hhcl::pvirtvorzaehler()
+{ //ω
+} // void hhcl::virtvorzaehler() //α
+//ω
+
+// wird aufgerufen in lauf
 void hhcl::virtzeigversion(const string& ltiffv/*=nix*/)
 { //ω
 	dhcl::virtzeigversion(ltiffv); //α
@@ -1918,6 +1927,10 @@ void hhcl::prueftab()
 	prueflypgl(My, obverb, oblog, /*direkt*/0);
 } // void hhcl::prueftab
 
+void hhcl::pvirtvorpruefggfmehrfach()
+{
+} // void hhcl::pvirtvorpruefggfmehrfach
+
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
@@ -2022,6 +2035,7 @@ int main(int argc,char** argv)
 	hhi.lauf(); // Einleitungsteil mit virtuellen Funktionen, 
 	// mit virtVorgbAllg,pvirtVorgbSpeziell,initopt,parsecl,pvirtmacherkl,zeighilfe,virtlieskonfein,verarbeitkonf,lieszaehlerein,MusterVorgb,dovi,dovs,virtzeigversion
 	// virtautokonfschreib,update,
+	return hhi.retu;
 } // int main 
 
 void hhcl::virttesterg()

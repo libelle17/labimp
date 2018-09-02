@@ -345,9 +345,11 @@ class hhcl:public dhcl
 		void virtinitopt(); // (programm-)spezifische Optionen
 		void pvirtmacherkl();
 		void virtMusterVorgb();
+		void pvirtvorzaehler();
 		void virtzeigversion(const string& ltiffv=nix);
 		void pvirtvorrueckfragen();
 		void virtrueckfragen();
+		void pvirtvorpruefggfmehrfach();
 		void virtpruefweiteres();
 		void virtzeigueberschrift();
 		void pvirtfuehraus();

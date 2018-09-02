@@ -79,11 +79,10 @@ void hhcl::vordverarb(const size_t aktc)
 
 void hhcl::nachbearbeit(const size_t aktc)
 {
-	caus<<"Hier Nachbearbeitung"<<endl;
 	uchar altZDB=ZDB;
 	ZDB=1;
 	RS vor(My,"SET @@GROUP_concat_max_len=150000; ",aktc,ZDB);
-	if (My->obtabspda("laborneu","wert") &&0) {
+	if (My->obtabspda("laborneu","wert")) {
 		my_ulonglong zahl=0;
 		RS v1(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
 				"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
@@ -207,25 +206,6 @@ void hhcl::nachbearbeit(const size_t aktc)
 	} // 	if (My->obtabspda("laborneu","wert"))
 
 	{
-		const string labor2aNachw{"labor2aNachw"};
-		RS viewN(My,"DROP VIEW IF EXISTS `"+labor2aNachw+"`;"
-				"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`praxis`@`%` SQL SECURITY DEFINER VIEW `"+labor2aNachw+"` AS "
-				"SELECT Pat_id, eingang Zeitpunkt,befart FertigStGrad, w.Abkü,w.langtext Langtext, Wert,Einheit "
-				",concat(if(e.text rlike '^:[ /\\*:]*$','',if(e.text rlike '^:[ /\\*]*:',concat(mid(e.text,locate(':',e.text,2)+1),';'),if(e.text='.','',if(e.text='','',concat(e.text,';'))))),k.text) Kommentar "
-				",NB,uNg, "
-				"IF(abkü = 'LDL' AND einheit = 'mg/dl','100',oNg) oNg,"
-				"Labor,u.DatID,u.SatzID,u.SatzLänge,u.Auftragsnummer,u.Auftragsschlüssel,u.Berichtsdatum,u.Nachname,u.Vorname,u.GebDat,Pfad "
-				"FROM `"+tlyus+"` u "
-				"LEFT JOIN `"+tlywert+"` w on u.id=w.usid "
-				"LEFT JOIN `"+tlyhinw+"` e on w.erklid=e.id "
-				"LEFT JOIN `"+tlyhinw+"` k on w.kommid=k.id "
-				"LEFT JOIN `"+tlypnb+"` n on w.nbid=n.id "
-				"LEFT JOIN `"+tlysaetze+"` s on u.satzid=s.satzid "
-				"LEFT JOIN `"+tlydat+"` d on s.datid=d.datid "
-				"LEFT JOIN `"+tlyplab+"` l on s.labid=l.id;",aktc,ZDB);
-	}
-
-	{
 		const string labor2a{"labor2a"};
 		RS view(My,"DROP VIEW IF EXISTS `"+labor2a+"`;"
 				"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`praxis`@`%` SQL SECURITY DEFINER VIEW `"+labor2a+"` AS "
@@ -241,7 +221,25 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"LEFT JOIN `"+tlypnb+"` n on w.nbid=n.id "
 				"LEFT JOIN `"+tlysaetze+"` s on u.satzid=s.satzid "
 				"LEFT JOIN `"+tlydat+"` d on s.datid=d.datid "
-				"LEFT JOIN `"+tlyplab+"` l on s.labid=l.id;",aktc,ZDB);
+				"LEFT JOIN `"+tlyplab+"` l on s.labid=l.id",aktc,ZDB);
+	}
+	{
+		const string labor2aNachw{"labor2aNachw"};
+		RS viewN(My,"DROP VIEW IF EXISTS `"+labor2aNachw+"`;"
+				"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`praxis`@`%` SQL SECURITY DEFINER VIEW `"+labor2aNachw+"` AS "
+				"SELECT Pat_id, eingang Zeitpunkt,befart FertigStGrad, w.Abkü,w.langtext Langtext, Wert,Einheit "
+				",concat(if(e.text rlike '^:[ /\\*:]*$','',if(e.text rlike '^:[ /\\*]*:',concat(mid(e.text,locate(':',e.text,2)+1),';'),if(e.text='.','',if(e.text='','',concat(e.text,';'))))),k.text) Kommentar "
+				",NB,uNg, "
+				"IF(abkü = 'LDL' AND einheit = 'mg/dl','100',oNg) oNg,"
+				"Labor,u.DatID,u.SatzID,u.SatzLänge,u.Auftragsnummer,u.Auftragsschlüssel,u.Berichtsdatum,u.Nachname,u.Vorname,u.GebDat,Pfad "
+				"FROM `"+tlyus+"` u "
+				"LEFT JOIN `"+tlywert+"` w on u.id=w.usid "
+				"LEFT JOIN `"+tlyhinw+"` e on w.erklid=e.id "
+				"LEFT JOIN `"+tlyhinw+"` k on w.kommid=k.id "
+				"LEFT JOIN `"+tlypnb+"` n on w.nbid=n.id "
+				"LEFT JOIN `"+tlysaetze+"` s on u.satzid=s.satzid "
+				"LEFT JOIN `"+tlydat+"` d on s.datid=d.datid "
+				"LEFT JOIN `"+tlyplab+"` l on s.labid=l.id",aktc,ZDB);
 	}
 
 	ZDB=altZDB;

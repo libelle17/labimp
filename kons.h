@@ -105,6 +105,7 @@ extern const char *_rot, *_hrot, *_schwarz, *_blau, *_gelb, *_tuerkis, *_hgrau;
 #include <chrono> // fuer sleep_for 
 #include <thread> // fuer sleep_for
 #include <iconv.h> // fuer ic_cl (Konversion von Dos-Dateien in utf-8)
+#include <utime.h>  // fuer utimbuf und utime
 
 #define neufind
 #define altfind
@@ -155,6 +156,8 @@ extern const string nix/*=string()*/;
 extern const string eins/*="1"*/;
 extern const string sudc/*="sudo "*/;
 extern const string sudhc/*="sudo -H "*/;
+struct linst_cl;
+extern linst_cl* linstp/*=0*/; // globales Objekt
 // typedef const char *TCtp[][SprachZahl];
 typedef const char * const * const TCtp[SprachZahl];
 class TxB // Text-Basisklasse
@@ -163,7 +166,7 @@ class TxB // Text-Basisklasse
   Sprache lgn; // Sprache numerisch
 //  TCtp* TCp;
   const char * const * const * const *TCp;
-	TxB(const char* const* const* const *TCp):TCp(TCp){}
+	TxB(const char* const* const* const *TCp);
   inline const char* operator[](long const& nr) const {
     TCtp *hilf = reinterpret_cast<TCtp*>(TCp);
     return (const char*)hilf[nr][lgn];
@@ -191,7 +194,7 @@ enum Tkons_
   T_nicht_mit_fopen_zum_Anhaengen_oeffnen,
   T_Bitte_mit,
   T_beenden,
-  T_stern_zeile,
+  // T_stern_zeile,
   T_Rueckmeldung,
   T_Suchbefehl,
   T_Fuehre_aus,
@@ -444,6 +447,20 @@ enum Tkons_
 	T_lieszaehlerein,
 	T_Parameter,
 	T_gefunden,
+	T_rueckzufragen_wegen,
+	T_virtlgnzuw_langu,
+	T_mit_w_werden_die_Einstellungen_noch_ausfuehrlicher_angezeigt,
+	T_keine_Daten_zum_Anzeigen_Bearbeiten,
+	T_Maximaldauer_ueberschritten,
+	T_Fehler_in_setfaclggf,
+	T_Fehler_in_find2cl,
+	T_nach_sh_viall_beendet,
+	T_nach__,
+	T_unbek,
+	T_Progvers,
+	T_verwendet_wird,
+	T_Ausgabezeile,
+	T_pruefmehrfach,
 	T_konsMAX
 }; // Tkons_
 
@@ -494,7 +511,7 @@ class argcl
 };
 
 // Gebrauch, z.B.: ic_cl ic("UTF8","CP850");
-//			caus<<ic.convert(inh)<<endl;
+////			caus<<ic.convert(inh)<<endl;
 class ic_cl 
 {
 	iconv_t ict;
@@ -604,7 +621,7 @@ inline int isnumeric(const char* str)
 
 string zuzahl(const string& q);
  
-string* anfzweg(string& quel);
+string* anfzweg(string *quel);
 char ers(const char roh);
 
 // Gesamt-Trim
@@ -666,13 +683,12 @@ std::string string_to_hex(const std::string& input);
 int dateivgl(const string& d1, const string& d2,uchar obzeit=0);
 void kuerzevtz(string *vzp);
 
-class svec: public vector<std::string>
+struct svec: public vector<std::string>
 {
-  public:
-    inline svec& operator<<(const std::string& str) {
-      this->push_back(str);
-      return *this;
-    }
+	inline svec& operator<<(const std::string& str) {
+		this->push_back(str);
+		return *this;
+	}
 }; // class svec: public vector<std::string>
 
 //svec& operator<<(svec& v, const std::string& str);
@@ -788,21 +804,37 @@ struct optcl:wpgcl
 		uchar nichtspeichern=0;
 		const uchar virteinzutragen(/*schAcl<optcl>**/void *schlp,int obverb);
 		void virtweisomapzu(/*schAcl<optcl>**/void *schlp);
+//		void virtloeschomaps(/*schAcl<optcl>**/void *schlp);
+		void virtloeschomaps(schAcl<optcl> *schlp);
 		optcl(const string& pname,const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-				         const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher,const uchar obno=0);
+				const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher,const uchar obno=0);
 		void setzwert();
 		int setzstr(const char* const neuw,uchar *const obzuschreib=0,const uchar ausDatei=0);
 		void virttusetzbemerkwoher(const string& ibemerk,const uchar vwoher);
 		void virtoausgeb() const;
 		int pzuweis(const char *const nacstr, const uchar vgegenteil=0, const uchar vnichtspeichern=0);
-    virtual const string& virtmachbemerk(const Sprache lg,const binaer obfarbe=wahr);
-    void hilfezeile(Sprache lg);
+		virtual const string& virtmachbemerk(const Sprache lg,const binaer obfarbe=wahr);
+		void hilfezeile(Sprache lg);
 		void virtfrisch();
 		~optcl();
 }; // struct optcl
 
 // fuer Commandline-Optionen
 // enum par_t:uchar {pstri,pdez,ppwd,pverz,pfile,puchar,pbin,pint,plong,pdat}; // Parameterart: Sonstiges, Verzeichnis, Datei, uchar, int, long, Datum (struct tm)
+
+struct aScl {
+   const string name;
+   const string *wertp;
+   aScl(const string& name, const string *wertp):name(name),wertp(wertp) {}
+}; // class aScl
+
+struct aSvec:vector<aScl>
+{
+	inline aSvec& operator<<(const aScl& aS) {
+		this->push_back(aS);
+		return *this;
+	}
+}; // class aSvec: public vector<std::string>
 
 template <typename SCL> class schAcl {
  public:
@@ -823,24 +855,30 @@ template <typename SCL> class schAcl {
  inline size_t size(){return schl.size();}
  inline shared_ptr<SCL> letzter() {return schl[schl.size()-1];} 
  schAcl(const string& name);
+ schAcl(const string& name, vector<aScl> *v);
+#ifdef false
+ schAcl(const string& name, vector<aScl> v);
+#endif
 // schAcl(const string& name, const char* const* sarr,size_t vzahl);
  // void neu(size_t vzahl=0);
  void sinit(size_t vzahl, ...);
  void sinit(vector<shared_ptr<SCL>> sqlvp);
-		map<string,SCL*> omap; // map der Optionen
-		map<const char* const,SCL const*> okmap; // map der Optionen, sortiert nach Tx[<kurzi>]
-		map<const char* const,SCL const*> olmap; // map der Optionen, sortiert nach Tx[<langi>]
-		typename map<string,SCL*>::iterator omit; // Optionen-Iterator
-//		void omapzuw(); // Optionen an omap zuweisen
-		// void initd(const char* const* sarr,size_t vzahl);
-// void initv(vector<optcl*> optpv,vector<size_t> optsv);
-// int setze(const string& pname, const string& wert/*, const string& bem=nix*/);
-// const string& hole(const string& pname);
+ map<string,SCL*> omap; // map der Optionen
+ map<const char* const,SCL const*> okmap; // map der Optionen, sortiert nach Tx[<kurzi>]
+ map<const char* const,SCL const*> olmap; // map der Optionen, sortiert nach Tx[<langi>]
+ typename map<string,SCL*>::iterator omit; // Optionen-Iterator
+ //		void omapzuw(); // Optionen an omap zuweisen
+ // void initd(const char* const* sarr,size_t vzahl);
+ // void initv(vector<optcl*> optpv,vector<size_t> optsv);
+ // int setze(const string& pname, const string& wert/*, const string& bem=nix*/);
+ // const string& hole(const string& pname);
  void setzbemv(const string& pname,TxB *TxBp,size_t Tind,uchar obfarbe=0,svec *fertige=0);
  void setzbemerkwoher(SCL *optp,const string& ibemerk,const uchar vwoher);
  void schAschreib(mdatei *const f,int obverb); // Schluessel-Array-schreib
  int confschreib(const string& fname,ios_base::openmode modus=ios_base::out,const string& mpfad=nix,const uchar faclbak=1,int obverb=0,int oblog=0);
+ void zeigschoen();
  void gibaus(const int nr=0);
+ void oausgeb(const char* const farbe,int obverb=0,int oblog=0);
  void gibomapaus();
  void eintrinit();
  void frisch();
@@ -849,12 +887,6 @@ template <typename SCL> class schAcl {
 template <> void schAcl<WPcl>::sinit(size_t vzahl, ...);
 template <> void schAcl<WPcl>::eintrinit();
 template <> void schAcl<optcl>::eintrinit();
-
-struct abSchl {
-   string pname;
-   string wert;
-   abSchl(string& vname, string& vwert):pname(vname),wert(vwert) {}
-}; // class abSchl
 
 // Linux-System-Enum
 enum lsysen:uchar {usys,sus,deb,fed};
@@ -916,24 +948,35 @@ struct color {
 struct absch
 {
  string aname;
- vector<abSchl> av;
- const string& suche(const char* const sname);
- const string& suche(const string& sname);
+ vector<aScl> av;
+ const string *suche(const char* const sname);
+ const string *suche(const string& sname);
  void clear();
 }; // class absch
 
+struct paarcl
+{
+	string name;
+	string wert;
+	string bemerk;
+	paarcl(const string& name, const string *wert, const string& bemerk);
+}; // kpaar
+
 // Konfigurationsdatei-Klasse, Nachfolger von confdat
-struct confdcl {
+struct confdcl 
+{
 	string fname; // Dateiname
 	svec zn;
+	vector<paarcl> paare;
 	uchar obgelesen;
 	uchar obzuschreib;
+	uchar mitabsch{0};
 	size_t richtige;
 	vector<absch> abschv;
-	confdcl(const string& fname, int obverb);
+	confdcl(const string& fname, int obverb, const char tz='=');
 	confdcl();
-	int lies(const string& vfname, int obverb);
-	template <typename SCL> void kauswert(schAcl<SCL> *sA, int obverb=0, const char tz='=',const uchar mitclear=1);
+	int lies(const string& vfname, int obverb, const char tz='=');
+	template <typename SCL> void kauswert(schAcl<SCL> *sA, int obverb=0,const uchar mitclear=1);
 	void Abschn_auswert(int obverb=0, const char tz='=');
 };
 
@@ -963,7 +1006,7 @@ int systemrueck(const string& cmd, int obverb=0, int oblog=0, vector<string> *ru
 								stringstream *ausgp=0,uchar obdirekt=0);
 void pruefplatte();
 void pruefmehrfach(const string& wen=nix,int obverb=0,uchar obstumm=0);
-void setfaclggf(const string& datei,int obverb=0,int oblog=0,const binaer obunter=falsch,int mod=4,uchar obimmer=0,
+int setfaclggf(const string& datei,int obverb=0,int oblog=0,const binaer obunter=falsch,int mod=4,uchar obimmer=0,
                 uchar faclbak=0,const string& user=string(),uchar fake=0,stringstream *ausgp=0,const uchar obprot=1);
 int pruefverz(const string& verz,int obverb=0,int oblog=0, uchar obmitfacl=0, uchar obmitcon=0,
               const string& besitzer=string(), const string& benutzer=string(), const uchar obmachen=1,const uchar obprot=1);
@@ -977,10 +1020,11 @@ string Tippzahl(const char *frage, const char *vorgabe=0);
 string Tippzahl(const char *frage, const string *vorgabe);
 string Tippzahl(const string& frage, const string *vorgabe);
 long Tippzahl(const string& frage,const long& vorgabe);
-string Tippstr(const char *frage, const string *vorgabe=0,const uchar obnichtleer=1);
+string Tippstr(const char *const frage, const string *const vorgabe=0,const uchar obnichtleer=1);
 // char* Tippcstr(const char *frage, char* buf, unsigned long buflen, const char* vorgabe=nix);
-string Tippstr(const string& frage, const string *vorgabe=0,const uchar obnichtleer=1);
-string Tippverz(const char *frage,const string *vorgabe=0);
+string Tippstr(const string& frage, const string *const vorgabe=0,const uchar obnichtleer=1);
+string Tippverz(const string& frage,const string *const vorgabe=0);
+string Tippverz(const char *const frage,const string *const vorgabe=0);
 uchar VerzeichnisGibts(const char* vname);
 int tuloeschen(const string& zuloe,const string& cuser=nix,int obverb=0, int oblog=0,stringstream *ausgp=0);
 int attrangleich(const string& zu, const string& gemaess,const string* const zeitvondtp=0, int obverb=0, int oblog=0);
@@ -995,6 +1039,7 @@ FILE*
 oeffne(const string& datei, uchar art, uchar* erfolg,uchar faclbak=1,int obverb=0, int oblog=0);
 #endif // falsch
 
+enum distroenum{unbek=-1,Mint,Ubuntu,Debian,Suse,Fedora,Fedoraalt,Mageia,Manjaro};
 struct linst_cl
 {
  instprog ipr=keinp; // installiertes Program
@@ -1045,7 +1090,7 @@ class servc {
 		int lief();
 		int obsvfeh(int obverb=0,int oblog=0); // ob service einrichtungs fehler
 		uchar spruef(const string& sbez,uchar obfork,const string& parent, const string& sexec, const string& CondPath, const string& After, 
-                 linst_cl *linstp, int obverb=0,int oblog=0, uchar mitstarten=1);
+                 int obverb=0,int oblog=0, uchar mitstarten=1);
     int restart(int obverb=0, int oblog=0);
     void start(int obverb=0, int oblog=0);
     int startundenable(int obverb=0, int oblog=0);
@@ -1055,7 +1100,7 @@ class servc {
     void pkill(int obverb=0,int oblog=0);
     int enableggf(int obverb=0,int oblog=0);
     int machfit(int obverb=0, int oblog=0, binaer nureinmal=falsch);
-		void semodpruef(linst_cl *linstp,int obverb=0,int oblog=0);
+		void semodpruef(int obverb=0,int oblog=0);
 		void semanpruef(int obverb=0,int oblog=0,const string& mod="getty_t");
 		static void daemon_reload(int obverb=0, int oblog=0);
 };
@@ -1187,6 +1232,7 @@ extern const string s_gz; // ="gz";
 extern const string& defvors; // ="https://github.com/"+gitv+"/";
 extern const string& defnachs; // ="/archive/master.tar.gz";
 void viadd(string *cmdp,string* zeigp,const string& datei,const uchar ro=0,const uchar hinten=0, const uchar unten=0);
+int schluss(const int fnr,string text=string(),int oblog=0);
 
 extern class lsyscl lsys;
 
@@ -1196,8 +1242,8 @@ class hcl
 	private:
 		uchar obsetz=1; // setzzaehler
 		uchar mitpids=0; // mehrere pids
-		pidvec pidv;
 	protected:
+		pidvec pidv;
 		const char* const DPROG;
     double tstart, tende;
     size_t optslsz=0; // last opts.size()
@@ -1218,6 +1264,7 @@ class hcl
 		string mpwd;  // Passwort fuer Mysql/MariaDB //ω
 		stringstream uebers; // Ueberschrift fuer Verarbeitungslauf
 		const uchar mitcron; // ob Programm auch in Cron eingetragen werden kann; kann im Konstruktor angegeben werden
+		unsigned tmmoelen;
 #ifdef _WIN32
     char cpt[255];
     DWORD dcpt;
@@ -1226,6 +1273,7 @@ class hcl
     size_t cptlen;
 #endif // _WIN32 else
 	public:
+		int retu{0}; // Return-Value
 		int obverb=0; // verbose
 		int oblog=0;  // mehr Protokollieren
     uchar rzf=0; // rueckzufragen
@@ -1261,7 +1309,6 @@ class hcl
 		string azaehlerdt; // akonfdt+".zaehl"
 		schAcl<WPcl> zcnfA=schAcl<WPcl>("zcnfA"); // Zaehlkonfiguration
 		string vorcm; // Vor-Cron-Minuten
-		linst_cl* linstp=0;
 		vector<string> benutzer; // Benutzer aus /etc/passwd, bearbeitet durch setzbenutzer(&user)
 		uchar obsotiff=0; // 1 = tiff wird von der source verwendet
 		stringstream erkl; // Erklärung für die Hilfe
@@ -1293,6 +1340,7 @@ class hcl
     void verarbeitkonf();
 		int zeighilfe(const stringstream *const erkl);
 		virtual void virttesterg()=0;
+		virtual void pvirtvorzaehler()=0;
 		void lieszaehlerein();
 		void setzzaehler();
 		void schreibzaehler();
@@ -1300,6 +1348,7 @@ class hcl
 		virtual void virtzeigversion(const string& ltiffv=nix);
 		virtual void pvirtvorrueckfragen()=0;
 		virtual void virtrueckfragen();
+		virtual void pvirtvorpruefggfmehrfach()=0;
 		void pruefggfmehrfach();
 		virtual void virtpruefweiteres();
 		uchar pruefcron(const string& cm);
@@ -1309,18 +1358,17 @@ class hcl
 		void update(const string& DPROG);
 		virtual void virtschlussanzeige();
 	public:
-		void optausg(const char *farbe); // Optionen ausgeben
 		void pruefcl(); // commandline mit omap und mit argcmv parsen
 		hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron);
 		~hcl();
 		void lauf();
-		int hLog(const string& text,const bool oberr=0,const short klobverb=0) const;
+		int hLog(const string& text,const bool oberr=0,const short klobverb=0) const; 
 		void pruefsamba(const vector<const string*>& vzn,const svec& abschni,const svec& suchs,const char* DPROG,const string& cuser);
 		int holvomnetz(const string& datei,const string& vors=defvors,const string& nachs=defnachs);
 		int kompilbase(const string& was,const string& endg);
 		int kompiliere(const string& was,const string& endg,const string& vorcfg=nix,const string& cfgbismake=s_dampand);
 		int kompilfort(const string& was,const string& vorcfg=nix,const string& cfgbismake=s_dampand,uchar ohneconf=0);
-		double progvers(const string& prog);
+		double progvers(const string& prog,string* ergptr=0);
 		void prueftif(string aktvers);
 		void zeigkonf();
 		void reduzierlibtiff();
