@@ -1476,11 +1476,12 @@ int hhcl::vverarbeit(const string& datei)
 		const char* const sonder[]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
 		string zeile,altz;
 //		struct tm berdat{0}; // Berichtsdatum
+		if (!My) initDB();
+		string auftr,nnam,vnam;
+		tm gebd{0},eingtm{0};
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
-			string auftr,nnam,vnam;
-			tm gebd{0};
 			if (zeile.size()>3) cd=zeile.substr(3,4);
 			if (zeile.size()>7) {
 				if (!cp) {
@@ -1505,19 +1506,47 @@ int hhcl::vverarbeit(const string& datei)
 					vnam=inh;
 				} else if (cd=="3103") {
 					BDTtoDate(inh,&gebd,1900);
+				} else if (cd=="8301") {
+					BDTtoDate(inh,&eingtm,2000);
 				} else if (cd=="8000") {
 					if (!auftr.empty()) {
-
+						char ***cerg{0};
+						RS vgl(My,"SELECT distinct Nachname,Vorname,GebDat FROM `labor2aNachw` l WHERE Eingang="+sqlft(My->DBS,&eingtm)+" AND auftragsschlüssel='"+auftr+"'",0,ZDB);
+						if (vgl.obfehl) {
+							 caus<<rot<<"Fehler bei "<<gruen<<vgl.sql<<schwarz<<endl;
+						} else {
+							unsigned fzahl{0};
+							while (cerg=vgl.HolZeile(),cerg?*cerg:0) {
+								fzahl++;
+//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
+								stringstream zpstr;
+								zpstr<<ztacl(&gebd,"%Y-%m-%d");
+								//// zp=buf;
+								if ((cjj(cerg,0)!=nnam || cjj(cerg,1)!=vnam || cjj(cerg,2)!=zpstr.str())
+									&&!(!strcmp(cjj(cerg,0),"")&&!strcmp(cjj(cerg,1),"")&&cjj(cerg,2)==zpstr.str())
+										) {
+									caus<<violett<<setw(30)<<nnam<<"|"<<violett<<setw(30)<<vnam<<schwarz<<"|"<<violett<<setw(19)<<zpstr.str()<<"|"<<schwarz<<gebd.tm_year<<"-"<<gebd.tm_mon<<"-"<<gebd.tm_mday<<endl;
+									caus<<blau<<setw(30)<<cjj(cerg,0)<<"|"<<blau<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
+								}
+							} // 							while (cerg=vgl.HolZeile())
+							if (!fzahl) {
+								caus<<rot<<"Nix gefunden bei "<<gruen<<vgl.sql<<schwarz<<endl;
+							}
+						} // 						if (vgl.obfehl)
+						nnam.clear();
+						vnam.clear();
+						memset(&gebd,0,sizeof gebd);
+						memset(&eingtm,0,sizeof eingtm);
 						auftr.clear();
-					}
-				}
+					} // 					if (!auftr.empty())
+				} // 				} else if (cd=="8000")
 				if (cd.empty()||!cd[0]) continue;
 				// sonst keinen Fall von Zeilenumbruch gefunden
 				if (cd=="8311" ||cd=="3101" ||cd=="3102"||cd=="3103"||cd=="8000")
 					hLog((cd=="8000"?gruens:blaus)+bzahl+" "+cd+" "+schwarz+inh);
 				//			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
-			}
-		} // 		while(getline(mdat,zeile))
+		}
+	} // 		while(getline(mdat,zeile))
 	} // 	if (mdat.is_open())
 	return 0;
 }
@@ -1571,7 +1600,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 		// ä,ö,ü,Ä,Ö,Ü,ß,µ,` iso8859-15, cp850, iso8859-1
 		const char* const sonder[]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
 		string zeile,altz;
-		struct tm berdat={0}; // Berichtsdatum
+		struct tm berdat{0}; // Berichtsdatum
 		uchar oblaborda=0, arztnameda=0, /*in (Vor)zeile kommt Wort Keimzahl vor*/keimz=0,/*die Keimzahl wurde schon eingesetzt*/keimzda=0;
 		string verf,abkue,lanr;
 		while(getline(mdat,zeile)) {

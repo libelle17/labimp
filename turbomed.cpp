@@ -231,7 +231,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				",concat(if(e.text rlike '^:[ /\\*:]*$','',if(e.text rlike '^:[ /\\*]*:',concat(mid(e.text,locate(':',e.text,2)+1),';'),if(e.text='.','',if(e.text='','',concat(e.text,';'))))),k.text) Kommentar "
 				",NB,uNg, "
 				"IF(abkü = 'LDL' AND einheit = 'mg/dl','100',oNg) oNg,"
-				"Labor,u.DatID,u.SatzID,u.SatzLänge,u.Auftragsnummer,u.Auftragsschlüssel,u.Berichtsdatum,u.Nachname,u.Vorname,u.GebDat,Pfad "
+				"Labor,u.DatID,u.SatzID,u.SatzLänge,u.Auftragsnummer,u.Auftragsschlüssel,u.Eingang,u.Berichtsdatum,u.Nachname,u.Vorname,u.GebDat,Pfad "
 				"FROM `"+tlyus+"` u "
 				"LEFT JOIN `"+tlywert+"` w on u.id=w.usid "
 				"LEFT JOIN `"+tlyhinw+"` e on w.erklid=e.id "

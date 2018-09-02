@@ -260,7 +260,7 @@ class hhcl:public dhcl
 		string labind,pneuind,pnbid,hinwind;
 		string datid;
 		ic_cl *icp[3];
-		tm eingtm{0}, gebdat={0};
+		tm eingtm{0}, gebdat{0};
 		tm minnachdat{0}; // minimales Datum der Tabelle tlyus fuer die Nachbearbeitung
 		tm maxnachdat{0,0,0,1,0,200,0,0,0}; // maximale Datum der Tabelle tlyus fuer die Nachbearbeitung
 		string nname,vname,titel,nvorsatz,sgschl,pat_id{"0"},auftrschl,baktid,hinwid,erklid,kommid;
