@@ -1748,13 +1748,13 @@ RS::RS(const DB* const pdb,const string& table):dbp(pdb),table(table)
 
 void RS::setzzruck() 
 {
-  this->result=0;
+  if (result) this->result=0;
 #ifdef mitpostgres 
 	this->pres=0;
 #endif // mitpostgres
   // um bei wiederholten Abfragen vorher mysql_free_result aufrufen zu koennen
   obfehl=-1;
-}
+} // void RS::setzzruck() 
 
 // wird aufgerufen im template RS::Abfrage
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
