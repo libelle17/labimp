@@ -1984,9 +1984,11 @@ RS::~RS()
 					mysql_free_result(result);
 					obfehl=-1;
 				}
-				// das Folgende half bei wiederholten View-Erstellungen als einziges, 
-				// nicht, wie in der mysql-Hilfe beschrieben, die Folge von mysql_use_result und mysql_free_result
-				for(;!mysql_next_result(dbp->conn[aktc]);); // https://stackoverflow.com/questions/614671/commands-out-of-sync-you-cant-run-this-command-now
+				// das Folgende half bei wiederholten View-Erstellungen ( mit drop view ...; create ...)
+				for(;!mysql_next_result(dbp->conn[aktc]);) { // https://stackoverflow.com/questions/614671/commands-out-of-sync-you-cant-run-this-command-now
+					result=mysql_use_result(dbp->conn[aktc]);
+					mysql_free_result(result);
+				}
 				break;
 			case Postgres:
 				caup<<"hier ~RS"<<endl;

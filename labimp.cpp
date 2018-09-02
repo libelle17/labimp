@@ -384,6 +384,12 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"nachbneu","afterwnew"},
 	// T_nachbneu_l
 	{"nachbearbeitungneu","afterworknew"},
+	// T_pruefauft_k,
+	{"pruefauft","checkord"},
+	// T_pruefauft_l,
+	{"pruefauftraege","checkorders"},
+	// T_pruefe_alle_Auftraege,
+	{"pruefe alle Auftraege","check all orders"},
 	// T_nur_Nachbearbeitung
 	{"nur Nachbearbeitung","only afterwork"},
 	// T_fertig
@@ -1125,6 +1131,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&initdb,/*art*/puchar,T_initdb_k,T_initdb_l,/*TxBp*/&Tx,/*Txi*/T_initialisiert_nur_die_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nachbneu,/*art*/puchar,T_nachbneu_k,T_nachbneu_l,/*TxBp*/&Tx,/*Txi*/T_Nachbearbeitung_von_vorne,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&pruefauft,/*art*/puchar,T_pruefauft_k,T_pruefauft_l,/*TxBp*/&Tx,/*Txi*/T_pruefe_alle_Auftraege,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pname*/"",/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
@@ -1276,7 +1283,7 @@ void hhcl::virtpruefweiteres()
 		RS d9(My,"TRUNCATE "+tlydat,aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleert_alle_Tabellen_und_faengt_von_vorne_an]+schwarz,1,1);
-	} else if (loeschunvollst||nurnachb||nachbneu) {
+	} else if (loeschunvollst||nurnachb||nachbneu||pruefauft) {
 		if (nachbneu) {
 			if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Nachbearbeitungen_von_vorne_angefangen_werden]+schwarz,"n")) {
 				fLog(Tx[T_Aktion_abgebrochen],1,1);
@@ -1288,6 +1295,11 @@ void hhcl::virtpruefweiteres()
 				fLog(Tx[T_Aktion_abgebrochen],1,1);
 				exit(0);
 			}
+		}
+		if (pruefauft) {
+			caus<<"So, jetzt pruefe ich die Auftraege"<<endl;
+//			vverarbeit("/opt/turbomed/labor/X010LG05SKD.LDT");
+			vverarbeit("/opt/turbomed/labor/X010PX05SKD.LDT");
 		}
 		const uchar altZDB{ZDB};
 		ZDB=1;
@@ -1454,6 +1466,62 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	rlep->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 } // void hhcl::wertschreib
 
+int hhcl::vverarbeit(const string& datei)
+{
+	mdatei mdat(datei,ios::in);
+	if (mdat.is_open()) {
+		// Zeichensatz ermitteln und verwenden
+		uchar cp=0; // 0=utf-8, 1=iso-8859-15, 2=cp850
+		// ä,ö,ü,Ä,Ö,Ü,ß,µ,` iso8859-15, cp850, iso8859-1
+		const char* const sonder[]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
+		string zeile,altz;
+//		struct tm berdat{0}; // Berichtsdatum
+		while(getline(mdat,zeile)) {
+			string bzahl=zeile.substr(0,3);
+			string cd,inh;
+			string auftr,nnam,vnam;
+			tm gebd{0};
+			if (zeile.size()>3) cd=zeile.substr(3,4);
+			if (zeile.size()>7) {
+				if (!cp) {
+					for(unsigned p=0;p<sizeof sonder/sizeof *sonder;p++) {
+						if (zeile.find_first_of(sonder[p],7)!=string::npos) {
+							cp=p+1;
+							break;
+						}
+					}
+				}
+				if (cp) {
+					inh=icp[cp-1]->convert(zeile,7);
+				} else {
+					inh=zeile.substr(7);
+				}
+				sersetze(&inh,"\r","");
+				if (cd=="3101") {
+					nnam=inh;
+				} else if (cd=="8311") {
+					auftr=inh;
+				} else if (cd=="3102") {
+					vnam=inh;
+				} else if (cd=="3103") {
+					BDTtoDate(inh,&gebd,1900);
+				} else if (cd=="8000") {
+					if (!auftr.empty()) {
+
+						auftr.clear();
+					}
+				}
+				if (cd.empty()||!cd[0]) continue;
+				// sonst keinen Fall von Zeilenumbruch gefunden
+				if (cd=="8311" ||cd=="3101" ||cd=="3102"||cd=="3103"||cd=="8000")
+					hLog((cd=="8000"?gruens:blaus)+bzahl+" "+cd+" "+schwarz+inh);
+				//			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
+			}
+		} // 		while(getline(mdat,zeile))
+	} // 	if (mdat.is_open())
+	return 0;
+}
+
 // aufgerufen in pvirtfuehraus; // return 0 = fertig
 int hhcl::dverarbeit(const string& datei,string *datidp)
 {
@@ -1503,7 +1571,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 		// ä,ö,ü,Ä,Ö,Ü,ß,µ,` iso8859-15, cp850, iso8859-1
 		const char* const sonder[]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
 		string zeile,altz;
-		struct tm berdat={0};
+		struct tm berdat={0}; // Berichtsdatum
 		uchar oblaborda=0, arztnameda=0, /*in (Vor)zeile kommt Wort Keimzahl vor*/keimz=0,/*die Keimzahl wurde schon eingesetzt*/keimzda=0;
 		string verf,abkue,lanr;
 		while(getline(mdat,zeile)) {
@@ -1939,7 +2007,7 @@ void hhcl::pvirtfuehraus()
 	if (initdb) {
 		prueftab();
 	} else if (!loeschalle && !loeschunvollst) {
-		if (!nurnachb && !nachbneu) {
+		if (!nurnachb && !nachbneu && !pruefauft) {
 			pruefverz(fertigvz,obverb,oblog);
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 			systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");

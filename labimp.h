@@ -180,6 +180,9 @@ enum T_
 	T_nurnachb_l,
 	T_nachbneu_k,
 	T_nachbneu_l,
+	T_pruefauft_k,
+	T_pruefauft_l,
+	T_pruefe_alle_Auftraege,
 	T_nur_Nachbearbeitung,
 	T_fertig,
 	T_Dateien_gefunden,
@@ -278,6 +281,7 @@ class hhcl:public dhcl
 		uchar loeschunvollst=0;
 		uchar nurnachb=0;
 		uchar nachbneu=0;
+		uchar pruefauft=0; // pruefe Patientenidentität der Auträge X010LG05SKD.LDT und X010PG05SKD.LDT
 		string loeschab;
 		string loeschid;
 		uchar listdat=0;
@@ -305,6 +309,7 @@ class hhcl:public dhcl
 		void virtlieskonfein();
 		void virtautokonfschreib();
 		int dverarbeit(const string& datei,string *datidp);
+		int vverarbeit(const string& datei); // Vergleichsdatei verarbeiten
 		void usreset();
 		void wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep);
 	protected: 
