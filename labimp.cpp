@@ -1298,8 +1298,8 @@ void hhcl::virtpruefweiteres()
 		}
 		if (pruefauft) {
 			caus<<"So, jetzt pruefe ich die Auftraege"<<endl;
-//			vverarbeit("/opt/turbomed/labor/X010LG05SKD.LDT");
-			vverarbeit("/opt/turbomed/labor/X010PX05SKD.LDT");
+//			vverarbeit("/DATA/down/X010LG05SKD.LDT");
+			vverarbeit("/DATA/down/X010PX05SKD.LDT");
 		}
 		const uchar altZDB{ZDB};
 		ZDB=1;
@@ -1477,7 +1477,7 @@ int hhcl::vverarbeit(const string& datei)
 		string zeile,altz;
 //		struct tm berdat{0}; // Berichtsdatum
 		if (!My) initDB();
-		string auftr,nnam,vnam;
+		string auftr,nnam,vnam,aufnr;
 		tm gebd{0},eingtm{0};
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
@@ -1504,37 +1504,122 @@ int hhcl::vverarbeit(const string& datei)
 					auftr=inh;
 				} else if (cd=="3102") {
 					vnam=inh;
+				} else if (cd=="8310") { // Auftragsnummer
+					aufnr=inh;
 				} else if (cd=="3103") {
 					BDTtoDate(inh,&gebd,1900);
 				} else if (cd=="8301") {
 					BDTtoDate(inh,&eingtm,2000);
 				} else if (cd=="8000") {
 					if (!auftr.empty()) {
-						char ***cerg{0};
-						RS vgl(My,"SELECT distinct Nachname,Vorname,GebDat FROM `labor2aNachw` l WHERE Eingang="+sqlft(My->DBS,&eingtm)+" AND auftragsschlüssel='"+auftr+"'",0,ZDB);
-						if (vgl.obfehl) {
-							 caus<<rot<<"Fehler bei "<<gruen<<vgl.sql<<schwarz<<endl;
-						} else {
-							unsigned fzahl{0};
-							while (cerg=vgl.HolZeile(),cerg?*cerg:0) {
-								fzahl++;
-//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
-								stringstream zpstr;
-								zpstr<<ztacl(&gebd,"%Y-%m-%d");
-								//// zp=buf;
-								if ((cjj(cerg,0)!=nnam || cjj(cerg,1)!=vnam || cjj(cerg,2)!=zpstr.str())
-									&&!(!strcmp(cjj(cerg,0),"")&&!strcmp(cjj(cerg,1),"")&&cjj(cerg,2)==zpstr.str())
-										) {
-									caus<<violett<<setw(30)<<nnam<<"|"<<violett<<setw(30)<<vnam<<schwarz<<"|"<<violett<<setw(19)<<zpstr.str()<<"|"<<schwarz<<gebd.tm_year<<"-"<<gebd.tm_mon<<"-"<<gebd.tm_mday<<endl;
-									caus<<blau<<setw(30)<<cjj(cerg,0)<<"|"<<blau<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
-								}
-							} // 							while (cerg=vgl.HolZeile())
-							if (!fzahl) {
+						const string vorsp="SELECT distinct Nachname,Vorname,GebDat,Auftragsnummer,Auftragsschlüssel,Pfad,Eingang FROM `labor2aNachw` l WHERE ";
+						const string sql[]{
+							"Eingang="+sqlft(My->DBS,&eingtm)+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")+
+							"AND auftragsschlüssel='"+auftr+"'",
+						  "Eingang="+sqlft(My->DBS,&eingtm)+" AND auftragsschlüssel='"+auftr+"'"
+						};
+						unsigned fzahl{0};
+						for(unsigned iru=0;iru<sizeof sql/sizeof *sql;iru++) {
+							char ***cerg{0};
+							RS vgl(My,vorsp+sql[iru],0,ZDB);
+							if (vgl.obfehl) {
+								caus<<rot<<"Fehler bei "<<gruen<<vgl.sql<<schwarz<<endl;
+							} else {
+								while (cerg=vgl.HolZeile(),cerg?*cerg:0) {
+									fzahl++;
+									//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
+									stringstream gebdp;
+									gebdp<<ztacl(&gebd,"%Y-%m-%d");
+									stringstream eingtmp;
+									eingtmp<<ztacl(&eingtm,"%Y-%m-%d");
+									//// zp=buf;
+									if ((cjj(cerg,0)!=nnam||cjj(cerg,1)!=vnam||(cjj(cerg,2)!=gebdp.str()&&!(!strcmp(cjj(cerg,2),"0000-01-00")&&gebdp.str()=="-1-12-31")))
+											&&!(!strcmp(cjj(cerg,0),"")&&!strcmp(cjj(cerg,1),"")&&cjj(cerg,2)==gebdp.str())
+										 ) {
+										caus<<violett<<setw(24)<<nnam<<"|"<<violett<<setw(17)<<vnam<<schwarz<<"|"<<violett<<setw(10)<<
+											gebdp.str()<<"|"<<violett<<setw(8)<<aufnr<<'|'<<auftr<<'|'<<eingtmp.str()<<'|'<<schwarz<<endl;
+										caus<<blau<<setw(24)<<cjj(cerg,0)<<"|"<<blau<<setw(17)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(10)<<
+											cjj(cerg,2)<<"|"<<blau<<setw(8)<<cjj(cerg,3)<<'|'<<cjj(cerg,4)<<'|'<<cjj(cerg,6)<<'|'<<schwarz<<cjj(cerg,5)<<endl;
+										caus<<blau<<"Was gefunden bei "<<vgl.sql<<schwarz<<endl;
+									}
+								} // 							while (cerg=vgl.HolZeile())
+								break;
+							} // 						if (vgl.obfehl)
+							if (iru==sizeof sql/sizeof *sql-1) if (!fzahl) {
 								caus<<rot<<"Nix gefunden bei "<<gruen<<vgl.sql<<schwarz<<endl;
 							}
-						} // 						if (vgl.obfehl)
+						}
+						if (0) {
+							uchar gefunden{0};
+							char ***cerg{0};
+							RS vg0(My,"SELECT distinct Nachname,Vorname,GebDat,Auftragsnummer,Auftragsschlüssel,Pfad,Eingang FROM `labor2aNachw` l "
+									"WHERE Eingang="+sqlft(My->DBS,&eingtm)+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")+
+									"AND auftragsschlüssel='"+auftr+"'",0,ZDB);
+							if (vg0.obfehl) {
+								caus<<rot<<"Fehler bei "<<gruen<<vg0.sql<<schwarz<<endl;
+							} else {
+								unsigned fzahl{0};
+								while (cerg=vg0.HolZeile(),cerg?*cerg:0) {
+									fzahl++;
+									//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
+									stringstream gebdp;
+									gebdp<<ztacl(&gebd,"%Y-%m-%d");
+									stringstream eingtmp;
+									eingtmp<<ztacl(&eingtm,"%Y-%m-%d");
+									//// zp=buf;
+									if ((cjj(cerg,0)!=nnam||cjj(cerg,1)!=vnam||(cjj(cerg,2)!=gebdp.str()&&!(!strcmp(cjj(cerg,2),"0000-01-00")&&gebdp.str()=="-1-12-31")))
+											&&!(!strcmp(cjj(cerg,0),"")&&!strcmp(cjj(cerg,1),"")&&cjj(cerg,2)==gebdp.str())
+										 ) {
+										caus<<hviolett<<setw(24)<<nnam<<"|"<<hviolett<<setw(17)<<vnam<<schwarz<<"|"<<hviolett<<setw(10)<<
+											gebdp.str()<<"|"<<hviolett<<setw(8)<<aufnr<<'|'<<auftr<<'|'<<eingtmp.str()<<'|'<<schwarz<<endl;
+										caus<<blau<<setw(24)<<cjj(cerg,0)<<"|"<<blau<<setw(17)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(10)<<
+											cjj(cerg,2)<<"|"<<blau<<setw(8)<<cjj(cerg,3)<<'|'<<cjj(cerg,4)<<'|'<<cjj(cerg,6)<<'|'<<schwarz<<cjj(cerg,5)<<endl;
+										caus<<blau<<"Was gefunden bei "<<vg0.sql<<schwarz<<endl;
+									}
+								} // 							while (cerg=vg0.HolZeile())
+								if (fzahl) {
+									//									caus<<blau<<"Was gefunden bei "<<vg0.sql<<schwarz<<endl;
+									gefunden=1;
+								} else {
+									if (nnam=="Caglayan")
+										caus<<"Nix gefunden bei "<<vg0.sql<<schwarz<<endl;
+								}
+							} // 						if (vg0.obfehl)
+
+							if (!gefunden) {
+								cerg=0;
+								RS vgl(My,"SELECT distinct Nachname,Vorname,GebDat,Auftragsnummer,Auftragsschlüssel,Pfad,Eingang FROM `labor2aNachw` l "
+										"WHERE Eingang="+sqlft(My->DBS,&eingtm)+" AND auftragsschlüssel='"+auftr+"'",0,ZDB);
+								if (vgl.obfehl) {
+									caus<<rot<<"Fehler bei "<<gruen<<vgl.sql<<schwarz<<endl;
+								} else {
+									unsigned fzahl{0};
+									while (cerg=vgl.HolZeile(),cerg?*cerg:0) {
+										fzahl++;
+										//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
+										stringstream gebdp;
+										gebdp<<ztacl(&gebd,"%Y-%m-%d");
+										stringstream eingtmp;
+										eingtmp<<ztacl(&eingtm,"%Y-%m-%d");
+										//// zp=buf;
+										if ((cjj(cerg,0)!=nnam||cjj(cerg,1)!=vnam||(cjj(cerg,2)!=gebdp.str()&&!(!strcmp(cjj(cerg,2),"0000-01-00")&&gebdp.str()=="-1-12-31")))
+												&&!(!strcmp(cjj(cerg,0),"")&&!strcmp(cjj(cerg,1),"")&&cjj(cerg,2)==gebdp.str())
+											 ) {
+											caus<<violett<<setw(24)<<nnam<<"|"<<violett<<setw(17)<<vnam<<schwarz<<"|"<<violett<<setw(10)<<
+												gebdp.str()<<"|"<<violett<<setw(8)<<aufnr<<'|'<<auftr<<'|'<<eingtmp.str()<<'|'<<schwarz<<endl;
+											caus<<blau<<setw(24)<<cjj(cerg,0)<<"|"<<blau<<setw(17)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(10)<<
+												cjj(cerg,2)<<"|"<<blau<<setw(8)<<cjj(cerg,3)<<'|'<<cjj(cerg,4)<<'|'<<cjj(cerg,6)<<'|'<<schwarz<<cjj(cerg,5)<<endl;
+										}
+									} // 							while (cerg=vgl.HolZeile())
+									if (!fzahl) {
+										caus<<rot<<"Nix gefunden bei "<<gruen<<vgl.sql<<schwarz<<endl;
+									}
+								} // 						if (vgl.obfehl)
+							}
+						}
 						nnam.clear();
 						vnam.clear();
+						aufnr.clear();
 						memset(&gebd,0,sizeof gebd);
 						memset(&eingtm,0,sizeof eingtm);
 						auftr.clear();
