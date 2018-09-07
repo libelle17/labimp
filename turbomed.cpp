@@ -43,31 +43,60 @@ void hhcl::pvirtVorgbSpeziell()
 	fertigvz=ldatvz+vtz+Tx[T_fertige];
 } // void hhcl::pvirtVorgbSpeziell
 
-
+// fuellt den Vektor pql, dessen Elemente dann in der Funktion pruefPatID verwendet werden, um hhcl::pat_id zu belegen
+// ueberdeckt die gleichnamige Funktion in labimp.cpp
 void hhcl::ergpql()
 {
 	if (My->obtabspda("namen","gebdat")) {
 		hLog(violetts+Txt[T_ergpql_volle_Funktion]+schwarz);
-		pql.insert(pql.begin(),"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
-		pql.insert(pql.begin()+1,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
-		pql.insert(pql.begin()+2,"SELECT pat_id FROM namen WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
-		pql.insert(pql.begin()+3,"SELECT pat_id FROM namen WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm));
-		pql.insert(pql.begin()+4,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebdat)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm));
-		pql.insert(pql.begin()+5,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm));
+		pql.insert(pql.begin(),"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+1,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		// Pat_ID_3:
+		pql.insert(pql.begin()+2,"SELECT pat_id FROM namen n WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+3,"SELECT pat_id FROM namen WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+4,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebdat)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+5,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
 		// hier steht dann die Standardvorgabe
+		/*
 		pql<<"SELECT n.pat_id FROM namen n LEFT JOIN laborneu l ON n.pat_id = l.pat_id WHERE n.gebdat="+sqlft(My->DBS,&gebdat)+" AND l.zeitpunkt BETWEEN "
 			"SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) GROUP BY n.pat_id";
 		//	pql<<"SELECT n.pat_id FROM namen n LEFT JOIN laborneu l ON n.pat_id = l.pat_id WHERE n.nachname="+nname+" AND l.zeitpunkt BETWEEN "
 		//		"SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) GROUP BY n.pat_id";
+		*/
+		string gsql{"SELECT l.pat_id FROM laborneu l WHERE "};
+		if (lwerte.size()) {
+			for(size_t i=0;i<lwerte.size();i++) {
+				gsql+="(SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,lwerte[i])+") IS NOT NULL ";
+				if (i!=lwerte.size()-1) gsql+="AND ";
+			}
+			/*
+			for(size_t i=0;i<lwerte.size();i++) {
+				gsql+="((SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,lwerte[i])+") IS NOT NULL)";
+				if (i!=lwerte.size()-1) gsql+='+';
+			}
+			gsql+="=";
+			gsql+=ltoan(lwerte.size());
+			*/
+			gsql+=" GROUP BY pat_id";
+		} else {
+			gsql+="0";
+		}
+		pql<<gsql;
+		for(unsigned i=0;i<pql.size();i++) {
+			caus<<i<<": "<<pql[i]<<endl;
+		}
 	}
 } // void hhcl::ergpql
 
-// schwache Funktion, kann ueberdeckt werden
+/*
+// ueberdeckt gleichnamige Funktion in labimp.cpp
+// wird aufgerufen in pruefPatID
 void hhcl::auswertpql(const size_t i,insv& rus)
 {
-	hLog(violetts+Txt[T_auswertpql_volle_Funktion]+schwarz);
-	rus.hz(("Pat_id_"+ltoan(i)).c_str(),pat_id);
+hLog(violetts+Txt[T_auswertpql_volle_Funktion]+schwarz);
+rus.hz(("Pat_id_"+ltoan(i)).c_str(),pat_id);
 } // void hhcl::auswertpql
+ */
 
 void hhcl::vordverarb(const size_t aktc)
 {
@@ -82,6 +111,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 	uchar altZDB=ZDB;
 	ZDB=1;
 	RS vor(My,"SET @@GROUP_concat_max_len=150000; ",aktc,ZDB);
+	if (1) {
 	if (My->obtabspda("laborneu","wert")) {
 		my_ulonglong zahl=0;
 		RS v1(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
@@ -204,6 +234,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"7, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 #endif
 	} // 	if (My->obtabspda("laborneu","wert"))
+	} // (0)
 
 	{
 		const string labor2a{"labor2a"};
@@ -231,7 +262,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				",concat(if(e.text rlike '^:[ /\\*:]*$','',if(e.text rlike '^:[ /\\*]*:',concat(mid(e.text,locate(':',e.text,2)+1),';'),if(e.text='.','',if(e.text='','',concat(e.text,';'))))),k.text) Kommentar "
 				",NB,uNg, "
 				"IF(abkü = 'LDL' AND einheit = 'mg/dl','100',oNg) oNg,"
-				"Labor,u.DatID,u.SatzID,u.SatzLänge,u.Auftragsnummer,u.Auftragsschlüssel,u.Eingang,u.Berichtsdatum,u.Nachname,u.Vorname,u.GebDat,Pfad "
+				"Labor,u.DatID,u.SatzID,u.SatzLänge,u.Auftragsnummer,u.Auftragsschlüssel,u.Eingang,u.Berichtsdatum,u.Nachname,u.Vorname,u.GebDat,Pfad,Erstellungsdatum,geändert "
 				"FROM `"+tlyus+"` u "
 				"LEFT JOIN `"+tlywert+"` w on u.id=w.usid "
 				"LEFT JOIN `"+tlyhinw+"` e on w.erklid=e.id "

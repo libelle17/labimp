@@ -358,8 +358,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"letzte Änderung","last modification"},
 	// T_Groesse
 	{"Größe","size"},
-	// T_auswertpql_leere_Funktion
-	{"auswertpql() (leere Funktion)","evaluatepql() (empty function)"},
+	// T_auswertpql
+	{"auswertpql()","evaluatepql()"},
 	// T_PatID_aus_Laborneu
 	{"Pat_ID aus Laborneu","Pat_id from laborneu"},
 	// T_nachbearbeit_leere_Funktion
@@ -492,6 +492,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"bakt","bact"},
 	// T_initialisiert_nur_die_Tabellen
 	{"initialisiert nur die Tabellen","initializes only the tables"},
+	// T_fuer_PatID_gewaehlte_SQL_Abfrage,
+	{"für Pat_ID gewählte SQL-Abfrage","sql-query chosen for pat_id"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -509,22 +511,27 @@ hhcl::hhcl(const int argc, const char *const *const argv):dhcl(argc,argv,DPROG,/
 // Hier neue Funktionen speichern: //ω
 
 // schwache Funktion, kann ueberdeckt werden
+// aufgerufen in fuellpql
 void hhcl::ergpql()
 {
 	hLog(violetts+Tx[T_ergpql_leere_Funktion]+schwarz);
 }
 
-// schwache Funktion, kann ueberdeckt werden
+// schwache Funktion, kann ueberdeckt werden, wird es aber nicht
+// aufgerufen in pruefPatID
 void hhcl::auswertpql(const size_t i,insv& rus)
 {
-	hLog(violetts+Tx[T_auswertpql_leere_Funktion]+schwarz);
+	hLog(violetts+Tx[T_auswertpql]+schwarz);
+	rus.hz(("Pat_id_"+ltoan(i)).c_str(),pat_id);
 }
 
+// aufgerufen in dverarbeit
 void hhcl::vordverarb(const size_t aktc)
 {
 	hLog(violetts+Tx[T_vordverarb_leere_Funktion]+schwarz);
 }
 // schwache Funktion, kann ueberdeckt werden
+// aufgerufen in pvirtfuehraus
 void hhcl::nachbearbeit(const size_t aktc)
 {
 	hLog(violetts+Tx[T_nachbearbeit_leere_Funktion]+schwarz);
@@ -833,6 +840,7 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 		*/
 		fdr<<new Feld("verglichen","datetime","0","0",Tx[T_Datum_zu_dem_Datensatz_zuletzt_verglichen_wurde],0,0,0);
 		fdr<<new Feld("AfN","smallint","6","0",Tx[T_Affected_Number_Zahl_der_zugehoerigen_Datensaetze_in_Laborneu],0,0,0);
+		fdr<<new Feld("SQL","varchar","210","",Tx[T_fuer_PatID_gewaehlte_SQL_Abfrage],0,0,0);
 		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
 		Constraint csts[]{Constraint(tlydat+tlyus,new Feld{Feld("DatID")},1,tlydat,new Feld{Feld("DatID")},1,cascade,cascade),
@@ -1066,27 +1074,33 @@ void hhcl::prueflypgl(DB *My, const int obverb, const int oblog, const uchar dir
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
+// aufgerufen in pruefPatID und prueflyus
 void hhcl::fuellpql()
 {
 	pql.clear();
-	pql<<"SELECT pat_id FROM `"+tlyus+"` u WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND auftragsschlüssel = "+sqlft(My->DBS,auftrschl)+" AND pat_id<>0 GROUP BY pat_id";
+	pql<<"SELECT pat_id FROM `"+tlyus+"` u WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND auftragsschlüssel = "+sqlft(My->DBS,auftrschl)+" AND eingang = "+sqlft(My->DBS,&eingtm)+" AND pat_id<>0 GROUP BY pat_id";
 	ergpql();
 }
 
+// aufgerufen in russchreib
 void hhcl::pruefPatID(const int aktc,insv& rus)
 {
+	obverb=1;
 	hLog(violetts+Tx[T_pruefPatID_Standardfunktion]+schwarz);
 	fuellpql();
 	for(size_t i=0;i<pql.size();i++) {
 		RS rspat(My,pql[i],aktc,ZDB);
-		if (!rspat.obfehl) {
+		if (!rspat.obqueryfehler && rspat.result) { // 7.9. !obqueryfehler und !result vorgekommen
 			hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+pql[i]+schwarz);
 			if (rspat.result->row_count==1){
 				char ***cerg{0};
 				if ((cerg=rspat.HolZeile())) {
 					if (*cerg) {
 					  hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
-						if (pat_id=="0" || pat_id.empty()) pat_id=**cerg;
+						if (pat_id=="0" || pat_id.empty()) {
+							pat_id=**cerg;
+							rus.hz("sql",pql[i]);
+						}
 						auswertpql(i,rus);
 //						break;
 					} // 					if (*cerg)
@@ -1094,8 +1108,10 @@ void hhcl::pruefPatID(const int aktc,insv& rus)
 			} // 			if (rspat.result->row_count==1)
 		} else {
 			fLog(rots+Tx[T_Fehler_bei_sql]+violett+pql[i]+schwarz,1,oblog);
-		} // 		if (!rspat.obfehl) else
+		} // 		if (!rspat.obqueryfehler) else
 	}
+	hLog(violetts+Txk[T_Ende]+Tx[T_pruefPatID_Standardfunktion]+schwarz);
+	obverb=0;
 //	if (pat_id=="0") exit(97);
 } // void hhcl::virtVorgbAllg
 
@@ -1184,7 +1200,7 @@ void hhcl::pvirtvorrueckfragen()
 		if (!My) initDB();
 		char*** cerg{0};
 		RS li(My,"SELECT d.datid,pfad,geändert,größe,zp,codepage,!!fertig,(SELECT count(0) from `"+tlysaetze+"` WHERE datid=d.datid),(SELECT COUNT(0) FROM `"+tlyus+"` WHERE datid=d.datid),SUM((SELECT COUNT(0) FROM `"+tlywert+"` WHERE usid=u.id)),SUM((SELECT COUNT(0) FROM `"+tlybakt+"` WHERE usid=u.id)) FROM `"+tlydat+"` d LEFT JOIN `"+tlyus+"` u ON d.datid = u.datid GROUP BY d.datid",aktc,ZDB);
-		if (!li.obfehl) {
+		if (!li.obqueryfehler) {
 			size_t zru=0;
 			while (cerg=li.HolZeile(),cerg?*cerg:0) {
 				if (!zru++) {
@@ -1336,6 +1352,7 @@ void BDTtoDate(string& inh,struct tm *tm,int abjahr=1900)
 	} // 	for(auto& aktmu:mu)
 } // void BDTtoDate
 
+// aufgerufen in dverarbeit und wertschreib
 void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 {
 	if (obverb) rus.ausgeb();
@@ -1351,7 +1368,7 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 	usreset();
 } // void hhcl::russchreib
 
-// ins russchreib und dverarbeit
+// in russchreib und dverarbeit
 void hhcl::usreset()
 {
 	nname.clear();
@@ -1367,8 +1384,10 @@ void hhcl::usreset()
 	hinwid="0";
 	erklid="0";
 	kommid="0";
+	lwerte.clear(); // fuer ergpql 
 } // void hhcl::usreset
 
+// aufgerufen in dverarbeit
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep)
 {
 	if (*usoffenp) {
@@ -1478,7 +1497,7 @@ int hhcl::vverarbeit(const string& datei)
 //		struct tm berdat{0}; // Berichtsdatum
 		if (!My) initDB();
 		string auftr,nnam,vnam,aufnr;
-		tm gebd{0},eingtm{0};
+		tm gebtm{0},eingtm{0};
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -1507,29 +1526,36 @@ int hhcl::vverarbeit(const string& datei)
 				} else if (cd=="8310") { // Auftragsnummer
 					aufnr=inh;
 				} else if (cd=="3103") {
-					BDTtoDate(inh,&gebd,1900);
+					BDTtoDate(inh,&gebtm,1900);
 				} else if (cd=="8301") {
 					BDTtoDate(inh,&eingtm,2000);
 				} else if (cd=="8000") {
 					if (!auftr.empty()) {
 						const string vorsp="SELECT distinct Nachname,Vorname,GebDat,Auftragsnummer,Auftragsschlüssel,Pfad,Eingang FROM `labor2aNachw` l WHERE ";
 						const string sql[]{
-							"Eingang="+sqlft(My->DBS,&eingtm)+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")+
-							"AND auftragsschlüssel='"+auftr+"'",
-						  "Eingang="+sqlft(My->DBS,&eingtm)+" AND auftragsschlüssel='"+auftr+"'"
+							"Nachname="+sqlft(My->DBS,nnam)+" AND Vorname="+sqlft(My->DBS,vnam)
+								+ " AND GebDat="+sqlft(My->DBS,&gebtm)
+								+ " AND Eingang="+sqlft(My->DBS,&eingtm)
+								+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")
+								+" AND auftragsschlüssel='"+auftr+"'",
+								"Eingang="+sqlft(My->DBS,&eingtm)+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")+
+									"AND auftragsschlüssel='"+auftr+"'",
+								"Eingang="+sqlft(My->DBS,&eingtm)+" AND auftragsschlüssel='"+auftr+"'"
 						};
-						unsigned fzahl{0};
-						for(unsigned iru=0;iru<sizeof sql/sizeof *sql;iru++) {
+						unsigned fzahl{0}, iru{0};
+						for(;iru<sizeof sql/sizeof *sql;iru++) {
 							char ***cerg{0};
 							RS vgl(My,vorsp+sql[iru],0,ZDB);
-							if (vgl.obfehl) {
+							if (vgl.obqueryfehler) {
 								caus<<rot<<"Fehler bei "<<gruen<<vgl.sql<<schwarz<<endl;
 							} else {
 								while (cerg=vgl.HolZeile(),cerg?*cerg:0) {
 									fzahl++;
+									if (nnam=="Krämer")
+										caus<<blau<<nnam<<" gefunden bei "<<vgl.sql<<schwarz<<endl;
 									//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
 									stringstream gebdp;
-									gebdp<<ztacl(&gebd,"%Y-%m-%d");
+									gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 									stringstream eingtmp;
 									eingtmp<<ztacl(&eingtm,"%Y-%m-%d");
 									//// zp=buf;
@@ -1540,87 +1566,19 @@ int hhcl::vverarbeit(const string& datei)
 											gebdp.str()<<"|"<<violett<<setw(8)<<aufnr<<'|'<<auftr<<'|'<<eingtmp.str()<<'|'<<schwarz<<endl;
 										caus<<blau<<setw(24)<<cjj(cerg,0)<<"|"<<blau<<setw(17)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(10)<<
 											cjj(cerg,2)<<"|"<<blau<<setw(8)<<cjj(cerg,3)<<'|'<<cjj(cerg,4)<<'|'<<cjj(cerg,6)<<'|'<<schwarz<<cjj(cerg,5)<<endl;
-										caus<<blau<<"Was gefunden bei "<<vgl.sql<<schwarz<<endl;
+										caus<<gruen<<vgl.sql<<schwarz<<endl;
 									}
 								} // 							while (cerg=vgl.HolZeile())
-								break;
-							} // 						if (vgl.obfehl)
-							if (iru==sizeof sql/sizeof *sql-1) if (!fzahl) {
-								caus<<rot<<"Nix gefunden bei "<<gruen<<vgl.sql<<schwarz<<endl;
-							}
+								if (fzahl) break;
+							} // 						if (vgl.obqueryfehler)
 						}
-						if (0) {
-							uchar gefunden{0};
-							char ***cerg{0};
-							RS vg0(My,"SELECT distinct Nachname,Vorname,GebDat,Auftragsnummer,Auftragsschlüssel,Pfad,Eingang FROM `labor2aNachw` l "
-									"WHERE Eingang="+sqlft(My->DBS,&eingtm)+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")+
-									"AND auftragsschlüssel='"+auftr+"'",0,ZDB);
-							if (vg0.obfehl) {
-								caus<<rot<<"Fehler bei "<<gruen<<vg0.sql<<schwarz<<endl;
-							} else {
-								unsigned fzahl{0};
-								while (cerg=vg0.HolZeile(),cerg?*cerg:0) {
-									fzahl++;
-									//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
-									stringstream gebdp;
-									gebdp<<ztacl(&gebd,"%Y-%m-%d");
-									stringstream eingtmp;
-									eingtmp<<ztacl(&eingtm,"%Y-%m-%d");
-									//// zp=buf;
-									if ((cjj(cerg,0)!=nnam||cjj(cerg,1)!=vnam||(cjj(cerg,2)!=gebdp.str()&&!(!strcmp(cjj(cerg,2),"0000-01-00")&&gebdp.str()=="-1-12-31")))
-											&&!(!strcmp(cjj(cerg,0),"")&&!strcmp(cjj(cerg,1),"")&&cjj(cerg,2)==gebdp.str())
-										 ) {
-										caus<<hviolett<<setw(24)<<nnam<<"|"<<hviolett<<setw(17)<<vnam<<schwarz<<"|"<<hviolett<<setw(10)<<
-											gebdp.str()<<"|"<<hviolett<<setw(8)<<aufnr<<'|'<<auftr<<'|'<<eingtmp.str()<<'|'<<schwarz<<endl;
-										caus<<blau<<setw(24)<<cjj(cerg,0)<<"|"<<blau<<setw(17)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(10)<<
-											cjj(cerg,2)<<"|"<<blau<<setw(8)<<cjj(cerg,3)<<'|'<<cjj(cerg,4)<<'|'<<cjj(cerg,6)<<'|'<<schwarz<<cjj(cerg,5)<<endl;
-										caus<<blau<<"Was gefunden bei "<<vg0.sql<<schwarz<<endl;
-									}
-								} // 							while (cerg=vg0.HolZeile())
-								if (fzahl) {
-									//									caus<<blau<<"Was gefunden bei "<<vg0.sql<<schwarz<<endl;
-									gefunden=1;
-								} else {
-									if (nnam=="Caglayan")
-										caus<<"Nix gefunden bei "<<vg0.sql<<schwarz<<endl;
-								}
-							} // 						if (vg0.obfehl)
-
-							if (!gefunden) {
-								cerg=0;
-								RS vgl(My,"SELECT distinct Nachname,Vorname,GebDat,Auftragsnummer,Auftragsschlüssel,Pfad,Eingang FROM `labor2aNachw` l "
-										"WHERE Eingang="+sqlft(My->DBS,&eingtm)+" AND auftragsschlüssel='"+auftr+"'",0,ZDB);
-								if (vgl.obfehl) {
-									caus<<rot<<"Fehler bei "<<gruen<<vgl.sql<<schwarz<<endl;
-								} else {
-									unsigned fzahl{0};
-									while (cerg=vgl.HolZeile(),cerg?*cerg:0) {
-										fzahl++;
-										//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
-										stringstream gebdp;
-										gebdp<<ztacl(&gebd,"%Y-%m-%d");
-										stringstream eingtmp;
-										eingtmp<<ztacl(&eingtm,"%Y-%m-%d");
-										//// zp=buf;
-										if ((cjj(cerg,0)!=nnam||cjj(cerg,1)!=vnam||(cjj(cerg,2)!=gebdp.str()&&!(!strcmp(cjj(cerg,2),"0000-01-00")&&gebdp.str()=="-1-12-31")))
-												&&!(!strcmp(cjj(cerg,0),"")&&!strcmp(cjj(cerg,1),"")&&cjj(cerg,2)==gebdp.str())
-											 ) {
-											caus<<violett<<setw(24)<<nnam<<"|"<<violett<<setw(17)<<vnam<<schwarz<<"|"<<violett<<setw(10)<<
-												gebdp.str()<<"|"<<violett<<setw(8)<<aufnr<<'|'<<auftr<<'|'<<eingtmp.str()<<'|'<<schwarz<<endl;
-											caus<<blau<<setw(24)<<cjj(cerg,0)<<"|"<<blau<<setw(17)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(10)<<
-												cjj(cerg,2)<<"|"<<blau<<setw(8)<<cjj(cerg,3)<<'|'<<cjj(cerg,4)<<'|'<<cjj(cerg,6)<<'|'<<schwarz<<cjj(cerg,5)<<endl;
-										}
-									} // 							while (cerg=vgl.HolZeile())
-									if (!fzahl) {
-										caus<<rot<<"Nix gefunden bei "<<gruen<<vgl.sql<<schwarz<<endl;
-									}
-								} // 						if (vgl.obfehl)
-							}
+						if (iru==sizeof sql/sizeof *sql) if (!fzahl) {
+							caus<<rot<<"Nix gefunden bei "<<gruen<<sql[iru-1]<<schwarz<<endl;
 						}
 						nnam.clear();
 						vnam.clear();
 						aufnr.clear();
-						memset(&gebd,0,sizeof gebd);
+						memset(&gebtm,0,sizeof gebtm);
 						memset(&eingtm,0,sizeof eingtm);
 						auftr.clear();
 					} // 					if (!auftr.empty())
@@ -1857,6 +1815,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				rwe.hz("Teststatus",inh);
 			} else if (cd=="8420") {
 				rwe.hz("Wert",inh);
+				lwerte<<inh;
 			} else if (cd=="8421") {
 				if (rbawep) {
 					rbawep->hz("Einheit",inh);
@@ -2146,7 +2105,7 @@ void hhcl::pvirtfuehraus()
 				RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
 				char ***cerg{0};
 				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))+" AND pfad = "+sqlft(My->DBS,*aktl),aktc,ZDB);
-				if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
+				if (rsfertig.obqueryfehler||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 					// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
 					yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
 					if (!dverarbeit(*aktl,&datid)) {
@@ -2157,7 +2116,7 @@ void hhcl::pvirtfuehraus()
 					}
 					yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
 					if (dszahl && verarbeitet==dszahl) break;
-				} // 				if (rsfertig.obfehl||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1)
+				} // 				if (rsfertig.obqueryfehler||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1)
 			} // 			for(size_t i=0;i<lrue.size();i++)
 		} // 		if (!nurnachb && !nachbneu)
 		if (nurnachb || nachbneu|| verarbeitet) nachbearbeit(aktc);

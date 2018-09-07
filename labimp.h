@@ -167,7 +167,7 @@ enum T_
 	T_Kommentar_Bezug_auf_lyhinw,
 	T_letzte_Aenderung,
 	T_Groesse,
-	T_auswertpql_leere_Funktion,
+	T_auswertpql,
 	T_PatID_aus_Laborneu,
 	T_nachbearbeit_leere_Funktion,
 	T_vordverarb_leere_Funktion,
@@ -234,6 +234,7 @@ enum T_
 	T_werte,
 	T_bakt,
 	T_initialisiert_nur_die_Tabellen,
+	T_fuer_PatID_gewaehlte_SQL_Abfrage,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -268,6 +269,7 @@ class hhcl:public dhcl
 		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
 		tm abndat{0};
 		uchar keimz{0},keimzda{0};
+		svec lwerte;
 	protected: //α //ω
 //		long listz=30; //ω
     unsigned long dszahl=0; // Datensatzzahl fuer Tabellenausgaben
