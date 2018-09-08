@@ -152,7 +152,7 @@ enum T_
 	T_Ordnungsnummer_der_Dateiuebertragung,
 	T_fehlend,
 	T_Bezug_auf_LaborBakt,
-	T_pruefPatID_Standardfunktion,
+//	T_pruefPatID_Standardfunktion,
 	T_ergpql_leere_Funktion,
 	T_Bezug_zu_laborynb,
 	T_prueflyaerzte,
@@ -167,7 +167,7 @@ enum T_
 	T_Kommentar_Bezug_auf_lyhinw,
 	T_letzte_Aenderung,
 	T_Groesse,
-	T_auswertpql,
+//	T_auswertpql,
 	T_PatID_aus_Laborneu,
 	T_nachbearbeit_leere_Funktion,
 	T_vordverarb_leere_Funktion,
@@ -235,6 +235,7 @@ enum T_
 	T_bakt,
 	T_initialisiert_nur_die_Tabellen,
 	T_fuer_PatID_gewaehlte_SQL_Abfrage,
+	T_russchreib_usid,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -260,16 +261,17 @@ class hhcl:public dhcl
 		const static tm tmmax; // {0,0,0,1,0,200,0,0,0}
 		string labind,pneuind,pnbid,hinwind;
 		string datid;
+		string usid;
 		ic_cl *icp[3];
-		tm eingtm{0}, gebdat{0};
+		tm eingtm{0}, gebtm{0};
 		tm minnachdat{0}; // minimales Datum der Tabelle tlyus fuer die Nachbearbeitung
 		tm maxnachdat{0,0,0,1,0,200,0,0,0}; // maximale Datum der Tabelle tlyus fuer die Nachbearbeitung
-		string nname,vname,titel,nvorsatz,sgschl,pat_id{"0"},auftrschl,baktid,hinwid,erklid,kommid;
+		string nname,vname,titel,nvorsatz,sgschl,pid{"0"},auftrschl,baktid,hinwid,erklid,kommid;
 		svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
 		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
 		tm abndat{0};
 		uchar keimz{0},keimzda{0};
-		svec lwerte;
+		svec zwerte;
 	protected: //α //ω
 //		long listz=30; //ω
     unsigned long dszahl=0; // Datensatzzahl fuer Tabellenausgaben
@@ -312,7 +314,7 @@ class hhcl:public dhcl
 		void virtautokonfschreib();
 		int dverarbeit(const string& datei,string *datidp);
 		int vverarbeit(const string& datei); // Vergleichsdatei verarbeiten
-		void usreset();
+		void usschluss(const size_t aktc);
 		void wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep);
 	protected: 
 		// void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, lieskonfein, hcl::hcl nach holsystemsprache
@@ -322,18 +324,27 @@ class hhcl:public dhcl
 			__attribute__((weak)) // implementationsspezifische Vorgaben, Modul vgb.cpp)
 #endif
 			;
+		/*
 		void pruefPatID(const int aktc,insv& rus)
 #ifdef VOMHAUPTCODE
 			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
 			;
+		*/
 		void fuellpql();
+		/*
 		void auswertpql(const size_t i,insv& rus)
 #ifdef VOMHAUPTCODE
 			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
 			;
+		*/
 		void ergpql()
+#ifdef VOMHAUPTCODE
+			__attribute__((weak)) // implementationsspezifische Adresspruefung)
+#endif
+			;
+		void usmod(const size_t aktc)
 #ifdef VOMHAUPTCODE
 			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif

@@ -3,8 +3,8 @@
 #include "labimp.h"
 
 enum Txt_ {
-	T_ergpql_volle_Funktion,
-	T_auswertpql_volle_Funktion,
+	T_ergpql_ueberladene_Funktion,
+	T_auswertpql_ueberladene_Funktion,
 	T_eingetragen,
 	T_Abfrage,
 	T_pvirtVorgbSpeziellvoll,
@@ -13,10 +13,10 @@ enum Txt_ {
 
 // const char *Txvgcl::TextC[T_vgMAX+1][SprachZahl]={
 const char *tm_T[T_tmMAX+1][SprachZahl]={
-	// T_ergpql_volle_Funktion
-	{"ergpql() (volle Funktion)","ergpql() (filled function)"},
-	// T_auswertpql_volle_Funktion
-	{"auswertpql() (volle Funktion)","auswertpql() (filled function)"},
+	// T_ergpql_ueberladene_Funktion
+	{"ergpql() (ueberladene Funktion)","ergpql() (filled function)"},
+	// T_auswertpql_ueberladene_Funktion
+	{"auswertpql() (ueberladene Funktion)","auswertpql() (filled function)"},
 	// 	T_eingetragen
 	{"eintragen: ","entered: "},
 	// 	T_Abfrage
@@ -43,49 +43,91 @@ void hhcl::pvirtVorgbSpeziell()
 	fertigvz=ldatvz+vtz+Tx[T_fertige];
 } // void hhcl::pvirtVorgbSpeziell
 
+// passt anhand spaeterer Informationen die Pat_id an
+void hhcl::usmod(const size_t aktc)
+{
+	if (!usid.empty()) {
+		string gsql{"SELECT l.pat_id,zeitpunkt FROM laborneu l WHERE "};
+		if (zwerte.size()) {
+			gsql+="l.zeitpunkt BETWEEN SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) AND ";
+			for(size_t i=0;i<zwerte.size();i++) {
+				gsql+="(SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,zwerte[i])+") IS NOT NULL ";
+				if (i!=zwerte.size()-1) gsql+="AND ";
+			}
+			/*
+				 for(size_t i=0;i<zwerte.size();i++) {
+				 gsql+="((SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,zwerte[i])+") IS NOT NULL)";
+				 if (i!=zwerte.size()-1) gsql+='+';
+				 }
+				 gsql+="=";
+				 gsql+=ltoan(zwerte.size());
+			 */
+			gsql+=" GROUP BY pat_id";
+		} else {
+			gsql+="0";
+		}
+		const unsigned i{7};
+		// folgender Code aehnlich in russchreib
+		string mods{"UPDATE `"+tlyus+"` SET "};
+		mods+="SQL7="+sqlft(My->DBS,gsql);
+		RS rspat(My,gsql,aktc,ZDB);
+		// 7.9. !obqueryfehler und !result vorgekommen
+		if (!rspat.obqueryfehler && rspat.result) {
+			hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+gsql+schwarz);
+			if (rspat.result->row_count==1){
+				char ***cerg{0};
+				if ((cerg=rspat.HolZeile())) {
+					if (*cerg && **cerg) {
+						hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
+						mods+=",Pat_id_"+ltoan(i)+"="+sqlft(My->DBS,**cerg);
+						mods+=",ZeitpunktLaborneu="+sqlft(My->DBS,cjj(cerg,1));
+						mods+=",Pat_id=IF(pat_id_0 IS NULL AND pat_id_1 IS NULL,"+sqlft(My->DBS,**cerg)+",Pat_id)";
+						/*
+							 if (pid=="0" || pid.empty()) {
+							 pid=**cerg;
+							 rus.hz("sql",gsql);
+							 }
+						 */
+						//						break;
+					} // 					if (*cerg)
+				} // 				if ((cerg=rspat.HolZeile()))
+			} // 			if (rspat.result->row_count==1)
+		} else {
+			fLog(rots+Tx[T_Fehler_bei_sql]+violett+gsql+schwarz,1,oblog);
+		} // 		if (!rspat.obqueryfehler) else
+		mods+=" WHERE id="+usid;
+		RS rsmod(My,mods,aktc,ZDB);
+	} // 	if (!usid.empty())
+} // void hhcl::usmod
+
 // fuellt den Vektor pql, dessen Elemente dann in der Funktion pruefPatID verwendet werden, um hhcl::pat_id zu belegen
 // ueberdeckt die gleichnamige Funktion in labimp.cpp
 void hhcl::ergpql()
 {
 	if (My->obtabspda("namen","gebdat")) {
-		hLog(violetts+Txt[T_ergpql_volle_Funktion]+schwarz);
-		pql.insert(pql.begin(),"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		hLog(violetts+Txt[T_ergpql_ueberladene_Funktion]+schwarz);
+		pql.insert(pql.begin(),"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
 		pql.insert(pql.begin()+1,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
 		// Pat_ID_3:
-		pql.insert(pql.begin()+2,"SELECT pat_id FROM namen n WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
-		pql.insert(pql.begin()+3,"SELECT pat_id FROM namen WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
-		pql.insert(pql.begin()+4,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebdat)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
-		pql.insert(pql.begin()+5,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebdat)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+2,"SELECT pat_id FROM namen n WHERE gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+3,"SELECT pat_id FROM namen WHERE gebdat="+sqlft(My->DBS,&gebtm)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+4,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebtm)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+5,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
 		// hier steht dann die Standardvorgabe
 		/*
-		pql<<"SELECT n.pat_id FROM namen n LEFT JOIN laborneu l ON n.pat_id = l.pat_id WHERE n.gebdat="+sqlft(My->DBS,&gebdat)+" AND l.zeitpunkt BETWEEN "
-			"SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) GROUP BY n.pat_id";
+		pql<<"SELECT n.pat_id FROM namen n LEFT JOIN laborneu l ON n.pat_id = l.pat_id WHERE n.gebdat="+sqlft(My->DBS,&gebtm)+
+		" AND l.zeitpunkt BETWEEN SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) "
+		"GROUP BY n.pat_id";
 		//	pql<<"SELECT n.pat_id FROM namen n LEFT JOIN laborneu l ON n.pat_id = l.pat_id WHERE n.nachname="+nname+" AND l.zeitpunkt BETWEEN "
 		//		"SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) GROUP BY n.pat_id";
 		*/
-		string gsql{"SELECT l.pat_id FROM laborneu l WHERE "};
-		if (lwerte.size()) {
-			for(size_t i=0;i<lwerte.size();i++) {
-				gsql+="(SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,lwerte[i])+") IS NOT NULL ";
-				if (i!=lwerte.size()-1) gsql+="AND ";
-			}
-			/*
-			for(size_t i=0;i<lwerte.size();i++) {
-				gsql+="((SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,lwerte[i])+") IS NOT NULL)";
-				if (i!=lwerte.size()-1) gsql+='+';
-			}
-			gsql+="=";
-			gsql+=ltoan(lwerte.size());
-			*/
-			gsql+=" GROUP BY pat_id";
-		} else {
-			gsql+="0";
-		}
+		string gsql{"SELECT NULL"};
 		pql<<gsql;
 		for(unsigned i=0;i<pql.size();i++) {
-			caus<<i<<": "<<pql[i]<<endl;
+			caus<<gruen<<i<<": "<<blau<<pql[i]<<schwarz<<endl;
 		}
 	}
+	hLog(violetts+Txk[T_Ende]+Txt[T_ergpql_ueberladene_Funktion]+schwarz);
 } // void hhcl::ergpql
 
 /*
@@ -93,7 +135,7 @@ void hhcl::ergpql()
 // wird aufgerufen in pruefPatID
 void hhcl::auswertpql(const size_t i,insv& rus)
 {
-hLog(violetts+Txt[T_auswertpql_volle_Funktion]+schwarz);
+hLog(violetts+Txt[T_auswertpql_ueberladene_Funktion]+schwarz);
 rus.hz(("Pat_id_"+ltoan(i)).c_str(),pat_id);
 } // void hhcl::auswertpql
  */
@@ -127,7 +169,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"GROUP BY pat_id,DATE(zeitpunkt),fertigstgrad\n"
 				") y ON x.werte=y.werte AND x.eingang =y.zp AND x.pat_id=y.pat_id AND x.befart=y.fertigstgrad "
 				"WHERE NOT ISNULL(y.pat_id) "
-				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zp, u.verglichen=now() "
+				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=if(i.zp is null,u.zeitpunktlaborneu,i.zp), u.verglichen=now() "
 				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"1, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
@@ -144,7 +186,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"GROUP BY pat_id,DATE(zeitpunkt),fertigstgrad\n"
 				") y ON x.werte=y.werte AND x.eingang =y.zp AND x.pat_id=y.pat_id AND x.befart=y.fertigstgrad "
 				"WHERE NOT ISNULL(y.pat_id) "
-				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zp, u.verglichen=now() "
+				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=if(i.zp is null,u.zeitpunktlaborneu,i.zp), u.verglichen=now() "
 				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"2, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
@@ -161,7 +203,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"GROUP BY pat_id,DATE(zeitpunkt),fertigstgrad\n"
 				") y ON x.werte=y.werte AND x.eingang =y.zp AND x.pat_id=y.pat_id AND x.befart=y.fertigstgrad "
 				"WHERE NOT ISNULL(y.pat_id) "
-				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zp, u.verglichen=now() "
+				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=if(i.zp is null,u.zeitpunktlaborneu,i.zp), u.verglichen=now() "
 				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"3, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
@@ -179,7 +221,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"GROUP BY pat_id,DATE(zeitpunkt),fertigstgrad\n"
 				") y ON x.werte=y.werte AND x.eingang =y.zp AND x.pat_id=y.pat_id AND x.befart=y.fertigstgrad "
 				"WHERE NOT ISNULL(y.pat_id) "
-				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=i.zp, u.verglichen=now() "
+				") i ON u.id=i.id set u.pat_id_laborneu=i.pat_id, u.zeitpunktlaborneu=if(i.zp is null,u.zeitpunktlaborneu,i.zp), u.verglichen=now() "
 				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"4, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
@@ -193,7 +235,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"INNER JOIN laborneu n ON n.pat_id=i.pat_id AND n.abkü=w.abkü AND n.wert=w.wert AND n.fertigstgrad=i.Befart AND DATE(n.zeitpunkt)=i.eingang "
 				"WHERE zahl>2 "
 				"GROUP BY i.id,i.eingang,i.pat_id,i.befart"
-				") j ON u.id=j.id set u.pat_id_laborneu=j.pat_id, u.zeitpunktlaborneu=j.eingang, u.verglichen=now() "
+				") j ON u.id=j.id set u.pat_id_laborneu=j.pat_id, u.zeitpunktlaborneu=if(j.eingang is null,u.zeitpunktlaborneu,j.eingang), u.verglichen=now() "
 				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"5, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
@@ -210,7 +252,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"WHERE zahl>3 "
 				"GROUP BY i.id,i.eingang,i.pat_id,n.pat_id,DATE(n.zeitpunkt), i.befart) j "
 				"WHERE gleiche>2"
-				") j ON u.id=j.id set u.pat_id_laborneu=j.pat_id, u.zeitpunktlaborneu=j.eingang, u.verglichen=now() "
+				") j ON u.id=j.id set u.pat_id_laborneu=j.pat_id, u.zeitpunktlaborneu=if(j.eingang is null,u.zeitpunktlaborneu,j.eingang), u.verglichen=now() "
 				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"6, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 
@@ -229,7 +271,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"WHERE zahl>3 "
 				"GROUP BY i.id,i.eingang,i.pat_id,n.pat_id,DATE(n.zeitpunkt), i.befart) j "
 				"WHERE gleiche>2"
-				") j ON u.id=j.id set u.pat_id_laborneu=j.pat_id, u.zeitpunktlaborneu=j.eingang, u.verglichen=now() "
+				") j ON u.id=j.id set u.pat_id_laborneu=j.pat_id, u.zeitpunktlaborneu=if(j.eingang is null,u.zeitpunktlaborneu,j.eingang), u.verglichen=now() "
 				"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) AND u.eingang between date("+sqlft(My->DBS,&minnachdat)+") and "+sqlft(My->DBS,&maxnachdat)+";",aktc,ZDB,0,0,0,&zahl);
 		fLog(dblaus+Txt[T_Abfrage]+schwarz+"7, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 #endif

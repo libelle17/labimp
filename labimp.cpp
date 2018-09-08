@@ -329,7 +329,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_Bezug_auf_LaborBakt
 	{"Bezug auf lybakt","reference to lybact"},
 	// T_pruefPatID_Standardfunktion
-	{"pruefPatID() (Stanardfunktion)","checkPatID() (standard function)"},
+	// {"pruefPatID() (Standardfunktion)","checkPatID() (standard function)"},
 	// T_ergpql_leere_Funktion
 	{"ergpql() (leere Funktion)","checkpql() (empty function)"},
 	// T_Bezug_zu_laborynb
@@ -359,7 +359,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_Groesse
 	{"Größe","size"},
 	// T_auswertpql
-	{"auswertpql()","evaluatepql()"},
+//	{"auswertpql()","evaluatepql()"},
 	// T_PatID_aus_Laborneu
 	{"Pat_ID aus Laborneu","Pat_id from laborneu"},
 	// T_nachbearbeit_leere_Funktion
@@ -494,6 +494,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"initialisiert nur die Tabellen","initializes only the tables"},
 	// T_fuer_PatID_gewaehlte_SQL_Abfrage,
 	{"für Pat_ID gewählte SQL-Abfrage","sql-query chosen for pat_id"},
+	// T_russchreib_usid,
+	{"russchreib(), usid: ","writerus(), usid: "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -517,13 +519,14 @@ void hhcl::ergpql()
 	hLog(violetts+Tx[T_ergpql_leere_Funktion]+schwarz);
 }
 
+/*
 // schwache Funktion, kann ueberdeckt werden, wird es aber nicht
 // aufgerufen in pruefPatID
 void hhcl::auswertpql(const size_t i,insv& rus)
 {
 	hLog(violetts+Tx[T_auswertpql]+schwarz);
-	rus.hz(("Pat_id_"+ltoan(i)).c_str(),pat_id);
 }
+*/
 
 // aufgerufen in dverarbeit
 void hhcl::vordverarb(const size_t aktc)
@@ -841,6 +844,7 @@ void hhcl::prueflyus(DB *My, const int obverb, const int oblog, const uchar dire
 		fdr<<new Feld("verglichen","datetime","0","0",Tx[T_Datum_zu_dem_Datensatz_zuletzt_verglichen_wurde],0,0,0);
 		fdr<<new Feld("AfN","smallint","6","0",Tx[T_Affected_Number_Zahl_der_zugehoerigen_Datensaetze_in_Laborneu],0,0,0);
 		fdr<<new Feld("SQL","varchar","210","",Tx[T_fuer_PatID_gewaehlte_SQL_Abfrage],0,0,0);
+		fdr<<new Feld("SQL7","text","","",Tx[T_fuer_PatID_gewaehlte_SQL_Abfrage],0,0,0);
 		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
 		Constraint csts[]{Constraint(tlydat+tlyus,new Feld{Feld("DatID")},1,tlydat,new Feld{Feld("DatID")},1,cascade,cascade),
@@ -1074,46 +1078,21 @@ void hhcl::prueflypgl(DB *My, const int obverb, const int oblog, const uchar dir
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
-// aufgerufen in pruefPatID und prueflyus
+// aufgerufen in /*pruefPatID*/ russchreib und prueflyus
 void hhcl::fuellpql()
 {
 	pql.clear();
-	pql<<"SELECT pat_id FROM `"+tlyus+"` u WHERE gebdat="+sqlft(My->DBS,&gebdat)+" AND auftragsschlüssel = "+sqlft(My->DBS,auftrschl)+" AND eingang = "+sqlft(My->DBS,&eingtm)+" AND pat_id<>0 GROUP BY pat_id";
+	pql<<"SELECT pat_id FROM `"+tlyus+"` u WHERE gebdat="+sqlft(My->DBS,&gebtm)+" AND auftragsschlüssel = "+sqlft(My->DBS,auftrschl)+" AND eingang = "+sqlft(My->DBS,&eingtm)+" AND pat_id<>0 GROUP BY pat_id";
 	ergpql();
 }
 
+/*
 // aufgerufen in russchreib
 void hhcl::pruefPatID(const int aktc,insv& rus)
 {
-	obverb=1;
-	hLog(violetts+Tx[T_pruefPatID_Standardfunktion]+schwarz);
-	fuellpql();
-	for(size_t i=0;i<pql.size();i++) {
-		RS rspat(My,pql[i],aktc,ZDB);
-		if (!rspat.obqueryfehler && rspat.result) { // 7.9. !obqueryfehler und !result vorgekommen
-			hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+pql[i]+schwarz);
-			if (rspat.result->row_count==1){
-				char ***cerg{0};
-				if ((cerg=rspat.HolZeile())) {
-					if (*cerg) {
-					  hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
-						if (pat_id=="0" || pat_id.empty()) {
-							pat_id=**cerg;
-							rus.hz("sql",pql[i]);
-						}
-						auswertpql(i,rus);
-//						break;
-					} // 					if (*cerg)
-				} // 				if ((cerg=rspat.HolZeile()))
-			} // 			if (rspat.result->row_count==1)
-		} else {
-			fLog(rots+Tx[T_Fehler_bei_sql]+violett+pql[i]+schwarz,1,oblog);
-		} // 		if (!rspat.obqueryfehler) else
-	}
-	hLog(violetts+Txk[T_Ende]+Tx[T_pruefPatID_Standardfunktion]+schwarz);
-	obverb=0;
-//	if (pat_id=="0") exit(97);
+//	if (pid=="0") exit(97);
 } // void hhcl::virtVorgbAllg
+*/
 
 //α
 // wird aufgerufen in lauf
@@ -1352,42 +1331,88 @@ void BDTtoDate(string& inh,struct tm *tm,int abjahr=1900)
 	} // 	for(auto& aktmu:mu)
 } // void BDTtoDate
 
-// aufgerufen in dverarbeit und wertschreib
+// aufgerufen in wertschreib und dverarbeit
+// vorher muss zwerte schon gefuellt sein
 void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 {
+	hLog(violetts+Tx[T_russchreib_usid]+schwarz+*usidp);
 	if (obverb) rus.ausgeb();
-	pruefPatID(aktc,rus);
+	// pruefPatID(aktc,rus);
+	obverb=1;
+	// hLog(violetts+Tx[T_pruefPatID_Standardfunktion]+schwarz);
+	fuellpql();
+	for(size_t i=0;i<pql.size();i++) {
+		// folgender Code aehnlich in usmod
+		RS rspat(My,pql[i],aktc,ZDB);
+		if (!rspat.obqueryfehler && rspat.result) { // 7.9. !obqueryfehler und !result vorgekommen
+			hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+pql[i]+schwarz);
+			if (rspat.result->row_count==1){
+				char ***cerg{0};
+				if ((cerg=rspat.HolZeile())) {
+					if (*cerg &&**cerg) {
+					  hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
+						if (pid=="0" || pid.empty()) {
+							pid=**cerg;
+							rus.hz("sql",pql[i]);
+						}
+	//					auswertpql(i,rus);
+						rus.hz(("Pat_id_"+ltoan(i)).c_str(),pid);
+						//						break;
+					} // 					if (*cerg)
+				} // 				if ((cerg=rspat.HolZeile()))
+			} // 			if (rspat.result->row_count==1)
+		} else {
+			fLog(rots+Tx[T_Fehler_bei_sql]+violett+pql[i]+schwarz,1,oblog);
+		} // 		if (!rspat.obqueryfehler) else
+	} // 	for(size_t i=0;i<pql.size();i++)
+	obverb=0;
 	rus.hz("Nachname",nname);
 	rus.hz("Vorname",vname);
 	rus.hz("Titel",titel);
 	rus.hz("NVorsatz",nvorsatz);
-	rus.hz("GebDat",&gebdat);
+	rus.hz("GebDat",&gebtm);
 	rus.hz("Geschlecht",sgschl);
-	rus.hz("Pat_id",pat_id);
+	rus.hz("Pat_id",pid);
 	rus.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/usidp);
-	usreset();
+	hLog(violetts+Txk[T_Ende]+Tx[T_russchreib_usid]+schwarz+*usidp);
 } // void hhcl::russchreib
 
-// in russchreib und dverarbeit
-void hhcl::usreset()
+// schwache Funktion, kann ueberdeckt werden
+void hhcl::usmod(const size_t aktc)
 {
+}
+
+// 2 x in dverarbeit
+void hhcl::usschluss(const size_t aktc)
+{
+	/*
+	stringstream gebdp;
+	gebdp<<ztacl(&gebtm,"%Y-%m-%d");
+	caus<<gruen<<"vor zwerte.clear, gebdat: "<<rot<<gebdp.str()<<schwarz<<endl;
+	for(size_t i=0;i<zwerte.size();i++) {
+		caus<<i<<": "<<zwerte[i]<<endl;
+	}
+	*/
+	usmod(aktc);
+	zwerte.clear(); // fuer ergpql 
 	nname.clear();
 	vname.clear();
 	titel.clear();
 	nvorsatz.clear();
-	memset(&gebdat,0,sizeof gebdat);
+	memset(&gebtm,0,sizeof gebtm);
 	memset(&eingtm,0,sizeof eingtm);
 	sgschl.clear();
 	auftrschl.clear();
-	pat_id="0";
+	pid="0";
 	baktid="0";
 	hinwid="0";
 	erklid="0";
 	kommid="0";
-	lwerte.clear(); // fuer ergpql 
-} // void hhcl::usreset
+	usid.clear();
+} // void hhcl::usschluss
 
 // aufgerufen in dverarbeit
+// vorher muss zwerte schon gefuellt sein
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep)
 {
 	if (*usoffenp) {
@@ -1485,115 +1510,6 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	rlep->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 } // void hhcl::wertschreib
 
-int hhcl::vverarbeit(const string& datei)
-{
-	mdatei mdat(datei,ios::in);
-	if (mdat.is_open()) {
-		// Zeichensatz ermitteln und verwenden
-		uchar cp=0; // 0=utf-8, 1=iso-8859-15, 2=cp850
-		// ä,ö,ü,Ä,Ö,Ü,ß,µ,` iso8859-15, cp850, iso8859-1
-		const char* const sonder[]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
-		string zeile,altz;
-//		struct tm berdat{0}; // Berichtsdatum
-		if (!My) initDB();
-		string auftr,nnam,vnam,aufnr;
-		tm gebtm{0},eingtm{0};
-		while(getline(mdat,zeile)) {
-			string bzahl=zeile.substr(0,3);
-			string cd,inh;
-			if (zeile.size()>3) cd=zeile.substr(3,4);
-			if (zeile.size()>7) {
-				if (!cp) {
-					for(unsigned p=0;p<sizeof sonder/sizeof *sonder;p++) {
-						if (zeile.find_first_of(sonder[p],7)!=string::npos) {
-							cp=p+1;
-							break;
-						}
-					}
-				}
-				if (cp) {
-					inh=icp[cp-1]->convert(zeile,7);
-				} else {
-					inh=zeile.substr(7);
-				}
-				sersetze(&inh,"\r","");
-				if (cd=="3101") {
-					nnam=inh;
-				} else if (cd=="8311") {
-					auftr=inh;
-				} else if (cd=="3102") {
-					vnam=inh;
-				} else if (cd=="8310") { // Auftragsnummer
-					aufnr=inh;
-				} else if (cd=="3103") {
-					BDTtoDate(inh,&gebtm,1900);
-				} else if (cd=="8301") {
-					BDTtoDate(inh,&eingtm,2000);
-				} else if (cd=="8000") {
-					if (!auftr.empty()) {
-						const string vorsp="SELECT distinct Nachname,Vorname,GebDat,Auftragsnummer,Auftragsschlüssel,Pfad,Eingang FROM `labor2aNachw` l WHERE ";
-						const string sql[]{
-							"Nachname="+sqlft(My->DBS,nnam)+" AND Vorname="+sqlft(My->DBS,vnam)
-								+ " AND GebDat="+sqlft(My->DBS,&gebtm)
-								+ " AND Eingang="+sqlft(My->DBS,&eingtm)
-								+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")
-								+" AND auftragsschlüssel='"+auftr+"'",
-								"Eingang="+sqlft(My->DBS,&eingtm)+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")+
-									"AND auftragsschlüssel='"+auftr+"'",
-								"Eingang="+sqlft(My->DBS,&eingtm)+" AND auftragsschlüssel='"+auftr+"'"
-						};
-						unsigned fzahl{0}, iru{0};
-						for(;iru<sizeof sql/sizeof *sql;iru++) {
-							char ***cerg{0};
-							RS vgl(My,vorsp+sql[iru],0,ZDB);
-							if (vgl.obqueryfehler) {
-								caus<<rot<<"Fehler bei "<<gruen<<vgl.sql<<schwarz<<endl;
-							} else {
-								while (cerg=vgl.HolZeile(),cerg?*cerg:0) {
-									fzahl++;
-									if (nnam=="Krämer")
-										caus<<blau<<nnam<<" gefunden bei "<<vgl.sql<<schwarz<<endl;
-									//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
-									stringstream gebdp;
-									gebdp<<ztacl(&gebtm,"%Y-%m-%d");
-									stringstream eingtmp;
-									eingtmp<<ztacl(&eingtm,"%Y-%m-%d");
-									//// zp=buf;
-									if ((cjj(cerg,0)!=nnam||cjj(cerg,1)!=vnam||(cjj(cerg,2)!=gebdp.str()&&!(!strcmp(cjj(cerg,2),"0000-01-00")&&gebdp.str()=="-1-12-31")))
-											&&!(!strcmp(cjj(cerg,0),"")&&!strcmp(cjj(cerg,1),"")&&cjj(cerg,2)==gebdp.str())
-										 ) {
-										caus<<violett<<setw(24)<<nnam<<"|"<<violett<<setw(17)<<vnam<<schwarz<<"|"<<violett<<setw(10)<<
-											gebdp.str()<<"|"<<violett<<setw(8)<<aufnr<<'|'<<auftr<<'|'<<eingtmp.str()<<'|'<<schwarz<<endl;
-										caus<<blau<<setw(24)<<cjj(cerg,0)<<"|"<<blau<<setw(17)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(10)<<
-											cjj(cerg,2)<<"|"<<blau<<setw(8)<<cjj(cerg,3)<<'|'<<cjj(cerg,4)<<'|'<<cjj(cerg,6)<<'|'<<schwarz<<cjj(cerg,5)<<endl;
-										caus<<gruen<<vgl.sql<<schwarz<<endl;
-									}
-								} // 							while (cerg=vgl.HolZeile())
-								if (fzahl) break;
-							} // 						if (vgl.obqueryfehler)
-						}
-						if (iru==sizeof sql/sizeof *sql) if (!fzahl) {
-							caus<<rot<<"Nix gefunden bei "<<gruen<<sql[iru-1]<<schwarz<<endl;
-						}
-						nnam.clear();
-						vnam.clear();
-						aufnr.clear();
-						memset(&gebtm,0,sizeof gebtm);
-						memset(&eingtm,0,sizeof eingtm);
-						auftr.clear();
-					} // 					if (!auftr.empty())
-				} // 				} else if (cd=="8000")
-				if (cd.empty()||!cd[0]) continue;
-				// sonst keinen Fall von Zeilenumbruch gefunden
-				if (cd=="8311" ||cd=="3101" ||cd=="3102"||cd=="3103"||cd=="8000")
-					hLog((cd=="8000"?gruens:blaus)+bzahl+" "+cd+" "+schwarz+inh);
-				//			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
-		}
-	} // 		while(getline(mdat,zeile))
-	} // 	if (mdat.is_open())
-	return 0;
-}
-
 // aufgerufen in pvirtfuehraus; // return 0 = fertig
 int hhcl::dverarbeit(const string& datei,string *datidp)
 {
@@ -1602,11 +1518,10 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 	const size_t aktc=0;
 #endif 
 	string satzid,arztid,satzart;
+	string labk; // letzte Einheit
 	unsigned UsLfd=0;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen=0, usoffen=0;
-	usreset();
-	string usid;
 	vordverarb(aktc);
 	svec eindfeld; eindfeld<<"id";
 	insv reing(My,/*itab*/tlydat,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
@@ -1671,21 +1586,29 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			hLog(blaus+bzahl+" "+cd+" "+schwarz+inh);
 			//			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
 #ifdef speichern
+
 			if (cd=="8000") {
-				if (inh.substr(0,4)=="8220") { // Datenpaket-Header
+				usschluss(aktc);
+				// 8220 Datenpaket-Header
+				if (inh.substr(0,4)=="8220") {
 					lsatzart=1;
 					saetzeoffen=1;
 					rsaetze.hz("Satzart",inh);
 					rsaetze.hz("DatID",datid);
 					UsLfd=0;
-				} else if (inh.substr(0,4)=="8221") { // Datenpaket-Abschluss
+					// 8221 Datenpaket-Abschluss
+				} else if (inh.substr(0,4)=="8221") {
 					//					if (inh.length()>4) ... // trat nicht auf
 					lsatzart=2;
 						// russchreib z.B. "Labor 20120223 020708.dat"
+									stringstream gebdp;
+									gebdp<<ztacl(&gebtm,"%Y-%m-%d");
+					caus<<rot<<"1 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl;
 					wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
 					// rle.schreib z.B. "Labor 20101201 004634.dat"
 					//					satzid="0";
-				} else { // 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
+				// 8201 FA-Bericht, 8202 LG-Bericht, 8203 Mikrobiologiebericht
+				} else {
 					lsatzart=3;
 					if (saetzeoffen) {
 						if (!oblaborda) {
@@ -1707,16 +1630,19 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 					if (usoffen) {
 						// caus<<rus.size()<<endl;
 						// z.B. "Labor 20091126 162200.dat"
+									stringstream gebdp;
+									gebdp<<ztacl(&gebtm,"%Y-%m-%d");
+					caus<<rot<<"4 vor russchreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl;
 						russchreib(rus,aktc,&usid);
 						usoffen=0;
-					}
+					} // if (usoffen)
 					satzart=inh;
 					rus.hz("DatID",datid);
 					rus.hz("SatzID",satzid);
 					rus.hz("SatzArt",satzart);
 					rus.hz("UsLfd",++UsLfd);
 					usoffen=1;
-				}
+				} // 				if (inh.substr(0,4)=="8220") else else
 			} else if (cd=="8100") {
 				switch (lsatzart) {
 					case 1:
@@ -1731,8 +1657,9 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 						break;
 					default:
 						break;
-				}
-			} else if (cd=="8410" || cd=="8434") { // 8410=Test-Ident, 8434=Verfahren
+				} // 				switch (lsatzart)
+				// 8410=Test-Ident, 8434=Verfahren
+			} else if (cd=="8410" || cd=="8434") { 
 				// russchreib z.B. "Labor 20091126 162829.dat"
 				// z.B. "Labor 20101202 002036.dat"
 				wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
@@ -1780,17 +1707,18 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			} else if (cd=="8614") { 
 				rbawep->hz("Abrd",inh);
 			} else if (cd=="8411") {
+				labk=inh;
 				rbawep->hz("Langtext",inh);
 				rpar.hz("Langtext",inh);
 				rpneu.hz("Langtext",inh);
 			} else if (cd=="8428") {
-				if (!rbawep) caus<<rot<<"4 Fehler rbawep 0"<<schwarz<<endl;
+				if (!rbawep) cerr<<rot<<"4 Fehler rbawep 0"<<schwarz<<endl;
 				rbawep->hz("KuQu",inh);
 			} else if (cd=="8430") {
-				if (!rbawep) caus<<rot<<"3 Fehler rbawep 0"<<schwarz<<endl;
+				if (!rbawep) cerr<<rot<<"3 Fehler rbawep 0"<<schwarz<<endl;
 				rbawep->hz("Quelle",inh);
 			} else if (cd=="8431") {
-				if (!rbawep) caus<<rot<<"2 Fehler rbawep 0"<<schwarz<<endl;
+				if (!rbawep) cerr<<rot<<"2 Fehler rbawep 0"<<schwarz<<endl;
 				if (qspez.empty()) qspez=inh;
 				else {
 					qspez+="\r\n";
@@ -1815,7 +1743,14 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				rwe.hz("Teststatus",inh);
 			} else if (cd=="8420") {
 				rwe.hz("Wert",inh);
-				lwerte<<inh;
+				// caus<<"labk: "<<labk<<", fuege zu zwerte hinzu: "<<inh<<endl;
+				// bei einer von zwei GFR kein Wiederfinden in laborneu Pat. 53919 am 4.7.12
+				if (strncasecmp(labk.c_str(),"GFR",3)) {
+					if (zwerte.size()<8) // 7erlei sollten reichen
+					zwerte<<inh; 
+				} else {
+//					caus<<rot<<"aussortiert!"<<schwarz<<endl;
+				}
 			} else if (cd=="8421") {
 				if (rbawep) {
 					rbawep->hz("Einheit",inh);
@@ -1863,7 +1798,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			} else if (cd=="3102") {
 				vname=inh;
 			} else if (cd=="3103") {
-				BDTtoDate(inh,&gebdat,1900);
+				BDTtoDate(inh,&gebtm,1900);
 			} else if (cd=="3110") {
 				sgschl=(inh=="W"?"2":inh=="M"?"1":inh=="X"?"3":inh);
 			} else if (cd=="3104") {
@@ -2040,12 +1975,16 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			altz=zeile;
 #endif 
 		} // 		while(getline(mdat,zeile))
+									stringstream gebdp;
+									gebdp<<ztacl(&gebtm,"%Y-%m-%d");
+					caus<<rot<<"3 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl;
 		wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
 		reing.hz("codepage",cp);
 		reing.hz("fertig",1);
 		reing.ergaenz(datid,/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
 		return reing.rsp->fnr;
 	} // 	if (mdat.is_open())
+	usschluss(aktc);
 	return 1;
 } // void hhcl::dverarbeit
 
@@ -2123,6 +2062,115 @@ void hhcl::pvirtfuehraus()
 	} // 	if (!loeschalle)
 	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);
 } // void hhcl::pvirtfuehraus  //α
+
+int hhcl::vverarbeit(const string& datei)
+{
+	mdatei mdat(datei,ios::in);
+	if (mdat.is_open()) {
+		// Zeichensatz ermitteln und verwenden
+		uchar cp=0; // 0=utf-8, 1=iso-8859-15, 2=cp850
+		// ä,ö,ü,Ä,Ö,Ü,ß,µ,` iso8859-15, cp850, iso8859-1
+		const char* const sonder[]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
+		string zeile,altz;
+//		struct tm berdat{0}; // Berichtsdatum
+		if (!My) initDB();
+		string auftr,nnam,vnam,aufnr;
+		tm gebvtm{0},eingvtm{0};
+		while(getline(mdat,zeile)) {
+			string bzahl=zeile.substr(0,3);
+			string cd,inh;
+			if (zeile.size()>3) cd=zeile.substr(3,4);
+			if (zeile.size()>7) {
+				if (!cp) {
+					for(unsigned p=0;p<sizeof sonder/sizeof *sonder;p++) {
+						if (zeile.find_first_of(sonder[p],7)!=string::npos) {
+							cp=p+1;
+							break;
+						}
+					}
+				}
+				if (cp) {
+					inh=icp[cp-1]->convert(zeile,7);
+				} else {
+					inh=zeile.substr(7);
+				}
+				sersetze(&inh,"\r","");
+				if (cd=="3101") {
+					nnam=inh;
+				} else if (cd=="8311") {
+					auftr=inh;
+				} else if (cd=="3102") {
+					vnam=inh;
+				} else if (cd=="8310") { // Auftragsnummer
+					aufnr=inh;
+				} else if (cd=="3103") {
+					BDTtoDate(inh,&gebvtm,1900);
+				} else if (cd=="8301") {
+					BDTtoDate(inh,&eingvtm,2000);
+				} else if (cd=="8000") {
+					if (!auftr.empty()) {
+						const string vorsp="SELECT distinct Nachname,Vorname,GebDat,Auftragsnummer,Auftragsschlüssel,Pfad,Eingang FROM `labor2aNachw` l WHERE ";
+						const string sql[]{
+							"Nachname="+sqlft(My->DBS,nnam)+" AND Vorname="+sqlft(My->DBS,vnam)
+								+ " AND GebDat="+sqlft(My->DBS,&gebvtm)
+								+ " AND Eingang="+sqlft(My->DBS,&eingvtm)
+								+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")
+								+" AND auftragsschlüssel='"+auftr+"'",
+								"Eingang="+sqlft(My->DBS,&eingvtm)+" AND "+(aufnr.empty()?"isnull(auftragsnummer)":"auftragsnummer='"+aufnr+"' ")+
+									"AND auftragsschlüssel='"+auftr+"'",
+								"Eingang="+sqlft(My->DBS,&eingvtm)+" AND auftragsschlüssel='"+auftr+"'"
+						};
+						unsigned fzahl{0}, iru{0};
+						for(;iru<sizeof sql/sizeof *sql;iru++) {
+							char ***cerg{0};
+							RS vgl(My,vorsp+sql[iru],0,ZDB);
+							if (vgl.obqueryfehler) {
+								cerr<<rot<<"Fehler bei "<<gruen<<vgl.sql<<schwarz<<endl;
+							} else {
+								while (cerg=vgl.HolZeile(),cerg?*cerg:0) {
+									fzahl++;
+									if (nnam=="Krämer")
+										caus<<blau<<nnam<<" gefunden bei "<<vgl.sql<<schwarz<<endl;
+									//									caus<<setw(30)<<cjj(cerg,0)<<"|"<<setw(30)<<cjj(cerg,1)<<schwarz<<"|"<<setw(19)<<cjj(cerg,2)<<"|"<<schwarz<<endl;
+									stringstream gebdp;
+									gebdp<<ztacl(&gebvtm,"%Y-%m-%d");
+									stringstream eingtmp;
+									eingtmp<<ztacl(&eingvtm,"%Y-%m-%d");
+									//// zp=buf;
+									if ((cjj(cerg,0)!=nnam||cjj(cerg,1)!=vnam||(cjj(cerg,2)!=gebdp.str()&&!(!strcmp(cjj(cerg,2),"0000-01-00")&&gebdp.str()=="-1-12-31")))
+											&&!(!strcmp(cjj(cerg,0),"")&&!strcmp(cjj(cerg,1),"")&&cjj(cerg,2)==gebdp.str())
+										 ) {
+										caus<<violett<<setw(24)<<nnam<<"|"<<violett<<setw(17)<<vnam<<schwarz<<"|"<<violett<<setw(10)<<
+											gebdp.str()<<"|"<<violett<<setw(8)<<aufnr<<'|'<<auftr<<'|'<<eingtmp.str()<<'|'<<schwarz<<endl;
+										caus<<blau<<setw(24)<<cjj(cerg,0)<<"|"<<blau<<setw(17)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(10)<<
+											cjj(cerg,2)<<"|"<<blau<<setw(8)<<cjj(cerg,3)<<'|'<<cjj(cerg,4)<<'|'<<cjj(cerg,6)<<'|'<<schwarz<<cjj(cerg,5)<<endl;
+										caus<<gruen<<vgl.sql<<schwarz<<endl;
+									}
+								} // 							while (cerg=vgl.HolZeile())
+								if (fzahl) break;
+							} // 						if (vgl.obqueryfehler)
+						}
+						if (iru==sizeof sql/sizeof *sql) if (!fzahl) {
+							caus<<rot<<"Nix gefunden bei "<<gruen<<sql[iru-1]<<schwarz<<endl;
+						}
+						nnam.clear();
+						vnam.clear();
+						aufnr.clear();
+						memset(&gebvtm,0,sizeof gebvtm);
+						memset(&eingvtm,0,sizeof eingvtm);
+						auftr.clear();
+					} // 					if (!auftr.empty())
+				} // 				} else if (cd=="8000")
+				if (cd.empty()||!cd[0]) continue;
+				// sonst keinen Fall von Zeilenumbruch gefunden
+				if (cd=="8311" ||cd=="3101" ||cd=="3102"||cd=="3103"||cd=="8000")
+					hLog((cd=="8000"?gruens:blaus)+bzahl+" "+cd+" "+schwarz+inh);
+				//			for(uchar i=0;i<inh.length();i++) { caus<<(int)(uchar)inh[i]<<" "; } caus<<endl;
+		}
+	} // 		while(getline(mdat,zeile))
+	} // 	if (mdat.is_open())
+	return 0;
+}
 
 // wird aufgerufen in lauf
 void hhcl::virtschlussanzeige()
