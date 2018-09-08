@@ -46,57 +46,81 @@ void hhcl::pvirtVorgbSpeziell()
 // passt anhand spaeterer Informationen die Pat_id an
 void hhcl::usmod(const size_t aktc)
 {
+	char const nz{'\n'};
+	unsigned const akbgrenze{4};
+	string const buchzahl{"2"};
 	if (!usid.empty()) {
-		string gsql{"SELECT l.pat_id,zeitpunkt FROM laborneu l WHERE "};
-		if (zwerte.size()) {
-			gsql+="l.zeitpunkt BETWEEN SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) AND ";
-			for(size_t i=0;i<zwerte.size();i++) {
-				gsql+="(SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,zwerte[i])+") IS NOT NULL ";
-				if (i!=zwerte.size()-1) gsql+="AND ";
+		string gsql{"SELECT l.pat_id,zeitpunkt FROM laborneu l WHERE 1 "};
+		gsql+=nz;
+		gsql+="AND ";
+		if (zwerte.size() || zverfa.size()) {
+			gsql+="l.zeitpunkt BETWEEN SUBDATE("+sqlft(My->DBS,&eingtm)+",interval "+(zwerte.size()?"5":"1")+" DAY)"
+				                    "AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval "+(zwerte.size()?"15":"1")+" DAY) "+nz+"AND ";
+			if (zwerte.size()) {
+				for(size_t i=0;i<zwerte.size();i++) {
+#define unscharf
+#ifndef unscharf
+					gsql+="(SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,zwerte[i])+") IS NOT NULL ";
+					if (i!=zverfa.size()-1) {gsql+=nz;gsql+="AND ";}
+#else
+					gsql+="((SELECT MAX(pat_id) FROM laborneu";
+					if (zwerte.size()<akbgrenze) {
+						gsql+=" LEFT JOIN laborlangtext using (LangtextVW)";
+					}
+					gsql+=" WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,zwerte[i]);
+					if (zwerte.size()<akbgrenze) {
+						gsql+=" AND LEFT(Langtext,"+buchzahl+")=LEFT("+sqlft(My->DBS,zlangt[i])+","+buchzahl+")";
+					}
+					gsql+=") IS NOT NULL)";
+					if (i!=zwerte.size()-1) {gsql+=nz;gsql+="   +";}
+#endif
+				}
+#ifdef unscharf
+				gsql+=">=";
+				gsql+=ltoan(zwerte.size()<6?zwerte.size():zwerte.size()<9?5:zwerte.size()<10?6:zwerte.size()-4);
+#endif
+			} else {
+				for(size_t i=0;i<zverfa.size();i++) {
+					gsql+="(SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND Abkü="+sqlft(My->DBS,zverfa[i])+") IS NOT NULL ";
+					if (i!=zverfa.size()-1) {gsql+=nz;gsql+="AND ";}
+				}
 			}
-			/*
-				 for(size_t i=0;i<zwerte.size();i++) {
-				 gsql+="((SELECT MAX(pat_id) FROM laborneu WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,zwerte[i])+") IS NOT NULL)";
-				 if (i!=zwerte.size()-1) gsql+='+';
-				 }
-				 gsql+="=";
-				 gsql+=ltoan(zwerte.size());
-			 */
-			gsql+=" GROUP BY pat_id";
-		} else {
-			gsql+="0";
+			gsql+=" ";
+			gsql+=nz;
+			gsql+="GROUP BY pat_id";
+			const unsigned i{7};
+			// folgender Code aehnlich in russchreib
+			string mods{"UPDATE `"+tlyus+"` SET "};
+			mods+="SQL7="+sqlft(My->DBS,gsql);
+			RS rspat(My,gsql,aktc,ZDB);
+			// 7.9. !obqueryfehler und !result vorgekommen
+			if (!rspat.obqueryfehler && rspat.result) {
+				hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+gsql+schwarz);
+				mods+=",z7="+ltoan(rspat.result->row_count);
+				if (rspat.result->row_count==1){
+					char ***cerg{0};
+					if ((cerg=rspat.HolZeile())) {
+						if (*cerg && **cerg) {
+							hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
+							mods+=",Pat_id_"+ltoan(i)+"="+sqlft(My->DBS,**cerg);
+							mods+=",ZeitpunktLaborneu="+sqlft(My->DBS,cjj(cerg,1));
+							mods+=",Pat_id=IF(pat_id_0 IS NULL AND pat_id_1 IS NULL,"+sqlft(My->DBS,**cerg)+",Pat_id)";
+							/*
+								 if (pid=="0" || pid.empty()) {
+								 pid=**cerg;
+								 rus.hz("sql",gsql);
+								 }
+							 */
+							//						break;
+						} // 					if (*cerg)
+					} // 				if ((cerg=rspat.HolZeile()))
+				} // 			if (rspat.result->row_count==1)
+			} else {
+				fLog(rots+Tx[T_Fehler_bei_sql]+violett+gsql+schwarz,1,oblog);
+			} // 		if (!rspat.obqueryfehler) else
+			mods+=" WHERE id="+usid;
+			RS rsmod(My,mods,aktc,ZDB);
 		}
-		const unsigned i{7};
-		// folgender Code aehnlich in russchreib
-		string mods{"UPDATE `"+tlyus+"` SET "};
-		mods+="SQL7="+sqlft(My->DBS,gsql);
-		RS rspat(My,gsql,aktc,ZDB);
-		// 7.9. !obqueryfehler und !result vorgekommen
-		if (!rspat.obqueryfehler && rspat.result) {
-			hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+gsql+schwarz);
-			if (rspat.result->row_count==1){
-				char ***cerg{0};
-				if ((cerg=rspat.HolZeile())) {
-					if (*cerg && **cerg) {
-						hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
-						mods+=",Pat_id_"+ltoan(i)+"="+sqlft(My->DBS,**cerg);
-						mods+=",ZeitpunktLaborneu="+sqlft(My->DBS,cjj(cerg,1));
-						mods+=",Pat_id=IF(pat_id_0 IS NULL AND pat_id_1 IS NULL,"+sqlft(My->DBS,**cerg)+",Pat_id)";
-						/*
-							 if (pid=="0" || pid.empty()) {
-							 pid=**cerg;
-							 rus.hz("sql",gsql);
-							 }
-						 */
-						//						break;
-					} // 					if (*cerg)
-				} // 				if ((cerg=rspat.HolZeile()))
-			} // 			if (rspat.result->row_count==1)
-		} else {
-			fLog(rots+Tx[T_Fehler_bei_sql]+violett+gsql+schwarz,1,oblog);
-		} // 		if (!rspat.obqueryfehler) else
-		mods+=" WHERE id="+usid;
-		RS rsmod(My,mods,aktc,ZDB);
 	} // 	if (!usid.empty())
 } // void hhcl::usmod
 
@@ -116,16 +140,18 @@ void hhcl::ergpql()
 		// hier steht dann die Standardvorgabe
 		/*
 		pql<<"SELECT n.pat_id FROM namen n LEFT JOIN laborneu l ON n.pat_id = l.pat_id WHERE n.gebdat="+sqlft(My->DBS,&gebtm)+
-		" AND l.zeitpunkt BETWEEN SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) "
+		" AND l.zeitpunkt BETWEEN SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 15 day) "
 		"GROUP BY n.pat_id";
 		//	pql<<"SELECT n.pat_id FROM namen n LEFT JOIN laborneu l ON n.pat_id = l.pat_id WHERE n.nachname="+nname+" AND l.zeitpunkt BETWEEN "
-		//		"SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 10 day) GROUP BY n.pat_id";
+		//		"SUBDATE("+sqlft(My->DBS,&eingtm)+",interval 5 day) AND ADDDATE("+sqlft(My->DBS,&eingtm)+",interval 15 day) GROUP BY n.pat_id";
 		*/
 		string gsql{"SELECT NULL"};
 		pql<<gsql;
+		/*
 		for(unsigned i=0;i<pql.size();i++) {
 			caus<<gruen<<i<<": "<<blau<<pql[i]<<schwarz<<endl;
 		}
+		*/
 	}
 	hLog(violetts+Txk[T_Ende]+Txt[T_ergpql_ueberladene_Funktion]+schwarz);
 } // void hhcl::ergpql
@@ -248,7 +274,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 				"GROUP BY us.id) i "
 				"LEFT JOIN `"+tlywert+"` w ON w.usid=i.id AND w.wert<>'' "
 				"INNER JOIN laborneu n ON n.pat_id=i.pat_id AND n.abkü=w.abkü AND n.wert=w.wert AND n.fertigstgrad=i.Befart "
-				"AND eingang BETWEEN SUBDATE(zeitpunkt,interval 10 day) AND ADDDATE(zeitpunkt,interval 10 day) "
+				"AND eingang BETWEEN SUBDATE(zeitpunkt,interval 10 day) AND ADDDATE(zeitpunkt,interval 15 day) "
 				"WHERE zahl>3 "
 				"GROUP BY i.id,i.eingang,i.pat_id,n.pat_id,DATE(n.zeitpunkt), i.befart) j "
 				"WHERE gleiche>2"

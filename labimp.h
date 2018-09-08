@@ -236,6 +236,8 @@ enum T_
 	T_initialisiert_nur_die_Tabellen,
 	T_fuer_PatID_gewaehlte_SQL_Abfrage,
 	T_russchreib_usid,
+	T_SQL_Abfrage_zur_direkten_Pat_id_Ermittlung_aus_laborneu,
+	T_Zahl_der_Antworten_aus_laborneu,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -271,7 +273,7 @@ class hhcl:public dhcl
 		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
 		tm abndat{0};
 		uchar keimz{0},keimzda{0};
-		svec zwerte;
+		svec zlangt,zwerte,zverfa; // fuer Vergleich mit laborneu
 	protected: //α //ω
 //		long listz=30; //ω
     unsigned long dszahl=0; // Datensatzzahl fuer Tabellenausgaben
