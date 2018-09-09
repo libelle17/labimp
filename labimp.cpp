@@ -10,7 +10,7 @@ const double& versnr= //α
 #define VOMHAUPTCODE // um Funktionsdefinition manchmal mit "__attribute__((weak)) " versehen zu können //ω
 #include "labimp.h"
 // fuer verschiedene Sprachen //α
-#define vorsilbe "laby"
+#define vorsilbe "labory"
 const string hhcl::vorsil=vorsilbe;
 const string hhcl::tlydat=vorsil+"dat";
 const string hhcl::tlyleist=vorsil+"leist";
