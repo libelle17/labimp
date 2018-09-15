@@ -1324,12 +1324,14 @@ void hhcl::virtzeigueberschrift()
 	hcl::virtzeigueberschrift();
 } // void hhcl::virtzeigueberschrift
 
-void BDTtoDate(string& inh,struct tm *tm,int abjahr=1900)
+void BDTtoDate(string& inh,struct tm *tm,int abjahr=1900,uchar objahrzuerst=0)
 {
 	memset(tm,0,sizeof *tm);
 //	const char* const mu[]{"%d%m%Y","%Y%m%d"};
 	const char* const mu[]{"%Y%m%d","%d%m%Y"};
-	for(auto const& aktmu:mu) {
+	for(int i=0;i<2;i++) {
+		auto const& aktmu=mu[objahrzuerst?i:1-i];
+//		caus<<"i: "<<i<<", aktmu: "<<violett<<aktmu<<schwarz<<endl;
 		tm->tm_isdst=-1;
 		strptime(inh.c_str(),aktmu,tm);
 		// nehmen wir mal an, das Programm wird nach 2040 nicht mehr gebraucht
@@ -1382,11 +1384,12 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 	rus.hz("Geschlecht",sgschl);
 	rus.hz("Pat_id",pid);
 	rus.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/usidp);
+	usids<<*usidp;
 	hLog(violetts+Txk[T_Ende]+Tx[T_russchreib_usid]+schwarz+*usidp);
 } // void hhcl::russchreib
 
 // schwache Funktion, kann ueberdeckt werden
-void hhcl::usmod(const size_t aktc)
+void hhcl::usmod(const size_t aktc,svec *zlangtp/*=0*/,svec *zwertep/*=0*/,svec *zverfap/*=0*/,tm *eingtmp/*=0*/)
 {
 }
 
@@ -1401,7 +1404,9 @@ void hhcl::usschluss(const size_t aktc)
 		caus<<i<<": "<<zwerte[i]<<endl;
 	}
 	*/
+#ifndef usmoddanach
 	usmod(aktc);
+#endif
 	zwerte.clear(); // fuer ergpql 
 	zlangt.clear();
 	zverfa.clear();
@@ -1566,11 +1571,12 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 		// Zeichensatz ermitteln und verwenden
 		uchar cp=0; // 0=utf-8, 1=iso-8859-15, 2=cp850
 		// ä,ö,ü,Ä,Ö,Ü,ß,µ,` iso8859-15, cp850, iso8859-1
-		const char* const sonder[]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
+		const char* const sonder[]{"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
 		string zeile,altz;
 		struct tm berdat{0}; // Berichtsdatum
 		uchar oblaborda=0, arztnameda=0, /*in (Vor)zeile kommt Wort Keimzahl vor*/keimz=0,/*die Keimzahl wurde schon eingesetzt*/keimzda=0;
 		string verf,abkue,lanr;
+		float ldtvers{0}; // LDT-Version
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -1737,7 +1743,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 					qspez+=inh;
 				}
 			} else if (cd=="8432") { // Abnahmedatum
-				BDTtoDate(inh,&abndat,2000);
+				BDTtoDate(inh,&abndat,2000,ldtvers>1014);
 			} else if (cd=="8433") {
 				strptime(inh.c_str(),"%H%M",&abndat);
 			} else if (cd=="8470") {
@@ -1773,7 +1779,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			} else if (cd=="8422") {
 				rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
-				BDTtoDate(inh,&eingtm,2000);
+				BDTtoDate(inh,&eingtm,2000,ldtvers>1014);
 				if (!memcmp(&minnachdat,&tmnull,sizeof minnachdat)|| difftime(mktime(&eingtm),mktime(&minnachdat))<0) {
 					memcpy(&minnachdat,&eingtm,sizeof minnachdat);
 				}
@@ -1782,7 +1788,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				}
 				rus.hz("Eingang",&eingtm);
 			} else if (cd=="8302") {
-				BDTtoDate(inh,&berdat,2000);
+				BDTtoDate(inh,&berdat,2000,ldtvers>1014);
 			} else if (cd=="8303") {
 				strptime(inh.c_str(),"%H%M",&berdat);
 				rus.hz("Berichtsdatum",&berdat);
@@ -1811,7 +1817,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			} else if (cd=="3102") {
 				vname=inh;
 			} else if (cd=="3103") {
-				BDTtoDate(inh,&gebtm,1900);
+				BDTtoDate(inh,&gebtm,1900,ldtvers>1014);
 			} else if (cd=="3110") {
 				sgschl=(inh=="W"?"2":inh=="M"?"1":inh=="X"?"3":inh);
 			} else if (cd=="3104") {
@@ -1820,6 +1826,8 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				nvorsatz=inh;
 			} else if (cd=="9212") {
 				rsaetze.hz("VersionSatzb",inh);
+				ldtvers=atof(inh.substr(3).c_str()); // LDT
+				caus<<"ldtvers:       "<<ldtvers<<endl;
 			} else if (cd=="0201") {
 				raerzte.hz("ArztNr",inh);
 			} else if (cd=="0203") {
@@ -1972,7 +1980,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				rsaetze.hz("Kundenarztnr",inh);
 			} else if (cd=="9103") {
 				tm erstd;
-				BDTtoDate(inh,&erstd,2000);
+				BDTtoDate(inh,&erstd,2000,ldtvers>1014);
 				rsaetze.hz("Erstellungsdatum",&erstd);
 			} else if (cd=="9202") {
 				rsaetze.hz("Gesamtlänge",inh);
@@ -2089,6 +2097,7 @@ int hhcl::vverarbeit(const string& datei)
 		if (!My) initDB();
 		string auftr,nnam,vnam,aufnr;
 		tm gebvtm{0},eingvtm{0};
+		float ldtvers{0};
 		while(getline(mdat,zeile)) {
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
@@ -2114,12 +2123,16 @@ int hhcl::vverarbeit(const string& datei)
 					auftr=inh;
 				} else if (cd=="3102") {
 					vnam=inh;
+				} else if (cd=="9212") {
+					ldtvers=atof(inh.substr(3).c_str()); // LDT
+					caus<<"ldtvers:       "<<ldtvers<<endl;
 				} else if (cd=="8310") { // Auftragsnummer
 					aufnr=inh;
 				} else if (cd=="3103") {
-					BDTtoDate(inh,&gebvtm,1900);
+					caus<<"ldtvers:       "<<ldtvers<<endl;
+					BDTtoDate(inh,&gebvtm,1900,ldtvers>1014);
 				} else if (cd=="8301") {
-					BDTtoDate(inh,&eingvtm,2000);
+					BDTtoDate(inh,&eingvtm,2000,ldtvers>1014);
 				} else if (cd=="8000") {
 					if (!auftr.empty()) {
 						const string vorsp="SELECT distinct Nachname,Vorname,GebDat,Auftragsnummer,Auftragsschlüssel,Pfad,Eingang FROM `labor2aNachw` l WHERE ";
@@ -2158,11 +2171,11 @@ int hhcl::vverarbeit(const string& datei)
 										caus<<blau<<setw(24)<<cjj(cerg,0)<<"|"<<blau<<setw(17)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(10)<<
 											cjj(cerg,2)<<"|"<<blau<<setw(8)<<cjj(cerg,3)<<'|'<<cjj(cerg,4)<<'|'<<cjj(cerg,6)<<'|'<<schwarz<<cjj(cerg,5)<<endl;
 										caus<<gruen<<vgl.sql<<schwarz<<endl;
-									}
+									} // if ((cjj(cerg,0)
 								} // 							while (cerg=vgl.HolZeile())
 								if (fzahl) break;
 							} // 						if (vgl.obqueryfehler)
-						}
+						} // 						for(;iru<sizeof sql/sizeof *sql;iru++)
 						if (iru==sizeof sql/sizeof *sql) if (!fzahl) {
 							caus<<rot<<"Nix gefunden bei "<<gruen<<sql[iru-1]<<schwarz<<endl;
 						}
