@@ -507,6 +507,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Namensanfang aller Einlesetabellen: ","Beginning of the name of all storage tables: "},
 	// T_Tabellenzahl_mit
 	{"Tabellenzahl mit ","no.of tables with "},
+	// T_Eingelesene_Labordateien
+	{"Eingelesene Labordateien: ","Processed laboratory files: "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1250,14 +1252,32 @@ void hhcl::virtrueckfragen()
 
 void hhcl::droptables(const size_t aktc/*=0*/,uchar obumben/*=0*/)
 {
-	for(auto tab:{&tlyhinw,&tlypgl,&tlywert,&tlyleist,&tlybakt,&tlypnb,&tlypneu,&tlyus,&tlysaetze,&tlyaerzte,&tlyparameter,&tlyplab,&tlyfehlt,&tlydat}){
-		if (obumben) {
-			RS d1(My,"ALTER TABLE `"+*tab+"` RENAME TO `"+umben+tab->substr(vorsil.length())+"`",aktc,ZDB);
-		} else {
-		// aber: laborparameter nicht loeschen!
-			RS d1(My,"DROP TABLE IF EXISTS `"+*tab+"`",aktc,ZDB);
+	auto altZDB{ZDB};
+//	ZDB=1;
+	for(int aru=0;aru<2;aru++) {
+		for(auto tab:{&tlyhinw,&tlypgl,&tlywert,&tlyleist,&tlybakt,&tlypnb,&tlypneu,&tlyus,&tlysaetze,&tlyaerzte,&tlyparameter,&tlyplab,&tlyfehlt,&tlydat}){
+			if (obumben) {
+				// erst alle constraints loeschen, dann alle umbennen
+				if (!aru) {
+				char ***cerg{0};
+				RS holconst(My,"SELECT CONSTRAINT_NAME FROM information_schema.key_column_usage "
+						"WHERE CONSTRAINT_SCHEMA = '"+dbq+"' AND TABLE_NAME='"+*tab+"' AND REFERENCED_TABLE_NAME IS NOT NULL",aktc,ZDB);
+				if (!holconst.obqueryfehler) {
+					while ((cerg=holconst.HolZeile())&&*cerg) {
+						RS loeconst(My,"ALTER TABLE `"+*tab+"` DROP FOREIGN KEY `"+cjj(cerg,0)+"`",aktc,ZDB);
+					}
+				}
+				} else {
+				RS d1(My,"ALTER TABLE `"+*tab+"` RENAME TO `"+umben+tab->substr(vorsil.length())+"`",aktc,ZDB);
+				}
+			} else {
+				// aber: laborparameter nicht loeschen!
+				RS d1(My,"DROP TABLE IF EXISTS `"+*tab+"`",aktc,ZDB);
+			}
 		}
+		if (!obumben) break;
 	}
+	ZDB=altZDB;
 }
 
 // wird aufgerufen in lauf
@@ -1266,21 +1286,23 @@ void hhcl::virtpruefweiteres()
 	const size_t aktc{0};
 	my_ulonglong zahl{0};
 	if (vonvorne||loeschalle||!umben.empty()) {
-		if (!umben.empty()) {
-			for(string *vsp:{&vorsil,&umben}) {
-				char ***cerg{0};
-				RS z(My,"SELECT COUNT(0) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_CATALOG='def' and TABLE_schema='"+dbq+"'"
-						" AND TABLE_NAME LIKE '"+*vsp+"%' AND TABLE_TYPE='BASE TABLE'",aktc,ZDB);
-				if (z.obqueryfehler||!(cerg=z.HolZeile())||cerg?!*cerg:1) {
-					fLog(Tx[T_Tabellenzahl_mit]+blaus+*vsp+schwarz+": "+blau+cjj(cerg,0)+schwarz,1,oblog);
-				}
+		if (!My) initDB();
+		for(string *vsp:{&vorsil,&umben}) {
+			char ***cerg{0};
+			RS z(My,"SELECT COUNT(0) FROM INFORMATION_SCHEMA.tables WHERE TABLE_CATALOG='def' and TABLE_SCHEMA='"+dbq+"'"
+					" AND TABLE_NAME LIKE '"+*vsp+"%' AND TABLE_TYPE='BASE TABLE'",aktc,ZDB);
+			if (!z.obqueryfehler&&(cerg=z.HolZeile())&&*cerg) {
+				fLog(Tx[T_Tabellenzahl_mit]+blaus+*vsp+schwarz+": "+blau+cjj(cerg,0)+schwarz,1,oblog);
 			}
+			cerg=0;
+			RS x(My,"SELECT COUNT(0) FROM `"+*vsp+tlydat.substr(vorsil.length())+"`",aktc,-2);
+			fLog(Tx[T_Eingelesene_Labordateien]+blaus+((!x.obqueryfehler&&(cerg=x.HolZeile())&&*cerg)?cjj(cerg,0):"0")+schwarz,1,oblog);
+			if (umben.empty()) break;
 		}
 		if (!Tippob(rots+Tx[umben.empty()?T_Soll_ich_wirklich_alle_Tabellen_mit:T_Soll_ich_wirklich_alle_Tabellen_mit___]+blau+vorsil+rot+(vonvorne?Tx[T_loeschen_und_von_vorne_anfangen]:loeschalle?Tx[T_loeschen]:Tx[T_nach___]+blaus+umben+schwarz+Tx[T_umbenennen])+schwarz,"n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
 			exit(0);
 		}
-		if (!My) initDB();
 		if (umben.empty()) {
 			droptables(aktc);
 			fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsil+schwarz,1,1);
@@ -1292,6 +1314,11 @@ void hhcl::virtpruefweiteres()
 			vorsil=altvorsil;
 			tabnamen();
 			droptables(aktc,1);
+			vorsil=umben;
+			tabnamen();
+			prueftab();
+			vorsil=altvorsil;
+			tabnamen();
 		}
 	} else if (!loeschab.empty() || !loeschid.empty()) {
 		if (!My) initDB();

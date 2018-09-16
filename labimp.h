@@ -249,6 +249,7 @@ enum T_
 	T_umbenennen,
 	T_Namensanfang_aller_Einlesetabellen,
 	T_Tabellenzahl_mit,
+	T_Eingelesene_Labordateien,
 	T_MAX //α
 }; // enum T_ //ω
 //α
