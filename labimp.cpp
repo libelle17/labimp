@@ -421,11 +421,15 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"listdat","listfil"},
 	// T_listdat_l
 	{"listdateien","listfiles"},
-	// T_listet_alle_eingelesenen_Dateien_auf
 	// T_initdb_k,
 	{"initdb","initdb"},
 	// T_initdb_l,
 	{"initdb","initdb"},
+	// T_umben_k,
+	{"umben","ren"},
+	// T_umben_l,
+	{"umbenenn","rename"},
+	// T_listet_alle_eingelesenen_Dateien_auf,
 	{"listet alle eingelesenen Dateien auf","lists all processed files"},
 	// T_Pfad_
 	{"Pfad","Path"},
@@ -481,6 +485,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"bakt","bact"},
 	// T_initialisiert_nur_die_Tabellen
 	{"initialisiert nur die Tabellen","initializes only the tables"},
+	// T_benennt_die_Tabellen_um
+	{"benennt die Tabellen um","renames the tables"},
 	// T_fuer_PatID_gewaehlte_SQL_Abfrage,
 	{"für Pat_ID gewählte SQL-Abfrage","sql-query chosen for pat_id"},
 	// T_russchreib_usid,
@@ -1123,6 +1129,7 @@ void hhcl::virtinitopt()
 
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&initdb,/*art*/puchar,T_initdb_k,T_initdb_l,/*TxBp*/&Tx,/*Txi*/T_initialisiert_nur_die_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&umben,/*art*/pstri,T_umben_k,T_umben_l,/*TxBp*/&Tx,/*Txi*/T_benennt_die_Tabellen_um,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nachbneu,/*art*/puchar,T_nachbneu_k,T_nachbneu_l,/*TxBp*/&Tx,/*Txi*/T_Nachbearbeitung_von_vorne,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&pruefauft,/*art*/puchar,T_pruefauft_k,T_pruefauft_l,/*TxBp*/&Tx,/*Txi*/T_pruefe_alle_Auftraege,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
@@ -1284,21 +1291,22 @@ void hhcl::virtpruefweiteres()
 		}
 		if (!My) initDB();
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
-		RS d13(My,"TRUNCATE "+tlyhinw,aktc,ZDB);
-		RS d0(My,"TRUNCATE "+tlypgl,aktc,ZDB);
-		RS d1(My,"TRUNCATE "+tlywert,aktc,ZDB);
-		RS d2(My,"TRUNCATE "+tlyleist,aktc,ZDB);
-		RS d3(My,"TRUNCATE "+tlybakt,aktc,ZDB);
-		RS d6(My,"TRUNCATE "+tlypnb,aktc,ZDB);
-		RS d7(My,"TRUNCATE "+tlypneu,aktc,ZDB);
-		RS d4(My,"TRUNCATE "+tlyus,aktc,ZDB);
-		RS d5(My,"TRUNCATE "+tlysaetze,aktc,ZDB);
-		RS d12(My,"TRUNCATE "+tlyaerzte,aktc,ZDB);
-		RS d11(My,"TRUNCATE "+tlyparameter,aktc,ZDB);
+		const string truncate{"TRUNCATE "};
+		RS d13(My,truncate+tlyhinw,aktc,ZDB);
+		RS d0(My,truncate+tlypgl,aktc,ZDB);
+		RS d1(My,truncate+tlywert,aktc,ZDB);
+		RS d2(My,truncate+tlyleist,aktc,ZDB);
+		RS d3(My,truncate+tlybakt,aktc,ZDB);
+		RS d6(My,truncate+tlypnb,aktc,ZDB);
+		RS d7(My,truncate+tlypneu,aktc,ZDB);
+		RS d4(My,truncate+tlyus,aktc,ZDB);
+		RS d5(My,truncate+tlysaetze,aktc,ZDB);
+		RS d12(My,truncate+tlyaerzte,aktc,ZDB);
+		RS d11(My,truncate+tlyparameter,aktc,ZDB);
 		// aber: laborparameter nicht loeschen!
 		RS d8(My,"DELETE FROM `"+tlyplab+"` where id>1",aktc,ZDB);
-		RS d10(My,"TRUNCATE "+tlyfehlt,aktc,ZDB);
-		RS d9(My,"TRUNCATE "+tlydat,aktc,ZDB);
+		RS d10(My,truncate+tlyfehlt,aktc,ZDB);
+		RS d9(My,truncate+tlydat,aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleert_alle_Tabellen_und_faengt_von_vorne_an]+schwarz,1,1);
 	} else if (loeschunvollst||nurnachb||nachbneu||pruefauft) {

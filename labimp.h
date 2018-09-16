@@ -208,6 +208,8 @@ enum T_
 	T_listdat_l,
 	T_initdb_k,
 	T_initdb_l,
+	T_umben_k,
+	T_umben_l,
 	T_listet_alle_eingelesenen_Dateien_auf,
 	T_Pfad_,
 	T_Eingang,
@@ -236,6 +238,7 @@ enum T_
 	T_werte,
 	T_bakt,
 	T_initialisiert_nur_die_Tabellen,
+	T_benennt_die_Tabellen_um,
 	T_fuer_PatID_gewaehlte_SQL_Abfrage,
 	T_russchreib_usid,
 	T_SQL_Abfrage_zur_direkten_Pat_id_Ermittlung_aus_laborneu,
@@ -295,6 +298,7 @@ class hhcl:public dhcl
 		string loeschid;
 		uchar listdat=0;
 		uchar initdb=0;
+		string umben;
 		string vorsil;   // Vorsilbe für Datenbanktabellen
 		string ldatvz;   // Verzeichnis der Labordateien
 		string fertigvz; // Verzeichnis der fertig bearbeiteten
