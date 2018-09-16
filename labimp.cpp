@@ -455,6 +455,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Soll ich wirklich alle Tabellen mit ","Shall I in fact truncate all tables with "},
 	//T_Soll_ich_wirklich_alle_Tabellen_mit__
 	{"Soll ich wirklich alle Tabellen mit ","Shall I in fact delete in all tables with "},
+	// T_Soll_ich_wirklich_alle_Tabellen_mit___
+	{"Soll ich wirklich alle Tabellen mit ","Shall I in fact rename in all tables with "},
 	// T_loeschen_und_von_vorne_anfangen
 	{" loeschen und von vorne anfangen?"," and start from scratch?"},
 	// T_Aktion_abgebrochen
@@ -497,6 +499,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Zahl der Antworten aus laborneu","No of answers from laborneu"},
 	// T_Vorsilbe_fuer_Datenbanktabellen,
 	{"Vorsilbe für Datenbanktabellen","prefix for database tables"},
+	// T_nach___
+	{"' nach '","' to '"},
+	// T_umbenennen
+	{"' umbenennen?","'?"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1123,13 +1129,13 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&umben,/*art*/pstri,T_umben_k,T_umben_l,/*TxBp*/&Tx,/*Txi*/T_benennt_die_Tabellen_um,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschab,/*art*/pdez,T_lab_k,T_lab_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Datensaetze_ab,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschab.empty());
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschid,/*art*/pdez,T_lid_k,T_lid_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensatz_id,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschid.empty());
 	opn<<new optcl(/*pname*/string(),/*pptr*/&listdat,/*art*/puchar,T_listdat_k,T_listdat_l,/*TxBp*/&Tx,/*Txi*/T_listet_alle_eingelesenen_Dateien_auf,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&initdb,/*art*/puchar,T_initdb_k,T_initdb_l,/*TxBp*/&Tx,/*Txi*/T_initialisiert_nur_die_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&umben,/*art*/pstri,T_umben_k,T_umben_l,/*TxBp*/&Tx,/*Txi*/T_benennt_die_Tabellen_um,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nachbneu,/*art*/puchar,T_nachbneu_k,T_nachbneu_l,/*TxBp*/&Tx,/*Txi*/T_Nachbearbeitung_von_vorne,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&pruefauft,/*art*/puchar,T_pruefauft_k,T_pruefauft_l,/*TxBp*/&Tx,/*Txi*/T_pruefe_alle_Auftraege,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
@@ -1238,34 +1244,42 @@ void hhcl::virtrueckfragen()
 	dhcl::virtrueckfragen();
 } // void hhcl::virtrueckfragen()
 
+void hhcl::droptables(uchar obumben/*=0*/)
+{
+	const size_t aktc{0};
+	for(auto tab:{&tlyhinw,&tlypgl,&tlywert,&tlyleist,&tlybakt,&tlypnb,&tlypneu,&tlyus,&tlysaetze,&tlyaerzte,&tlyparameter,&tlyplab,&tlyfehlt,&tlydat}){
+		if (obumben) {
+			RS d1(My,"ALTER TABLE `"+*tab+"` RENAME TO `"+umben+tab->substr(vorsil.length())+"`",aktc,ZDB);
+		} else {
+		// aber: laborparameter nicht loeschen!
+			RS d1(My,"DROP TABLE IF EXISTS `"+*tab+"`",aktc,ZDB);
+		}
+	}
+}
+
 // wird aufgerufen in lauf
 void hhcl::virtpruefweiteres()
 { //ω
 	const size_t aktc{0};
 	my_ulonglong zahl{0};
-	if (vonvorne||loeschalle) {
-		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit]+blau+vorsil+rot+(vonvorne?Tx[T_loeschen_und_von_vorne_anfangen]:Tx[T_loeschen])+schwarz,"n")) {
+	if (vonvorne||loeschalle||!umben.empty()) {
+		if (!Tippob(rots+Tx[umben.empty()?T_Soll_ich_wirklich_alle_Tabellen_mit:T_Soll_ich_wirklich_alle_Tabellen_mit___]+blau+vorsil+rot+(vonvorne?Tx[T_loeschen_und_von_vorne_anfangen]:loeschalle?Tx[T_loeschen]:Tx[T_nach___]+blaus+umben+schwarz+Tx[T_umbenennen])+schwarz,"n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
 			exit(0);
 		}
 		if (!My) initDB();
-		const string dropif{"DROP TABLE IF EXISTS "};
-		RS d13(My,dropif+tlyhinw,aktc,ZDB);
-		RS d0(My,dropif+tlypgl,aktc,ZDB);
-		RS d1(My,dropif+tlywert,aktc,ZDB);
-		RS d2(My,dropif+tlyleist,aktc,ZDB);
-		RS d3(My,dropif+tlybakt,aktc,ZDB);
-		RS d6(My,dropif+tlypnb,aktc,ZDB);
-		RS d7(My,dropif+tlypneu,aktc,ZDB);
-		RS d4(My,dropif+tlyus,aktc,ZDB);
-		RS d5(My,dropif+tlysaetze,aktc,ZDB);
-		RS d12(My,dropif+tlyaerzte,aktc,ZDB);
-		RS d11(My,dropif+tlyparameter,aktc,ZDB);
-		// aber: laborparameter nicht loeschen!
-		RS d8(My,dropif+tlyplab,aktc,ZDB);
-		RS d10(My,dropif+tlyfehlt,aktc,ZDB);
-		RS d9(My,dropif+tlydat,aktc,ZDB);
-		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsil+schwarz,1,1);
+		if (umben.empty()) {
+			droptables();
+			fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsil+schwarz,1,1);
+		} else {
+			auto altvorsil{vorsil};
+			vorsil=umben;
+			tabnamen();
+			droptables();
+			vorsil=altvorsil;
+			tabnamen();
+			droptables(1);
+		}
 	} else if (!loeschab.empty() || !loeschid.empty()) {
 		if (!My) initDB();
     my_ulonglong dzahl{0},szahl{0},uzahl{0};
@@ -1336,7 +1350,7 @@ void hhcl::virtpruefweiteres()
 			RS nachloesch(My,"UPDATE `"+tlyus+"` SET pat_id_laborneu=null",aktc,ZDB);
 		}
 		ZDB=altZDB;
-	} // if (vonvorne||loeschalle) else if ..  else if (loeschunvollst||nurnachb||nachbneu)
+	} // if (vonvorne||loeschalle||!umben.empty()) else if ..  else if (loeschunvollst||nurnachb||nachbneu)
 	hcl::virtpruefweiteres(); // z.Zt. leer //α
 } // void hhcl::virtpruefweiteres
 
@@ -2064,7 +2078,7 @@ void hhcl::pvirtfuehraus()
 	unsigned long verarbeitet{0};
 	if (initdb) {
 		prueftab();
-	} else if (!loeschalle && !loeschunvollst) {
+	} else if (!loeschalle && !loeschunvollst && umben.empty()) {
 		if (!nurnachb && !nachbneu && !pruefauft) {
 			pruefverz(fertigvz,obverb,oblog);
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
@@ -2110,7 +2124,7 @@ void hhcl::pvirtfuehraus()
 			} // 			for(size_t i=0;i<lrue.size();i++)
 		} // 		if (!nurnachb && !nachbneu)
 		if (nurnachb || nachbneu|| verarbeitet) nachbearbeit(aktc);
-	} // 	if (!loeschalle)
+	} // 		else if (!loeschalle && !loeschunvollst && umben.empty())
 	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);
 	ZDB=altZDB;
 } // void hhcl::pvirtfuehraus  //α

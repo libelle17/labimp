@@ -223,6 +223,7 @@ enum T_
 	T_Soll_ich_wirklich_alle_Tabellen_mit,
 	T_Soll_ich_wirklich_alle_Tabellen_mit_,
 	T_Soll_ich_wirklich_alle_Tabellen_mit__,
+	T_Soll_ich_wirklich_alle_Tabellen_mit___,
 	T_loeschen_und_von_vorne_anfangen,
 	T_Aktion_abgebrochen,
 	T_loeschen,
@@ -244,6 +245,8 @@ enum T_
 	T_SQL_Abfrage_zur_direkten_Pat_id_Ermittlung_aus_laborneu,
 	T_Zahl_der_Antworten_aus_laborneu,
 	T_Vorsilbe_fuer_Datenbanktabellen,
+	T_nach___,
+	T_umbenennen,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -320,6 +323,7 @@ class hhcl:public dhcl
 		void prueflyparameter(DB *My, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyhinw(DB *My, const int obverb, const int oblog, const uchar direkt=0);
 		void prueftab();
+		void droptables(uchar obumben=0);
 		void virttesterg(); //α
 		void virtlieskonfein();
 		void virtautokonfschreib();
