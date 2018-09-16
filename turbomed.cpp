@@ -124,9 +124,7 @@ void hhcl::usmod(const size_t aktc,svec *zlangtp/*=0*/,svec *zwertep/*=0*/,svec 
 			} // 		if (!rspat.obqueryfehler) else
 			mods+=" WHERE id="+usid;
 			RS rsmod(My,mods,aktc,ZDB);
-			if (rsmod.geaendert) {
-				caus<<rot<<"geänderte Sätze: "<<violett<<rsmod.geaendert<<schwarz<<endl;
-			}
+//			if (rsmod.geaendert) caus<<rot<<"geänderte Sätze: "<<violett<<rsmod.geaendert<<schwarz<<endl;
 		}
 	} // 	if (!usid.empty())
 } // void hhcl::usmod

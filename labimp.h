@@ -121,6 +121,8 @@ enum T_
 	T_8411_Testbezeichnung_Turbomed,
 	T_ldvz_k,
 	T_ldvz_l,
+	T_vors_k,
+	T_vors_l,
 	T_fgvz_k,
 	T_fgvz_l,
 	T_Verzeichnis_der_Faxdateien,
@@ -137,7 +139,7 @@ enum T_
 	T_Kennung,
 	T_Inhalt,
 	T_prueflyfehlt,
-	T_Bezug_auf_lyplab,
+	T_Bezug_auf_,
 	T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich,
 	T_8421,
 	T_LaborParameter,
@@ -147,7 +149,7 @@ enum T_
 	T_oberer_Normwert_maennlich,
 	T_unterer_Normwert_weiblich,
 	T_oberer_Normwert_weiblich,
-	T_Normbereich_aus_lywert,
+	T_Normbereich_aus_,
 	T_Aktualisierungszeitpunt,
 	T_Ordnungsnummer_der_Dateiuebertragung,
 	T_fehlend,
@@ -238,27 +240,27 @@ enum T_
 	T_russchreib_usid,
 	T_SQL_Abfrage_zur_direkten_Pat_id_Ermittlung_aus_laborneu,
 	T_Zahl_der_Antworten_aus_laborneu,
+	T_Vorsilbe_fuer_Datenbanktabellen,
 	T_MAX //α
 }; // enum T_ //ω
 //α
 class hhcl:public dhcl
 {
 	private: //ω
-		const static string vorsil; /*=labory*/
-		const static string tlydat; /*=vorsil+"dat"*/
-		const static string tlyleist; /*=vorsil+"leist"*/
-		const static string tlypgl; /*=vorsil+"pgl"*/
-		const static string tlyplab; /*=vorsil+"plab"*/
-		const static string tlypnb; /*=vorsil+"pnb"*/
-		const static string tlypneu; /*=vorsil+"pneu"*/
-		const static string tlyaerzte; /*=vorsil+"saetze"*/
-		const static string tlysaetze; /*=vorsil+"saetze"*/
-		const static string tlyus; /*=vorsil+"us"*/
-		const static string tlywert; /*=vorsil+"wert"*/
-		const static string tlybakt; /*=vorsil+"bakt"*/
-		const static string tlyfehlt; /*=vorsil+"fehlt"*/
-		const static string tlyparameter; /*=vorsil+"parameter"*/
-		const static string tlyhinw; /*=vorsil+"hinw"*/
+		string tlydat; /*=vorsil+"dat"*/
+		string tlyleist; /*=vorsil+"leist"*/
+		string tlypgl; /*=vorsil+"pgl"*/
+		string tlyplab; /*=vorsil+"plab"*/
+		string tlypnb; /*=vorsil+"pnb"*/
+		string tlypneu; /*=vorsil+"pneu"*/
+		string tlyaerzte; /*=vorsil+"saetze"*/
+		string tlysaetze; /*=vorsil+"saetze"*/
+		string tlyus; /*=vorsil+"us"*/
+		string tlywert; /*=vorsil+"wert"*/
+		string tlybakt; /*=vorsil+"bakt"*/
+		string tlyfehlt; /*=vorsil+"fehlt"*/
+		string tlyparameter; /*=vorsil+"parameter"*/
+		string tlyhinw; /*=vorsil+"hinw"*/
 		const static tm tmnull; // {0}
 		const static tm tmmax; // {0,0,0,1,0,200,0,0,0}
 		string labind,pneuind,pnbid,hinwind;
@@ -293,10 +295,12 @@ class hhcl:public dhcl
 		string loeschid;
 		uchar listdat=0;
 		uchar initdb=0;
+		string vorsil;   // Vorsilbe für Datenbanktabellen
 		string ldatvz;   // Verzeichnis der Labordateien
 		string fertigvz; // Verzeichnis der fertig bearbeiteten
 	public: //α //ω
 	private: //α //ω
+		void tabnamen();
 		void prueflydat(DB *My, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyleist(DB *My, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflypgl(DB *My, const int obverb, const int oblog, const uchar direkt=0);

@@ -11,21 +11,6 @@ const double& versnr= //α
 #include "labimp.h"
 // fuer verschiedene Sprachen //α
 #define vorsilbe "labory"
-const string hhcl::vorsil=vorsilbe;
-const string hhcl::tlydat=vorsil+"dat";
-const string hhcl::tlyleist=vorsil+"leist";
-const string hhcl::tlypgl=vorsil+"pgl";
-const string hhcl::tlyplab=vorsil+"plab";
-const string hhcl::tlypnb=vorsil+"pnb";
-const string hhcl::tlypneu=vorsil+"pneu";
-const string hhcl::tlyaerzte=vorsil+"aerzte";
-const string hhcl::tlysaetze=vorsil+"saetze";
-const string hhcl::tlyus=vorsil+"us";
-const string hhcl::tlywert=vorsil+"wert";
-const string hhcl::tlybakt=vorsil+"bakt";
-const string hhcl::tlyfehlt=vorsil+"fehlt";
-const string hhcl::tlyparameter=vorsil+"parameter";
-const string hhcl::tlyhinw=vorsil+"hinw";
 const tm hhcl::tmnull{0};
 const tm hhcl::tmmax{0,0,0,1,0,200,0,0,0};
 char const *DPROG_T[T_MAX+1][SprachZahl]={
@@ -265,6 +250,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"ldvz","lddir"},
 	// T_ldvz_l
 	{"labordatenvz","laboratoryfiledir"},
+	// T_vors_k
+	{"vors","pref"},
+	// T_vors_l
+	{"vorsilbe","prefix"},
 	// T_fgvz_k
 	{"fgvz","fddir"},
 	// T_fgvz_l
@@ -297,8 +286,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Inhalt","content"},
 	// T_prueflyfehlt
 	{"prueflyfehlt()","testlaboratoymissing()"},
-	// T_Bezug_auf_lyplab
-	{"Bezug zu " vorsilbe"plab","reference to " vorsilbe"plab"},
+	// T_Bezug_auf_
+	{"Bezug auf ","reference to "},
 	// T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich
 	{"Abkürzung mit gleicher Bedeutung, gleicher Einheit und gleichem Normbereich",
 	 "abbreviation with same meaning, same unit and same normal range"},
@@ -318,8 +307,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"unterer Normwert weiblich","lower border female"},
 	// T_oberer_Normwert_weiblich,
 	{"oberer Normwert weiblich","upper border female"},
-	// T_Normbereich_aus_lywert
-	{"Normbereich aus " vorsilbe"wert","normal range from " vorsilbe"wert"},
+	// T_Normbereich_aus_
+	{"Normbereich aus ","normal range from "},
 	// T_Aktualisierungszeitpunt
 	{"Aktualisierungszeitpunkt","actualization time"},
 	// T_Ordnungsnummer_der_Dateiuebertragung
@@ -401,9 +390,9 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	//	T_lab_l,
 	{"loescheab","deletefrom"},
 	// T_loescht_alle_Datensaetze_ab
-	{"loescht alle Datensaetze ab " vorsilbe"dat ID: ","deletes all data sets beginning at " vorsilbe"dat ID: "},
+	{"loescht alle Datensaetze ab DatID: ","deletes all data sets beginning at dat ID: "},
 	// T_Loescheab
-	{"Loesche ab " vorsilbe"dat ID: ","Deleting from " vorsilbe"dat ID: "},
+	{"Loesche ab DatID: ","Deleting from dat ID: "},
 	// T_lid_k,
 	{"loeid","delid"},
 	// T_lid_l,
@@ -411,7 +400,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_loescht_Datensatz_id,
 	{"loescht Datensatz mit DATID ","deletes data set with DATID "},
 	// T_Loescheid,
-	{"Loesche " vorsilbe"dat ID: ","Deleting " vorsilbe"dat ID: "},
+	{"Loesche DatID: ","Deleting datID: "},
 	// T_Datensaetze_geloescht
 	{"Datensaetze geloescht","entries deleted"},
 	// T_fertig_mit_datid
@@ -500,6 +489,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"SQL-Abfrage zur direkten Pat_id-Ermittlung aus laborneu","sql-query for directly questioning pat_id from laborneu"},
 	// T_Zahl_der_Antworten_aus_laborneu,
 	{"Zahl der Antworten aus laborneu","No of answers from laborneu"},
+	// T_Vorsilbe_fuer_Datenbanktabellen,
+	{"Vorsilbe für Datenbanktabellen","prefix for database tables"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -581,7 +572,7 @@ void hhcl::prueflyparameter(DB *My, const int obverb, const int oblog, const uch
 		Feld felder[] = {
 			Feld(/*name*/"Abkü",/*typ*/"varchar",/*lenge*/"42",/*prec*/"",/*comment*/Tx[T_8410_maximale_Laenge_8],/*obind*/0,/*obaut*/0,/*nnull*/1),
 			Feld("AbküN","varchar","8","",Tx[T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich],0,0,1),
-			Feld("LabID","int","10","",Tx[T_Bezug_auf_lyplab],0,0,1,string(),1),
+			Feld("LabID","int","10","",(Tx[T_Bezug_auf_]+tlyplab).c_str(),0,0,1,string(),1),
 			Feld("Langtext","varchar","41","",Tx[T_8411_maximale_Laenge_40],0,0,1),
 			Feld("Einheit","varchar","12","",Tx[T_8421],0,0,1,"kA"),
 			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
@@ -590,7 +581,7 @@ void hhcl::prueflyparameter(DB *My, const int obverb, const int oblog, const uch
 			Feld("oNm","varchar","6","",Tx[T_oberer_Normwert_maennlich],0,0,1),
 			Feld("uNw","varchar","5","",Tx[T_unterer_Normwert_weiblich],0,0,1),
 			Feld("oNw","varchar","6","",Tx[T_oberer_Normwert_weiblich],0,0,1),
-			Feld("NB","varchar","1342","",Tx[T_Normbereich_aus_lywert],0,0,1),
+			Feld("NB","varchar","1342","",Tx[T_Normbereich_aus_]+tlywert,0,0,1),
 			Feld("Aktzeit","datetime","0","0",Tx[T_Aktualisierungszeitpunt],1,0,1),
 			Feld("StByte","int","10","",Tx[T_Ordnungsnummer_der_Dateiuebertragung],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/0),
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
@@ -680,7 +671,7 @@ void hhcl::prueflypneu(DB *My, const int obverb, const int oblog, const uchar di
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("Abkü","varchar","42","",Tx[T_8410_maximale_Laenge_8],1,0,1),
 			Feld("AbküN","varchar","8","",Tx[T_Abkuerzung_mit_gleicher_Bedeutung_gleicher_Einheit_und_gleichem_Normbereich],0,0,1),
-			Feld("LabID","int","10","",Tx[T_Bezug_auf_lyplab],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa,NULL*/string(),/*unsig*/1),
+			Feld("LabID","int","10","",Tx[T_Bezug_auf_],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa,NULL*/string(),/*unsig*/1),
 			Feld("Langtext","varchar","41","",Tx[T_8411_maximale_Laenge_40],0,0,1),
 			Feld("Einheit","varchar","12","",Tx[T_8421_maximale_Laenge_12],0,0,1,"kA"),
 			Feld("Gruppe","int","10","",Tx[T_Bezug_auf_laborgruppen_laborgruppe],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
@@ -782,7 +773,7 @@ void hhcl::prueflysaetze(DB *My, const int obverb, const int oblog, const uchar 
 			Feld("SatzlängeSchluss","varchar","5","",Tx[T_8100_Satzlaenge_Turbomed_nach_8221_in_Feld_8000],0,0,1),
 			Feld("VersionSatzb","varchar","11","",Tx[T_9212_Version_der_Satzbeschreibung_Turbomed],0,0,1),
 			Feld("ArztID","int","10","",Tx[T_Bezug_auf_lyaerzte],0,0,1,string(),1),
-			Feld("LabID","int","10","",Tx[T_Bezug_auf_lyplab],0,0,1,string(),1),
+			Feld("LabID","int","10","",Tx[T_Bezug_auf_],0,0,1,string(),1),
 			Feld("KBVPrüfnr","varchar","16","",Tx[T_101_KBV_Pruefnummer_Turbomed],0,0,1),
 			Feld("Zeichensatz","varchar","1","",Tx[T_9106_verwendeter_Zeichensatz_Turbomed],0,0,1),
 			Feld("Kundenarztnr","varchar","8","",Tx[T_8312_Kundenarztnummer_Turbomed],0,0,1),
@@ -1120,6 +1111,7 @@ void hhcl::pvirtVorgbSpeziell()
 // wird aufgerufen in lauf
 void hhcl::virtinitopt()
 { //ω
+	opn<<new optcl(/*pname*/"vorsil",/*pptr*/&vorsil,/*art*/pstri,T_vors_k,T_vors_l,/*TxBp*/&Tx,/*Txi*/T_Vorsilbe_fuer_Datenbanktabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!vorsil.empty());
 	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Faxdateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty());
 	opn<<new optcl(/*pname*/"fertigvz",/*pptr*/&fertigvz,/*art*/pverz,T_fgvz_k,T_fgvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Fertigen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!fertigvz.empty());
 	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -1143,7 +1135,26 @@ void hhcl::pvirtmacherkl()
 {
 	erkl<<blau<<Txk[T_Program]<<violett<<DPROG //ω
 		<<blau<<" ist etwas ganz Spezielles"<<schwarz; //α
+	tabnamen();
 } // void hhcl::pvirtmacherkl
+
+void hhcl::tabnamen()
+{
+	tlydat=vorsil+"dat";
+	tlyleist=vorsil+"leist";
+	tlypgl=vorsil+"pgl";
+	tlyplab=vorsil+"plab";
+	tlypnb=vorsil+"pnb";
+	tlypneu=vorsil+"pneu";
+	tlyaerzte=vorsil+"aerzte";
+	tlysaetze=vorsil+"saetze";
+	tlyus=vorsil+"us";
+	tlywert=vorsil+"wert";
+	tlybakt=vorsil+"bakt";
+	tlyfehlt=vorsil+"fehlt";
+	tlyparameter=vorsil+"parameter";
+	tlyhinw=vorsil+"hinw";
+}
 
 // wird aufgerufen in lauf
 void hhcl::virtMusterVorgb()
@@ -1151,6 +1162,7 @@ void hhcl::virtMusterVorgb()
 	hLog(violetts+Tx[T_virtMusterVorgb]+schwarz); //ω
 	dhcl::virtMusterVorgb(); //α
 	dbq=DPROG;
+	vorsil=vorsilbe;
 	ldatvz=gethome()+vtz+Tx[T_labor];
 	fertigvz=ldatvz+vtz+Tx[T_fertige];
 } // void hhcl::MusterVorgb
@@ -1178,9 +1190,9 @@ void hhcl::pvirtvorrueckfragen()
 		const size_t aktc=0;
 #ifdef sqlos
 		svec datr;
-		systemrueck("mysql -u"+muser+" -p"+mpwd+" "+dbq+" -e'select datid,pfad,geändert,größe,zp,codepage,!!fertig from `"+tlydat+"`'",obverb,oblog,&datr);
-		for(size_t i=0;i<datr.size();i++) {
-			caus<<datr[i]<<endl;
+		systemrueck("mysql -u"+muser+" -p"+mpwd+" "+dbq+" -e'SELECT datid,pfad,geändert,größe,zp,codepage,!!fertig FROM `"+tlydat+"`'",obverb,oblog,&datr);
+		for(auto aktdat:datr) {
+			caus<<aktdat<<endl;
 		}
 #else
 		if (!My) initDB();
@@ -1210,6 +1222,9 @@ void hhcl::virtrueckfragen()
 {
 	hLog(violetts+Tx[T_virtrueckfragen]+schwarz);
 	if (rzf) { //ω
+		if (vorsil.empty()) vorsil=vorsilbe;
+		vorsil=Tippstr(Tx[T_Vorsilbe_fuer_Datenbanktabellen],&vorsil);
+		tabnamen();
 		ldatvz=Tippverz(Tx[T_Verzeichnis_der_Faxdateien],&ldatvz);
 		fertigvz=Tippverz(Tx[T_Verzeichnis_der_fertig_Verarbeiteten],&fertigvz);
 	} //α
@@ -1227,22 +1242,23 @@ void hhcl::virtpruefweiteres()
 			exit(0);
 		}
 		if (!My) initDB();
-		RS d13(My,"DROP TABLE IF EXISTS "+tlyhinw,aktc,ZDB);
-		RS d0(My,"DROP TABLE IF EXISTS "+tlypgl,aktc,ZDB);
-		RS d1(My,"DROP TABLE IF EXISTS "+tlywert,aktc,ZDB);
-		RS d2(My,"DROP TABLE IF EXISTS "+tlyleist,aktc,ZDB);
-		RS d3(My,"DROP TABLE IF EXISTS "+tlybakt,aktc,ZDB);
-		RS d6(My,"DROP TABLE IF EXISTS "+tlypnb,aktc,ZDB);
-		RS d7(My,"DROP TABLE IF EXISTS "+tlypneu,aktc,ZDB);
-		RS d4(My,"DROP TABLE IF EXISTS "+tlyus,aktc,ZDB);
-		RS d5(My,"DROP TABLE IF EXISTS "+tlysaetze,aktc,ZDB);
-		RS d12(My,"DROP TABLE IF EXISTS "+tlyaerzte,aktc,ZDB);
-		RS d11(My,"DROP TABLE IF EXISTS "+tlyparameter,aktc,ZDB);
+		const string dropif{"DROP TABLE IF EXISTS "};
+		RS d13(My,dropif+tlyhinw,aktc,ZDB);
+		RS d0(My,dropif+tlypgl,aktc,ZDB);
+		RS d1(My,dropif+tlywert,aktc,ZDB);
+		RS d2(My,dropif+tlyleist,aktc,ZDB);
+		RS d3(My,dropif+tlybakt,aktc,ZDB);
+		RS d6(My,dropif+tlypnb,aktc,ZDB);
+		RS d7(My,dropif+tlypneu,aktc,ZDB);
+		RS d4(My,dropif+tlyus,aktc,ZDB);
+		RS d5(My,dropif+tlysaetze,aktc,ZDB);
+		RS d12(My,dropif+tlyaerzte,aktc,ZDB);
+		RS d11(My,dropif+tlyparameter,aktc,ZDB);
 		// aber: laborparameter nicht loeschen!
-		RS d8(My,"DROP TABLE IF EXISTS "+tlyplab,aktc,ZDB);
-		RS d10(My,"DROP TABLE IF EXISTS "+tlyfehlt,aktc,ZDB);
-		RS d9(My,"DROP TABLE IF EXISTS "+tlydat,aktc,ZDB);
-		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsilbe+schwarz,1,1);
+		RS d8(My,dropif+tlyplab,aktc,ZDB);
+		RS d10(My,dropif+tlyfehlt,aktc,ZDB);
+		RS d9(My,dropif+tlydat,aktc,ZDB);
+		fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsil+schwarz,1,1);
 	} else if (!loeschab.empty() || !loeschid.empty()) {
 		if (!My) initDB();
     my_ulonglong dzahl{0},szahl{0},uzahl{0};
@@ -1827,7 +1843,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			} else if (cd=="9212") {
 				rsaetze.hz("VersionSatzb",inh);
 				ldtvers=atof(inh.substr(3).c_str()); // LDT
-				caus<<"ldtvers:       "<<ldtvers<<endl;
+//				caus<<"ldtvers:       "<<ldtvers<<endl;
 			} else if (cd=="0201") {
 				raerzte.hz("ArztNr",inh);
 			} else if (cd=="0203") {
@@ -2034,6 +2050,8 @@ void hhcl::pvirtvorpruefggfmehrfach()
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
+	auto altZDB=ZDB;
+//	ZDB=1;
 	const size_t aktc{0};
 	unsigned long verarbeitet{0};
 	if (initdb) {
@@ -2061,9 +2079,13 @@ void hhcl::pvirtfuehraus()
 					pthread_mutex_unlock(&timemutex);
 					}
 				 */
-				RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
+				// wenn Datei schon angefangen wurde zu einzulesen (fertig<>1), dann dieses loeschen
+				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
+				// 16.9.18: Namen sollen eindeutig sein, dafuer koennen die Pfade mal umsortiert werden, ohne dass gleich alle Dateien neu eingelesen werden
+				RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE name="+sqlft(My->DBS,base_name(*aktl))+" AND fertig<>1",aktc,ZDB);
 				char ***cerg{0};
-				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))+" AND pfad = "+sqlft(My->DBS,*aktl),aktc,ZDB);
+				// der evtl. Fund folgender Suche muss also fertig==1 haben
+				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))/*+" AND pfad = "+sqlft(My->DBS,*aktl)*/,aktc,ZDB);
 				if (rsfertig.obqueryfehler||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
 					// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
 //					yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
@@ -2082,6 +2104,7 @@ void hhcl::pvirtfuehraus()
 		if (nurnachb || nachbneu|| verarbeitet) nachbearbeit(aktc);
 	} // 	if (!loeschalle)
 	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);
+	ZDB=altZDB;
 } // void hhcl::pvirtfuehraus  //α
 
 int hhcl::vverarbeit(const string& datei)
@@ -2125,7 +2148,7 @@ int hhcl::vverarbeit(const string& datei)
 					vnam=inh;
 				} else if (cd=="9212") {
 					ldtvers=atof(inh.substr(3).c_str()); // LDT
-					caus<<"ldtvers:       "<<ldtvers<<endl;
+//					caus<<"ldtvers:       "<<ldtvers<<endl;
 				} else if (cd=="8310") { // Auftragsnummer
 					aufnr=inh;
 				} else if (cd=="3103") {
@@ -2239,6 +2262,7 @@ void hhcl::virtlieskonfein()
 	hLog(violetts+Txk[T_virtlieskonfein]+schwarz);
 	hcl::virtlieskonfein(); //ω
 	hLog(violetts+Txk[T_Ende]+Txk[T_virtlieskonfein]+schwarz); //α
+	caus<<"vorsil: "<<vorsil<<endl;
 	obverb=altobverb;
 } // void hhcl::virtlieskonfein()
 
