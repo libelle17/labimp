@@ -247,6 +247,8 @@ enum T_
 	T_Vorsilbe_fuer_Datenbanktabellen,
 	T_nach___,
 	T_umbenennen,
+	T_Namensanfang_aller_Einlesetabellen,
+	T_Tabellenzahl_mit,
 	T_MAX //α
 }; // enum T_ //ω
 //α
@@ -323,7 +325,7 @@ class hhcl:public dhcl
 		void prueflyparameter(DB *My, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyhinw(DB *My, const int obverb, const int oblog, const uchar direkt=0);
 		void prueftab();
-		void droptables(uchar obumben=0);
+		void droptables(const size_t aktc=0,uchar obumben=0);
 		void virttesterg(); //α
 		void virtlieskonfein();
 		void virtautokonfschreib();

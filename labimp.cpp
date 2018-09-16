@@ -503,6 +503,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"' nach '","' to '"},
 	// T_umbenennen
 	{"' umbenennen?","'?"},
+	// 	T_Namensanfang_aller_Einlesetabellen,
+	{"Namensanfang aller Einlesetabellen: ","Beginning of the name of all storage tables: "},
+	// T_Tabellenzahl_mit
+	{"Tabellenzahl mit ","no.of tables with "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1244,9 +1248,8 @@ void hhcl::virtrueckfragen()
 	dhcl::virtrueckfragen();
 } // void hhcl::virtrueckfragen()
 
-void hhcl::droptables(uchar obumben/*=0*/)
+void hhcl::droptables(const size_t aktc/*=0*/,uchar obumben/*=0*/)
 {
-	const size_t aktc{0};
 	for(auto tab:{&tlyhinw,&tlypgl,&tlywert,&tlyleist,&tlybakt,&tlypnb,&tlypneu,&tlyus,&tlysaetze,&tlyaerzte,&tlyparameter,&tlyplab,&tlyfehlt,&tlydat}){
 		if (obumben) {
 			RS d1(My,"ALTER TABLE `"+*tab+"` RENAME TO `"+umben+tab->substr(vorsil.length())+"`",aktc,ZDB);
@@ -1263,22 +1266,32 @@ void hhcl::virtpruefweiteres()
 	const size_t aktc{0};
 	my_ulonglong zahl{0};
 	if (vonvorne||loeschalle||!umben.empty()) {
+		if (!umben.empty()) {
+			for(string *vsp:{&vorsil,&umben}) {
+				char ***cerg{0};
+				RS z(My,"SELECT COUNT(0) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_CATALOG='def' and TABLE_schema='"+dbq+"'"
+						" AND TABLE_NAME LIKE '"+*vsp+"%' AND TABLE_TYPE='BASE TABLE'",aktc,ZDB);
+				if (z.obqueryfehler||!(cerg=z.HolZeile())||cerg?!*cerg:1) {
+					fLog(Tx[T_Tabellenzahl_mit]+blaus+*vsp+schwarz+": "+blau+cjj(cerg,0)+schwarz,1,oblog);
+				}
+			}
+		}
 		if (!Tippob(rots+Tx[umben.empty()?T_Soll_ich_wirklich_alle_Tabellen_mit:T_Soll_ich_wirklich_alle_Tabellen_mit___]+blau+vorsil+rot+(vonvorne?Tx[T_loeschen_und_von_vorne_anfangen]:loeschalle?Tx[T_loeschen]:Tx[T_nach___]+blaus+umben+schwarz+Tx[T_umbenennen])+schwarz,"n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
 			exit(0);
 		}
 		if (!My) initDB();
 		if (umben.empty()) {
-			droptables();
+			droptables(aktc);
 			fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsil+schwarz,1,1);
 		} else {
 			auto altvorsil{vorsil};
 			vorsil=umben;
 			tabnamen();
-			droptables();
+			droptables(aktc);
 			vorsil=altvorsil;
 			tabnamen();
-			droptables(1);
+			droptables(aktc,1);
 		}
 	} else if (!loeschab.empty() || !loeschid.empty()) {
 		if (!My) initDB();
@@ -2279,12 +2292,12 @@ hhcl::~hhcl()
 
 void hhcl::virtlieskonfein()
 {
-	const int altobverb=obverb;
+	const int altobverb{obverb};
 	//	obverb=1;
 	hLog(violetts+Txk[T_virtlieskonfein]+schwarz);
 	hcl::virtlieskonfein(); //ω
 	hLog(violetts+Txk[T_Ende]+Txk[T_virtlieskonfein]+schwarz); //α
-	caus<<"vorsil: "<<vorsil<<endl;
+	fLog(Tx[T_Namensanfang_aller_Einlesetabellen]+blaus+vorsil+schwarz,1,oblog);
 	obverb=altobverb;
 } // void hhcl::virtlieskonfein()
 
