@@ -303,29 +303,29 @@ class hhcl:public dhcl
 		string loeschab;
 		string loeschid;
 		uchar listdat=0;
-		uchar initdb=0;
+		uchar nurinitdb=0;
 		string umben;
-		string vorsil;   // Vorsilbe für Datenbanktabellen
+		string vorsl,vorclvors,nachclvors;   // Vorsilbe für Datenbanktabellen, vor und nach command line-Auswertung
 		string ldatvz;   // Verzeichnis der Labordateien
 		string fertigvz; // Verzeichnis der fertig bearbeiteten
 	public: //α //ω
 	private: //α //ω
 		void tabnamen();
-		void prueflydat(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflyleist(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflypgl(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflyplab(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflypnb(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflypneu(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflyaerzte(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflysaetze(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflyus(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflywert(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflybakt(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflyfehlt(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflyparameter(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueflyhinw(DB *My, const int obverb, const int oblog, const uchar direkt=0);
-		void prueftab();
+		void prueflydat(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyleist(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflypgl(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyplab(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflypnb(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflypneu(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyaerzte(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflysaetze(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyus(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflywert(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflybakt(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyfehlt(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyparameter(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyhinw(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueftbl();
 		void droptables(const size_t aktc=0,uchar obumben=0);
 		void virttesterg(); //α
 		void virtlieskonfein();

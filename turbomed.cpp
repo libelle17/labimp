@@ -181,6 +181,7 @@ void hhcl::vordverarb(const size_t aktc)
 	}
 } // void hhcl::vordverarb
 
+
 void hhcl::nachbearbeit(const size_t aktc)
 {
 	uchar altZDB=ZDB;
@@ -331,43 +332,6 @@ void hhcl::nachbearbeit(const size_t aktc)
 #endif
 		} // 	if (My->obtabspda("laborneu","wert"))
 		// KLZ // (0)
-
-		{
-			const string labor2a{"labor2a"};
-			RS view(My,"DROP VIEW IF EXISTS `"+labor2a+"`;"
-					"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`praxis`@`%` SQL SECURITY DEFINER VIEW `"+labor2a+"` AS "
-					"SELECT Pat_id, eingang Zeitpunkt,befart FertigStGrad, Abkü,w.abkü abk_ur,w.langtext Langtext, Wert,Einheit, Einheit Einheit_ur "
-					",CONCAT(IF(e.text rlike '^:[ /\\*:]*$','',IF(e.text rlike '^:[ /\\*]*:',CONCAT(MID(e.text,locate(':',e.text,2)+1),';'),IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),k.text) Kommentar "
-					",NB, nb NB_ur,uNg,uNg uNg_ur, "
-					"IF(abkü = 'LDL' AND einheit = 'mg/dl','100',oNg) oNg,"
-					"oNg oNg_ur, Labor,Pfad "
-					"FROM `"+tlyus+"` u "
-					"LEFT JOIN `"+tlywert+"` w on u.id=w.usid "
-					"LEFT JOIN `"+tlyhinw+"` e on w.erklid=e.id "
-					"LEFT JOIN `"+tlyhinw+"` k on w.kommid=k.id "
-					"LEFT JOIN `"+tlypnb+"` n on w.nbid=n.id "
-					"LEFT JOIN `"+tlysaetze+"` s on u.satzid=s.satzid "
-					"LEFT JOIN `"+tlydat+"` d on s.datid=d.datid "
-					"LEFT JOIN `"+tlyplab+"` l on s.labid=l.id",aktc,ZDB);
-		}
-		{
-			const string labor2aNachw{"labor2aNachw"};
-			RS viewN(My,"DROP VIEW IF EXISTS `"+labor2aNachw+"`;"
-					"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`praxis`@`%` SQL SECURITY DEFINER VIEW `"+labor2aNachw+"` AS "
-					"SELECT Pat_id, eingang Zeitpunkt,befart FertigStGrad, w.Abkü,w.langtext Langtext, Wert,Einheit "
-					",CONCAT(IF(e.text rlike '^:[ /\\*:]*$','',IF(e.text rlike '^:[ /\\*]*:',CONCAT(MID(e.text,locate(':',e.text,2)+1),';'),IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),k.text) Kommentar "
-					",NB,uNg, "
-					"IF(abkü = 'LDL' AND einheit = 'mg/dl','100',oNg) oNg,"
-					"Labor,u.DatID,u.SatzID,u.SatzLänge,u.Auftragsnummer,u.Auftragsschlüssel,u.Eingang,u.Berichtsdatum,u.Nachname,u.Vorname,u.GebDat,Pfad,Erstellungsdatum,geändert "
-					"FROM `"+tlyus+"` u "
-					"LEFT JOIN `"+tlywert+"` w on u.id=w.usid "
-					"LEFT JOIN `"+tlyhinw+"` e on w.erklid=e.id "
-					"LEFT JOIN `"+tlyhinw+"` k on w.kommid=k.id "
-					"LEFT JOIN `"+tlypnb+"` n on w.nbid=n.id "
-					"LEFT JOIN `"+tlysaetze+"` s on u.satzid=s.satzid "
-					"LEFT JOIN `"+tlydat+"` d on s.datid=d.datid "
-					"LEFT JOIN `"+tlyplab+"` l on s.labid=l.id",aktc,ZDB);
-		}
 	} // (0)
 //#define usmoddanach
 #ifdef usmoddanach
