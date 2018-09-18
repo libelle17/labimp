@@ -2154,6 +2154,8 @@ void hhcl::pvirtfuehraus()
 			//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);
 			// prueftbl soll nur aufgerufen werden, wenn eine neue Datei da ist oder wenn die Vorsilbe ueber die Befehlszeile geaendert wurde
+			auto woher=opn.omap.find("vorsil")->second->woher;
+			caus<<"woher: "<<(int)woher<<endl;
       if (lrue.size()||vorclvors!=nachclvors)
 					prueftbl();
 			for(size_t i=0;i<lrue.size();i++) {
