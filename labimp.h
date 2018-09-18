@@ -305,7 +305,7 @@ class hhcl:public dhcl
 		uchar listdat=0;
 		uchar nurinitdb=0;
 		string umben;
-		string vorsl,vorclvors,nachclvors;   // Vorsilbe für Datenbanktabellen, vor und nach command line-Auswertung
+		string vorsl/*,vorclvors,nachclvors*/;   // Vorsilbe für Datenbanktabellen, vor und nach command line-Auswertung
 		string ldatvz;   // Verzeichnis der Labordateien
 		string fertigvz; // Verzeichnis der fertig bearbeiteten
 	public: //α //ω

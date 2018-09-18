@@ -1133,7 +1133,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&pruefauft,/*art*/puchar,T_pruefauft_k,T_pruefauft_l,/*TxBp*/&Tx,/*Txi*/T_pruefe_alle_Auftraege,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pname*/"",/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	dhcl::virtinitopt(); //α
-	vorclvors=vorsl;
+//	vorclvors=vorsl;
 } // void hhcl::virtinitopt
 
 // wird aufgerufen in lauf
@@ -1227,9 +1227,11 @@ cout<<schwarz<<setw(6)<<"DATID"<<"|"<<setw(60)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T
 void hhcl::virtrueckfragen()
 {
 	hLog(violetts+Tx[T_virtrueckfragen]+schwarz);
+	if (vorsl.empty()) vorsl=vorsilbe;
 	if (rzf) { //ω
-		if (vorsl.empty()) vorsl=vorsilbe;
-		vorsl=Tippstr(Tx[T_Vorsilbe_fuer_Datenbanktabellen],&vorsl);
+		do {
+			vorsl=Tippstr(Tx[T_Vorsilbe_fuer_Datenbanktabellen],&vorsl);
+		} while (vorsl.empty());
 		tabnamen();
 		ldatvz=Tippverz(Tx[T_Verzeichnis_der_Faxdateien],&ldatvz);
 		fertigvz=Tippverz(Tx[T_Verzeichnis_der_fertig_Verarbeiteten],&fertigvz);
@@ -2153,10 +2155,10 @@ void hhcl::pvirtfuehraus()
 			systemrueck("find "+ldatvz+" -maxdepth 1 -type f \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 			//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);
-			// prueftbl soll nur aufgerufen werden, wenn eine neue Datei da ist oder wenn die Vorsilbe ueber die Befehlszeile geaendert wurde
+			// prueftbl soll nur aufgerufen werden, wenn eine neue Datei da ist oder wenn die Vorsilbe ueber die Befehlszeile angegeben wurde
 			auto woher=opn.omap.find("vorsil")->second->woher;
-			caus<<"woher: "<<(int)woher<<endl;
-      if (lrue.size()||vorclvors!=nachclvors)
+//			caus<<"woher: "<<(int)woher<<endl;
+      if (lrue.size()||woher==3/*vorclvors!=nachclvors*/)
 					prueftbl();
 			for(size_t i=0;i<lrue.size();i++) {
 				string *aktl{&lrue[i]};
@@ -2350,7 +2352,7 @@ void hhcl::virtlieskonfein()
 	const int altobverb{obverb};
 	//	obverb=1;
 	hLog(violetts+Txk[T_virtlieskonfein]+schwarz);
-	nachclvors=vorsl;
+	//nachclvors=vorsl;
 	hcl::virtlieskonfein(); //ω
 	hLog(violetts+Txk[T_Ende]+Txk[T_virtlieskonfein]+schwarz); //α
 	fLog(Tx[T_Namensanfang_aller_Einlesetabellen]+blaus+vorsl+schwarz,1,oblog);
