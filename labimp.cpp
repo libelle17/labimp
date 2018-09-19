@@ -1410,7 +1410,7 @@ void BDTtoDate(string& inh,struct tm *tm,int abjahr=1900,uchar objahrzuerst=0)
 } // void BDTtoDate
 
 // aufgerufen in wertschreib und dverarbeit
-// vorher muessen zwerte und zlangt schon gefuellt sein
+// vorher muessen zwerte und zlangt und zakb schon gefuellt sein
 void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 {
 	hLog(violetts+Tx[T_russchreib_usid]+schwarz+*usidp);
@@ -1458,7 +1458,7 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 } // void hhcl::russchreib
 
 // schwache Funktion, kann ueberdeckt werden
-void hhcl::usmod(const size_t aktc,svec *zlangtp/*=0*/,svec *zwertep/*=0*/,svec *zverfap/*=0*/,tm *eingtmp/*=0*/)
+void hhcl::usmod(const size_t aktc,svec *zlangtp/*=0*/,svec *zabkp/*=0*/,svec *zwertep/*=0*/,svec *zverfap/*=0*/,tm *eingtmp/*=0*/)
 {
 }
 
@@ -1478,6 +1478,7 @@ void hhcl::usschluss(const size_t aktc)
 #endif
 	zwerte.clear(); // fuer ergpql 
 	zlangt.clear();
+	zabk.clear();
 	zverfa.clear();
 	nname.clear();
 	vname.clear();
@@ -1496,7 +1497,7 @@ void hhcl::usschluss(const size_t aktc)
 } // void hhcl::usschluss
 
 // aufgerufen in dverarbeit
-// vorher muessen zwerte und zlangt bzw. zverfa schon gefuellt sein
+// vorher muessen zwerte und zlangt und zabk bzw. zverfa schon gefuellt sein
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep)
 {
 	if (*usoffenp) {
@@ -1602,7 +1603,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 	const size_t aktc=0;
 #endif 
 	string satzid,arztid,satzart;
-	string labk; // letzte Einheit
 	unsigned UsLfd=0;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen=0, usoffen=0;
@@ -1644,6 +1644,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 		string zeile,altz;
 		struct tm berdat{0}; // Berichtsdatum
 		uchar oblaborda=0, arztnameda=0, /*in (Vor)zeile kommt Wort Keimzahl vor*/keimz=0,/*die Keimzahl wurde schon eingesetzt*/keimzda=0;
+		string labk,llang; // letzte Abkürzung, letzter Langtext
 		string verf,abkue,lanr;
 		float ldtvers{0}; // LDT-Version
 		while(getline(mdat,zeile)) {
@@ -1772,6 +1773,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 					abkue=inh;
 					rwe.hz("Abkü",inh);
 				} // 					if (cd=="8434") else if (cd=="8410")
+				labk=inh;
 				rpar.hz("Abkü",inh);
 				rpneu.hz("Abkü",inh);
 				rpar.hz("LabID",labind);
@@ -1793,8 +1795,9 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				rle.hz("GOÄ",inh);
 			} else if (cd=="8614") { 
 				rbawep->hz("Abrd",inh);
+				// Langtext
 			} else if (cd=="8411") {
-				labk=inh;
+				llang=inh;
 				rbawep->hz("Langtext",inh);
 				rpar.hz("Langtext",inh);
 				rpneu.hz("Langtext",inh);
@@ -1830,12 +1833,13 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				rwe.hz("Teststatus",inh);
 			} else if (cd=="8420") {
 				rwe.hz("Wert",inh);
-				// caus<<"labk: "<<labk<<", fuege zu zwerte hinzu: "<<inh<<endl;
+				// caus<<"llang: "<<llang<<", fuege zu zwerte hinzu: "<<inh<<endl;
 				// bei einer von zwei GFR kein Wiederfinden in laborneu Pat. 53919 am 4.7.12
-				if (strncasecmp(labk.c_str(),"gfr",3) && strncasecmp(labk.c_str(),"sammel",6) && strncasecmp(labk.c_str(),"körper",6)) {
+				if (strncasecmp(llang.c_str(),"gfr",3) && strncasecmp(llang.c_str(),"sammel",6) && strncasecmp(llang.c_str(),"körper",6)) {
 					if (zwerte.size()<9) // 8erlei, davon mindestens 5 richtige
 					zwerte<<inh; 
-					zlangt<<labk;
+					zlangt<<llang;
+					zabk<<labk;
 				} else {
 //					caus<<rot<<"aussortiert!"<<schwarz<<endl;
 				}

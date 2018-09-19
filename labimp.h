@@ -1,4 +1,5 @@
 #define DPROG "labimp"
+#define usmoddanach
 // fuer verschiedene Sprachen //α
 enum T_      
 {
@@ -285,7 +286,7 @@ class hhcl:public dhcl
 		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
 		tm abndat{0};
 		uchar keimz{0},keimzda{0};
-		svec zlangt,zwerte,zverfa; // fuer Vergleich mit laborneu
+		svec zlangt,zabk,zwerte,zverfa; // fuer Vergleich mit laborneu
 	protected: //α //ω
 //		long listz=30; //ω
     unsigned long dszahl=0; // Datensatzzahl fuer Tabellenausgaben
@@ -362,7 +363,7 @@ class hhcl:public dhcl
 			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
 			;
-		void usmod(const size_t aktc,svec *zlangtp=0,svec *zwertep=0,svec *zverfap=0,tm *eingtmp=0)
+		void usmod(const size_t aktc,svec *zlangtp=0,svec *zabkp=0, svec *zwertep=0,svec *zverfap=0,tm *eingtmp=0)
 #ifdef VOMHAUPTCODE
 			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif

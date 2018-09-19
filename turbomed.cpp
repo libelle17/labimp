@@ -44,12 +44,13 @@ void hhcl::pvirtVorgbSpeziell()
 } // void hhcl::pvirtVorgbSpeziell
 
 // passt anhand spaeterer Informationen die Pat_id an
-void hhcl::usmod(const size_t aktc,svec *zlangtp/*=0*/,svec *zwertep/*=0*/,svec *zverfap/*=0*/,tm *eingtmp/*=0*/)
+void hhcl::usmod(const size_t aktc,svec *zlangtp/*=0*/,svec *zabkp/*=0*/,svec *zwertep/*=0*/,svec *zverfap/*=0*/,tm *eingtmp/*=0*/)
 {
 	char const nz{'\n'};
 	unsigned const akbgrenze{4};
 	string const buchzahl{"2"};
 	if (!zlangtp) zlangtp=&zlangt;
+	if (!zabkp) zabkp=&zabk;
 	if (!zwertep) zwertep=&zwerte;
 	if (!zverfap) zverfap=&zverfa;
 	if (!eingtmp) eingtmp=&eingtm;
@@ -69,11 +70,12 @@ void hhcl::usmod(const size_t aktc,svec *zlangtp/*=0*/,svec *zwertep/*=0*/,svec 
 #else
 					gsql+="((SELECT MAX(pat_id) FROM laborneu";
 					if (zwertep->size()<akbgrenze) {
-						gsql+=" LEFT JOIN laborlangtext using (LangtextVW)";
+						gsql+=" LEFT JOIN laborlangtext USING (LangtextVW)";
 					}
 					gsql+=" WHERE fid=l.fid AND zeitpunkt=l.zeitpunkt AND wert="+sqlft(My->DBS,zwertep->at(i));
 					if (zwertep->size()<akbgrenze) {
-						gsql+=" AND LEFT(Langtext,"+buchzahl+")=LEFT("+sqlft(My->DBS,zlangtp->at(i))+","+buchzahl+")";
+						gsql+=" AND (LEFT(Abkü,"+buchzahl+")=LEFT("+sqlft(My->DBS,zabkp->at(i))+","+buchzahl+")";
+						gsql+=" OR LEFT(Langtext,"+buchzahl+")=LEFT("+sqlft(My->DBS,zlangtp->at(i))+","+buchzahl+"))";
 					}
 					gsql+=") IS NOT NULL)";
 					if (i!=zwertep->size()-1) {gsql+=nz;gsql+="   +";}
@@ -81,6 +83,7 @@ void hhcl::usmod(const size_t aktc,svec *zlangtp/*=0*/,svec *zwertep/*=0*/,svec 
 				}
 #ifdef unscharf
 				gsql+=">=";
+				// so viele Werte bzw. Werte plus Langtexte sollen uebereinstimmen
 				gsql+=ltoan(zwertep->size()<6?zwertep->size():zwertep->size()<9?5:zwertep->size()<10?6:zwertep->size()-4);
 #endif
 			} else {
@@ -197,7 +200,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 			if (i==usids.size()-1) usbed+=')'; else usbed+=',';
 		}
 	}
-	if (1) {
+	if (0) {
 		if (My->obtabspda("laborneu","wert")) {
 			my_ulonglong zahl=0;
 			RS v1(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
@@ -338,16 +341,17 @@ void hhcl::nachbearbeit(const size_t aktc)
 	RS selid(My,"SELECT id,eingang FROM `"+tlyus+"` u WHERE 1"+(usids.empty()?"":" AND u"+usbed),aktc,ZDB);
 	char ***cerg{0};
 	while (cerg=selid.HolZeile(),cerg?*cerg&&**cerg:0) {
-		svec zzwerte,zzlangt,zzverfa;
+		svec zzwerte,zzlangt,zzabk,zzverfa;
 		tm eingtm{0};
 		usid=cjj(cerg,0);
 		strptime(cjj(cerg,1),"%Y-%m-%d",&eingtm);
-		RS werte(My,"SELECT wert,langtext FROM `"+tlywert+"` w WHERE usid="+usid+" AND wert<>'' LIMIT 9",aktc,ZDB);
+		RS werte(My,"SELECT wert,langtext,abkü FROM `"+tlywert+"` w WHERE usid="+usid+" AND wert<>'' LIMIT 9",aktc,ZDB);
 		char ***cergw{0};
 		while (cergw=werte.HolZeile(),cergw?*cergw&&**cergw:0) {
 			caus<<" "<<dblau<<cjj(cergw,0)<<schwarz<<" "<<violett<<cjj(cergw,1)<<schwarz<<endl;
 			zzwerte<<cjj(cergw,0);
 			zzlangt<<cjj(cergw,1);
+			zzabk<<cjj(cergw,2);
 		}
 		RS lab(My,"SELECT verf FROM `"+tlybakt+"` w WHERE usid="+usid+" AND verf<>''",aktc,ZDB);
 		char ***cergb{0};
@@ -356,7 +360,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 			zzverfa<<cjj(cergb,0);
 		}
 		caus<<blau<<"usid: "<<violett<<usid<<schwarz<<" "<<ztacl(&eingtm)<<endl;
-		usmod(aktc,&zzlangt,&zzwerte,&zzverfa,&eingtm);
+		usmod(aktc,&zzlangt,&zzabk,&zzwerte,&zzverfa,&eingtm);
 	}
 #endif
 	ZDB=altZDB;
