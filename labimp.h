@@ -1,5 +1,5 @@
 #define DPROG "labimp"
-#define usmoddanach
+// #define usmoddanach in labimp.h und turbomed.h
 // fuer verschiedene Sprachen //α
 enum T_      
 {

@@ -191,8 +191,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 	ZDB=1;
 	RS vor(My,"SET @@GROUP_CONCAT_MAX_LEN=150000; ",aktc,ZDB);
 	string usbed; // usid-Bedingung, wenn nicht -nurnachb aufgerufen
-	usids.clear();
-	usids<<"92811";
+	// usids.clear(); usids<<"92811";
 	if (!usids.empty()) {
 		usbed=".ID IN (";
 		for(size_t i=0;i<usids.size();i++) {
@@ -200,7 +199,8 @@ void hhcl::nachbearbeit(const size_t aktc)
 			if (i==usids.size()-1) usbed+=')'; else usbed+=',';
 		}
 	}
-	if (0) {
+	const uchar oballes=1;
+	if (oballes) {
 		if (My->obtabspda("laborneu","wert")) {
 			my_ulonglong zahl=0;
 			RS v1(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
@@ -336,7 +336,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 		} // 	if (My->obtabspda("laborneu","wert"))
 		// KLZ // (0)
 	} // (0)
-//#define usmoddanach
+//#define usmoddanach // muss in labimp.h stehen
 #ifdef usmoddanach
 	RS selid(My,"SELECT id,eingang FROM `"+tlyus+"` u WHERE 1"+(usids.empty()?"":" AND u"+usbed),aktc,ZDB);
 	char ***cerg{0};

@@ -2210,7 +2210,7 @@ int hhcl::vverarbeit(const string& datei)
 		// Zeichensatz ermitteln und verwenden
 		uchar cp=0; // 0=utf-8, 1=iso-8859-15, 2=cp850
 		// ä,ö,ü,Ä,Ö,Ü,ß,µ,` iso8859-15, cp850, iso8859-1
-		const char* const sonder[]={"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
+		const char* const sonder[]{"\xE4\xF6\xFC\xC4\xD6\xDC\xDF\xB5","\x84\x94\x81\x8E\x99\x9A\xE1\xE6\x80\x82\x83\x85\x86\x87\x88\x8A\x8C\x8D\x8F\xA0","\xB4"};
 		string zeile,altz;
 //		struct tm berdat{0}; // Berichtsdatum
 		if (!My) initDB();
