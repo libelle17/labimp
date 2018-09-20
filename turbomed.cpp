@@ -185,7 +185,7 @@ void hhcl::vordverarb(const size_t aktc)
 } // void hhcl::vordverarb
 
 
-void hhcl::nachbearbeit(const size_t aktc)
+void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 {
 	uchar altZDB=ZDB;
 	ZDB=1;
@@ -199,7 +199,7 @@ void hhcl::nachbearbeit(const size_t aktc)
 			if (i==usids.size()-1) usbed+=')'; else usbed+=',';
 		}
 	}
-	const uchar oballes=1;
+	const uchar oballes=obusmod?0:1;
 	if (oballes) {
 		if (My->obtabspda("laborneu","wert")) {
 			my_ulonglong zahl=0;
@@ -336,32 +336,31 @@ void hhcl::nachbearbeit(const size_t aktc)
 		} // 	if (My->obtabspda("laborneu","wert"))
 		// KLZ // (0)
 	} // (0)
-//#define usmoddanach // muss in labimp.h stehen
-#ifdef usmoddanach
-	RS selid(My,"SELECT id,eingang FROM `"+tlyus+"` u WHERE 1"+(usids.empty()?"":" AND u"+usbed),aktc,ZDB);
-	char ***cerg{0};
-	while (cerg=selid.HolZeile(),cerg?*cerg&&**cerg:0) {
-		svec zzwerte,zzlangt,zzabk,zzverfa;
-		tm eingtm{0};
-		usid=cjj(cerg,0);
-		strptime(cjj(cerg,1),"%Y-%m-%d",&eingtm);
-		RS werte(My,"SELECT wert,langtext,abkü FROM `"+tlywert+"` w WHERE usid="+usid+" AND wert<>'' LIMIT 9",aktc,ZDB);
-		char ***cergw{0};
-		while (cergw=werte.HolZeile(),cergw?*cergw&&**cergw:0) {
-			caus<<" "<<dblau<<cjj(cergw,0)<<schwarz<<" "<<violett<<cjj(cergw,1)<<schwarz<<endl;
-			zzwerte<<cjj(cergw,0);
-			zzlangt<<cjj(cergw,1);
-			zzabk<<cjj(cergw,2);
+	if (obusmod) {
+		RS selid(My,"SELECT id,eingang FROM `"+tlyus+"` u WHERE 1"+(usids.empty()?"":" AND u"+usbed),aktc,ZDB);
+		char ***cerg{0};
+		while (cerg=selid.HolZeile(),cerg?*cerg&&**cerg:0) {
+			svec zzwerte,zzlangt,zzabk,zzverfa;
+			tm eingtm{0};
+			usid=cjj(cerg,0);
+			strptime(cjj(cerg,1),"%Y-%m-%d",&eingtm);
+			RS werte(My,"SELECT wert,langtext,abkü FROM `"+tlywert+"` w WHERE usid="+usid+" AND wert<>'' LIMIT 9",aktc,ZDB);
+			char ***cergw{0};
+			while (cergw=werte.HolZeile(),cergw?*cergw&&**cergw:0) {
+				caus<<" "<<dblau<<cjj(cergw,0)<<schwarz<<" "<<violett<<cjj(cergw,1)<<schwarz<<endl;
+				zzwerte<<cjj(cergw,0);
+				zzlangt<<cjj(cergw,1);
+				zzabk<<cjj(cergw,2);
+			}
+			RS lab(My,"SELECT verf FROM `"+tlybakt+"` w WHERE usid="+usid+" AND verf<>''",aktc,ZDB);
+			char ***cergb{0};
+			while (cergb=lab.HolZeile(),cergb?*cergb&&**cergb:0) {
+				caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<endl;
+				zzverfa<<cjj(cergb,0);
+			}
+			caus<<blau<<"usid: "<<violett<<usid<<schwarz<<" "<<ztacl(&eingtm)<<endl;
+			usmod(aktc,&zzlangt,&zzabk,&zzwerte,&zzverfa,&eingtm);
 		}
-		RS lab(My,"SELECT verf FROM `"+tlybakt+"` w WHERE usid="+usid+" AND verf<>''",aktc,ZDB);
-		char ***cergb{0};
-		while (cergb=lab.HolZeile(),cergb?*cergb&&**cergb:0) {
-			caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<endl;
-			zzverfa<<cjj(cergb,0);
-		}
-		caus<<blau<<"usid: "<<violett<<usid<<schwarz<<" "<<ztacl(&eingtm)<<endl;
-		usmod(aktc,&zzlangt,&zzabk,&zzwerte,&zzverfa,&eingtm);
 	}
-#endif
 	ZDB=altZDB;
 } // void hhcl::nachbearbeit

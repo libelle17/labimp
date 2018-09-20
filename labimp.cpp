@@ -373,6 +373,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"nachbneu","afterwnew"},
 	// T_nachbneu_l
 	{"nachbearbeitungneu","afterworknew"},
+	// T_nurusmod_k
+	{"nurusmod","onlyusmod"},
+	// T_nurnachb_l
+	{"nurusmod","onlyusmod"},
 	// T_pruefauft_k,
 	{"pruefauft","checkord"},
 	// T_pruefauft_l,
@@ -381,6 +385,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"pruefe alle Auftraege","check all orders"},
 	// T_nur_Nachbearbeitung
 	{"nur Nachbearbeitung","only afterwork"},
+	// T_nur_usmod
+	{"nur usmod","only usmod"},
 	// T_fertig
 	{"fertig!","finished!"},
 	// T_Dateien_gefunden
@@ -548,7 +554,7 @@ void hhcl::vordverarb(const size_t aktc)
 }
 // schwache Funktion, kann ueberdeckt werden
 // aufgerufen in pvirtfuehraus
-void hhcl::nachbearbeit(const size_t aktc)
+void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 {
 	hLog(violetts+Tx[T_nachbearbeit_leere_Funktion]+schwarz);
 }
@@ -1130,6 +1136,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurinitdb,/*art*/puchar,T_initdb_k,T_initdb_l,/*TxBp*/&Tx,/*Txi*/T_initialisiert_nur_die_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nachbneu,/*art*/puchar,T_nachbneu_k,T_nachbneu_l,/*TxBp*/&Tx,/*Txi*/T_Nachbearbeitung_von_vorne,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&nurusmod,/*art*/puchar,T_nurusmod_k,T_nurusmod_l,/*TxBp*/&Tx,/*Txi*/T_nur_usmod,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&pruefauft,/*art*/puchar,T_pruefauft_k,T_pruefauft_l,/*TxBp*/&Tx,/*Txi*/T_pruefe_alle_Auftraege,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pname*/"",/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	dhcl::virtinitopt(); //α
@@ -1354,7 +1361,7 @@ void hhcl::virtpruefweiteres()
 		RS d9(My,truncate+tlydat,aktc,ZDB);
 		RS de(My,"SET FOREIGN_KEY_CHECKS=1",aktc,ZDB);
 		fLog(blaus+Tx[T_Entleert_alle_Tabellen_und_faengt_von_vorne_an]+schwarz,1,1);
-	} else if (loeschunvollst||nurnachb||nachbneu||pruefauft) {
+	} else if (loeschunvollst||nurnachb||nachbneu||nurusmod||pruefauft) {
 		if (nachbneu) {
 			if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Nachbearbeitungen_von_vorne_angefangen_werden]+schwarz,"n")) {
 				fLog(Tx[T_Aktion_abgebrochen],1,1);
@@ -1381,7 +1388,7 @@ void hhcl::virtpruefweiteres()
 			RS nachloesch(My,"UPDATE `"+tlyus+"` SET pat_id_laborneu=null",aktc,ZDB);
 		}
 		ZDB=altZDB;
-	} // if (vonvorne||loeschalle||!umben.empty()) else if ..  else if (loeschunvollst||nurnachb||nachbneu)
+	} // if (vonvorne||loeschalle||!umben.empty()) else if ..  else if (loeschunvollst||nurnachb||nurusmod||nachbneu)
 	hcl::virtpruefweiteres(); // z.Zt. leer //α
 } // void hhcl::virtpruefweiteres
 
@@ -2151,7 +2158,7 @@ void hhcl::pvirtfuehraus()
 	if (nurinitdb) {
 		prueftbl();
 	} else if (!loeschalle && !loeschunvollst && umben.empty()) {
-		if (!nurnachb && !nachbneu && !pruefauft) {
+		if (!nurnachb && !nachbneu && !nurusmod && !pruefauft) {
 			pruefverz(fertigvz,obverb,oblog);
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 			systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
@@ -2196,8 +2203,8 @@ void hhcl::pvirtfuehraus()
 					if (dszahl && verarbeitet==dszahl) break;
 				} // 				if (rsfertig.obqueryfehler||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1)
 			} // 			for(size_t i=0;i<lrue.size();i++)
-		} // 		if (!nurnachb && !nachbneu)
-		if (nurnachb || nachbneu|| verarbeitet) nachbearbeit(aktc);
+		} // 		if (!nurnachb && !nachbneu && !nurusmod && !pruefauft) {
+		if (nurnachb || nachbneu|| nurusmod || verarbeitet) nachbearbeit(aktc,nurusmod);
 	} // 		else if (!loeschalle && !loeschunvollst && umben.empty())
 	fLog(blaus+Tx[T_fertig]+schwarz,1,oblog);
 	ZDB=altZDB;

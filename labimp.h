@@ -1,5 +1,4 @@
 #define DPROG "labimp"
-// #define usmoddanach in labimp.h und turbomed.h
 // fuer verschiedene Sprachen //α
 enum T_      
 {
@@ -183,10 +182,13 @@ enum T_
 	T_nurnachb_l,
 	T_nachbneu_k,
 	T_nachbneu_l,
+	T_nurusmod_k,
+	T_nurusmod_l,
 	T_pruefauft_k,
 	T_pruefauft_l,
 	T_pruefe_alle_Auftraege,
 	T_nur_Nachbearbeitung,
+	T_nur_usmod,
 	T_fertig,
 	T_Dateien_gefunden,
 	T_lab_k,
@@ -300,6 +302,7 @@ class hhcl:public dhcl
 		uchar loeschunvollst=0;
 		uchar nurnachb=0;
 		uchar nachbneu=0;
+		uchar nurusmod=0;
 		uchar pruefauft=0; // pruefe Patientenidentität der Auträge X010LG05SKD.LDT und X010PG05SKD.LDT
 		string loeschab;
 		string loeschid;
@@ -373,7 +376,7 @@ class hhcl:public dhcl
 			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
 			;
-		void nachbearbeit(const size_t aktc)
+		void nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 #ifdef VOMHAUPTCODE
 			__attribute__((weak)) // implementationsspezifische Adresspruefung)
 #endif
