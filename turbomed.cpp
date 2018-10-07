@@ -187,8 +187,9 @@ void hhcl::vordverarb(const size_t aktc)
 
 void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 {
-	uchar altZDB=ZDB;
+	uchar altZDB{ZDB};
 	ZDB=1;
+	my_ulonglong zahl{0},gzahl{0};
 	RS vor(My,"SET @@GROUP_CONCAT_MAX_LEN=150000; ",aktc,ZDB);
 	string usbed; // usid-Bedingung, wenn nicht -nurnachb aufgerufen
 	// usids.clear(); usids<<"92811";
@@ -199,10 +200,9 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			if (i==usids.size()-1) usbed+=')'; else usbed+=',';
 		}
 	}
-	const uchar oballes=obusmod?0:1;
+	const bool oballes{obusmod?0:1};
 	if (oballes) {
 		if (My->obtabspda("laborneu","wert")) {
-			my_ulonglong zahl=0;
 			RS v1(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
 					"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
 					"SELECT GROUP_CONCAT(CONCAT(w.abkü,REPLACE(REPLACE(REPLACE(REPLACE(w.wert,'.',''),'<',''),':',''),'-','')) ORDER BY w.abkü,w.wert) werte,"
@@ -333,6 +333,141 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 					"WHERE (ISNULL(pat_id_laborneu) OR pat_id_laborneu=0) "/*AND u.eingang BETWEEN date("+sqlft(My->DBS,&minnachdat)+") AND "+sqlft(My->DBS,&maxnachdat)*/+(usids.empty()?"":" AND u"+usbed)+";",aktc,ZDB,0,0,0,&zahl);
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"7, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(zahl),1,0);
 #endif
+			gzahl=0;
+			// mit einem group weniger dürfte es auch ohne while gehen, hier will ich aber keinen Fehler machen
+			// wenn zu Laborwerten mit selber Auftragsnummer und selbem Eingangsdatum, aber verschiedenen Pat_id sich zur ersten Pat_id kein
+			// Eintrag in laborneu findet, dann wende die 2. Pat_id auch auf die ersetzen Sätze an
+			while (1) {
+				RS labneu1leer(My,"SELECT l1.id ID, l2.pat_id P2 "
+						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
+						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
+						"LEFT JOIN laborydat d2 ON d2.datid=l2.datid "
+						"LEFT JOIN laborneu ln ON ln.pat_id=l1.pat_id AND DATE(ln.zeitpunkt)=l1.eingang "
+						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
+						"AND ISNULL(ln.abkü) "
+						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
+						,aktc,ZDB);
+				char ***cergb{0};
+				zahl=0;
+				while (cergb=labneu1leer.HolZeile(),cergb?*cergb&&**cergb:0) {
+					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					gzahl+=zahl;
+				}
+				if (!zahl) break;
+			}
+			fLog(dblaus+Txt[T_Abfrage]+schwarz+"laborneu1leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
+			// s.o.; wenn zu Laborwerten mit selber Auftragsnummer und selbem Eingangsdatum, aber verschiedenen Pat_id sich zur zweiten Pat_id kein
+			// Eintrag in laborneu findet, dann wende die 1. Pat_id auch auf die zweiten Sätze an
+			gzahl=0;
+			while (1) {
+				RS labneu2leer(My,"SELECT l2.id ID, l1.pat_id P1 "
+						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
+						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
+						"LEFT JOIN laborydat d2 ON d2.datid=l2.datid "
+						"LEFT JOIN laborneu ln ON ln.pat_id=l2.pat_id AND DATE(ln.zeitpunkt)=l1.eingang "
+						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
+						"AND ISNULL(ln.abkü) "
+						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
+						,aktc,ZDB);
+				char ***cergb{0};
+				zahl=0;
+				while (cergb=labneu2leer.HolZeile(),cergb?*cergb&&**cergb:0) {
+					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					gzahl+=zahl;
+				}
+				if (!zahl) break;
+			}
+			fLog(dblaus+Txt[T_Abfrage]+schwarz+"laborneu2leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
+			// wenn sich zur ersten pat_id kein Kassenfall findet, dann zweite nehmen
+			gzahl=0;
+			while (1) {
+				RS fall1leer(My,"SELECT l1.id, l2.pat_id P2 "
+						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
+						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
+						"LEFT JOIN laborydat d2 ON d2.datid=l2.datid "
+						"LEFT JOIN faelle f ON f.pat_id=l1.pat_id AND l1.eingang BETWEEN f.bhfb AND f.bhfe1 "
+						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
+						"AND ISNULL(f.fid) AND(select MAX(schgr) FROM faelle WHERE pat_id=l1.pat_id AND bhfb=(SELECT MAX(bhfb) FROM faelle WHERE pat_id=l1.pat_id))<>90 "
+						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
+						,aktc,ZDB);
+				char ***cergb{0};
+				zahl=0;
+				while (cergb=fall1leer.HolZeile(),cergb?*cergb&&**cergb:0) {
+					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					gzahl+=zahl;
+				}
+				if (!zahl) break;
+			}
+			fLog(dblaus+Txt[T_Abfrage]+schwarz+"fall1leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
+			// wenn sich zur zweiten pat_id kein Kassenfall findet, dann erste nehmen
+			gzahl=0;
+			while (1) {
+				RS fall2leer(My,"SELECT l2.id, l1.pat_id P1 "
+						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
+						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
+						"LEFT JOIN laborydat d2 ON d2.datid=l2.datid "
+						"LEFT JOIN faelle f ON f.pat_id=l2.pat_id AND l1.eingang BETWEEN f.bhfb AND f.bhfe1 "
+						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
+						"AND ISNULL(f.fid) AND(select MAX(schgr) FROM faelle WHERE pat_id=l2.pat_id AND bhfb=(SELECT MAX(bhfb) FROM faelle WHERE pat_id=l2.pat_id))<>90 "
+						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
+						,aktc,ZDB);
+				char ***cergb{0};
+				zahl=0;
+				while (cergb=fall2leer.HolZeile(),cergb?*cergb&&**cergb:0) {
+					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					gzahl+=zahl;
+				}
+				if (!zahl) break;
+			}
+			fLog(dblaus+Txt[T_Abfrage]+schwarz+"fall2leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
+			// wenn pat_id_7 identisch, dann dieses nehmen (für l1)
+			gzahl=0;
+			while (1) {
+				RS p7fuerl1(My,"SELECT l1.id, l1.pat_id_7 "
+						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
+						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
+						"LEFT JOIN laborydat d2 ON d2.datid=l2.datid "
+						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
+						"AND l1.pat_id_7=l2.pat_id_7 "
+						"AND l1.pat_id<>l1.pat_id_7 "
+						"GROUP BY l1.pat_id,l2.pat_id,l1.pat_id_7,l2.pat_id_7,l1.eingang;"
+						,aktc,ZDB);
+				char ***cergb{0};
+				zahl=0;
+				while (cergb=p7fuerl1.HolZeile(),cergb?*cergb&&**cergb:0) {
+					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					gzahl+=zahl;
+				}
+				if (!zahl) break;
+			}
+			fLog(dblaus+Txt[T_Abfrage]+schwarz+"p7fuerl1, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
+			// wenn pat_id_7 identisch, dann dieses nehmen (für l2)
+			gzahl=0;
+			while (1) {
+				RS p7fuerl2(My,"SELECT l2.id, l1.pat_id_7 "
+						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
+						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
+						"LEFT JOIN laborydat d2 ON d2.datid=l2.datid "
+						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
+						"AND l1.pat_id_7=l2.pat_id_7 "
+						"AND l2.pat_id<>l1.pat_id_7 "
+						"GROUP BY l1.pat_id,l2.pat_id,l1.pat_id_7,l2.pat_id_7,l1.eingang;"
+						,aktc,ZDB);
+				char ***cergb{0};
+				zahl=0;
+				while (cergb=p7fuerl2.HolZeile(),cergb?*cergb&&**cergb:0) {
+					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					gzahl+=zahl;
+				}
+				if (!zahl) break;
+			}
+			fLog(dblaus+Txt[T_Abfrage]+schwarz+"p7fuerl2, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
 		} // 	if (My->obtabspda("laborneu","wert"))
 		// KLZ // (0)
 	} // (0)
