@@ -345,6 +345,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 						"LEFT JOIN laborneu ln ON ln.pat_id=l1.pat_id AND DATE(ln.zeitpunkt)=l1.eingang "
 						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
 						"AND ISNULL(ln.abkü) "
+						"AND l1.eingang<SUBDATE(NOW(),INTERVAL 5 DAY) "
 						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
 						,aktc,ZDB);
 				char ***cergb{0};
@@ -368,6 +369,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 						"LEFT JOIN laborneu ln ON ln.pat_id=l2.pat_id AND DATE(ln.zeitpunkt)=l1.eingang "
 						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
 						"AND ISNULL(ln.abkü) "
+						"AND l1.eingang<SUBDATE(NOW(),INTERVAL 5 DAY) "
 						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
 						,aktc,ZDB);
 				char ***cergb{0};
@@ -390,6 +392,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 						"LEFT JOIN faelle f ON f.pat_id=l1.pat_id AND l1.eingang BETWEEN f.bhfb AND f.bhfe1 "
 						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
 						"AND ISNULL(f.fid) AND(select MAX(schgr) FROM faelle WHERE pat_id=l1.pat_id AND bhfb=(SELECT MAX(bhfb) FROM faelle WHERE pat_id=l1.pat_id))<>90 "
+						"AND l1.eingang<SUBDATE(NOW(),INTERVAL 5 DAY) "
 						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
 						,aktc,ZDB);
 				char ***cergb{0};
@@ -412,6 +415,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 						"LEFT JOIN faelle f ON f.pat_id=l2.pat_id AND l1.eingang BETWEEN f.bhfb AND f.bhfe1 "
 						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
 						"AND ISNULL(f.fid) AND(select MAX(schgr) FROM faelle WHERE pat_id=l2.pat_id AND bhfb=(SELECT MAX(bhfb) FROM faelle WHERE pat_id=l2.pat_id))<>90 "
+						"AND l1.eingang<SUBDATE(NOW(),INTERVAL 5 DAY) "
 						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
 						,aktc,ZDB);
 				char ***cergb{0};
@@ -434,6 +438,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
 						"AND l1.pat_id_7=l2.pat_id_7 "
 						"AND l1.pat_id<>l1.pat_id_7 "
+						"AND l1.eingang<SUBDATE(NOW(),INTERVAL 5 DAY) "
 						"GROUP BY l1.pat_id,l2.pat_id,l1.pat_id_7,l2.pat_id_7,l1.eingang;"
 						,aktc,ZDB);
 				char ***cergb{0};
@@ -456,6 +461,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
 						"AND l1.pat_id_7=l2.pat_id_7 "
 						"AND l2.pat_id<>l1.pat_id_7 "
+						"AND l1.eingang<SUBDATE(NOW(),INTERVAL 5 DAY) "
 						"GROUP BY l1.pat_id,l2.pat_id,l1.pat_id_7,l2.pat_id_7,l1.eingang;"
 						,aktc,ZDB);
 				char ***cergb{0};
