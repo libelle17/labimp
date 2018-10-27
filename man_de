@@ -2,7 +2,7 @@
 .\" Manual-Seite für ²DPROG²
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH man 1 "15.10.18" "Version 0.11447" "Manual-Seite für ²DPROG²"
+.TH man 1 "27.10.18" "Version 0.11447" "Manual-Seite für ²DPROG²"
 .SH NAME
 \fB²DPROG² \- Labordatenimport\fR: importiert Labordaten in selbst verwaltete Mariadb-Tabellen aus den Uebertragungsdateien des Labors 
 .br

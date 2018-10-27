@@ -502,6 +502,12 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			caus<<blau<<"usid: "<<violett<<usid<<schwarz<<" "<<ztacl(&eingtm)<<endl;
 			usmod(aktc,&zzlangt,&zzabk,&zzwerte,&zzverfa,&eingtm);
 		}
+		string rsid[]{
+			"DELETE FROM `"+tlyus+"` WHERE auftragsschlüssel='0511249475' and auftragsnummer='11249475' and pat_id=1558",
+		};
+		for(size_t i=0;i<sizeof rsid/sizeof *rsid;i++) {
+			RS rsloe(My,rsid[i],aktc,1);
+		}
 	}
 	ZDB=altZDB;
 } // void hhcl::nachbearbeit
