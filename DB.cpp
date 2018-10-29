@@ -979,8 +979,11 @@ int Tabelle::machconstr(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 // aufgerufen in prueftab
 int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 {
+////	int altobverb{obverb};
+////	obverb=1;
 	lesespalten(aktc,obverb>0?obverb-1:0,oblog);
 	for(unsigned i=0;i<indexzahl;i++) {
+////		caus<<"Tabelle "<<rot<<tbname<<schwarz<<endl;
 		const Index* const indx=&indices[i];
 		// steht aus: Namen nicht beruecksichtigen, nur Feldreihenfolge und ggf. -laenge
 		uchar obneu=0;
@@ -1072,6 +1075,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 			rindins.Abfrage(sql.str(),aktc,obverb);
 		} // if (!rind.obqueryfehler) 
 	} // 	for(unsigned i=0;i<indexzahl;i++)
+////	obverb=altobverb;
 	return 0;
 } // int DB::machind(const string& tbname, Index* indx,int obverb/*=0*/, int oblog/*=0*/)
 

@@ -427,10 +427,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"listdat","listfil"},
 	// T_listdat_l
 	{"listdateien","listfiles"},
-	// T_initdb_k,
-	{"initdb","initdb"},
-	// T_initdb_l,
-	{"initdb","initdb"},
+	// T_pruefdb_k,
+	{"pruefdb","checkdb"},
+	// T_pruefdb_l,
+	{"pruefdb","checkdb"},
 	// T_umben_k,
 	{"umben","ren"},
 	// T_umben_l,
@@ -859,7 +859,8 @@ void hhcl::prueflyus(DB *My, const size_t aktc, const int obverb, const int oblo
 		fdr<<new Feld("z7","int","10","",Tx[T_Zahl_der_Antworten_aus_laborneu],0,0,0);
 		fdr<<new Feld("SQL7","text","","",Tx[T_SQL_Abfrage_zur_direkten_Pat_id_Ermittlung_aus_laborneu],0,0,0);
 		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-		Index indices[]={i0};
+		Feld ifelder1[]{Feld("Pat_Id_Laborneu"),Feld("ZeitpunktLaborneu")};   Index i1("Laborneu",ifelder1,sizeof ifelder1/sizeof* ifelder1);
+		Index indices[]={i0,i1};
 		Constraint csts[]{Constraint(tlydat+tlyus,new Feld{Feld("DatID")},1,tlydat,new Feld{Feld("DatID")},1,cascade,cascade),
 		                	Constraint(tlysaetze+tlyus,new Feld{Feld("satzid")},1,tlysaetze,new Feld{Feld("satzid")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
@@ -903,8 +904,8 @@ void hhcl::prueflyus(DB *My, const size_t aktc, const int obverb, const int oblo
 			Feld("verglichen","datetime","0","0",Tx[T_Datum_zu_dem_Datensatz_zuletzt_verglichen_wurde],0,0,0),
 			Feld("AfN","smallint","6","0",Tx[T_Affected_Number_Zahl_der_zugehoerigen_Datensaetze_in_Laborneu],0,0,0),
 		};
-		Feld ifelder0[] = {Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
-		Index indices[]={i0};
+		Feld ifelder0[]{Feld("Nachname"),Feld("Vorname")};   Index i0("Name",ifelder0,sizeof ifelder0/sizeof* ifelder0);
+		Index indices[]{i0};
 		Constraint csts[]{Constraint(tlydat+tlyus,new Feld{Feld("DatID")},1,tlydat,new Feld{Feld("DatID")},1,cascade,cascade),
 		                	Constraint(tlysaetze+tlyus,new Feld{Feld("satzid")},1,tlysaetze,new Feld{Feld("satzid")},1,cascade,cascade)};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
@@ -1051,11 +1052,13 @@ void hhcl::prueflypgl(DB *My, const size_t aktc, const int obverb, const int obl
 {
 	hLog(violetts+Tx[T_prueflypgl]+schwarz);
 	if (!direkt) {
+		const string idypneu{"id"+tlypneu.substr(tlypneu.length()-5)},
+					idypbez{"id"+tlypneu.substr(tlypneu.length()-5,2)+"bez"};
 		Feld felder[] = {
-			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
-			Feld("idxpneu","int","10","",Tx[T_laborxpneu],1,0,1,string(),1),
-			Feld("idpara","int","10","",Tx[T_laborparameter],1,0,1,string(),1),
-			Feld("idxpbez","int","10","",Tx[T_ist_identisch_mit_laborxpneu],1,0,1,string(),1),
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],/*obind*/1,/*obauto*/1,/*nnull*/0,string(),1),
+			Feld(idypneu,"int","10","",Tx[T_laborxpneu],1,/*obauto*/0,/*nnull*/0,string(),1), // idypneu
+			Feld("idpara","int","10","",Tx[T_laborparameter],1,/*obauto*/0,/*nnull*/0,string(),1),
+			Feld(idypbez,"int","10","",Tx[T_ist_identisch_mit_laborxpneu],1,/*obauto*/0,/*nnull*/1,string(),1), // idypbez
 			Feld("ergaenzt","datetime","0","0",Tx[T_Zeitpunkt_der_Ergaenzung],0,0,1),
 		};
 		Index indices[]{
@@ -1073,9 +1076,9 @@ void hhcl::prueflypgl(DB *My, const size_t aktc, const int obverb, const int obl
 		Constraint csts[]{c0,c1,c2};
 		*/
 		Constraint csts[]{
-			Constraint(vorsl+"pgl_1",new Feld{Feld("idxpneu")},1,tlypneu,new Feld{Feld("id")},1),
-			Constraint(vorsl+"pgl_2",new Feld{Feld("idpara")},1,tlyparameter,new Feld{Feld("id")},1),
-			Constraint(vorsl+"pgl_3",new Feld{Feld("idxpbez")},1,tlypneu,new Feld{Feld("id")},1,cascade,cascade),
+			Constraint(vorsl+"pgl_1",new Feld{Feld(idypneu)},1,tlypneu,new Feld{Feld("id")},1),
+			Constraint(vorsl+"pgl_2",new Feld{Feld("idpara")},1,"laborparameter",new Feld{Feld("id")},1),
+			Constraint(vorsl+"pgl_3",new Feld{Feld(idypbez)},1,tlypneu,new Feld{Feld("id")},1,cascade,cascade),
 		};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
 		Tabelle taba(My,tlypgl,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborpgl]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
@@ -1133,7 +1136,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/string(),/*pptr*/&listdat,/*art*/puchar,T_listdat_k,T_listdat_l,/*TxBp*/&Tx,/*Txi*/T_listet_alle_eingelesenen_Dateien_auf,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 
 	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&nurinitdb,/*art*/puchar,T_initdb_k,T_initdb_l,/*TxBp*/&Tx,/*Txi*/T_initialisiert_nur_die_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/string(),/*pptr*/&nurpruefdb,/*art*/puchar,T_pruefdb_k,T_pruefdb_l,/*TxBp*/&Tx,/*Txi*/T_initialisiert_nur_die_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nachbneu,/*art*/puchar,T_nachbneu_k,T_nachbneu_l,/*TxBp*/&Tx,/*Txi*/T_Nachbearbeitung_von_vorne,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&nurusmod,/*art*/puchar,T_nurusmod_k,T_nurusmod_l,/*TxBp*/&Tx,/*Txi*/T_nur_usmod,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
@@ -2155,7 +2158,7 @@ void hhcl::pvirtfuehraus()
 //	ZDB=1;
 	const size_t aktc{0};
 	unsigned long verarbeitet{0};
-	if (nurinitdb) {
+	if (nurpruefdb) {
 		prueftbl();
 	} else if (!loeschalle && !loeschunvollst && umben.empty()) {
 		if (!nurnachb && !nachbneu && !nurusmod && !pruefauft) {

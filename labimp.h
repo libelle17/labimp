@@ -209,8 +209,8 @@ enum T_
 	T_nach_,
 	T_listdat_k,
 	T_listdat_l,
-	T_initdb_k,
-	T_initdb_l,
+	T_pruefdb_k,
+	T_pruefdb_l,
 	T_umben_k,
 	T_umben_l,
 	T_listet_alle_eingelesenen_Dateien_auf,
@@ -307,7 +307,7 @@ class hhcl:public dhcl
 		string loeschab;
 		string loeschid;
 		uchar listdat=0;
-		uchar nurinitdb=0;
+		uchar nurpruefdb=0;
 		string umben;
 		string vorsl/*,vorclvors,nachclvors*/;   // Vorsilbe für Datenbanktabellen, vor und nach command line-Auswertung
 		string ldatvz;   // Verzeichnis der Labordateien

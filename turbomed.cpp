@@ -110,6 +110,7 @@ void hhcl::usmod(const size_t aktc,svec *zlangtp/*=0*/,svec *zabkp/*=0*/,svec *z
 						if (*cerg && **cerg) {
 							hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
 							mods+=",Pat_id_"+ltoan(i)+"="+sqlft(My->DBS,**cerg);
+							mods+=",Pat_id_Laborneu="+sqlft(My->DBS,**cerg);
 							mods+=",ZeitpunktLaborneu="+sqlft(My->DBS,cjj(cerg,1));
 							mods+=",Pat_id=IF(pat_id_0 IS NULL AND pat_id_1 IS NULL,"+sqlft(My->DBS,**cerg)+",Pat_id)";
 							/*
@@ -478,29 +479,31 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 		// KLZ // (0)
 	} // (0)
 	if (obusmod) {
-		RS selid(My,"SELECT id,eingang FROM `"+tlyus+"` u WHERE 1"+(usids.empty()?"":" AND u"+usbed),aktc,ZDB);
-		char ***cerg{0};
-		while (cerg=selid.HolZeile(),cerg?*cerg&&**cerg:0) {
-			svec zzwerte,zzlangt,zzabk,zzverfa;
-			tm eingtm{0};
-			usid=cjj(cerg,0);
-			strptime(cjj(cerg,1),"%Y-%m-%d",&eingtm);
-			RS werte(My,"SELECT wert,langtext,abkü FROM `"+tlywert+"` w WHERE usid="+usid+" AND wert<>'' LIMIT 9",aktc,ZDB);
-			char ***cergw{0};
-			while (cergw=werte.HolZeile(),cergw?*cergw&&**cergw:0) {
-				caus<<" "<<dblau<<cjj(cergw,0)<<schwarz<<" "<<violett<<cjj(cergw,1)<<schwarz<<endl;
-				zzwerte<<cjj(cergw,0);
-				zzlangt<<cjj(cergw,1);
-				zzabk<<cjj(cergw,2);
+		if (1) {
+			RS selid(My,"SELECT id,eingang FROM `"+tlyus+"` u WHERE 1"+(usids.empty()?"":" AND u"+usbed),aktc,ZDB);
+			char ***cerg{0};
+			while (cerg=selid.HolZeile(),cerg?*cerg&&**cerg:0) {
+				svec zzwerte,zzlangt,zzabk,zzverfa;
+				tm eingtm{0};
+				usid=cjj(cerg,0);
+				strptime(cjj(cerg,1),"%Y-%m-%d",&eingtm);
+				RS werte(My,"SELECT wert,langtext,abkü FROM `"+tlywert+"` w WHERE usid="+usid+" AND wert<>'' LIMIT 9",aktc,ZDB);
+				char ***cergw{0};
+				while (cergw=werte.HolZeile(),cergw?*cergw&&**cergw:0) {
+					caus<<" "<<dblau<<cjj(cergw,0)<<schwarz<<" "<<violett<<cjj(cergw,1)<<schwarz<<endl;
+					zzwerte<<cjj(cergw,0);
+					zzlangt<<cjj(cergw,1);
+					zzabk<<cjj(cergw,2);
+				}
+				RS lab(My,"SELECT verf FROM `"+tlybakt+"` w WHERE usid="+usid+" AND verf<>''",aktc,ZDB);
+				char ***cergb{0};
+				while (cergb=lab.HolZeile(),cergb?*cergb&&**cergb:0) {
+					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<endl;
+					zzverfa<<cjj(cergb,0);
+				}
+				caus<<blau<<"usid: "<<violett<<usid<<schwarz<<" "<<ztacl(&eingtm)<<endl;
+				usmod(aktc,&zzlangt,&zzabk,&zzwerte,&zzverfa,&eingtm);
 			}
-			RS lab(My,"SELECT verf FROM `"+tlybakt+"` w WHERE usid="+usid+" AND verf<>''",aktc,ZDB);
-			char ***cergb{0};
-			while (cergb=lab.HolZeile(),cergb?*cergb&&**cergb:0) {
-				caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<endl;
-				zzverfa<<cjj(cergb,0);
-			}
-			caus<<blau<<"usid: "<<violett<<usid<<schwarz<<" "<<ztacl(&eingtm)<<endl;
-			usmod(aktc,&zzlangt,&zzabk,&zzwerte,&zzverfa,&eingtm);
 		}
 		string rsid[]{
 			"DELETE FROM `"+tlyus+"` WHERE auftragsschlüssel='0511249475' and auftragsnummer='11249475' and pat_id=1558",
