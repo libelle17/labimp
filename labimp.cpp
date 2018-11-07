@@ -1277,7 +1277,7 @@ void hhcl::droptables(const size_t aktc/*=0*/,uchar obumben/*=0*/)
 		if (!obumben) break;
 	}
 	ZDB=altZDB;
-}
+} // hhcl::droptables
 
 // wird aufgerufen in lauf
 void hhcl::virtpruefweiteres()
@@ -2109,41 +2109,69 @@ void hhcl::prueftbl()
 	prueflyleist(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflywert(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflypgl(My, aktc, obverb, oblog, /*direkt*/0);
-	{
-		const string labor2a{"labor2a"};
-		RS view(My,"DROP VIEW IF EXISTS `"+labor2a+"`;"
-				"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`"+muser+"`@`%` SQL SECURITY DEFINER VIEW `"+labor2a+"` AS "
-				"SELECT Pat_id, eingang Zeitpunkt,befart FertigStGrad, Abkü,w.abkü abk_ur,w.langtext Langtext, Wert,Einheit, Einheit Einheit_ur "
-				",CONCAT(IF(e.text rlike '^:[ /\\*:]*$','',IF(e.text rlike '^:[ /\\*]*:',CONCAT(MID(e.text,locate(':',e.text,2)+1),';'),IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),k.text) Kommentar "
-				",NB, nb NB_ur,uNg,uNg uNg_ur, "
-				"IF(abkü = 'LDL' AND einheit = 'mg/dl','100',oNg) oNg,"
-				"oNg oNg_ur, Labor,Pfad "
+	ZDB=1;
+//	My->usedb(dbq,aktc);
+	struct {
+		const string name;
+		string sql;
+	} vpaare[]{ {
+		"_labor2a",
+			"SELECT Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.abkü abk_ur, w.langtext Langtext, Wert, w.Einheit, w.Einheit Einheit_ur "
+				",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:',CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';'),"
+				"IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
+				",n.NB, n.nb NB_ur, uNg,uNg uNg_ur"
+				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
+				",oNg oNg_ur, l.Labor, Pfad "
+				",p.Gruppe, p.Reihe,2 Qu "
 				"FROM `"+tlyus+"` u "
-				"LEFT JOIN `"+tlywert+"` w on u.id=w.usid "
-				"LEFT JOIN `"+tlyhinw+"` e on w.erklid=e.id "
-				"LEFT JOIN `"+tlyhinw+"` k on w.kommid=k.id "
-				"LEFT JOIN `"+tlypnb+"` n on w.nbid=n.id "
-				"LEFT JOIN `"+tlysaetze+"` s on u.satzid=s.satzid "
-				"LEFT JOIN `"+tlydat+"` d on s.datid=d.datid "
-				"LEFT JOIN `"+tlyplab+"` l on s.labid=l.id",aktc,ZDB);
-	}
-	{
-		const string labor2aNachw{"labor2aNachw"};
-		RS viewN(My,"DROP VIEW IF EXISTS `"+labor2aNachw+"`;"
-				"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`"+muser+"`@`%` SQL SECURITY DEFINER VIEW `"+labor2aNachw+"` AS "
-				"SELECT Pat_id, eingang Zeitpunkt,befart FertigStGrad, w.Abkü,w.langtext Langtext, Wert,Einheit "
-				",CONCAT(IF(e.text rlike '^:[ /\\*:]*$','',IF(e.text rlike '^:[ /\\*]*:',CONCAT(MID(e.text,locate(':',e.text,2)+1),';'),IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),k.text) Kommentar "
-				",NB,uNg, "
-				"IF(abkü = 'LDL' AND einheit = 'mg/dl','100',oNg) oNg,"
-				"Labor,u.DatID,u.SatzID,u.SatzLänge,u.Auftragsnummer,u.Auftragsschlüssel,u.Eingang,u.Berichtsdatum,u.Nachname,u.Vorname,u.GebDat,Pfad,Erstellungsdatum,geändert "
+				"LEFT JOIN `"+tlywert+"` w ON u.id=w.usid "
+				"LEFT JOIN `"+tlyhinw+"` e ON w.erklid=e.id "
+				"LEFT JOIN `"+tlyhinw+"` k ON w.kommid=k.id "
+				"LEFT JOIN `"+tlypnb+"` n ON w.nbid=n.id "
+				"LEFT JOIN `"+tlysaetze+"` s ON u.satzid=s.satzid "
+				"LEFT JOIN `"+tlydat+"` d ON s.datid=d.datid "
+				"LEFT JOIN `"+tlyplab+"` l ON s.labid=l.id "
+				"LEFT JOIN laborparameter p ON p.abkü=CAST(w.abkü AS CHAR CHARSET latin1) COLLATE latin1_german2_ci AND "
+				"p.einheit=CAST(IF(w.einheit='','kA',w.einheit) AS CHAR CHARSET latin1) COLLATE latin1_german2_ci "
+	}, {
+		"labor2a",
+			"SELECT * FROM _labor2a WHERE (wert<>'' AND wert IS NOT NULL) OR (kommentar<>'' AND kommentar IS NOT NULL)"
+	}, {
+		"labor2aNachweis",
+			"SELECT d.Pfad, d.Datid,s.Satzid,u.id USID,w.id,pat_id_0,pat_id_1,pat_id_2,pat_id_3,pat_id_4,pat_id_5,pat_id_6,pat_id_7,pat_id_laborneu"
+				",Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.abkü abk_ur, w.langtext Langtext, Wert, w.Einheit, w.Einheit Einheit_ur "
+				",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:',CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';'),"
+				"IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
+				",n.NB, n.nb NB_ur, uNg,uNg uNg_ur"
+				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
+				",oNg oNg_ur, l.Labor "
+				",p.Gruppe, p.Reihe,2 Qu "
 				"FROM `"+tlyus+"` u "
-				"LEFT JOIN `"+tlywert+"` w on u.id=w.usid "
-				"LEFT JOIN `"+tlyhinw+"` e on w.erklid=e.id "
-				"LEFT JOIN `"+tlyhinw+"` k on w.kommid=k.id "
-				"LEFT JOIN `"+tlypnb+"` n on w.nbid=n.id "
-				"LEFT JOIN `"+tlysaetze+"` s on u.satzid=s.satzid "
-				"LEFT JOIN `"+tlydat+"` d on s.datid=d.datid "
-				"LEFT JOIN `"+tlyplab+"` l on s.labid=l.id",aktc,ZDB);
+				"LEFT JOIN `"+tlywert+"` w ON u.id=w.usid "
+				"LEFT JOIN `"+tlyhinw+"` e ON w.erklid=e.id "
+				"LEFT JOIN `"+tlyhinw+"` k ON w.kommid=k.id "
+				"LEFT JOIN `"+tlypnb+"` n ON w.nbid=n.id "
+				"LEFT JOIN `"+tlysaetze+"` s ON u.satzid=s.satzid "
+				"LEFT JOIN `"+tlydat+"` d ON s.datid=d.datid "
+				"LEFT JOIN `"+tlyplab+"` l ON s.labid=l.id "
+				"LEFT JOIN laborparameter p ON p.abkü=CAST(w.abkü AS CHAR CHARSET latin1) COLLATE latin1_german2_ci AND "
+				"p.einheit=CAST(IF(w.einheit='','kA',w.einheit) AS CHAR CHARSET latin1) COLLATE latin1_german2_ci "
+	}, {
+		"labor2bakt",
+			"SELECT Verf,KuQu,Quelle,QSpez,if(isnull(k.text),'',k.text) Kommentar, if(isnull(e.text),'',e.text) Erkl"
+				", if(isnull(h.text),'',h.text) Hinw, Keimzahl,abrd,Auftragsnummer"
+				",Auftragsschlüssel,Eingang,Berichtsdatum,Pat_id,nachname,vorname,GebDat,Zeitpunktlaborneu,Pat_id_Laborneu "
+				"FROM `"+tlybakt+"` b "
+				"LEFT JOIN `"+tlyus+"` u ON u.id=b.usid "
+				"LEFT JOIN `"+tlyhinw+"` k ON b.kommid=k.id "
+				"LEFT JOIN `"+tlyhinw+"` e ON b.erklid=e.id "
+				"LEFT JOIN `"+tlyhinw+"` h ON b.hinwid=h.id "
+	},
+	};
+	for(size_t i=0;i<sizeof vpaare/sizeof *vpaare;i++) {
+		RS delv(My,"DROP VIEW IF EXISTS `"+vpaare[i].name+"`;",aktc,ZDB);
+		RS view(My,"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`"+muser+"`@`%` SQL SECURITY DEFINER VIEW `"+vpaare[i].name+"` AS "+
+				vpaare[i].sql,aktc,ZDB);
 	}
 } // void hhcl::prueftbl
 
@@ -2155,7 +2183,7 @@ void hhcl::pvirtvorpruefggfmehrfach()
 void hhcl::pvirtfuehraus()
 { //ω
 	auto altZDB=ZDB;
-//	ZDB=1;
+	//	ZDB=1;
 	const size_t aktc{0};
 	unsigned long verarbeitet{0};
 	if (nurpruefdb) {
@@ -2171,9 +2199,9 @@ void hhcl::pvirtfuehraus()
 			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);
 			// prueftbl soll nur aufgerufen werden, wenn eine neue Datei da ist oder wenn die Vorsilbe ueber die Befehlszeile angegeben wurde
 			auto woher=opn.omap.find("vorsil")->second->woher;
-//			caus<<"woher: "<<(int)woher<<endl;
-      if (lrue.size()||woher==3/*vorclvors!=nachclvors*/)
-					prueftbl();
+			//			caus<<"woher: "<<(int)woher<<endl;
+			if (lrue.size()||woher==3/*vorclvors!=nachclvors*/)
+				prueftbl();
 			for(size_t i=0;i<lrue.size();i++) {
 				string *aktl{&lrue[i]};
 				//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
