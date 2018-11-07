@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "07.11.18" "Version 0.11507" "\fB²DPROG²\fR man page"
+.TH man 1 "07.11.18" "Version 0.11508" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Laboratory import\fR: imports laboratory files into self mad mariadb tables from the laboratory transmission files
 .br
@@ -28,7 +28,7 @@ Ideally, the program should have installed itsself after the first call(s) (see 
 .SH OPTIONS 
 .br
 .br
-    \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11507 \fR (Laborimport) 
+    \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11508 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -86,7 +86,7 @@ Ideally, the program should have installed itsself after the first call(s) (see 
 .br
 \fB -pref, --prefix <string>\fR: prefix for database tables ('\fBlabory\fR')
 .br
-\fB -lddir, --laboratoryfiledir <path>\fR: directory of the fax files ('\fB/root/laboratory\fR')
+\fB -lddir, --laboratoryfiledir <path>\fR: directory of the laboratory files ('\fB/root/laboratory\fR')
 .br
 \fB -fddir, --processeddir <path>\fR: directory of the finished ('\fB/root/laboratory/processed\fR')
 .br

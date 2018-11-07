@@ -258,8 +258,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"fgvz","fddir"},
 	// T_fgvz_l
 	{"fertigvz","processeddir"},
-	// T_Verzeichnis_der_Faxdateien
-	{"Verzeichnis der Faxdateien","directory of the fax files"},
+	// T_Verzeichnis_der_Labordateien
+	{"Verzeichnis der Labordateien","directory of the laboratory files"},
 	// T_Verzeichnis_der_Fertigen
 	{"Verzeichnis der Fertigen","directory of the finished"},
 	// T_vv_k
@@ -1125,7 +1125,7 @@ void hhcl::pvirtVorgbSpeziell()
 void hhcl::virtinitopt()
 { //ω
 	opn<<new optcl(/*pname*/"vorsil",/*pptr*/&vorsl,/*art*/pstri,T_vors_k,T_vors_l,/*TxBp*/&Tx,/*Txi*/T_Vorsilbe_fuer_Datenbanktabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!vorsl.empty());
-	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Faxdateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty());
+	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Labordateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty());
 	opn<<new optcl(/*pname*/"fertigvz",/*pptr*/&fertigvz,/*art*/pverz,T_fgvz_k,T_fgvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Fertigen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!fertigvz.empty());
 	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -1243,7 +1243,7 @@ void hhcl::virtrueckfragen()
 			vorsl=Tippstr(Tx[T_Vorsilbe_fuer_Datenbanktabellen],&vorsl);
 		} while (vorsl.empty());
 		tabnamen();
-		ldatvz=Tippverz(Tx[T_Verzeichnis_der_Faxdateien],&ldatvz);
+		ldatvz=Tippverz(Tx[T_Verzeichnis_der_Labordateien],&ldatvz);
 		fertigvz=Tippverz(Tx[T_Verzeichnis_der_fertig_Verarbeiteten],&fertigvz);
 	} //α
 	dhcl::virtrueckfragen();

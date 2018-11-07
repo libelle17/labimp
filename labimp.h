@@ -125,7 +125,7 @@ enum T_
 	T_vors_l,
 	T_fgvz_k,
 	T_fgvz_l,
-	T_Verzeichnis_der_Faxdateien,
+	T_Verzeichnis_der_Labordateien,
 	T_Verzeichnis_der_Fertigen,
 	T_vv_k,
 	T_vv_l,
