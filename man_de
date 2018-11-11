@@ -2,7 +2,7 @@
 .\" Manual-Seite für ²DPROG²
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH man 1 "07.11.18" "Version 0.11508" "Manual-Seite für ²DPROG²"
+.TH man 1 "11.11.18" "Version 0.11509" "Manual-Seite für ²DPROG²"
 .SH NAME
 \fB²DPROG² \- Labordatenimport\fR: importiert Labordaten in selbst verwaltete Mariadb-Tabellen aus den Uebertragungsdateien des Labors 
 .br
@@ -29,7 +29,7 @@ Im Idealfall sollte sich das Programm nach dem/n erstem/n Aufruf/en (s.o.) und B
 .SH OPTIONEN 
 .br
 .br
-    \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11508 \fR (Laborimport) 
+    \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11509 \fR (Laborimport) 
 .br
 \fBOptionen, die nicht gespeichert werden (aktueller Wert in Klammern): \fR
 .br

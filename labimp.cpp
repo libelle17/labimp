@@ -2116,9 +2116,11 @@ void hhcl::prueftbl()
 		string sql;
 	} vpaare[]{ {
 		"_labor2a",
-			"SELECT Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.abkü abk_ur, w.langtext Langtext, Wert, w.Einheit, w.Einheit Einheit_ur "
-				",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:',CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';'),"
-				"IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
+			"SELECT Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.abkü abk_ur, w.langtext Langtext"
+				",TRIM(IF(TRIM(Wert) REGEXP '^[0-9]+\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert)) Wert"
+				",w.Einheit, w.Einheit Einheit_ur "
+				",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:',CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';')"
+				",IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
 				",n.NB, n.nb NB_ur, uNg,uNg uNg_ur"
 				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
 				",oNg oNg_ur, l.Labor, Pfad "
@@ -2139,9 +2141,11 @@ void hhcl::prueftbl()
 	}, {
 		"labor2aNachweis",
 			"SELECT d.Pfad, d.Datid,s.Satzid,u.id USID,w.id,pat_id_0,pat_id_1,pat_id_2,pat_id_3,pat_id_4,pat_id_5,pat_id_6,pat_id_7,pat_id_laborneu"
-				",Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.abkü abk_ur, w.langtext Langtext, Wert, w.Einheit, w.Einheit Einheit_ur "
-				",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:',CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';'),"
-				"IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
+				",Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.abkü abk_ur, w.langtext Langtext"
+				",TRIM(IF(TRIM(Wert) REGEXP '^[0-9]+\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert)) Wert"
+				",w.Einheit, w.Einheit Einheit_ur "
+				",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:',CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';')"
+				",IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
 				",n.NB, n.nb NB_ur, uNg,uNg uNg_ur"
 				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
 				",oNg oNg_ur, l.Labor "
@@ -2159,7 +2163,7 @@ void hhcl::prueftbl()
 	}, {
 		"labor2bakt",
 			"SELECT Verf,KuQu,Quelle,QSpez,if(isnull(k.text),'',k.text) Kommentar, if(isnull(e.text),'',e.text) Erkl"
-				", if(isnull(h.text),'',h.text) Hinw, Keimzahl,abrd,Auftragsnummer"
+				",if(isnull(h.text),'',h.text) Hinw, Keimzahl,abrd,Auftragsnummer"
 				",Auftragsschlüssel,Eingang,Berichtsdatum,Pat_id,nachname,vorname,GebDat,Zeitpunktlaborneu,Pat_id_Laborneu "
 				"FROM `"+tlybakt+"` b "
 				"LEFT JOIN `"+tlyus+"` u ON u.id=b.usid "
