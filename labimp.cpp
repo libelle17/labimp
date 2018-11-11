@@ -1277,7 +1277,7 @@ void hhcl::droptables(const size_t aktc/*=0*/,uchar obumben/*=0*/)
 		if (!obumben) break;
 	}
 	ZDB=altZDB;
-} // hhcl::droptables
+} // void hhcl::droptables
 
 // wird aufgerufen in lauf
 void hhcl::virtpruefweiteres()
