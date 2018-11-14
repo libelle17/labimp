@@ -111,7 +111,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_1_Mann_2_Frau_3_unbek_4_Knabe_5_Maedchen_0_Name_fehlt_9_beide
 	{"1=Mann, 2=Frau, 3=unbek, 4=Knabe, 5=Mädchen, 0=Name fehlt, 9=beide","1=man, 2=woman, 3=unknown, 4=boy, 5=girl, 0=name is missing, 9=both"},
 	// T_Eingangsdatum_im_Labor
-	{"Eingangsdatum im Labor","entry date in the laboratory"},
+	{"Eingangsdatum im Labor (Feld 8301)","entry date in the laboratory (field 8301)"},
 	// T_untere_Normgrenze
 	{"untere Normgrenze","lower border"},
 	// T_obere_Normgrenze
