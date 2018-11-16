@@ -201,7 +201,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			if (i==usids.size()-1) usbed+=')'; else usbed+=',';
 		}
 	}
-	const bool oballes{obusmod?0:1};
+	const bool oballes{obusmod/*?0:1*/};
 	if (oballes) {
 		if (My->obtabspda("laborneu","wert")) {
 			RS v1(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
@@ -477,7 +477,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"p7fuerl2, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
 		} // 	if (My->obtabspda("laborneu","wert"))
 		// KLZ // (0)
-	} // (0)
+	} // (oballes)
 	if (obusmod) {
 		if (1) {
 			RS selid(My,"SELECT id,eingang FROM `"+tlyus+"` u WHERE 1"+(usids.empty()?"":" AND u"+usbed),aktc,ZDB);
@@ -505,6 +505,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				usmod(aktc,&zzlangt,&zzabk,&zzwerte,&zzverfa,&eingtm);
 			}
 		}
+		// falsche Eintraege loeschen
 		string rsid[]{
 			"DELETE FROM `"+tlyus+"` WHERE auftragsschlüssel='0511249475' and auftragsnummer='11249475' and pat_id=1558",
 		};

@@ -1324,18 +1324,24 @@ void hhcl::virtpruefweiteres()
 	} else if (!loeschab.empty() || !loeschid.empty()) {
 		if (!My) initDB();
     my_ulonglong dzahl{0},szahl{0},uzahl{0};
-    RS datzahl(My,"SELECT datid FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&dzahl);
-    RS satzzahl(My,"SELECT datid FROM `"+tlysaetze+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&szahl);
-    RS uszahl(My,"SELECT datid FROM `"+tlyus+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&uzahl);
+    RS datzahl(My,"SELECT datid FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",
+				aktc,ZDB,0,0,0,&dzahl);
+    RS satzzahl(My,"SELECT datid FROM `"+tlysaetze+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",
+				aktc,ZDB,0,0,0,&szahl);
+    RS uszahl(My,"SELECT datid FROM `"+tlyus+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",
+				aktc,ZDB,0,0,0,&uzahl);
 		string dzahls{ltoan(dzahl)};
 		string szahls{ltoan(szahl)};
 		string uzahls{ltoan(uzahl)};
-		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit]+blau+vorsl+rot+Tx[(loeschab.empty()?T_mit_DATID:T_ab_DATID)]+blau+(loeschab.empty()?loeschid:loeschab)+rot+Tx[T_loeschen]+schwarz+"("+gruen+dzahls+schwarz+Tx[T_Eintraege_aus]+blau+tlydat+schwarz+", "+gruen+szahls+schwarz+Tx[T_Eintraege_aus]+blau+tlysaetze+schwarz+", "+gruen+uzahls+schwarz+Tx[T_Eintraege_aus]+blau+tlyus+schwarz+")","n")) {
+		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit]+blau+vorsl+rot+Tx[(loeschab.empty()?T_mit_DATID:T_ab_DATID)]+blau
+					+(loeschab.empty()?loeschid:loeschab)+rot+Tx[T_loeschen]+schwarz+"("+gruen+dzahls+schwarz+Tx[T_Eintraege_aus]+blau
+					+tlydat+schwarz+", "+gruen+szahls+schwarz+Tx[T_Eintraege_aus]+blau+tlysaetze+schwarz+", "+gruen+uzahls+schwarz
+					+Tx[T_Eintraege_aus]+blau+tlyus+schwarz+")","n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
 			exit(0);
 		}
 		fLog(blaus+Tx[(loeschab.empty()?T_Loescheid:T_Loescheab)]+gruen+(loeschab.empty()?loeschid:loeschab)+schwarz,1,0);
-		ZDB=1;
+		// ZDB=1;
 		RS loe(My,"DELETE FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		exit(0);
@@ -1383,7 +1389,7 @@ void hhcl::virtpruefweiteres()
 			vverarbeit("/DATA/down/X010PX05SKD.LDT");
 		}
 		const uchar altZDB{ZDB};
-		ZDB=1;
+		// ZDB=1;
 		if (!My) initDB();
 		RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE fertig<>1",aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
@@ -1727,7 +1733,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 						// z.B. "Labor 20091126 162200.dat"
 									stringstream gebdp;
 									gebdp<<ztacl(&gebtm,"%Y-%m-%d");
-					caus<<rot<<"4 vor russchreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl;
 						russchreib(rus,aktc,&usid);
 						usoffen=0;
 					} // if (usoffen)
@@ -2109,8 +2114,8 @@ void hhcl::prueftbl()
 	prueflyleist(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflywert(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflypgl(My, aktc, obverb, oblog, /*direkt*/0);
-	ZDB=1;
-//	My->usedb(dbq,aktc);
+////	My->usedb(dbq,aktc);
+//	ZDB=1;
 	struct {
 		const string name;
 		string sql;
@@ -2186,7 +2191,7 @@ void hhcl::pvirtvorpruefggfmehrfach()
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
-	auto altZDB=ZDB;
+	auto altZDB{ZDB};
 	//	ZDB=1;
 	const size_t aktc{0};
 	unsigned long verarbeitet{0};
@@ -2204,8 +2209,9 @@ void hhcl::pvirtfuehraus()
 			// prueftbl soll nur aufgerufen werden, wenn eine neue Datei da ist oder wenn die Vorsilbe ueber die Befehlszeile angegeben wurde
 			auto woher=opn.omap.find("vorsil")->second->woher;
 			//			caus<<"woher: "<<(int)woher<<endl;
-			if (lrue.size()||woher==3/*vorclvors!=nachclvors*/)
+			if (lrue.size()||woher==3/*vorclvors!=nachclvors*/) {
 				prueftbl();
+			}
 			for(size_t i=0;i<lrue.size();i++) {
 				string *aktl{&lrue[i]};
 				//		caus<<i<<": "<<blau<<lrue[i]<<schwarz<<endl;
@@ -2221,22 +2227,34 @@ void hhcl::pvirtfuehraus()
 				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
 				// 16.9.18: Namen sollen eindeutig sein, dafuer koennen die Pfade mal umsortiert werden, ohne dass gleich alle Dateien neu eingelesen werden
 				RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE name="+sqlft(My->DBS,base_name(*aktl))+" AND fertig<>1",aktc,ZDB);
-				char ***cerg{0};
 				// der evtl. Fund folgender Suche muss also fertig==1 haben
-				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))/*+" AND pfad = "+sqlft(My->DBS,*aktl)*/,aktc,ZDB);
-				if (rsfertig.obqueryfehler||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1) {
-					// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
-//					yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
-					yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i+1,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
-					if (!dverarbeit(*aktl,&datid)) {
-						verarbeitet++;
-						if (rename(aktl->c_str(),(fertigvz+'/'+base_name(*aktl)).c_str())) {
-							fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+*aktl+rot+Tx[T_nach_]+blau+fertigvz+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
+				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))
+						/*+" AND pfad = "+sqlft(My->DBS,*aktl)*/,aktc,ZDB);
+				if (!rsfertig.obqueryfehler) {
+					uchar obverschieb{0};
+					if (!rsfertig.HolZeile()) {
+						// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
+						// yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
+						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i+1,schwarz,blau,lrue.size(),
+								schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
+						if (!dverarbeit(*aktl,&datid)) {
+							verarbeitet++;
+							obverschieb=1;
 						}
-					}
-					yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i+1,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
-					if (dszahl && verarbeitet==dszahl) break;
-				} // 				if (rsfertig.obqueryfehler||!(cerg=rsfertig.HolZeile())||cerg?!*cerg:1)
+						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i+1,schwarz,blau,lrue.size(),
+								schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
+						if (dszahl && verarbeitet==dszahl) break;
+					} else { // 				if (!rsfertig.HolZeile())
+						// wenn Datei schon eingetragen, dann auch verscheiben
+						obverschieb=1;
+					}        // 				if (!rsfertig.HolZeile()) else
+					if (obverschieb && fertigvz!=ldatvz) {
+						if (rename(aktl->c_str(),(fertigvz+'/'+base_name(*aktl)).c_str())) {
+							fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+*aktl+rot+Tx[T_nach_]+blau+fertigvz+
+									schwarz+": "+rot+strerror(errno)+schwarz,1,1);
+						}
+					} // 					if (obverschieb)
+				} // rsfertig.obqueryfehler
 			} // 			for(size_t i=0;i<lrue.size();i++)
 		} // 		if (!nurnachb && !nachbneu && !nurusmod && !pruefauft) {
 		if (nurnachb || nachbneu|| nurusmod || verarbeitet) nachbearbeit(aktc,nurusmod);
@@ -2290,7 +2308,6 @@ int hhcl::vverarbeit(const string& datei)
 				} else if (cd=="8310") { // Auftragsnummer
 					aufnr=inh;
 				} else if (cd=="3103") {
-					caus<<"ldtvers:       "<<ldtvers<<endl;
 					BDTtoDate(inh,&gebvtm,1900,ldtvers>1014);
 				} else if (cd=="8301") {
 					BDTtoDate(inh,&eingvtm,2000,ldtvers>1014);
