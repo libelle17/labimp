@@ -253,6 +253,8 @@ enum T_
 	T_Namensanfang_aller_Einlesetabellen,
 	T_Tabellenzahl_mit,
 	T_Eingelesene_Labordateien,
+	T_war_schon_in,
+	T_eingetragen_,
 	T_MAX //α
 }; // enum T_ //ω
 //α

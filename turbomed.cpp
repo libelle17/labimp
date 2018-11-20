@@ -189,7 +189,7 @@ void hhcl::vordverarb(const size_t aktc)
 void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 {
 	uchar altZDB{ZDB};
-	ZDB=1;
+//	ZDB=1;
 	my_ulonglong zahl{0},gzahl{0};
 	RS vor(My,"SET @@GROUP_CONCAT_MAX_LEN=150000; ",aktc,ZDB);
 	string usbed; // usid-Bedingung, wenn nicht -nurnachb aufgerufen
@@ -200,8 +200,8 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			usbed+=usids[i];
 			if (i==usids.size()-1) usbed+=')'; else usbed+=',';
 		}
-	}
-	const bool oballes{obusmod/*?0:1*/};
+	} // 	if (!usids.empty())
+	const bool oballes{obusmod?0:1};
 	if (oballes) {
 		if (My->obtabspda("laborneu","wert")) {
 			RS v1(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("
@@ -246,7 +246,8 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 					"SELECT us.id,us.pat_id,us.eingang zp FROM `"+tlyus+"` us INNER JOIN (\n"
 					"SELECT GROUP_CONCAT(CONCAT(w.abkü,REPLACE(REPLACE(REPLACE(REPLACE(w.wert,'.',''),'<',''),':',''),'-','')) ORDER BY w.abkü,w.wert) werte, "
 					"usi.id, usi.pat_id, gesname(usi.pat_id) name, eingang, befart "
-					"FROM `"+tlyus+"` usi LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` union SELECT usid,verf,'' FROM `"+tlybakt+"`) w ON w.usid=usi.id AND w.wert = '' \n"
+					"FROM `"+tlyus+"` usi LEFT JOIN (SELECT usid,abkü,wert FROM `"+tlywert+"` "
+					" UNION SELECT usid,verf,'' FROM `"+tlybakt+"`) w ON w.usid=usi.id AND w.wert = '' \n"
 					+(usids.empty()?"":"WHERE usi"+usbed)+
 					" GROUP BY pat_id,eingang,befart\n"
 					") x ON us.pat_id=x.pat_id AND us.eingang=x.eingang AND us.befart=x.befart LEFT JOIN (\n"
@@ -392,7 +393,8 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 						"LEFT JOIN laborydat d2 ON d2.datid=l2.datid "
 						"LEFT JOIN faelle f ON f.pat_id=l1.pat_id AND l1.eingang BETWEEN f.bhfb AND f.bhfe1 "
 						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
-						"AND ISNULL(f.fid) AND(select MAX(schgr) FROM faelle WHERE pat_id=l1.pat_id AND bhfb=(SELECT MAX(bhfb) FROM faelle WHERE pat_id=l1.pat_id))<>90 "
+						"AND ISNULL(f.fid) AND(select MAX(schgr) FROM faelle "
+						" WHERE pat_id=l1.pat_id AND bhfb=(SELECT MAX(bhfb) FROM faelle WHERE pat_id=l1.pat_id))<>90 "
 						"AND l1.eingang<SUBDATE(NOW(),INTERVAL 5 DAY) "
 						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
 						,aktc,ZDB);
@@ -415,7 +417,8 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 						"LEFT JOIN laborydat d2 ON d2.datid=l2.datid "
 						"LEFT JOIN faelle f ON f.pat_id=l2.pat_id AND l1.eingang BETWEEN f.bhfb AND f.bhfe1 "
 						"WHERE l1.pat_id<>l2.pat_id AND l1.pat_id<>0 AND l2.pat_id<>0 AND d1.geändert>d2.geändert "
-						"AND ISNULL(f.fid) AND(select MAX(schgr) FROM faelle WHERE pat_id=l2.pat_id AND bhfb=(SELECT MAX(bhfb) FROM faelle WHERE pat_id=l2.pat_id))<>90 "
+						"AND ISNULL(f.fid) AND(select MAX(schgr) FROM faelle "
+						" WHERE pat_id=l2.pat_id AND bhfb=(SELECT MAX(bhfb) FROM faelle WHERE pat_id=l2.pat_id))<>90 "
 						"AND l1.eingang<SUBDATE(NOW(),INTERVAL 5 DAY) "
 						"GROUP BY l1.pat_id,l2.pat_id,l1.eingang;"
 						,aktc,ZDB);
@@ -478,6 +481,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 		} // 	if (My->obtabspda("laborneu","wert"))
 		// KLZ // (0)
 	} // (oballes)
+	// usmod wird normalerweise (obusmod==0) nicht hier aufgerufen, sondern einzeln
 	if (obusmod) {
 		if (1) {
 			RS selid(My,"SELECT id,eingang FROM `"+tlyus+"` u WHERE 1"+(usids.empty()?"":" AND u"+usbed),aktc,ZDB);
@@ -512,6 +516,6 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 		for(size_t i=0;i<sizeof rsid/sizeof *rsid;i++) {
 			RS rsloe(My,rsid[i],aktc,1);
 		}
-	}
+	} // obusmod
 	ZDB=altZDB;
 } // void hhcl::nachbearbeit

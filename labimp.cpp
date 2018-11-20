@@ -515,6 +515,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"Tabellenzahl mit ","no.of tables with "},
 	// T_Eingelesene_Labordateien
 	{"Eingelesene Labordateien: ","Processed laboratory files: "},
+	// T_war_schon_in
+	{" war schon in `"," was already entered in `"},
+	// T_eingetragen_
+	{"` eingetragen! (","`! ("},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1490,6 +1494,7 @@ void hhcl::usschluss(const size_t aktc)
 	}
 	*/
 #ifndef usmoddanach
+	// Normalfall
 	usmod(aktc);
 #endif
 	zwerte.clear(); // fuer ergpql 
@@ -2228,11 +2233,12 @@ void hhcl::pvirtfuehraus()
 				// 16.9.18: Namen sollen eindeutig sein, dafuer koennen die Pfade mal umsortiert werden, ohne dass gleich alle Dateien neu eingelesen werden
 				RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE name="+sqlft(My->DBS,base_name(*aktl))+" AND fertig<>1",aktc,ZDB);
 				// der evtl. Fund folgender Suche muss also fertig==1 haben
-				RS rsfertig(My,"SELECT fertig,name FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))
+				RS rsfertig(My,"SELECT fertig,name,datid FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))
 						/*+" AND pfad = "+sqlft(My->DBS,*aktl)*/,aktc,ZDB);
 				if (!rsfertig.obqueryfehler) {
 					uchar obverschieb{0};
-					if (!rsfertig.HolZeile()) {
+					char ***cerg{0};
+					if (!(cerg=rsfertig.HolZeile())||!*cerg) {
 						// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
 						// yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
 						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i+1,schwarz,blau,lrue.size(),
@@ -2246,6 +2252,8 @@ void hhcl::pvirtfuehraus()
 						if (dszahl && verarbeitet==dszahl) break;
 					} else { // 				if (!rsfertig.HolZeile())
 						// wenn Datei schon eingetragen, dann auch verscheiben
+						fLog(rots+Txk[T_datei]+blau+*aktl+rot+Tx[T_war_schon_in]+blau+dbq+rot+Tx[T_eingetragen_]+blau+"\n"+rsfertig.sql+
+								rot+"), datid: "+blau+cjj(cerg,2)+schwarz,1,oblog);
 						obverschieb=1;
 					}        // 				if (!rsfertig.HolZeile()) else
 					if (obverschieb && fertigvz!=ldatvz) {
