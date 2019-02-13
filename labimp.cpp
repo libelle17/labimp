@@ -1128,24 +1128,24 @@ void hhcl::pvirtVorgbSpeziell()
 // wird aufgerufen in lauf
 void hhcl::virtinitopt()
 { //ω
-	opn<<new optcl(/*pname*/"vorsil",/*pptr*/&vorsl,/*art*/pstri,T_vors_k,T_vors_l,/*TxBp*/&Tx,/*Txi*/T_Vorsilbe_fuer_Datenbanktabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!vorsl.empty());
-	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Labordateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty());
-	opn<<new optcl(/*pname*/"fertigvz",/*pptr*/&fertigvz,/*art*/pverz,T_fgvz_k,T_fgvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Fertigen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!fertigvz.empty());
-	opn<<new optcl(/*pname*/string(),/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&umben,/*art*/pstri,T_umben_k,T_umben_l,/*TxBp*/&Tx,/*Txi*/T_benennt_die_Tabellen_um,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschab,/*art*/pdez,T_lab_k,T_lab_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Datensaetze_ab,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschab.empty());
-	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschid,/*art*/pdez,T_lid_k,T_lid_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensatz_id,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschid.empty());
-	opn<<new optcl(/*pname*/string(),/*pptr*/&listdat,/*art*/puchar,T_listdat_k,T_listdat_l,/*TxBp*/&Tx,/*Txi*/T_listet_alle_eingelesenen_Dateien_auf,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"vorsil",/*pptr*/&vorsl,/*art*/pstri,T_vors_k,T_vors_l,/*TxBp*/&Tx,/*Txi*/T_Vorsilbe_fuer_Datenbanktabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!vorsl.empty(),T_Vorsilbe_fuer_Datenbanktabellen);
+	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Labordateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty(),T_Verzeichnis_der_Labordateien);
+	opn<<new optcl(/*pname*/"fertigvz",/*pptr*/&fertigvz,/*art*/pverz,T_fgvz_k,T_fgvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Fertigen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!fertigvz.empty(),T_Verzeichnis_der_Fertigen);
+	opn<<new optcl(/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&umben,/*art*/pstri,T_umben_k,T_umben_l,/*TxBp*/&Tx,/*Txi*/T_benennt_die_Tabellen_um,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&loeschab,/*art*/pdez,T_lab_k,T_lab_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Datensaetze_ab,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschab.empty());
+	opn<<new optcl(/*pptr*/&loeschid,/*art*/pdez,T_lid_k,T_lid_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensatz_id,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschid.empty());
+	opn<<new optcl(/*pptr*/&listdat,/*art*/puchar,T_listdat_k,T_listdat_l,/*TxBp*/&Tx,/*Txi*/T_listet_alle_eingelesenen_Dateien_auf,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 
-	opn<<new optcl(/*pname*/string(),/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&nurpruefdb,/*art*/puchar,T_pruefdb_k,T_pruefdb_l,/*TxBp*/&Tx,/*Txi*/T_initialisiert_nur_die_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&nachbneu,/*art*/puchar,T_nachbneu_k,T_nachbneu_l,/*TxBp*/&Tx,/*Txi*/T_Nachbearbeitung_von_vorne,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&nurusmod,/*art*/puchar,T_nurusmod_k,T_nurusmod_l,/*TxBp*/&Tx,/*Txi*/T_nur_usmod,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
-	opn<<new optcl(/*pname*/string(),/*pptr*/&pruefauft,/*art*/puchar,T_pruefauft_k,T_pruefauft_l,/*TxBp*/&Tx,/*Txi*/T_pruefe_alle_Auftraege,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&nurpruefdb,/*art*/puchar,T_pruefdb_k,T_pruefdb_l,/*TxBp*/&Tx,/*Txi*/T_initialisiert_nur_die_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&nurnachb,/*art*/puchar,T_nurnachb_k,T_nurnachb_l,/*TxBp*/&Tx,/*Txi*/T_nur_Nachbearbeitung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
+	opn<<new optcl(/*pptr*/&nachbneu,/*art*/puchar,T_nachbneu_k,T_nachbneu_l,/*TxBp*/&Tx,/*Txi*/T_Nachbearbeitung_von_vorne,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&nurusmod,/*art*/puchar,T_nurusmod_k,T_nurusmod_l,/*TxBp*/&Tx,/*Txi*/T_nur_usmod,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
+	opn<<new optcl(/*pptr*/&pruefauft,/*art*/puchar,T_pruefauft_k,T_pruefauft_l,/*TxBp*/&Tx,/*Txi*/T_pruefe_alle_Auftraege,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
+	opn<<new optcl(/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	dhcl::virtinitopt(); //α
 //	vorclvors=vorsl;
 } // void hhcl::virtinitopt
@@ -2212,7 +2212,7 @@ void hhcl::pvirtfuehraus()
 			//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);
 			// prueftbl soll nur aufgerufen werden, wenn eine neue Datei da ist oder wenn die Vorsilbe ueber die Befehlszeile angegeben wurde
-			auto woher=opn.omap.find("vorsil")->second->woher;
+			auto woher{opn.omap.find("vorsil")->second->woher};
 			//			caus<<"woher: "<<(int)woher<<endl;
 			if (lrue.size()||woher==3/*vorclvors!=nachclvors*/) {
 				prueftbl();
