@@ -82,10 +82,13 @@ GCCOK::=$(shell expr $(MAXGCCNR) \>\= $(MINGCCNR))
 -include vars # wird durch install.sh generiert; DPROG und GDAT dürfen nur nachher verwendet werden
 ifeq ($(GCCOK),0)
 	# wenn minimal notwendige Version nicht verfügbar ist, dann diese neu als maximal installierbare definieren und später installieren
-  ifeq ($(shell expr $(OSNR) \<= 3),1)
+  ifeq ($(shell expr $(OSNR) \<\= 3),1)
   	MINVGCC::=$(shell apt-cache search '^g\+\+-[0-9]+$$' -n|cut -f2 -d'-'|sort -nr|head -n1)
   else ifeq ($(OSNR),4)
 	  MINVGCC::=$(shell which zypper $(KR)&&zypper se /gcc[^-]$*-c\\+\\+$$/|tail -n1|cut -dc -f3|cut -d- -f1||echo 0;)
+  #  else ifeq ($(OSNR),5)
+	else
+	  MINVGCC::=6
   endif
   ifeq ($(shell expr $(MINVGCC) \> $(MINGCCNR)),1)
 	  MINGCCNR::=$(MINVGCC)
@@ -95,7 +98,7 @@ ifeq ($(shell expr $(MAXGCCNR) \> $(MINGCCNR)),1)
 	MINGCCNR::=$(MAXGCCNR)
 endif
 CCName::=g++-$(MINGCCNR)
-ifeq ($(shell expr $(OSNR) \<= 3),1)
+ifeq ($(shell expr $(OSNR) \<\= 3),1)
 	CCInst::=gcc-$(MINGCCNR) g++-$(MINGCCNR)
 	DName::="Debian/Ubuntu/Mint"
 else ifeq ($(OSNR),4)
@@ -110,7 +113,7 @@ else ifeq ($(OSNR),7)
 else ifeq ($(OSNR),8)
 	DName::="Manjaro"
 endif
-ifeq ($(shell expr $(OSNR) \<= 4),1)
+ifeq ($(shell expr $(OSNR) \<\= 4),1)
 	COMP::=$(COMP) $(CCInst)
 endif
 CFLAGS::=-c -Wall
@@ -432,9 +435,9 @@ define machvers
 endef
 
 define priv_html
-	-@printf " erstelle/generating:%b$(1)%b\n" $(blau) $(reset)
+	-@printf " erstelle/generating:%b$(1)%b..." $(blau) $(reset)
 	-@groff -mandoc -Thtml -v $(KR);EXC="$$$$?"; \
-	for p in $(PGROFF); do { [ $$$${EXC} -gt 1 ]|| ! which groff $(KR)|| ! $(SPR) $$$$p $(KR);}&&{ sh configure inst _ $$$$p verbose;}; done; :;
+		bp=$$$$(echo $(PGROFF));for p in $$$$bp;do { [ $$$$EXC -eq 0 ]&&which groff $(KR)&&$(SPR) $$$$p $(KR);}||{ sh configure inst _ $$$$p verbose;};done;:;
 	-@rm -f $(1).html
 	-@sed -e 's/²gitv²/$(GITV)/g;s/²DPROG²/$(DPROG)/g;'\
 	 -e 's/Ä/\&Auml;/g;s/Ö/\&Ouml;/g;s/Ü/\&Uuml;/g;s/ä/\&auml;/g;s/ö/\&ouml;/g;s/ü/\&uuml;/g;s/ß/\&szlig;/g;'\
@@ -570,9 +573,9 @@ tumitzieh:
 	printf "adapt/ mitziehen von %b$$TZL%b\n" $(blau) $(reset);\
 	printf "cp -au $$blau.exrc Makefile install.sh man_?? viall configure $$reset\"$$TZL\";\n";\
 	cp -au .exrc Makefile install.sh man_?? viall configure "$$TZL";\
-	printf "for A in $${blau}kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h$$reset;do [ -f \"$$TZL/\\$A\" -a -f \"\\$A\" ]&&cp -au \"\\$A\" \"$$TZL\";done;\n";\
+	printf "for A in $${blau}kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h$$reset;do [ -f \"$$TZL/\\$\\$A\" -a -f \"./\\$\\$A\" ]&&cp -au \"\\$$A\" \"$$TZL\";done;\n";\
 	cd "$$TZL" $(DN);test -d ".git"&&git commit -m"vor mitzieh" $(KR);cd - $(DN);\
-	for A in kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h;do [ -f "$$TZL/$$A" -a -f "$$A" ]&&cp -au "$$A" "$$TZL";done;\
+	for A in kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h;do [ -f "$$TZL/$$A" -a -f "./$$A" ]&&cp -au "$$A" "$$TZL";done;\
 	cd "$$TZL" $(DN); sh configure; cd - $(DN);
 
 

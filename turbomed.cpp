@@ -339,6 +339,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			// mit einem group weniger dürfte es auch ohne while gehen, hier will ich aber keinen Fehler machen
 			// wenn zu Laborwerten mit selber Auftragsnummer und selbem Eingangsdatum, aber verschiedenen Pat_id sich zur ersten Pat_id kein
 			// Eintrag in laborneu findet, dann wende die 2. Pat_id auch auf die ersetzen Sätze an
+			RS begin(My,"BEGIN",aktc,obverb);
 			while (1) {
 				RS labneu1leer(My,"SELECT l1.id ID, l2.pat_id P2 "
 						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
@@ -359,6 +360,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				}
 				if (!zahl) break;
 			}
+			RS commit(My,"COMMIT",aktc,obverb);
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"laborneu1leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
 			// s.o.; wenn zu Laborwerten mit selber Auftragsnummer und selbem Eingangsdatum, aber verschiedenen Pat_id sich zur zweiten Pat_id kein
 			// Eintrag in laborneu findet, dann wende die 1. Pat_id auch auf die zweiten Sätze an

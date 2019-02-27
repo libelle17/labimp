@@ -24,7 +24,7 @@ getIPR() {
 #	OSNR=0 # 1=Mint, 2=Ubuntu, 3=Debian, 4=SUSE, 5=Fedora, 6=Fedoraalt, 7=Mageia, 8=Manjaro
 	os=$(cat /etc/os-release|grep '^NAME=')
 	[ -z "$os" ]&& os=$(cat /etc/lsb-release|grep '^DISTRIB_ID=')
-	os=$(echo $os|cut -d= -f2|sed 's/"\(.*\)"/\1/')
+	os=$(echo $os|cut -d= -f2|sed 's/^[[:space:]]*//'|sed 's/"\(.*\)"/\1/')
 	# echo $os
 	case "$os" in 
 		*Mint*) OSNR=1;;
@@ -44,7 +44,7 @@ getIPR() {
 # openSUSE
 	{ [ $OSNR = 4 ]&&
 		{ 
-			Z=zypper;
+			Z=$(which zypper);
 			g=--gpg-auto-import-keys;
 			IdPR="$Z -n $g in -f ";
 			IP_R="${SUDC}$Z $g in ";
@@ -71,9 +71,9 @@ getIPR() {
 	} || 
 	{ [ $OSNR = 1 -o $OSNR = 2 -o $OSNR = 3 ]&&
 		{ 
-			IdPR="apt-get --assume-yes --allow-unauthenticated install --reinstall ";
+			IdPR="$(which apt-get) --assume-yes --allow-unauthenticated install --reinstall ";
 			IP_R="${SUDC}$IdPR";
-			UPR="${SUDC}apt-get -f install; ${SUDC}apt-get --auto-remove purge ";
+			UPR="${SUDC}$(which apt-get) -f install; ${SUDC}$(which apt-get) --auto-remove purge ";
 			dev=dev;
 			COMP="build-essential linux-headers-\$(shell uname -r)";
 			LT=${_LT}-${dev};
@@ -83,21 +83,21 @@ getIPR() {
 	} || 
 	{ [ $OSNR = 5 ]&&
 		{ 
-			IdPR="dnf -y install ";
-			UPR="${SUDC}dnf remove ";
+			IdPR="$(which dnf) -y install ";
+			UPR="${SUDC}$(which dnf) remove ";
 		} 
 	} || 
 	{ [ $OSNR = 6 ]&&
 		{ 
-			IdPR="yum -y install ";
-			UPR="${SUDC}yum remove ";
+			IdPR="$(which yum) -y install ";
+			UPR="${SUDC}$(which yum) remove ";
 		} 
 	} || 
 	{ [ $OSNR = 7 ]&&
 		{ 
-			IdPR="urpmi --auto --force ";
+			IdPR="$(which urpmi) --auto --force ";
 			IP_R="${SUDC}$IdPR";
-			UPR="${SUDC}urpme ";
+			UPR="${SUDC}$(which urpme) ";
 			dev=devel;
 			LT=${_LT}-${dev};
 			libmdb=lib64mariadb;
@@ -106,15 +106,15 @@ getIPR() {
 	} || 
 	{ [ $OSNR = 8 ]&&
 		{ 
-			IdPR="pacman -S ";
+			IdPR="$(which pacman) -S ";
 			IP_R="${SUDC}$IdPR";
 			dev=devel;
 			LT=${_LT}-${dev};
 			COMP="make automake base-devel";
 			UPR="${SUDC}pacman -R ";
-			SPR="pacman -Qi ";
+			SPR="$(which pacman) -Qi ";
 			libmdb=libmysqlclient;
-			UDPR="${SUDC}pacman -Rd ";
+			UDPR="${SUDC}$(which pacman) -Rd ";
 		};
 	}
 	[ $OSNR = 5 -o $OSNR = 6 ]&& 
@@ -130,22 +130,22 @@ getIPR() {
 	}
 	{ [ $OSNR -gt 3 -a $OSNR -lt 8 ]&&
 		{ 
-			SPR="rpm -q ";
+			SPR="$(which rpm) -q "; # in Makefile reicht hier der Pfad nicht immer
 			LACL=libacl-${dev};
 			LCURL=libcurl-${dev};
-			UDPR="${SUDC}rpm -e --nodeps ";
+			UDPR="${SUDC}$(which rpm) -e --nodeps ";
 		};
 	} || 
 	{ [ $OSNR -le 3 ]&&
 		{ 
-			SPR="dpkg -s ";
+			SPR="$(which dpkg) -s ";
 			LBOOST=libboost-${dev};
 			LBIO=libboost-iostreams-${dev};
 			LBLO=libboost-locale-${dev};
 			#   dpk -s libboost-dev, dpk -s libboost-iostream-dev, dpk -s libboost-locale-dev,   		
 			LACL=libacl1-${dev};
 			LCURL=libcurl4-openssl-${dev};
-			UDPR="${SUDC}apt-get -f install; ${SUDC}dpkg -r --force-depends ";
+			UDPR="${SUDC}$(which apt-get) -f install; ${SUDC}$(which dpkg) -r --force-depends ";
 		};
 	}
 	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include[ ]*<mysql.h>" "$A" &&break;done ||libmdb=;
@@ -236,9 +236,11 @@ einricht() {
 		[ $OSNR = 1 -o $OSNR = 2 -o $OSNR = 3 ]&&{
 			# wenn cdrom-Zeile vorkommt, vor ftp.-debian-Zeile steht und www.debian.org erreichbar ist, dann alle cdrom-Zeilen hinten anhängen
 			# gleichlautend in kons.cpp: linst_cl::linst_cl(int obverb,int oblog)
-			${SUDC} sh -c "S=/etc/apt/sources.list;F='^[^#]*cdrom:';grep -qm1 \$F \$S && \ 
-			test 0\$(sed -n '/^[^#]*ftp.*debian/{=;q}' \$S) -gt 0\$(sed -n '/'\$F'/{=;q}' \$S) && \  
-			ping -qc 1 www.debian.org >/dev/null 2>&1 && sed -i.bak '/'\$F'/{H;d};\${p;x}' \$S;:"
+			cmd="S=/etc/apt/sources.list;F='^[^#]*cdrom:';grep -qm1 \$F \$S &&";
+			cmd="$cmd test 0\$(sed -n '/^[^#]*ftp.*debian/{=;q}' \$S) -gt 0\$(sed -n '/'\$F'/{=;q}' \$S) &&";
+			cmd="$cmd ping -qc 1 www.debian.org >/dev/null 2>&1 && sed -i.bak '/'\$F'/{H;d};\${p;x}' \$S;:";
+			# 	echo "$cmd";
+			$SUDC sh -c "$cmd";
 			# für jessie weitere evtl. notwendige Befehle
 			# in /etc/apt/sources.list einfügen: "deb http://ftp.de.debian.org/debian/ unstable main contrib non-free
 			#                                    "deb-src http://ftp.de.debian.org/debian/ unstable main contrib non-free"
@@ -349,13 +351,14 @@ if test "$ICH" = configure -o "$ICH" = install.sh -o "$ICH" = ${DPROG}_inst.sh -
 	a=$(sudo -n -v 2>&1);test -z "$a" || echo $a|grep -q "assw" || 
 	{
 		printf "Must allow '$blau$USER$reset' to call '${blau}sudo$reset'."
-		printf "Please enter ${blau}root$reset's password at the next question:\n"
-		printf "Then please log out and in again, change to the directory '$blau$PWD$reset' and then call '${blau}sh install.sh$reset'!\n"
+		printf "Please enter ${blau}root$reset's password twice at the next question:\n"
+		printf "Then You may be logged out, otherwise please log out and in again, change to the directory '$blau$PWD$reset' and then call '${blau}sh install.sh$reset'!\n"
 		printf "Muss '$blau$USER$reset' den Aufruf von '${blau}sudo$reset' ermoeglichen. "
-		printf "Bitte geben Sie bei der Frage das Passwort von '${blau}root$reset' ein:\n";
-		printf "Danach loggen Sie sich bitte aus und nochmal ein, wechseln Sie nach '$blau$PWD$reset' und rufen Sie '${blau}sh install.sh$reset' auf!\n";
-		echo su -c "usermod -aG $(cut -d: -f1 /etc/group|grep -w "$SUG"|tail -n1) "$USER";"
-		su -c "usermod -aG $(cut -d: -f1 /etc/group|grep -w "$SUG"|tail -n1) "$USER";" && exit
+		printf "Bitte geben Sie zweimal bei der Frage das Passwort von '${blau}root$reset' ein:\n";
+		printf "Danach können Sie ausgeloggt werden, andernfalls loggen Sie sich bitte aus und nochmal ein";
+		printf ", wechseln Sie nach '$blau$PWD$reset' und rufen Sie '${blau}sh install.sh$reset' auf!\n";
+		echo su -c "usermod -aG $(cut -d: -f1 /etc/group|grep -w "$SUG"|tail -n1) "$USER"; && su -c \"pkill -u \\\"$USER\\\"\""
+		su -c "usermod -aG $(cut -d: -f1 /etc/group|grep -w "$SUG"|tail -n1) "$USER";" && su -c "pkill -u \"$USER\""
 	}
 	if test "$ICH" != viall; then
 		#// which sudo >/dev/null && id -Gzn $USER|grep -qw "$SUG";}||{ 
