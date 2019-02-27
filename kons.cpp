@@ -5622,6 +5622,7 @@ uchar hcl::pruefcron(const string& cm)
 #endif // anders
 		} //   if (cronda) 
 	}
+	hLog(violetts+Txk[T_Ende]+Txk[T_pruefcron]+schwarz+Txk[T_cronzuplanen]+violetts+(cronzuplanen?"1":"0")+schwarz);
 	return obschreib;
 	//  systemrueck(string("mv -i '")+mpfad+"' /root/bin",1,0);
 } // hcl::pruefcron

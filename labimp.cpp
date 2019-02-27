@@ -13,7 +13,8 @@ const double& versnr= //α
 #define vorsilbe "labory"
 const tm hhcl::tmnull{0};
 const tm hhcl::tmmax{0,0,0,1,0,200,0,0,0};
-char const *DPROG_T[T_MAX+1][SprachZahl]={
+char const *DPROG_T[T_MAX+1][SprachZahl]=
+{
 	// T_virtVorgbAllg
 	{"virtVorgbAllg()","virtgeneralprefs()"},
 	// T_pvirtVorgbSpeziell
@@ -519,6 +520,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{" war schon in `"," was already entered in `"},
 	// T_eingetragen_
 	{"` eingetragen! (","`! ("},
+	// T_pvirtfueraus,
+	{"pvirtfueraus()","pvirtexecute()"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -2196,6 +2199,7 @@ void hhcl::pvirtvorpruefggfmehrfach()
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
 { //ω
+	hLog(violetts+Txk[T_pvirtfueraus]+schwarz);
 	auto altZDB{ZDB};
 	//	ZDB=1;
 	const size_t aktc{0};

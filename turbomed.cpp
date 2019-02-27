@@ -340,6 +340,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			// wenn zu Laborwerten mit selber Auftragsnummer und selbem Eingangsdatum, aber verschiedenen Pat_id sich zur ersten Pat_id kein
 			// Eintrag in laborneu findet, dann wende die 2. Pat_id auch auf die ersetzen Sätze an
 			while (1) {
+				RS begin(My,"BEGIN",aktc,obverb);
 				RS labneu1leer(My,"SELECT l1.id ID, l2.pat_id P2 "
 						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
 						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
@@ -353,10 +354,11 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=labneu1leer.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					caus<<"1: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l1.id: "<<cjj(cergb,0)<<schwarz<<", l2.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
 					gzahl+=zahl;
 				}
+				RS commit(My,"COMMIT",aktc,obverb);
 				if (!zahl) break;
 			}
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"laborneu1leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
@@ -364,6 +366,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			// Eintrag in laborneu findet, dann wende die 1. Pat_id auch auf die zweiten Sätze an
 			gzahl=0;
 			while (1) {
+				RS begin(My,"BEGIN",aktc,obverb);
 				RS labneu2leer(My,"SELECT l2.id ID, l1.pat_id P1 "
 						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
 						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
@@ -377,16 +380,18 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=labneu2leer.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					caus<<"2: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
 					gzahl+=zahl;
 				}
+				RS commit(My,"COMMIT",aktc,obverb);
 				if (!zahl) break;
 			}
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"laborneu2leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
 			// wenn sich zur ersten pat_id kein Kassenfall findet, dann zweite nehmen
 			gzahl=0;
 			while (1) {
+				RS begin(My,"BEGIN",aktc,obverb);
 				RS fall1leer(My,"SELECT l1.id, l2.pat_id P2 "
 						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
 						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
@@ -401,16 +406,18 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=fall1leer.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					caus<<"3: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l1.id: "<<cjj(cergb,0)<<schwarz<<", l2.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
 					gzahl+=zahl;
 				}
+				RS commit(My,"COMMIT",aktc,obverb);
 				if (!zahl) break;
 			}
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"fall1leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
 			// wenn sich zur zweiten pat_id kein Kassenfall findet, dann erste nehmen
 			gzahl=0;
 			while (1) {
+				RS begin(My,"BEGIN",aktc,obverb);
 				RS fall2leer(My,"SELECT l2.id, l1.pat_id P1 "
 						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
 						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
@@ -425,16 +432,18 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=fall2leer.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					caus<<"4: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
 					gzahl+=zahl;
 				}
+				RS commit(My,"COMMIT",aktc,obverb);
 				if (!zahl) break;
 			}
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"fall2leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
 			// wenn pat_id_7 identisch, dann dieses nehmen (für l1)
 			gzahl=0;
 			while (1) {
+				RS begin(My,"BEGIN",aktc,obverb);
 				RS p7fuerl1(My,"SELECT l1.id, l1.pat_id_7 "
 						"FROM laboryus l1 LEFT JOIN laboryus l2 USING (eingang,auftragsschlüssel) "
 						"LEFT JOIN laborydat d1 ON d1.datid=l1.datid "
@@ -448,10 +457,11 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=p7fuerl1.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"     "<<blau<<cjj(cergb,0)<<schwarz<<" "<<cjj(cergb,1)<<endl;
+					caus<<"5: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l1.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
 					gzahl+=zahl;
 				}
+				RS commit(My,"COMMIT",aktc,obverb);
 				if (!zahl) break;
 			}
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"p7fuerl1, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
@@ -473,12 +483,12 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=p7fuerl2.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", li.pat_id: "<<cjj(cergb,1)<<endl;
+					caus<<"6: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
 					gzahl+=zahl;
 				}
-				if (!zahl) break;
 				RS commit(My,"COMMIT",aktc,obverb);
+				if (!zahl) break;
 			}
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"p7fuerl2, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
 		} // 	if (My->obtabspda("laborneu","wert"))
