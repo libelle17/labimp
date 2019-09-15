@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "27.02.19" "Version 0.11535" "\fB²DPROG²\fR man page"
+.TH man 1 "15.09.19" "Version 0.11535" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -67,7 +67,7 @@ Depending on operating system, accessability and preferences the users thus coul
 .SH OPTIONS 
  '\fB²DPROG² -?\fR' or '\fB²DPROG² -h\fR' shows the important command line options and '\fB²DPROG² -lh\fR' all of them. Some options (e.g. the sql commands for finding an addressee from the fax number) cannot be set via the command line, but only via the configuration file, which can be edited directly by '\fB²DPROG² -vi\fR' or interactively by '\fB²DPROG² -rf\fR'.
 .br
-    \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11535 \fR (Laborimport) 
+    \fRProgramm: \fB/home/schade/labimp/labimp\fR, V: \fB0.11535 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -113,7 +113,7 @@ Depending on operating system, accessability and preferences the users thus coul
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/labimp\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/labimp\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .br
@@ -127,9 +127,9 @@ Depending on operating system, accessability and preferences the users thus coul
 .br
 \fB -pref, --prefix <string>\fR: prefix for database tables ('\fBlabory\fR')
 .br
-\fB -lddir, --laboratoryfiledir <path>\fR: directory of the laboratory files ('\fB/root/laboratory\fR')
+\fB -lddir, --laboratoryfiledir <path>\fR: directory of the laboratory files ('\fB/home/schade/laboratory\fR')
 .br
-\fB -fddir, --processeddir <path>\fR: directory of the finished ('\fB/root/laboratory/processed\fR')
+\fB -fddir, --processeddir <path>\fR: directory of the finished ('\fB/home/schade/laboratory/processed\fR')
 .br
 \fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
 .br
