@@ -172,7 +172,6 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 // class Txdbcl Txd;
 // class TxB Txd(DB_T);
 class TxB Txd((const char* const* const* const*)DB_T);
-const string& pwk = "4893019320jfdksalö590ßs89d0qÃ9m0943Ã09Ãax"; // fuer Antlitzaenderung
 
 #ifdef mitpostgres 
 const DBSTyp myDBS=Postgres;
@@ -267,7 +266,7 @@ Feld::Feld(const string& name, string typ/*=string()*/, const string& lenge/*=st
 	}
 } // Feld(const string& name, const string& typ, const string& lenge, const string& prec, string comment, bool vind, bool vobauto, bool vnnull, string vdefa):
 
-// Feld::Feld(Feld const& copy) { }
+// Feld::Feld
 
 
 Index::Index(const string& name, Feld *const vfelder, const unsigned feldzahl, const uchar unique/*=0*/):
@@ -454,7 +453,7 @@ void DB::init(
 										obverb,oblog,&zincldir,/*obsudc=*/1); 
 								for(auto const& aktdir:zincldir) {
 									svec zzruck2;
-									systemrueck("find "+aktdir+" -not -type d",obverb,oblog,&zzruck2,/*obsudc=*/1); // auch links
+									systemrueck("find "+aktdir+" -not -type d -name '*.cnf'",obverb,oblog,&zzruck2,/*obsudc=*/1); // auch links
 									for(auto const& aktzz2:zzruck2) {
 										myconfpfad<<aktzz2;
 									}
@@ -1794,10 +1793,9 @@ void RS::setzzruck()
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
 int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int oblog/*=0*/,string *idp/*=0*/,my_ulonglong *arowsp/*=0*/)
 {
-	int altobverb=obverb;
+////	int altobverb=obverb; obverb=1;
 	const unsigned vlz=10; // Verlängerungszahl
 	const unsigned maxversuche=3;
-//	obverb=1;
 	yLog(obverb>0?obverb-1:0,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
 	int obfalsch{0};
@@ -1968,7 +1966,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 #endif // mitpostgres
 			break;
 	} // 	switch (db->DBS)
-	obverb=altobverb;
+////	obverb=altobverb;
 	return (int)obqueryfehler;
 } // RS::doAbfrage
 
@@ -2459,7 +2457,7 @@ void dhcl::virtinitopt()
 	opn<<new optcl(/*pname*/"mpwd",/*pptr*/&mpwd,/*part*/ppwd,T_mpwd_k,T_mpwd_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!mpwd.empty(),T_Passwort_fuer_MySQL_MariaDB);
 	opn<<new optcl(/*pname*/"datenbank",/*pptr*/&dbq,/*part*/pstri,T_db_k,T_datenbank_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!dbq.empty(),T_Datenbankname_fuer_MySQL_MariaDB_auf);
 //	opn<<optcl(/*pname*/"tabl",/*pptr*/&tabl,/*art*/pstri,T_tb_k,T_tabelle_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Tabelle_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1);
-	opn<<new optcl(/*pptr*/&ZDB,/*art*/puchar,T_sqlv_k,T_sql_verbose_l,/*TxBp*/&Txd,/*Txi*/T_Bildschirmausgabe_mit_SQL_Befehlen,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&ZDB,/*art*/puchar,T_sqlv_k,T_sql_verbose_l,/*TxBp*/&Txd,/*Txi*/T_Bildschirmausgabe_mit_SQL_Befehlen,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
 	hcl::virtinitopt();
 } // void hhcl::virtinitopt
 
@@ -2629,3 +2627,19 @@ void insv::zeig(const char* const wo) {
 		fLog(violetts+"i: "+gruen+ltoan(i)+": "+schwarz+ivec[i].feld+": '"+blau+ivec[i].wert+"'"+schwarz,1,0);
 	}
 }
+
+Feld& Feld::operator=(const Feld* fur) {
+	if (fur!=this) {
+		string *np=(string*)&name; *np=fur->name;
+		np=(string*)&typ;*np=fur->typ;
+		lenge=fur->lenge;
+		np=(string*)&prec;*np=fur->prec;
+		comment=fur->comment;
+		obind=fur->obind;
+		obauto=fur->obauto;
+		nnull=fur->nnull;
+		defa=fur->defa;
+		unsig=fur->unsig;
+	}
+	return *this;
+} // Feld& Feld::operator=

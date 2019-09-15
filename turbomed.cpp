@@ -339,6 +339,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			// mit einem group weniger dürfte es auch ohne while gehen, hier will ich aber keinen Fehler machen
 			// wenn zu Laborwerten mit selber Auftragsnummer und selbem Eingangsdatum, aber verschiedenen Pat_id sich zur ersten Pat_id kein
 			// Eintrag in laborneu findet, dann wende die 2. Pat_id auch auf die ersetzen Sätze an
+			if (0) {
 			while (1) {
 				RS begin(My,"BEGIN",aktc,obverb);
 				RS labneu1leer(My,"SELECT l1.id ID, l2.pat_id P2 "
@@ -354,13 +355,14 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=labneu1leer.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"1: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l1.id: "<<cjj(cergb,0)<<schwarz<<", l2.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					caus<<"1: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l1.id: "<<cjj(cergb,0)<<schwarz<<", l2.pat_id: "<<cjj(cergb,1)<<endl;
 					gzahl+=zahl;
 				}
 				RS commit(My,"COMMIT",aktc,obverb);
 				if (!zahl) break;
-			}
+			} // while (1)
+			} // if (0)
 			fLog(dblaus+Txt[T_Abfrage]+schwarz+"laborneu1leer, "+dblau+Txt[T_eingetragen]+schwarz+ltoan(gzahl),1,0);
 			// s.o.; wenn zu Laborwerten mit selber Auftragsnummer und selbem Eingangsdatum, aber verschiedenen Pat_id sich zur zweiten Pat_id kein
 			// Eintrag in laborneu findet, dann wende die 1. Pat_id auch auf die zweiten Sätze an
@@ -380,8 +382,8 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=labneu2leer.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"2: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					caus<<"2: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					gzahl+=zahl;
 				}
 				RS commit(My,"COMMIT",aktc,obverb);
@@ -406,8 +408,8 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=fall1leer.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"3: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l1.id: "<<cjj(cergb,0)<<schwarz<<", l2.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					caus<<"3: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l1.id: "<<cjj(cergb,0)<<schwarz<<", l2.pat_id: "<<cjj(cergb,1)<<endl;
 					gzahl+=zahl;
 				}
 				RS commit(My,"COMMIT",aktc,obverb);
@@ -432,8 +434,8 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=fall2leer.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"4: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					caus<<"4: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					gzahl+=zahl;
 				}
 				RS commit(My,"COMMIT",aktc,obverb);
@@ -457,8 +459,8 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=p7fuerl1.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"5: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l1.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					caus<<"5: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l1.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					gzahl+=zahl;
 				}
 				RS commit(My,"COMMIT",aktc,obverb);
@@ -483,8 +485,8 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 				char ***cergb{0};
 				zahl=0;
 				while (cergb=p7fuerl2.HolZeile(),cergb?*cergb&&**cergb:0) {
-					caus<<"6: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					RS korr(My,string("UPDATE laboryus SET pat_id=")+cjj(cergb,1)+" WHERE ID="+cjj(cergb,0),aktc,ZDB,0,0,0,&zahl);
+					caus<<"6: zahl: "<<zahl<<", gzahl: "<<gzahl<<", l2.id: "<<cjj(cergb,0)<<schwarz<<", l1.pat_id: "<<cjj(cergb,1)<<endl;
 					gzahl+=zahl;
 				}
 				RS commit(My,"COMMIT",aktc,obverb);
