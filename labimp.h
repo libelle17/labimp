@@ -317,6 +317,7 @@ class hhcl:public dhcl
 		string fertigvz; // Verzeichnis der fertig bearbeiteten
 	public: //α //ω
 	private: //α //ω
+		int fui0();
 		void tabnamen();
 		void prueflydat(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyleist(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
@@ -391,8 +392,7 @@ class hhcl:public dhcl
 		void pvirtvorzaehler();
 		void virtzeigversion(const string& ltiffv=nix);
 		void pvirtvorrueckfragen();
-		void virtrueckfragen();
-		void pvirtvorpruefggfmehrfach();
+		void pvirtnachrueckfragen();
 		void virtpruefweiteres();
 		void virtzeigueberschrift();
 		void pvirtfuehraus();

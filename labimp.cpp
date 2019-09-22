@@ -1128,12 +1128,16 @@ void hhcl::pvirtVorgbSpeziell()
 	virtMusterVorgb();
 } // void hhcl::pvirtVorgbSpeziell
 
+int hhcl::fui0(){return !vorsl.empty();};
+
 // wird aufgerufen in lauf
 void hhcl::virtinitopt()
 { //ω
-	opn<<new optcl(/*pname*/"vorsil",/*pptr*/&vorsl,/*art*/pstri,T_vors_k,T_vors_l,/*TxBp*/&Tx,/*Txi*/T_Vorsilbe_fuer_Datenbanktabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!vorsl.empty(),T_Vorsilbe_fuer_Datenbanktabellen);
-	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Labordateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty(),T_Verzeichnis_der_Labordateien);
-	opn<<new optcl(/*pname*/"fertigvz",/*pptr*/&fertigvz,/*art*/pverz,T_fgvz_k,T_fgvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Fertigen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!fertigvz.empty(),T_Verzeichnis_der_Fertigen);
+	// Kopiervorlage:
+	// opn<<new optcl(/*pname*/"pname",/*pptr*/pptr,/*art*/pstri,/*kurzi*/T_kurz_k,/*langi*/T_lang_l,/*TxBp*/&Tx,/*Txi*/T_Option_erklaert,/*wi*/1,/*Txi2*/T_Option_Nachtext,/*rottxt*/nix,/*wert*/1,/*woher*/!pname.empty(),/*Txtrf*/{},/*obno*/1,/*refstr*/0,/*obfragz*/0,/*fnobfragz*/0,/*fnnachhz*/&hcl::fu1,/*fnvorhz*/0,/*sonderrf*/0,/*fngueltigz*/0)
+	opn<<new optcl(/*pname*/"vorsil",/*pptr*/&vorsl,/*art*/pstri,T_vors_k,T_vors_l,/*TxBp*/&Tx,/*Txi*/T_Vorsilbe_fuer_Datenbanktabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!vorsl.empty(),Tx[T_Vorsilbe_fuer_Datenbanktabellen],/*obno*/0,/*refstr*/0,/*obfragz*/0,/*fnobfragz*/0,/*fnnachhz*/0,/*fnvorhz*/0,/*sonderrf*/0,/*fngueltigz*/&hcl::fui0);
+	opn<<new optcl(/*pname*/"ldatvz",/*pptr*/&ldatvz,/*art*/pverz,T_ldvz_k,T_ldvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Labordateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!ldatvz.empty(),Tx[T_Verzeichnis_der_Labordateien]);
+	opn<<new optcl(/*pname*/"fertigvz",/*pptr*/&fertigvz,/*art*/pverz,T_fgvz_k,T_fgvz_l,/*TxBp*/&Tx,/*Txi*/T_Verzeichnis_der_Fertigen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!fertigvz.empty(),Tx[T_Verzeichnis_der_fertig_Verarbeiteten]);
 	opn<<new optcl(/*pptr*/&vonvorne,/*art*/puchar,T_vv_k,T_vv_l,/*TxBp*/&Tx,/*Txi*/T_Loesche_alle_Tabellen_und_fange_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&entleer,/*art*/puchar,T_tr_k,T_tr_l,/*TxBp*/&Tx,/*Txi*/T_Entleert_alle_Tabellen_und_faengt_von_vorne_an,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&loeschalle,/*art*/puchar,T_la_k,T_la_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Tabellen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -1236,25 +1240,10 @@ cout<<schwarz<<setw(6)<<"DATID"<<"|"<<setw(60)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T
 
 #endif
 			exit(0);
-  } //α
-} // void hhcl::pvirtvorrueckfragen
-
-
-// wird aufgerufen in lauf
-void hhcl::virtrueckfragen()
-{
-	hLog(violetts+Tx[T_virtrueckfragen]+schwarz);
+  }
 	if (vorsl.empty()) vorsl=vorsilbe;
-	if (rzf) { //ω
-		do {
-			vorsl=Tippstr(Tx[T_Vorsilbe_fuer_Datenbanktabellen],&vorsl);
-		} while (vorsl.empty());
-		tabnamen();
-		ldatvz=Tippverz(Tx[T_Verzeichnis_der_Labordateien],&ldatvz);
-		fertigvz=Tippverz(Tx[T_Verzeichnis_der_fertig_Verarbeiteten],&fertigvz);
-	} //α
-	dhcl::virtrueckfragen();
-} // void hhcl::virtrueckfragen()
+	//α
+} // void hhcl::pvirtvorrueckfragen
 
 void hhcl::droptables(const size_t aktc/*=0*/,uchar obumben/*=0*/)
 {
@@ -2192,9 +2181,9 @@ void hhcl::prueftbl()
 	}
 } // void hhcl::prueftbl
 
-void hhcl::pvirtvorpruefggfmehrfach()
+void hhcl::pvirtnachrueckfragen()
 {
-} // void hhcl::pvirtvorpruefggfmehrfach
+} // void hhcl::pvirtnachrueckfragen
 
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
@@ -2204,6 +2193,7 @@ void hhcl::pvirtfuehraus()
 	//	ZDB=1;
 	const size_t aktc{0};
 	unsigned long verarbeitet{0};
+	if (rzf) tabnamen(); // nach rueckfragen
 	if (nurpruefdb) {
 		prueftbl();
 	} else if (!loeschalle && !loeschunvollst && umben.empty()) {
