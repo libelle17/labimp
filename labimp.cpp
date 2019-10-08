@@ -1320,7 +1320,8 @@ void hhcl::virtpruefweiteres()
 	} else if (!loeschab.empty() || !loeschid.empty()) {
 		if (!My) initDB();
     my_ulonglong dzahl{0},szahl{0},uzahl{0};
-    RS datzahl(My,"SELECT datid FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",
+		char ***cerg{0};
+		RS datzahl(My,"SELECT datid p0, name p1 FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",
 				aktc,ZDB,0,0,0,&dzahl);
     RS satzzahl(My,"SELECT datid FROM `"+tlysaetze+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",
 				aktc,ZDB,0,0,0,&szahl);
@@ -1338,6 +1339,11 @@ void hhcl::virtpruefweiteres()
 		}
 		fLog(blaus+Tx[(loeschab.empty()?T_Loescheid:T_Loescheab)]+gruen+(loeschab.empty()?loeschid:loeschab)+schwarz,1,0);
 		// ZDB=1;
+		while (cerg=datzahl.HolZeile(),cerg?*cerg:0) {
+			if (rename((fertigvz+'/'+cjj(cerg,1)).c_str(),(ldatvz+'/'+cjj(cerg,1)).c_str())) {
+				fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+fertigvz+'/'+cjj(cerg,1)+rot+Tx[T_nach_]+blau+ldatvz+'/'+cjj(cerg,1)+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
+			}
+		}
 		RS loe(My,"DELETE FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		exit(0);
