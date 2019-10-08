@@ -400,6 +400,12 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"loescht alle Datensaetze ab DatID: ","deletes all data sets beginning at dat ID: "},
 	// T_Loescheab
 	{"Loesche ab DatID: ","Deleting from dat ID: "},
+	// T_pidnachw_k,
+	{"pidnw","pidpf"},
+	// T_pidnachw_l,
+	{"pidnachweis","pidproof"},
+	// T_listet_Eintraege_zu_pid,
+	{"listet Eintraege zu pid","lists entries to pid"},
 	// T_lid_k,
 	{"loeid","delid"},
 	// T_lid_l,
@@ -1144,6 +1150,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pptr*/&umben,/*art*/pstri,T_umben_k,T_umben_l,/*TxBp*/&Tx,/*Txi*/T_benennt_die_Tabellen_um,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&loeschab,/*art*/pdez,T_lab_k,T_lab_l,/*TxBp*/&Tx,/*Txi*/T_loescht_alle_Datensaetze_ab,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschab.empty());
 	opn<<new optcl(/*pptr*/&loeschid,/*art*/pdez,T_lid_k,T_lid_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensatz_id,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!loeschid.empty());
+	opn<<new optcl(/*pptr*/&pidnachw,/*art*/pdez,T_pidnachw_k,T_pidnachw_l,/*TxBp*/&Tx,/*Txi*/T_listet_Eintraege_zu_pid,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!pidnachw.empty());
 	opn<<new optcl(/*pptr*/&listdat,/*art*/puchar,T_listdat_k,T_listdat_l,/*TxBp*/&Tx,/*Txi*/T_listet_alle_eingelesenen_Dateien_auf,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 
 	opn<<new optcl(/*pptr*/&loeschunvollst,/*art*/puchar,T_lu_k,T_lu_l,/*TxBp*/&Tx,/*Txi*/T_loescht_Datensaetze_aus_unvollstaendig_eingelesenen_Dateien,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -1212,35 +1219,51 @@ void hhcl::pvirtvorrueckfragen()
 	hLog(violetts+Tx[T_pvirtvorrueckfragen]+schwarz);
 	if (rzf) { //ω
 	}
-	if (listdat) {
-		// schon vor pruefggfdoppelt
-		const size_t aktc=0;
-#ifdef sqlos
-		svec datr;
-		systemrueck("mysql -u"+muser+" -p"+mpwd+" "+dbq+" -e'SELECT datid,pfad,geändert,größe,zp,codepage,!!fertig FROM `"+tlydat+"`'",obverb,oblog,&datr);
-		for(auto aktdat:datr) {
-			caus<<aktdat<<endl;
-		}
-#else
-		if (!My) initDB();
+	if (listdat||!pidnachw.empty()) {
+#ifndef sqlos
 		char*** cerg{0};
-		RS li(My,"SELECT d.datid,pfad,geändert,größe,zp,codepage,!!fertig,(SELECT count(0) from `"+tlysaetze+"` WHERE datid=d.datid),(SELECT COUNT(0) FROM `"+tlyus+"` WHERE datid=d.datid),SUM((SELECT COUNT(0) FROM `"+tlywert+"` WHERE usid=u.id)),SUM((SELECT COUNT(0) FROM `"+tlybakt+"` WHERE usid=u.id)) FROM `"+tlydat+"` d LEFT JOIN `"+tlyus+"` u ON d.datid = u.datid GROUP BY d.datid",aktc,ZDB);
-		if (!li.obqueryfehler) {
-			size_t zru=0;
-			while (cerg=li.HolZeile(),cerg?*cerg:0) {
-				if (!zru++) {
-					cout<<violett<<Tx[T_listet_alle_eingelesenen_Dateien_auf]<<schwarz<<endl;
-cout<<schwarz<<setw(6)<<"DATID"<<"|"<<setw(60)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T_Eingang]<<"|"<<setw(9)<<Tx[T_Groesse]<<"|"<<setw(19)<<Tx[T_eingelesen]<<"|"<<setw(2)<<Tx[T_Zeichensatz]<<"|"<<setw(1)<<Tx[T_fertig_]<<"|"<<setw(4)<<Tx[T_saetze]<<"|"<<setw(4)<<Tx[T_unters]<<"|"<<setw(5)<<Tx[T_werte]<<"|"<<setw(4)<<Tx[T_bakt]<<schwarz<<endl;
-				} // 								if (!zru++)
-				cout<<blau<<setw(6)<<cjj(cerg,0)<<"|"<<violett<<setw(60)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"
-					<<schwarz<<setw(9)<<cjj(cerg,3)<<"|"<<blau<<setw(19)<<cjj(cerg,4)<<"|"<<violett<<setw(2)<<cjj(cerg,5)<<"|"
-					<<blau<<setw(1)<<cjj(cerg,6)<<"|"<<setw(4)<<cjj(cerg,7)<<"|"<<setw(4)<<cjj(cerg,8)<<"|"<<setw(5)<<cjj(cerg,9)<<"|"<<setw(4)<<cjj(cerg,10)<<schwarz<<endl;
-			} // while (cerg=li.HolZeile(),cerg?*cerg:0) 
-		}
-
+		const size_t aktc{0};
+		if (!My) initDB();
 #endif
-			exit(0);
-  }
+		if (listdat) {
+			// schon vor pruefggfdoppelt
+#ifdef sqlos
+			svec datr;
+			systemrueck("mysql -u"+muser+" -p"+mpwd+" "+dbq+" -e'SELECT datid,pfad,geändert,größe,zp,codepage,!!fertig FROM `"+tlydat+"`'",obverb,oblog,&datr);
+			for(auto aktdat:datr) {
+				caus<<aktdat<<endl;
+			}
+#else
+			RS li(My,"SELECT d.datid,pfad,geändert,größe,zp,codepage,!!fertig,(SELECT count(0) from `"+tlysaetze+"` WHERE datid=d.datid),(SELECT COUNT(0) FROM `"+tlyus+"` WHERE datid=d.datid),SUM((SELECT COUNT(0) FROM `"+tlywert+"` WHERE usid=u.id)),SUM((SELECT COUNT(0) FROM `"+tlybakt+"` WHERE usid=u.id)) FROM `"+tlydat+"` d LEFT JOIN `"+tlyus+"` u ON d.datid = u.datid GROUP BY d.datid",aktc,ZDB);
+			if (!li.obqueryfehler) {
+				size_t zru=0;
+				while (cerg=li.HolZeile(),cerg?*cerg:0) {
+					if (!zru++) {
+						cout<<violett<<Tx[T_listet_alle_eingelesenen_Dateien_auf]<<schwarz<<endl;
+						cout<<schwarz<<setw(6)<<"DATID"<<"|"<<setw(60)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T_Eingang]<<"|"<<setw(9)<<Tx[T_Groesse]<<"|"<<setw(19)<<Tx[T_eingelesen]<<"|"<<setw(2)<<Tx[T_Zeichensatz]<<"|"<<setw(1)<<Tx[T_fertig_]<<"|"<<setw(4)<<Tx[T_saetze]<<"|"<<setw(4)<<Tx[T_unters]<<"|"<<setw(5)<<Tx[T_werte]<<"|"<<setw(4)<<Tx[T_bakt]<<schwarz<<endl;
+					} // 								if (!zru++)
+					cout<<blau<<setw(6)<<cjj(cerg,0)<<"|"<<violett<<setw(60)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"
+						<<schwarz<<setw(9)<<cjj(cerg,3)<<"|"<<blau<<setw(19)<<cjj(cerg,4)<<"|"<<violett<<setw(2)<<cjj(cerg,5)<<"|"
+						<<blau<<setw(1)<<cjj(cerg,6)<<"|"<<setw(4)<<cjj(cerg,7)<<"|"<<setw(4)<<cjj(cerg,8)<<"|"<<setw(5)<<cjj(cerg,9)<<"|"<<setw(4)<<cjj(cerg,10)<<schwarz<<endl;
+				} // while (cerg=li.HolZeile(),cerg?*cerg:0) 
+			} // 			if (!li.obqueryfehler) 
+#endif
+		} else if (!pidnachw.empty()) {
+			RS nw(My,"SELECT * FROM labor2aNachweis WHERE pat_id="+pidnachw,aktc,ZDB);
+			if (!nw.obqueryfehler) {
+				size_t zru=0;
+				while (cerg=nw.HolZeile(),cerg?*cerg:0) {
+					if (!zru++) {
+						cout<<violett<<Tx[T_listet_Eintraege_zu_pid]<<" "<<blau<<pidnachw<<schwarz<<endl;
+						cout<<blau<<setw(26)<<"Name "<<violett<<setw(5)<<"Datid"<<schwarz<<setw(5)<<"Satzid"<<blau<<setw(7)<<"USID"<<schwarz<<setw(8)<<"w.ID"<<gruen<<setw(6)<<"PID_0"<<setw(6)<<"PID_1"<<setw(6)<<"PID_2"<<setw(6)<<"PID_3"<<setw(6)<<"PID_4"<<setw(6)<<"PID_5"<<setw(6)<<"PID_6"<<setw(6)<<"PID_7"<<setw(6)<<"PID_L"<<setw(6)<<"PID"<<schwarz<<setw(9)<<"us.eing"<<blau<<setw(2)<<"FS"<<schwarz<<setw(10)<<"Abk_ur"<<blau<<setw(8)<<"Wert"<<schwarz<<setw(11)<<"Einh_ur"<<endl;
+					}
+					string c15(cjj(cerg,15));
+					cout<<blau<<setw(26)<<base_name(cjj(cerg,0))<<violett<<setw(5)<<cjj(cerg,1)<<schwarz<<setw(5)<<cjj(cerg,2)<<blau<<setw(7)<<cjj(cerg,3)<<schwarz<<setw(8)<<cjj(cerg,4)<<blau<<gruen<<setw(6)<<cjj(cerg,5)<<setw(6)<<cjj(cerg,6)<<setw(6)<<cjj(cerg,7)<<setw(6)<<cjj(cerg,8)<<setw(6)<<cjj(cerg,9)<<setw(6)<<cjj(cerg,10)<<setw(6)<<cjj(cerg,11)<<setw(6)<<cjj(cerg,12)<<setw(6)<<cjj(cerg,13)<<setw(6)<<cjj(cerg,14)<<schwarz<<setw(5)<<c15.substr(0,4)<<c15.substr(5,2)<<c15.substr(8,2)<<blau<<setw(2)<<cjj(cerg,16)<<schwarz<<setw(10)<<cjj(cerg,18)<<blau<<setw(8)<<cjj(cerg,20)<<schwarz<<setw(11)<<cjj(cerg,22)<<blau<<endl;// setw(10)<<cjj(cerg,23)<<endl;
+				} // 				while (cerg=nw.HolZeile(),cerg?*cerg:0)
+			} // 			if (!nw.obqueryfehler)
+		} // 		} else if (!pidnachw.empty())
+		exit(0);
+	} // 	if (listdat||!pidnachw.empty())
 	if (vorsl.empty()) vorsl=vorsilbe;
 	//α
 } // void hhcl::pvirtvorrueckfragen
@@ -1302,7 +1325,7 @@ void hhcl::virtpruefweiteres()
 			droptables(aktc);
 			fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsl+schwarz,1,1);
 		} else {
-			auto altvorsil{vorsl};
+			auto const altvorsil{vorsl};
 			vorsl=umben;
 			tabnamen();
 			droptables(aktc);

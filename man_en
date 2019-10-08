@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "08.10.19" "Version 0.11538" "\fB²DPROG²\fR man page"
+.TH man 1 "09.10.19" "Version 0.11575" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -67,7 +67,7 @@ Depending on operating system, accessability and preferences the users thus coul
 .SH OPTIONS 
  '\fB²DPROG² -?\fR' or '\fB²DPROG² -h\fR' shows the important command line options and '\fB²DPROG² -lh\fR' all of them. Some options (e.g. the sql commands for finding an addressee from the fax number) cannot be set via the command line, but only via the configuration file, which can be edited directly by '\fB²DPROG² -vi\fR' or interactively by '\fB²DPROG² -rf\fR'.
 .br
-                                                                                                                                                                                                                \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11538 \fR (Laborimport) 
+                                                                                                                                                           \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11575 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -82,6 +82,8 @@ Depending on operating system, accessability and preferences the users thus coul
 \fB -delfrom, --deletefrom <string>\fR: deletes all data sets beginning at dat ID:  ('\fB\fR')
 .br
 \fB -delid, --deleteid <string>\fR: deletes data set with DATID  ('\fB\fR')
+.br
+\fB -pidpf, --pidproof <string>\fR: lists entries to pid ('\fB\fR')
 .br
 \fB -listfil, --listfiles\fR: lists all processed files (\fB0\fR)
 .br

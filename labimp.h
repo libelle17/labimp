@@ -195,6 +195,9 @@ enum T_
 	T_lab_l,
 	T_loescht_alle_Datensaetze_ab,
 	T_Loescheab,
+	T_pidnachw_k,
+	T_pidnachw_l,
+	T_listet_Eintraege_zu_pid,
 	T_lid_k,
 	T_lid_l,
 	T_loescht_Datensatz_id,
@@ -310,6 +313,7 @@ class hhcl:public dhcl
 		string loeschab;
 		string loeschid;
 		uchar listdat=0;
+		string pidnachw;
 		uchar nurpruefdb=0;
 		string umben;
 		string vorsl/*,vorclvors,nachclvors*/;   // Vorsilbe für Datenbanktabellen, vor und nach command line-Auswertung
