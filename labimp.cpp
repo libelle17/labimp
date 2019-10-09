@@ -1249,16 +1249,61 @@ void hhcl::pvirtvorrueckfragen()
 			} // 			if (!li.obqueryfehler) 
 #endif
 		} else if (!pidnachw.empty()) {
-			RS nw(My,"SELECT * FROM labor2aNachweis WHERE pat_id="+pidnachw,aktc,ZDB);
+			RS nw(My,"SELECT pfad,datid,satzid,usid,id,pat_id_0,pat_id_1,pat_id_2,pat_id_3,pat_id_4,pat_id_5,pat_id_6,pat_id_7,pat_id_laborneu,"
+					"Pat_ID,Zeitpunkt,FertigStGrad,Abkü,abk_ur,Langtext,Wert,Einheit,Einheit_ur,Kommentar,Auftragsnummer,Auftragsschlüssel "
+					"FROM labor2aNachweis WHERE pat_id="+pidnachw,aktc,ZDB);
 			if (!nw.obqueryfehler) {
 				size_t zru=0;
 				while (cerg=nw.HolZeile(),cerg?*cerg:0) {
 					if (!zru++) {
 						cout<<violett<<Tx[T_listet_Eintraege_zu_pid]<<" "<<blau<<pidnachw<<schwarz<<endl;
-						cout<<blau<<setw(26)<<"Name "<<violett<<setw(5)<<"Datid"<<schwarz<<setw(5)<<"Satzid"<<blau<<setw(7)<<"USID"<<schwarz<<setw(8)<<"w.ID"<<gruen<<setw(6)<<"PID_0"<<setw(6)<<"PID_1"<<setw(6)<<"PID_2"<<setw(6)<<"PID_3"<<setw(6)<<"PID_4"<<setw(6)<<"PID_5"<<setw(6)<<"PID_6"<<setw(6)<<"PID_7"<<setw(6)<<"PID_L"<<setw(6)<<"PID"<<schwarz<<setw(9)<<"us.eing"<<blau<<setw(2)<<"FS"<<schwarz<<setw(10)<<"Abk_ur"<<blau<<setw(8)<<"Wert"<<schwarz<<setw(11)<<"Einh_ur"<<endl;
+						cout<<blau<<setw(26)<<"Name "
+								<<violett<<setw(5)<<"Datid"
+								<<schwarz<<setw(11)<<"Auftrag"
+//								<<schwarz<<setw(5)<<"Satzid"
+//								<<blau<<setw(7)<<"USID"
+//								<<schwarz<<setw(8)<<"w.ID"
+								<<gruen<<setw(6)<<"PID_0"
+									<<setw(6)<<"PID_1"
+									<<setw(6)<<"PID_2"
+									<<setw(6)<<"PID_3"
+									<<setw(6)<<"PID_4"
+									<<setw(6)<<"PID_5"
+									<<setw(6)<<"PID_6"
+									<<setw(6)<<"PID_7"
+									<<setw(6)<<"PID_L"
+									<<setw(6)<<"PID"
+								<<schwarz<<setw(9)<<"us.eing"
+								<<blau<<setw(2)<<"FS"
+								<<schwarz<<setw(10)<<"Abk_ur"
+								<<blau<<setw(8)<<"Wert"
+								<<schwarz<<setw(11)<<"Einh_ur"
+								<<endl;
 					}
 					string c15(cjj(cerg,15));
-					cout<<blau<<setw(26)<<base_name(cjj(cerg,0))<<violett<<setw(5)<<cjj(cerg,1)<<schwarz<<setw(5)<<cjj(cerg,2)<<blau<<setw(7)<<cjj(cerg,3)<<schwarz<<setw(8)<<cjj(cerg,4)<<blau<<gruen<<setw(6)<<cjj(cerg,5)<<setw(6)<<cjj(cerg,6)<<setw(6)<<cjj(cerg,7)<<setw(6)<<cjj(cerg,8)<<setw(6)<<cjj(cerg,9)<<setw(6)<<cjj(cerg,10)<<setw(6)<<cjj(cerg,11)<<setw(6)<<cjj(cerg,12)<<setw(6)<<cjj(cerg,13)<<setw(6)<<cjj(cerg,14)<<schwarz<<setw(5)<<c15.substr(0,4)<<c15.substr(5,2)<<c15.substr(8,2)<<blau<<setw(2)<<cjj(cerg,16)<<schwarz<<setw(10)<<cjj(cerg,18)<<blau<<setw(8)<<cjj(cerg,20)<<schwarz<<setw(11)<<cjj(cerg,22)<<blau<<endl;// setw(10)<<cjj(cerg,23)<<endl;
+					cout<<blau<<setw(26)<<base_name(cjj(cerg,0))
+							<<violett<<setw(5)<<cjj(cerg,1)
+							<<schwarz<<setw(11)<<cjj(cerg,25)
+//							<<schwarz<<setw(5)<<cjj(cerg,2)
+//							<<blau<<setw(7)<<cjj(cerg,3)
+//							<<schwarz<<setw(8)<<cjj(cerg,4)
+							<<gruen<<setw(6)<<cjj(cerg,5)
+								<<setw(6)<<cjj(cerg,6)
+								<<setw(6)<<cjj(cerg,7)
+								<<setw(6)<<cjj(cerg,8)
+								<<setw(6)<<cjj(cerg,9)
+								<<setw(6)<<cjj(cerg,10)
+								<<setw(6)<<cjj(cerg,11)
+								<<setw(6)<<cjj(cerg,12)
+								<<setw(6)<<cjj(cerg,13)
+								<<setw(6)<<cjj(cerg,14)
+							<<schwarz<<setw(5)<<c15.substr(0,4)
+							<<c15.substr(5,2)<<c15.substr(8,2)
+							<<blau<<setw(2)<<cjj(cerg,16)
+							<<schwarz<<setw(10)<<cjj(cerg,18)
+							<<blau<<setw(8)<<cjj(cerg,20)
+							<<schwarz<<setw(11)<<cjj(cerg,22)
+							<<endl;// <<blau<<setw(10)<<cjj(cerg,23)<<endl;
 				} // 				while (cerg=nw.HolZeile(),cerg?*cerg:0)
 			} // 			if (!nw.obqueryfehler)
 		} // 		} else if (!pidnachw.empty())
@@ -2124,7 +2169,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 
 void hhcl::prueftbl()
 {
-	const size_t aktc=0;
+	const size_t aktc{0};
 	if (!My) initDB();
 	prueflyhinw(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflyplab(My, aktc, obverb, oblog, /*direkt*/0);
@@ -2179,7 +2224,7 @@ void hhcl::prueftbl()
 				",IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
 				",n.NB, n.nb NB_ur, uNg,uNg uNg_ur"
 				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
-				",oNg oNg_ur, l.Labor "
+				",oNg oNg_ur, u.Auftragsnummer, u.Auftragsschlüssel, l.Labor "
 				",p.Gruppe, p.Reihe,2 Qu "
 				"FROM `"+tlyus+"` u "
 				"LEFT JOIN `"+tlywert+"` w ON u.id=w.usid "
