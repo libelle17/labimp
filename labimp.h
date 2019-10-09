@@ -261,6 +261,9 @@ enum T_
 	T_pvirtfueraus,
 	T_MAX //α
 }; // enum T_ //ω
+
+void BDTtoDate(const string& inh,struct tm *tm,int abjahr=1900,uchar objahrzuerst=0);
+
 //α
 class hhcl:public dhcl
 {

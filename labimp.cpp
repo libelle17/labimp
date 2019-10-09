@@ -1188,7 +1188,7 @@ void hhcl::tabnamen()
 	tlyfehlt=vorsl+"fehlt";
 	tlyparameter=vorsl+"parameter";
 	tlyhinw=vorsl+"hinw";
-}
+} // void hhcl::tabnamen
 
 // wird aufgerufen in lauf
 void hhcl::virtMusterVorgb()
@@ -1279,7 +1279,7 @@ void hhcl::pvirtvorrueckfragen()
 								<<blau<<setw(8)<<"Wert"
 								<<schwarz<<setw(11)<<"Einh_ur"
 								<<endl;
-					}
+					} // 					if (!zru++)
 					string c15(cjj(cerg,15));
 					cout<<blau<<setw(26)<<base_name(cjj(cerg,0))
 							<<violett<<setw(5)<<cjj(cerg,1)
@@ -1411,7 +1411,7 @@ void hhcl::virtpruefweiteres()
 			if (rename((fertigvz+'/'+cjj(cerg,1)).c_str(),(ldatvz+'/'+cjj(cerg,1)).c_str())) {
 				fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+fertigvz+'/'+cjj(cerg,1)+rot+Tx[T_nach_]+blau+ldatvz+'/'+cjj(cerg,1)+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
 			}
-		}
+		} // 		while (cerg=datzahl.HolZeile(),cerg?*cerg:0)
 		RS loe(My,"DELETE FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		exit(0);
@@ -1446,13 +1446,13 @@ void hhcl::virtpruefweiteres()
 				fLog(Tx[T_Aktion_abgebrochen],1,1);
 				exit(0);
 			}
-		}
+		} // 		if (nachbneu)
 		if (loeschunvollst||nachbneu) {
 			if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit__]+blau+vorsl+rot+Tx[T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden]+schwarz,"n")) {
 				fLog(Tx[T_Aktion_abgebrochen],1,1);
 				exit(0);
 			}
-		}
+		} // 		if (loeschunvollst||nachbneu)
 		if (pruefauft) {
 			caus<<"So, jetzt pruefe ich die Auftraege"<<endl;
 //			vverarbeit("/DATA/down/X010LG05SKD.LDT");
@@ -1479,7 +1479,7 @@ void hhcl::virtzeigueberschrift()
 	hcl::virtzeigueberschrift();
 } // void hhcl::virtzeigueberschrift
 
-void BDTtoDate(string& inh,struct tm *tm,int abjahr=1900,uchar objahrzuerst=0)
+void BDTtoDate(const string& inh,struct tm *tm,int abjahr/*=1900*/,uchar objahrzuerst/*=0*/)
 {
 	memset(tm,0,sizeof *tm);
 //	const char* const mu[]{"%d%m%Y","%Y%m%d"};
