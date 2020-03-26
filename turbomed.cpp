@@ -527,6 +527,10 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 		// falsche Eintraege loeschen
 		string rsid[]{
 			"DELETE FROM `"+tlyus+"` WHERE auftragsschlüssel='0511249475' and auftragsnummer='11249475' and pat_id=1558",
+        // /opt/turbomed/labor/backup/Labor 20200313 062300.dat:
+			"DELETE FROM `"+tlyus+"` WHERE auftragsschlüssel='0511246337' and auftragsnummer='11246337' and pat_id=52560",
+        // /opt/turbomed/labor/backup/Labor 20200324 063259.dat:
+			"DELETE FROM `"+tlyus+"` WHERE auftragsschlüssel='0511246636' and auftragsnummer='11246636' and pat_id=53266",
 		};
 		for(size_t i=0;i<sizeof rsid/sizeof *rsid;i++) {
 			RS rsloe(My,rsid[i],aktc,1);
