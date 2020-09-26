@@ -201,7 +201,7 @@ void hhcl::nachbearbeit(const size_t aktc,const uchar obusmod/*=0*/)
 			if (i==usids.size()-1) usbed+=')'; else usbed+=',';
 		}
 	} // 	if (!usids.empty())
-	const bool oballes{obusmod?0:1};
+	const bool oballes{obusmod?false:true};
 	if (oballes) {
 		if (My->obtabspda("laborneu","wert")) {
 			RS v1(My,"UPDATE `"+tlyus+"` u LEFT JOIN ("

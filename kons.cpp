@@ -2032,7 +2032,7 @@ linst_cl::linst_cl(int obverb,int oblog)
 					uypr=upr+"-y ";
 					upd=sudc+"zypper patch";
 					repos=sudc+"zypper lr | grep 'g++\\|devel_gcc'>/dev/null 2>&1 || "+
-						sudc+"zypper ar http://download.opensuse.org/repositories/devel:/gcc/`cat /etc/*-release |"
+						sudc+"zypper ar -f http://download.opensuse.org/repositories/devel:/gcc/`cat /etc/*-release |"
 						"grep ^NAME= | cut -d'\"' -f2 | sed 's/ /_/'`_`cat /etc/*-release | grep ^VERSION_ID= | cut -d'\"' -f2`/devel:gcc.repo;";
 					compil="gcc gcc-c++ gcc6-c++";
 					break;
@@ -4568,7 +4568,7 @@ int kopier(const string& quel, const string& ziel, int obverb, int oblog)
 					fehler=0;
 					bool chmerg __attribute__((unused))=chmod(ziel.c_str(),statq.st_mode);
 					bool choerg __attribute__((unused))=chown(ziel.c_str(),statq.st_uid,statq.st_gid);
-					struct utimbuf ubuf={0};
+					struct utimbuf ubuf{0};
 					ubuf.actime=ubuf.modtime=statq.st_mtime;
 					utime(ziel.c_str(),&ubuf);
 				} // if (erg==-1)
@@ -5452,7 +5452,7 @@ void hcl::parsecl()
 // wird aufgerufen in lauf
 void hcl::virtMusterVorgb()
 {
-} // void hhcl::MusterVorgb
+} // void hhcl::virtMusterVorgb
 
 // wird aufgerufen in lauf; liest die Konfiguration ein
 void hcl::virtlieskonfein()
@@ -6037,7 +6037,7 @@ int hcl::kompilfort(const string& was,const string& vorcfg/*=string()*/, const s
 		 */
 		const string b1{"cd \""+ivw+"\"&&"+(vorcfg.empty()?s_true:vorcfg)+(ohneconf?"":"&& [ -f configure ]&&./configure ")+cfgbismake+" make"};
 		const string b2{"cd \""+ivw+"\"&& make install"};
-		const string b3{"cd \""+ivw+"\"&&{ M=Makefile;[ -f $M ]&&{ grep -q 'distclean:' $M&&make distclean||{ grep -q 'clean:' $M&&make clean;};};};"
+		const string b3{"cd \""+ivw+"\"&&{ M=Makefile;[ -f $M ]&&{ grep -q 'clean:' $M&&make clean||{ grep -q 'distclean:' $M&&make distclean;};};};"
 			"[ -f configure ]&&./configure; make"};
 		////		const string b4="ldconfig "+lsys.getlib64();
 		const string b4{"ldconfig /usr"};
@@ -6142,9 +6142,9 @@ void hcl::zeigkonf()
 {
 	struct stat kstat{0};
 	cout<<Txk[T_aktuelle_Einstellungen_aus]<<blau<<akonfdt<<schwarz<<"' (";
-	//// char buf[100]={0};
+	//// char buf[100]{0};
 	if (!lstat(akonfdt.c_str(),&kstat)) {
-		//// struct tm tm={0};
+		//// struct tm tm{0};
 		//// pthread_mutex_lock(&timemutex);
 		//// memcpy(&tm, localtime(&kstat.st_mtime),sizeof(tm));
 		cout<<ztacl(kstat.st_mtime,"%d.%m.%Y %H.%M.%S");
@@ -6474,7 +6474,7 @@ int optcl::pzuweis(const char *const nacstr, const uchar vgegenteil/*=0*/, const
 
 // zum Ueberladen
 void hcl::fuv0(){}; void hcl::fuv1(){}; void hcl::fuv2(){}; void hcl::fuv3(){}; void hcl::fuv4(){}; void hcl::fuv5(){}; void hcl::fuv6(){}; void hcl::fuv7(){}; void hcl::fuv8(){}; void hcl::fuv9(){}; void hcl::fuv10(){};
-int hcl::fui0(){return 0;}; int hcl::fui1(){return 0;}; int hcl::fui2(){return 0;}; int hcl::fui3(){return 0;}; int hcl::fui4(){return 0;}; int hcl::fui5(){return 0;}; int hcl::fui6(){return 0;}; int hcl::fui7(){return 0;}; int hcl::fui8(){return 0;}; int hcl::fui9(){return 0;}; int hcl::fui10(){return 0;};
+int hcl::fui0(){return 0;}; int hcl::fui1(){return 0;}; int hcl::fui2(){return 0;}; int hcl::fui3(){return 0;}; int hcl::fui4(){return 0;}; int hcl::fui5(){return 0;}; int hcl::fui6(){return 0;}; int hcl::fui7(){return 0;}; int hcl::fui8(){return 0;}; int hcl::fui9(){return 0;}; int hcl::fui10(){return 0;}; int hcl::fui11(){return 0;};
 
 optcl::optcl(const string& pname,const void* pptr,const par_t part, const int kurzi, const int langi, TxB* TxBp, const long Txi, const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const string& Txtrf/*={}*/,const uchar obno/*=(uchar)-1*/,const string* refstr/*=0*/,const uchar* obfragz/*=0*/,fnhcliztyp fnobfragz/*=0*/,fnhclztyp fnnachhz/*=0*/,fnhclztyp fnvorhz/*=0*/,uchar sonderrf/*=0*/,fnhcliztyp fngueltigz/*=0*/):
 	wpgcl(pname,pptr,part),
