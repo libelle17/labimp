@@ -1234,7 +1234,8 @@ void hhcl::pvirtvorrueckfragen()
 				caus<<aktdat<<endl;
 			}
 #else
-			RS li(My,"SELECT d.datid,pfad,geändert,größe,zp,codepage,!!fertig,(SELECT count(0) from `"+tlysaetze+"` WHERE datid=d.datid),(SELECT COUNT(0) FROM `"+tlyus+"` WHERE datid=d.datid),SUM((SELECT COUNT(0) FROM `"+tlywert+"` WHERE usid=u.id)),SUM((SELECT COUNT(0) FROM `"+tlybakt+"` WHERE usid=u.id)) FROM `"+tlydat+"` d LEFT JOIN `"+tlyus+"` u ON d.datid = u.datid GROUP BY d.datid",aktc,ZDB);
+			if (!dszahl) dszahl=100;
+			RS li(My,"SELECT * from (SELECT d.datid,pfad,geändert,größe,zp,codepage,!!fertig,(SELECT count(0) from `"+tlysaetze+"` WHERE datid=d.datid),(SELECT COUNT(0) FROM `"+tlyus+"` WHERE datid=d.datid),SUM((SELECT COUNT(0) FROM `"+tlywert+"` WHERE usid=u.id)),SUM((SELECT COUNT(0) FROM `"+tlybakt+"` WHERE usid=u.id)) FROM `"+tlydat+"` d LEFT JOIN `"+tlyus+"` u ON d.datid = u.datid GROUP BY d.datid DESC LIMIT "+ltoan(dszahl)+") i ORDER BY datid",aktc,ZDB);
 			if (!li.obqueryfehler) {
 				size_t zru=0;
 				while (cerg=li.HolZeile(),cerg?*cerg:0) {
