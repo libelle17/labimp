@@ -2210,8 +2210,10 @@ void hhcl::prueftbl()
 				"LEFT JOIN `"+tlysaetze+"` s ON u.satzid=s.satzid "
 				"LEFT JOIN `"+tlydat+"` d ON s.datid=d.datid "
 				"LEFT JOIN `"+tlyplab+"` l ON s.labid=l.id "
-				"LEFT JOIN laborparameter p ON p.abkü=CAST(w.abkü AS CHAR CHARSET latin1) COLLATE latin1_german2_ci AND "
-				"p.einheit=CAST(IF(w.einheit='','kA',w.einheit) AS CHAR CHARSET latin1) COLLATE latin1_german2_ci "
+				"LEFT JOIN laborparameter p ON p.abkü=w.abkü AND "
+				"p.einheit=IF(w.einheit='','kA',w.einheit)"
+//				"LEFT JOIN laborparameter p ON p.abkü=CAST(w.abkü AS CHAR CHARSET latin1) COLLATE latin1_german2_ci AND "
+//				"p.einheit=CAST(IF(w.einheit='','kA',w.einheit) AS CHAR CHARSET latin1) COLLATE latin1_german2_ci "
 	}, {
 		"labor2a",
 			"SELECT * FROM _labor2a WHERE (wert<>'' AND wert IS NOT NULL) OR (kommentar<>'' AND kommentar IS NOT NULL)"
@@ -2235,8 +2237,10 @@ void hhcl::prueftbl()
 				"LEFT JOIN `"+tlysaetze+"` s ON u.satzid=s.satzid "
 				"LEFT JOIN `"+tlydat+"` d ON s.datid=d.datid "
 				"LEFT JOIN `"+tlyplab+"` l ON s.labid=l.id "
-				"LEFT JOIN laborparameter p ON p.abkü=CAST(w.abkü AS CHAR CHARSET latin1) COLLATE latin1_german2_ci AND "
-				"p.einheit=CAST(IF(w.einheit='','kA',w.einheit) AS CHAR CHARSET latin1) COLLATE latin1_german2_ci "
+				"LEFT JOIN laborparameter p ON p.abkü=w.abkü AND "
+				"p.einheit=IF(w.einheit='','kA',w.einheit)"
+//				"LEFT JOIN laborparameter p ON p.abkü=CAST(w.abkü AS CHAR CHARSET latin1) COLLATE latin1_german2_ci AND "
+//				"p.einheit=CAST(IF(w.einheit='','kA',w.einheit) AS CHAR CHARSET latin1) COLLATE latin1_german2_ci "
 	}, {
 		"labor2bakt",
 			"SELECT Verf,KuQu,Quelle,QSpez,if(isnull(k.text),'',k.text) Kommentar, if(isnull(e.text),'',e.text) Erkl"

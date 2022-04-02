@@ -344,7 +344,7 @@ Tabelle::Tabelle(const DB* dbp,const string& vtbname,const size_t aktc,int obver
 
 const string DB::defmyengine{"InnoDB"};
 const string DB::defmycharset{"utf8"};
-const string DB::defmycollat{"utf8_unicode_ci"};
+const string DB::defmycollat{"utf8mb4_unicode_ci"};
 const string DB::defmyrowform{"DYNAMIC"};
 
 // statische Variable, 1= mariadb=geprueft
@@ -666,8 +666,8 @@ void DB::init(
 					pconn=pmconn;
 					RS p1(this,"CREATE USER "+puser+" CREATEDB CREATEUSER INHERIT REPLICATION PASSWORD '"+ppasswd+"'",obverb);
 					////					PQexec(pmconn, ("CREATE USER "+puser+" CREATEDB CREATEUSER INHERIT REPLICATION PASSWORD '"+ppasswd+"'").c_str());
-					RS p2(this,string("CREATE DATABASE \"")+uedb+"\" ENCODING 'LATIN1' TEMPLATE template0 LC_CTYPE 'de_DE.ISO88591' LC_COLLATE 'de_DE.ISO88591'",obverb);
-					////					PQexec(pmconn, (string("CREATE DATABASE \"")+uedb+"\" ENCODING 'LATIN1' TEMPLATE template0 LC_CTYPE 'de_DE.ISO88591' LC_COLLATE 'de_DE.ISO88591'").c_str());
+					RS p2(this,string("CREATE DATABASE \"")+uedb+"\" ENCODING 'UTF8' TEMPLATE template0 LC_CTYPE 'de_DE.ISO88591' LC_COLLATE 'de_DE.ISO88591'",obverb);
+					////					PQexec(pmconn, (string("CREATE DATABASE \"")+uedb+"\" ENCODING 'UTF8' TEMPLATE template0 LC_CTYPE 'de_DE.ISO88591' LC_COLLATE 'de_DE.ISO88591'").c_str());
 					pconn=zwi;
 				} else {
 					fLog(Txd[T_Verbindung_zu]+blaus+uedb+schwarz+Txd[T_gelungen]+blau+user+schwarz+"', host: '"+blau+ip_a+schwarz+"', port: '"+blau+ltoan(port)+schwarz+"'",obverb,oblog);
