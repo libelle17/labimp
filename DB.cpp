@@ -343,8 +343,8 @@ Tabelle::Tabelle(const DB* dbp,const string& vtbname,const size_t aktc,int obver
 }
 
 const string DB::defmyengine{"InnoDB"};
-const string DB::defmycharset{"utf8"};
-const string DB::defmycollat{"utf8mb4_unicode_ci"};
+const string DB::defmycharset{"utf8mb4"};
+const string DB::defmycollat{"utf8mb4_german2_ci"};
 const string DB::defmyrowform{"DYNAMIC"};
 
 // statische Variable, 1= mariadb=geprueft
@@ -518,7 +518,7 @@ void DB::init(
 						fehnr=0;
 						if (mysql_real_connect(conn[aktc], host.c_str(), user.c_str(), passwd.c_str(), dbname.c_str(), port, unix_socket, client_flag)) {
 							// mysql_set_character_set(conn[aktc],"utf8");
-							cmd="SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'";
+							cmd="SET NAMES 'utf8mb4' COLLATE 'utf8mb4_german2_ci'";
 							if (mysql_real_query(conn[aktc],cmd.c_str(),cmd.length())) {
 								if (MYSQL_RES *dbres{mysql_use_result(conn[aktc])}) {
 									mysql_free_result(dbres);

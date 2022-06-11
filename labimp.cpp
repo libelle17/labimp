@@ -1251,7 +1251,7 @@ void hhcl::pvirtvorrueckfragen()
 #endif
 		} else if (!pidnachw.empty()) {
 			RS nw(My,"SELECT pfad,datid,satzid,usid,id,pat_id_0,pat_id_1,pat_id_2,pat_id_3,pat_id_4,pat_id_5,pat_id_6,pat_id_7,pat_id_laborneu,"
-					"Pat_ID,Zeitpunkt,FertigStGrad,Abkü,abk_ur,Langtext,Wert,Einheit,Einheit_ur,Kommentar,Auftragsnummer,Auftragsschlüssel "
+					"Pat_ID,Zeitpunkt,FertigStGrad,Abkü,Langtext,Wert,Einheit,Kommentar,Auftragsnummer,Auftragsschlüssel "
 					"FROM labor2aNachweis WHERE pat_id="+pidnachw,aktc,ZDB);
 			if (!nw.obqueryfehler) {
 				size_t zru=0;
@@ -1276,15 +1276,15 @@ void hhcl::pvirtvorrueckfragen()
 									<<setw(6)<<"PID"
 								<<schwarz<<setw(9)<<"us.eing"
 								<<blau<<setw(2)<<"FS"
-								<<schwarz<<setw(10)<<"Abk_ur"
+								<<schwarz<<setw(10)<<"Abkü"
 								<<blau<<setw(8)<<"Wert"
-								<<schwarz<<setw(11)<<"Einh_ur"
+								<<schwarz<<setw(11)<<"Einh"
 								<<endl;
 					} // 					if (!zru++)
 					string c15(cjj(cerg,15));
 					cout<<blau<<setw(26)<<base_name(cjj(cerg,0))
 							<<violett<<setw(5)<<cjj(cerg,1)
-							<<schwarz<<setw(11)<<cjj(cerg,25)
+							<<schwarz<<setw(11)<<cjj(cerg,23)
 //							<<schwarz<<setw(5)<<cjj(cerg,2)
 //							<<blau<<setw(7)<<cjj(cerg,3)
 //							<<schwarz<<setw(8)<<cjj(cerg,4)
@@ -1301,10 +1301,10 @@ void hhcl::pvirtvorrueckfragen()
 							<<schwarz<<setw(5)<<c15.substr(0,4)
 							<<c15.substr(5,2)<<c15.substr(8,2)
 							<<blau<<setw(2)<<cjj(cerg,16)
-							<<schwarz<<setw(10)<<cjj(cerg,18)
-							<<blau<<setw(8)<<cjj(cerg,20)
-							<<schwarz<<setw(11)<<cjj(cerg,22)
-							<<endl;// <<blau<<setw(10)<<cjj(cerg,23)<<endl;
+							<<schwarz<<setw(10)<<cjj(cerg,17)
+							<<blau<<setw(8)<<cjj(cerg,19)
+							<<schwarz<<setw(11)<<cjj(cerg,20)
+							<<endl;// <<blau<<setw(10)<<cjj(cerg,21)<<endl;
 				} // 				while (cerg=nw.HolZeile(),cerg?*cerg:0)
 			} // 			if (!nw.obqueryfehler)
 		} // 		} else if (!pidnachw.empty())
@@ -2192,15 +2192,15 @@ void hhcl::prueftbl()
 		const string name;
 		string sql;
 	} vpaare[]{ {
-		"_labor2a",
-			"SELECT Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.abkü abk_ur, w.langtext Langtext"
+		"labor2a",
+			"SELECT Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.langtext Langtext"
 				",TRIM(IF(TRIM(Wert) REGEXP '^[0-9]+\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert)) Wert"
-				",w.Einheit, w.Einheit Einheit_ur "
+				",w.Einheit "
 				",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:',CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';')"
 				",IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
-				",n.NB, n.nb NB_ur, uNg,uNg uNg_ur"
+				",n.NB, uNg"
 				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
-				",oNg oNg_ur, l.Labor, Pfad "
+				",l.Labor, Pfad "
 				",p.Gruppe, p.Reihe,2 Qu "
 				"FROM `"+tlyus+"` u "
 				"LEFT JOIN `"+tlywert+"` w ON u.id=w.usid "
@@ -2212,22 +2212,20 @@ void hhcl::prueftbl()
 				"LEFT JOIN `"+tlyplab+"` l ON s.labid=l.id "
 				"LEFT JOIN laborparameter p ON p.abkü=w.abkü AND "
 				"p.einheit=IF(w.einheit='','kA',w.einheit)"
+			  "HAVING (wert<>'' AND wert IS NOT NULL) OR (kommentar<>'' AND kommentar IS NOT NULL)"
 //				"LEFT JOIN laborparameter p ON p.abkü=CAST(w.abkü AS CHAR CHARSET latin1) COLLATE latin1_german2_ci AND "
 //				"p.einheit=CAST(IF(w.einheit='','kA',w.einheit) AS CHAR CHARSET latin1) COLLATE latin1_german2_ci "
 	}, {
-		"labor2a",
-			"SELECT * FROM _labor2a WHERE (wert<>'' AND wert IS NOT NULL) OR (kommentar<>'' AND kommentar IS NOT NULL)"
-	}, {
 		"labor2aNachweis",
 			"SELECT d.Pfad, d.Datid,s.Satzid,u.id USID,w.id,pat_id_0,pat_id_1,pat_id_2,pat_id_3,pat_id_4,pat_id_5,pat_id_6,pat_id_7,pat_id_laborneu"
-				",Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.abkü abk_ur, w.langtext Langtext"
+				",Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.langtext Langtext"
 				",TRIM(IF(TRIM(Wert) REGEXP '^[0-9]+\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert)) Wert"
-				",w.Einheit, w.Einheit Einheit_ur "
+				",w.Einheit "
 				",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:',CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';')"
 				",IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
-				",n.NB, n.nb NB_ur, uNg,uNg uNg_ur"
+				",n.NB, uNg"
 				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
-				",oNg oNg_ur, u.Auftragsnummer, u.Auftragsschlüssel, l.Labor "
+				",u.Auftragsnummer, u.Auftragsschlüssel, l.Labor "
 				",p.Gruppe, p.Reihe,2 Qu "
 				"FROM `"+tlyus+"` u "
 				"LEFT JOIN `"+tlywert+"` w ON u.id=w.usid "
