@@ -1408,25 +1408,20 @@ void hhcl::virtpruefweiteres()
 		}
 		fLog(blaus+Tx[(loeschab.empty()?T_Loescheid:T_Loescheab)]+gruen+(loeschab.empty()?loeschid:loeschab)+schwarz,1,0);
 		// ZDB=1;
-		string verschobenedatei;
+		string verschobenedatei,befehl;
 		while (cerg=datzahl.HolZeile(),cerg?*cerg:0) {
 			verschobenedatei=ldatvz+'/'+cjj(cerg,1);
 			if (rename((fertigvz+'/'+cjj(cerg,1)).c_str(),verschobenedatei.c_str())) {
 				fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+fertigvz+'/'+cjj(cerg,1)+rot+Tx[T_nach_]+blau+ldatvz+'/'+cjj(cerg,1)+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
+			} else {
+				befehl="vi \""+verschobenedatei+"\"";
+				cout<<befehl<<endl;
 			}
 		} // 		while (cerg=datzahl.HolZeile(),cerg?*cerg:0)
 		RS loe(My,"DELETE FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (!loeschid.empty()) {
-			string zeig;
-			cmd=edit;
-			viadd(&cmd,&zeig,"\""+verschobenedatei+"\"");
-			string erg;
-			viadd(&erg,&zeig,"\""+verschobenedatei+"\"",1,0,0);
-			caus<<verschobenedatei<<endl;
-			caus<<erg<<endl;
-			caus<<zeig<<endl;
-			vischluss(erg,zeig);
+			exit(schluss(systemrueck(befehl+" "+devtty,/*obverb=*/0,/*oblog=*/0,/*rueck=*/0,/*obsudc=*/1),Txk[T_nach__]+befehl,oblog));
 		}
 		exit(0);
 	} else if (entleer) {
