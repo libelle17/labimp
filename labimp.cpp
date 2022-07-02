@@ -1420,8 +1420,13 @@ void hhcl::virtpruefweiteres()
 		if (!loeschid.empty()) {
 			string zeig;
 			cmd=edit;
-			viadd(&cmd,&zeig,verschobenedatei);
-			vischluss(cmd,zeig);
+			viadd(&cmd,&zeig,"\""+verschobenedatei+"\"");
+			string erg;
+			viadd(&erg,&zeig,"\""+verschobenedatei+"\"",1,0,0);
+			caus<<verschobenedatei<<endl;
+			caus<<erg<<endl;
+			caus<<zeig<<endl;
+			vischluss(erg,zeig);
 		}
 		exit(0);
 	} else if (entleer) {
@@ -2200,6 +2205,7 @@ void hhcl::prueftbl()
 		const string name;
 		string sql;
 	} vpaare[]{ {
+		// soll gleich lauten wie u:\programmierung\dateielesen\formular.frm
 		"labor2a",
 			"SELECT Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.langtext Langtext"
 				",TRIM(IF(TRIM(Wert) REGEXP '^[0-9]+\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert)) Wert"
@@ -2208,7 +2214,7 @@ void hhcl::prueftbl()
 				",IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
 				",n.NB, uNg"
 				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
-				",l.Labor, Pfad "
+				",l.Labor, Pfad, d.DatID "
 				",p.Gruppe, p.Reihe,2 Qu "
 				"FROM `"+tlyus+"` u "
 				"LEFT JOIN `"+tlywert+"` w ON u.id=w.usid "
@@ -2225,7 +2231,7 @@ void hhcl::prueftbl()
 //				"p.einheit=CAST(IF(w.einheit='','kA',w.einheit) AS CHAR CHARSET latin1) COLLATE latin1_german2_ci "
 	}, {
 		"labor2aNachweis",
-			"SELECT d.Pfad, d.Datid,s.Satzid,u.id USID,w.id,pat_id_0,pat_id_1,pat_id_2,pat_id_3,pat_id_4,pat_id_5,pat_id_6,pat_id_7,pat_id_laborneu"
+			"SELECT d.Pfad,d.Datid,s.Satzid,u.id USID,w.id,pat_id_0,pat_id_1,pat_id_2,pat_id_3,pat_id_4,pat_id_5,pat_id_6,pat_id_7,pat_id_laborneu"
 				",Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.langtext Langtext"
 				",TRIM(IF(TRIM(Wert) REGEXP '^[0-9]+\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert)) Wert"
 				",w.Einheit "
