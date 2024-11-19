@@ -2219,7 +2219,7 @@ void hhcl::prueftbl()
 				"LEFT JOIN `"+tlysaetze+"` s ON u.satzid=s.satzid "
 				"LEFT JOIN `"+tlydat+"` d ON d.datid=s.datid "
 				"LEFT JOIN `"+tlyplab+"` l ON l.id=s.labid "
-        "LEFT JOIN laborparameter p ON p.abkü=w.abkü AND p.einheit=IF(w.einheit IN ('','\'kA\''),'kA',w.einheit)"
+        "LEFT JOIN laborparameter p ON p.abkü=w.abkü AND p.einheit=IF(w.einheit IN ('','\\'kA\\''),'kA',w.einheit)"
         "      AND p.id = (SELECT id FROM laborparameter WHERE abkü=w.`Abkü` AND einheit=IF(w.einheit IN ('','\'kA\''),'kA',w.Einheit) ORDER BY gruppe DESC, reihe DESC LIMIT 1)"
         "WHERE ((wert<>'' AND wert IS NOT NULL) OR (e.text<>'' AND e.text IS NOT NULL))"
 //				"LEFT JOIN laborparameter p ON p.abkü=CAST(w.abkü AS CHAR CHARSET latin1) COLLATE latin1_german2_ci AND "
