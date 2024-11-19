@@ -2200,12 +2200,12 @@ void hhcl::prueftbl()
 		const string name;
 		string sql;
 	} vpaare[]{ {
-		// soll gleich lauten wie u:\programmierung\dateielesen\formular.frm
+		// soll gleich lauten wie u:\programmierung\dateielesen\formular.frm, backslashes hier verdppeln!
 		"labor2a",
 			"SELECT Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.langtext Langtext"
-        ",TRIM(IF(w.Abkü='ALBUM' AND Wert='' AND k.Text LIKE 'nicht berechenb%','< 20',IF(TRIM(Wert) REGEXP '^[0-9]+\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert))) Wert"
+        ",TRIM(IF(w.Abkü='ALBUM' AND Wert='' AND k.Text LIKE 'nicht berechenb%','< 20',IF(TRIM(Wert) REGEXP '^[0-9]+\\\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert))) Wert"
 				",w.Einheit "
-        ",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:'"
+        ",CONCAT(IF(e.text IS NULL OR e.text RLIKE '^:[ /\\\\*:]*$','',IF(e.text RLIKE '^:[ /\\\\*]*:'"
         " ,CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';'),IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar/*, n.id*/ "
 				",n.NB, uNg"
 				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
