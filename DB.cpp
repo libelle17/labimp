@@ -1803,13 +1803,14 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 ////	int altobverb=obverb; obverb=1;
 	const unsigned vlz=10; // Verlängerungszahl
 	const unsigned maxversuche=3;
-	const string hochzwei{'\xC2'}, hze{'²'};
+	const string hochzwei{'\xB2'}, hze{'2'};
 	yLog(obverb>0?obverb-1:0,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
 	int obfalsch{0};
 	geaendert=0;
 	// fuer wiederholten Abfragen
 	//// <<"in doAbfrage: "<<blau<<sql<<schwarz<<endl;
+			char obf=0; // (sql.find("1.73")!=string::npos);
 	switch (dbp->DBS) {
 		case MySQL:
 			if (!obqueryfehler)  {
@@ -1820,7 +1821,15 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 			num_fields=0;
 			////      if (sql=="select column_name from information_schema.columns where table_schema='emails' and table_name = 'lmailbody' and extra = 'auto_increment'") {mysql_commit(dbp->conn[aktc]);} // sql="select 'ID'";
 			//// <<"sql.c_str(): "<<sql.c_str()<<endl;
-			ersetzAllezu(sql,hochzwei,hze);
+			if (obf) cout<<"vor: "<<sql<<endl;
+//			ersetzAllezu(sql,hochzwei,hze);
+			if (obf) { cout<<"nach: "<<sql<<endl;
+//			  for (char const elt: sql.c_str())
+					if (obf) for(std::string::size_type i = 0; i < sql.size(); ++i) {
+    std::cout << "0x" << std::hex << std::setw(2) << std::setfill('0')
+              << static_cast<int>(sql[i]) << ' ';
+	        }
+  std::cout << '\n'; }
 			if ((obverb>0)|oblog)
 				fLog("SQL: '"+blaus+sql+schwarz+"'",obverb,oblog);
 			if (!dbp->conn[aktc]) {

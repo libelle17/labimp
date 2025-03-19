@@ -1939,11 +1939,13 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 //					caus<<rot<<"aussortiert!"<<schwarz<<endl;
 				}
 			} else if (cd=="8421") {
+        string keinh;
+				keinh=(inh.find("ml/min/1.73")==string::npos?inh:"ml/min/1.73m²");
 				if (rbawep) {
-					rbawep->hz("Einheit",inh);
+					rbawep->hz("Einheit",keinh);
 				}
-				rpar.hz("Einheit",inh);
-				rpneu.hz("Einheit",inh);
+				rpar.hz("Einheit",keinh);
+				rpneu.hz("Einheit",keinh);
 			} else if (cd=="8422") {
 				rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
