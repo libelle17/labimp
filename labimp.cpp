@@ -2287,7 +2287,7 @@ void hhcl::pvirtfuehraus()
 	} else if (!loeschalle && !loeschunvollst && umben.empty()) {
 		if (!nurnachb && !nachbneu && !nurusmod && !pruefauft) {
 			pruefverz(fertigvz,obverb,oblog);
-			systemrueck("Q="+ldatvz+"/;P="+fertigvz+";find /opt/turbomed/LaborStaber/DFUE/Update_Staber/LDTArchiv -iname '*.ldt' -newer \"$(printf $P;ls -t $P|head -n1)\"|while read U;do cp \"$U\" \"$Q\"; find /DATA/Patientendokumente/ -mindepth 1 -maxdepth 1 -type d -regex '.*/[^/]+Labor$' -exec cp \"$U\" {} \\; ; done;");
+			systemrueck("Q="+ldatvz+"/;P="+fertigvz+";find /opt/turbomed/LaborStaber/DFUE/Update_Staber/LDTArchiv -iname '*.ldt' -newer \"$(printf $P;ls -t $P|head -n1)\"|while read U;do cp \"$U\" \"$Q\"; find /DATA/Patientendokumente/ -mindepth 1 -maxdepth 1 -type d -regex '.*/[^/]+Labor$' -exec cp \"$U\" {} \\; ; done;",2);
 			sleep(2);
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 			systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
