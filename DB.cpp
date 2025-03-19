@@ -1803,6 +1803,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 ////	int altobverb=obverb; obverb=1;
 	const unsigned vlz=10; // Verlängerungszahl
 	const unsigned maxversuche=3;
+	const string hochzwei{'\xB2'}, hze{'2'};
 	yLog(obverb>0?obverb-1:0,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
 	int obfalsch{0};
@@ -1819,6 +1820,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 			num_fields=0;
 			////      if (sql=="select column_name from information_schema.columns where table_schema='emails' and table_name = 'lmailbody' and extra = 'auto_increment'") {mysql_commit(dbp->conn[aktc]);} // sql="select 'ID'";
 			//// <<"sql.c_str(): "<<sql.c_str()<<endl;
+			sersetze(&sql,hochzwei,hze);
 			if ((obverb>0)|oblog)
 				fLog("SQL: '"+blaus+sql+schwarz+"'",obverb,oblog);
 			if (!dbp->conn[aktc]) {
