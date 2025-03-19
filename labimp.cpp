@@ -2285,6 +2285,8 @@ void hhcl::pvirtfuehraus()
 	} else if (!loeschalle && !loeschunvollst && umben.empty()) {
 		if (!nurnachb && !nachbneu && !nurusmod && !pruefauft) {
 			pruefverz(fertigvz,obverb,oblog);
+			systemrueck("Q="+ldatvz+"/;P="+fertigvz+"/;find /opt/turbomed/LaborStaber/DFUE/Update_Staber/LDTArchiv -iname '*.ldt' -newer \"$(printf $P;ls -t $P|head -n1)\" -exec cp {} \"$Q\" \\;");
+			sleep(500);
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 			systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
 			svec lrue;
