@@ -19,6 +19,8 @@ enum T_
 	T_prueflyus,
 	T_prueflywert,
 	T_prueflybakt,
+	T_prueflpath,
+	T_prueflpatel,
 	T_eindeutige_Identifikation,
 	T_Pfadname,
 	T_Name_der_eingelesenen_Labordatei_ohne_Endung,
@@ -259,6 +261,26 @@ enum T_
 	T_war_schon_in,
 	T_eingetragen_,
 	T_pvirtfueraus,
+	T_Einlesedatum,
+	T_Pfad,
+	T_Name,
+	T_Aenderungsdatum,
+	T_dfertig,
+	T_Path_Labor_Einlesungen,
+	T_ID_der_Einlesung,
+	T_Laborparameter,
+	T_LWert,
+	T_Einheit,
+	T_Vorwert_1,
+	T_Vorwert_2,
+	T_HinweisedL,
+	T_fehlende_ICDs,
+	T_namsp,
+	T_wertsp,
+	T_hinwsp,
+	T_termsp,
+	T_ficdsp,
+	T_Termine,
 	T_MAX //α
 }; // enum T_ //ω
 
@@ -282,6 +304,8 @@ class hhcl:public dhcl
 		string tlyfehlt; /*=vorsil+"fehlt"*/
 		string tlyparameter; /*=vorsil+"parameter"*/
 		string tlyhinw; /*=vorsil+"hinw"*/
+	 string labpatel;
+	 string labpath;
 		const static tm tmnull; // {0}
 		const static tm tmmax; // {0,0,0,1,0,200,0,0,0}
 		string labind,pneuind,pnbid,hinwind;
@@ -340,6 +364,8 @@ class hhcl:public dhcl
 		void prueflyfehlt(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyparameter(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyhinw(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflpath(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflpatel(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueftbl();
 		void droptables(const size_t aktc=0,uchar obumben=0);
 		void virttesterg(); //α

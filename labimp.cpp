@@ -49,6 +49,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"prueflywert()","testlyvalue()"},
 	// T_prueflybakt,
 	{"prueflybakt","testlybact()"},
+	// T_prueflpath,
+	{"prueflpath()","testlpath()"},
+	// T_prueflpatel,
+	{"prueflpatel()","testlpatel()"},
 	// T_eindeutige_Identifikation
 	{"eindeutige Identifikation","unique identifier"},
 	// T_Pfadname
@@ -528,6 +532,46 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"` eingetragen! (","`! ("},
 	// T_pvirtfueraus,
 	{"pvirtfueraus()","pvirtexecute()"},
+	// T_Einlesedatum
+	{"Einlesedatum","date of parsing"},
+	// T_Pfad,
+	{"Pfad","path"},
+	// T_Name,
+	{"Name","name"},
+	// T_Aenderungsdatum
+	{"Änderungsdatum","date of last change"},
+	// T_dfertig,
+	{"Daten fertig eingetragen","data completely written"},
+	// T_Path_Labor_Einlesungen
+	{"Pathologische Laborwert-Dateien-Einlesungen","readings of files with pathological lab values"},
+	// T_ID_der_Einlesung
+	{"ID der Einlesung","id of the reading"},
+	// T_Laborparameter
+	{"Laborparameter","lab parameter"},
+	// T_LWert
+	{"Wert","value"},
+	// T_Einheit
+	{"Einheit","unit"},
+	// T_Vorwert_1
+	{"Vorwert 1","previous value 1"},
+	// T_Vorwert_2
+	{"Vorwert 2","previous value 2"},
+	// T_HinweisedL
+	{"Hinweise des Labors","hints of the lab"},
+	// T_fehlende_ICDs
+	{"fehlende ICDs","missing ICDs"},
+	// T_fehlende_ICDs
+	{"fehlende ICDs","missing ICDs"},
+	// T_Termine
+	{"Termine","appointments"},
+	// T_Laborwert
+	{"(path.) Laborwert","pathol.lab value"},
+	// T_quellvz
+	{"Quellverzeichnis","sourcedir"},
+	// T_pruefdb_k,
+	{"pruefdb","checkdb"},
+	// T_Termine
+	{"Termine","appointments"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1102,6 +1146,73 @@ void hhcl::prueflypgl(DB *My, const size_t aktc, const int obverb, const int obl
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
+// wird aufgerufen in: prueftbl
+void hhcl::prueflpatel(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflpatel]+schwarz);
+	if (!direkt) {
+		Feld felder[] = {
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+			Feld("Datum","datetime","0","0",Tx[T_Einlesedatum],0,0,1),
+			Feld("Pfad","varchar","100","",Tx[T_Pfad],0,0,1),
+			Feld("Name","varchar","100","",Tx[T_Name],0,0,1),
+			Feld("Größe","int","12","",Tx[T_Groesse],0,0,1),
+			Feld("Änderungsdatum","datetime","0","0",Tx[T_Aenderungsdatum],0,0,1),
+			Feld("fertig","bit","","",Tx[T_dfertig],0,0,1),
+		};
+		Feld ifelder1[] = {Feld("Datum")};   Index i1("Datum",ifelder1,elemzahl(ifelder1));
+		Feld ifelder2[] = {Feld("Name"),Feld("Pfad")};   Index i2("Pfad",ifelder2,elemzahl(ifelder2));
+		Index indices[]={i1,i2};
+		Tabelle taba(My,labpatel,felder,elemzahl(felder),indices,elemzahl(indices),0,0,Tx[T_Path_Labor_Einlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+labpatel,1,1);
+			exit(11);
+		}
+	}
+} // prueflpath
+
+// wird aufgerufen in: prueftbl
+void hhcl::prueflpath(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflpath]+schwarz);
+	if (!direkt) {
+		Feld felder[] = {
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+			Feld("elID","int","10","",Tx[T_ID_der_Einlesung],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
+		  Feld("Pat_id","int","6","","",0,0,1),
+			Feld("Name","varchar","20","",Tx[T_Name],0,0,1),
+			Feld("Parameter","varchar","50","",Tx[T_Laborparameter],0,0,1),
+			Feld("Wert","varchar","20","",Tx[T_LWert],0,0,1),
+			Feld("Einheit","varchar","20","",Tx[T_Einheit],0,0,1),
+			Feld("Vorwert_1","varchar","30","",Tx[T_Vorwert_1],0,0,1),
+			Feld("Vorwert_2","varchar","30","",Tx[T_Vorwert_2],0,0,1),
+			Feld("Normbereich","varchar","300","",Tx[T_Normbereich],0,0,1),
+			Feld("Labhinw","varchar","60","Hinweis des Labors",Tx[T_HinweisedL],0,0,1),
+			Feld("Hinweise","varchar","60","",Tx[T_Hinweise],0,0,1,""),
+			Feld("fICD","varchar","60","",Tx[T_fehlende_ICDs],0,0,1,""),
+		  Feld("namsp","int","10","",Tx[T_namsp],0,0,1),
+		  Feld("wertsp","int","10","",Tx[T_wertsp],0,0,1),
+		  Feld("hinwsp","int","10","",Tx[T_hinwsp],0,0,1),
+		  Feld("termsp","int","10","",Tx[T_termsp],0,0,1),
+		  Feld("fICDsp","int","10","",Tx[T_ficdsp],0,0,1),
+			Feld("Termine","longtext","","",Tx[T_Termine],0,0,1),
+		};
+		Feld ifelder1[] = {Feld("Pat_id"),Feld("Parameter")}; Index i1("Patid_Par",ifelder1,elemzahl(ifelder1));
+		Index indices[]={i1};
+		Constraint csts[]{
+			Constraint(labpath+labpatel,new Feld{Feld("elID")},1,labpatel,new Feld{Feld("ID")},1,cascade,cascade),
+		};
+		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
+		Tabelle taba(My,labpath,felder,elemzahl(felder),indices,elemzahl(indices),csts,elemzahl(csts),Tx[T_Laborwert]
+				/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+labpath,1,1);
+			exit(11);
+		}
+	} // if (!direkt)
+} // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
+
+
 // aufgerufen in /*pruefPatID*/ russchreib und prueflyus
 void hhcl::fuellpql()
 {
@@ -1188,6 +1299,8 @@ void hhcl::tabnamen()
 	tlyfehlt=vorsl+"fehlt";
 	tlyparameter=vorsl+"parameter";
 	tlyhinw=vorsl+"hinw";
+	labpatel="labpatel";
+	labpath="labpath";
 } // void hhcl::tabnamen
 
 // wird aufgerufen in lauf
@@ -1418,7 +1531,9 @@ void hhcl::virtpruefweiteres()
 				cout<<befehl<<endl;
 			}
 		} // 		while (cerg=datzahl.HolZeile(),cerg?*cerg:0)
-		RS loe(My,"DELETE FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",aktc,ZDB,0,0,0,&zahl);
+		const string delausw{" FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'"};
+		RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Name,Pfad) IN (SELECT CONCAT (Name,Pfad)"+delausw+")",aktc,ZDB,0,0,0,&zahl); 
+		RS loe(My,"DELETE"+delausw,aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (!loeschid.empty()) {
 			exit(schluss(systemrueck(befehl+" "+devtty,/*obverb=*/0,/*oblog=*/0,/*rueck=*/0,/*obsudc=*/1),Txk[T_nach__]+befehl,oblog));
@@ -1470,7 +1585,9 @@ void hhcl::virtpruefweiteres()
 		const uchar altZDB{ZDB};
 		// ZDB=1;
 		if (!My) initDB();
-		RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE fertig<>1",aktc,ZDB,0,0,0,&zahl);
+		const string delausw{" FROM `"+tlydat+"` WHERE fertig<>1"};
+		RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Name,Pfad) IN (SELECT CONCAT (Name,Pfad)"+delausw+")",aktc,ZDB,0,0,0,&zahl); 
+		RS loeschvor(My,"DELETE"+delausw,aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (nachbneu) {
 			RS nachloesch(My,"UPDATE `"+tlyus+"` SET pat_id_laborneu=null",aktc,ZDB);
@@ -1702,20 +1819,29 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 	unsigned UsLfd=0;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen=0, usoffen=0;
-	vordverarb(aktc);
+	vordverarb(aktc); // keine Funktion, nur Meldung
 	svec eindfeld; eindfeld<<"id";
-	insv reing(My,/*itab*/tlydat,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	insv rpatel(My,/*itam*/labpatel,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+	svec deindfeld; deindfeld<<"datid";
+	insv reing(My,/*itab*/tlydat,aktc,/*eindeutig*/0,deindfeld,/*asy*/0,/*csets*/0);
 	/*auto*/chrono::system_clock::time_point jetzt=chrono::system_clock::now();
 	reing.hz("Name",base_name(datei));
+	rpatel.hz("Name",base_name(datei));
 	reing.hz("Pfad",datei);
+	rpatel.hz("Pfad",datei);
 	struct stat pfst{0};
 	if (!lstat(datei.c_str(),&pfst)) {
 		reing.hz("geändert",&pfst.st_mtime);
+		rpatel.hz("Änderungsdatum",&pfst.st_mtime);
 		reing.hz("Größe",pfst.st_size);
+		rpatel.hz("Größe",pfst.st_size);
 	}
 	reing.hz("Zp",&jetzt);
+	rpatel.hz("Datum",&jetzt);
+	rpatel.hz("fertig",0);
 #ifdef speichern
 	reing.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/datidp);
+	rpatel.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/datidp);
 #endif 
 	insv raerzte(My,/*itab*/tlyaerzte,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rsaetze(My,/*itab*/tlysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
@@ -1782,7 +1908,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				} else if (inh.substr(0,4)=="8221") {
 					//					if (inh.length()>4) ... // trat nicht auf
 					lsatzart=2;
-						// russchreib z.B. "Labor 20120223 020708.dat"
 					/* stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 					caus<<rot<<"1 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
 					wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
@@ -1840,8 +1965,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				} // 				switch (lsatzart)
 				// 8410=Test-Ident, 8434=Verfahren
 			} else if (cd=="8410" || cd=="8434") { 
-				// russchreib z.B. "Labor 20091126 162829.dat"
-				// z.B. "Labor 20101202 002036.dat"
 				/*stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 				caus<<rot<<"2 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
 				wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
@@ -2196,6 +2319,8 @@ void hhcl::prueftbl()
 	prueflyleist(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflywert(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflypgl(My, aktc, obverb, oblog, /*direkt*/0);
+	prueflpatel(My, aktc, obverb, oblog, /*direkt*/0);
+	prueflpath(My, aktc, obverb, oblog, /*direkt*/0);
 ////	My->usedb(dbq,aktc);
 //	ZDB=1;
 	struct {
@@ -2231,7 +2356,7 @@ void hhcl::prueftbl()
 			"SELECT d.Pfad,d.Datid,s.Satzid,u.id USID,w.id,pat_id_0,pat_id_1,pat_id_2,pat_id_3,pat_id_4,pat_id_5,pat_id_6,pat_id_7,pat_id_laborneu"
 				",Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.langtext Langtext"
 				",TRIM(IF(TRIM(Wert) REGEXP '^[0-9]+\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert)) Wert"
-				",w.Einheit "
+				",w.Einheit,w.Grenzwerti "
 				",CONCAT(IF(ISNULL(e.text) OR e.text RLIKE '^:[ /\\*:]*$','',IF(e.text RLIKE '^:[ /\\*]*:',CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';')"
 				",IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar "
 				",n.NB, uNg"
@@ -2315,13 +2440,16 @@ void hhcl::pvirtfuehraus()
 				// wenn Datei schon angefangen wurde zu einzulesen (fertig<>1), dann dieses loeschen
 				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
 				// 16.9.18: Namen sollen eindeutig sein, dafuer koennen die Pfade mal umsortiert werden, ohne dass gleich alle Dateien neu eingelesen werden
-				RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE name="+sqlft(My->DBS,base_name(*aktl))+" AND fertig<>1",aktc,ZDB);
+				const string delausw{" FROM `"+tlydat+"` WHERE name="+sqlft(My->DBS,base_name(*aktl))+" AND fertig<>1"};
+				RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Name,Pfad) IN (SELECT CONCAT (Name,Pfad)"+delausw+")",aktc,ZDB); 
+				RS loeschvor(My,"DELETE"+delausw,aktc,ZDB);
 				// der evtl. Fund folgender Suche muss also fertig==1 haben
 				RS rsfertig(My,"SELECT fertig,name,datid FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))
 						/*+" AND pfad = "+sqlft(My->DBS,*aktl)*/,aktc,ZDB);
 				if (!rsfertig.obqueryfehler) {
 					uchar obverschieb{0};
 					char ***cerg{0};
+					// wenn die gefundene Datei also keinen 'fertig'-Eintrag hat
 					if (!(cerg=rsfertig.HolZeile())||!*cerg) {
 						// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
 						// yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
