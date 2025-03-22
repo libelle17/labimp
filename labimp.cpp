@@ -1532,7 +1532,7 @@ void hhcl::virtpruefweiteres()
 			}
 		} // 		while (cerg=datzahl.HolZeile(),cerg?*cerg:0)
 		const string delausw{" FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'"};
-		RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Name,Pfad) IN (SELECT CONCAT (Name,Pfad)"+delausw+")",aktc,ZDB,0,0,0,&zahl); 
+		RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")",aktc,ZDB,0,0,0,&zahl); 
 		RS loe(My,"DELETE"+delausw,aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (!loeschid.empty()) {
@@ -1586,7 +1586,7 @@ void hhcl::virtpruefweiteres()
 		// ZDB=1;
 		if (!My) initDB();
 		const string delausw{" FROM `"+tlydat+"` WHERE fertig<>1"};
-		RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Name,Pfad) IN (SELECT CONCAT (Name,Pfad)"+delausw+")",aktc,ZDB,0,0,0,&zahl); 
+		RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")",aktc,ZDB,0,0,0,&zahl); 
 		RS loeschvor(My,"DELETE"+delausw,aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (nachbneu) {
@@ -1828,7 +1828,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 	reing.hz("Name",base_name(datei));
 	rpatel.hz("Name",base_name(datei));
 	reing.hz("Pfad",datei);
-	rpatel.hz("Pfad",datei);
+	rpatel.hz("Pfad",dir_name(datei));
 	struct stat pfst{0};
 	if (!lstat(datei.c_str(),&pfst)) {
 		reing.hz("geändert",&pfst.st_mtime);
@@ -2441,7 +2441,7 @@ void hhcl::pvirtfuehraus()
 				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
 				// 16.9.18: Namen sollen eindeutig sein, dafuer koennen die Pfade mal umsortiert werden, ohne dass gleich alle Dateien neu eingelesen werden
 				const string delausw{" FROM `"+tlydat+"` WHERE name="+sqlft(My->DBS,base_name(*aktl))+" AND fertig<>1"};
-				RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Name,Pfad) IN (SELECT CONCAT (Name,Pfad)"+delausw+")",aktc,ZDB); 
+				RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")",aktc,ZDB); 
 				RS loeschvor(My,"DELETE"+delausw,aktc,ZDB);
 				// der evtl. Fund folgender Suche muss also fertig==1 haben
 				RS rsfertig(My,"SELECT fertig,name,datid FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))
