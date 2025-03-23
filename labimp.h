@@ -319,7 +319,8 @@ class hhcl:public dhcl
 		tm maxnachdat{0,0,0,1,0,200,0,0,0}; // maximale Datum der Tabelle tlyus fuer die Nachbearbeitung
 		string nname,vname,titel,nvorsatz,sgschl,pid{"0"},auftrschl,baktid,hinwid,erklid,kommid;
 		svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
-		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw,grenzwi,labk,lwert;
+		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw,grenzwi,labk,lwert,koreinh;
+		struct tm berdat{0}; // Berichtsdatum
 		tm abndat{0};
 		uchar keimz{0},keimzda{0};
 		svec zlangt,zabk,zwerte,zverfa; // fuer Vergleich mit laborneu

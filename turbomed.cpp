@@ -142,16 +142,16 @@ void hhcl::ergpql()
 	if (My->obtabspda("namen","gebdat")) {
 		hLog(violetts+Txt[T_ergpql_ueberladene_Funktion]+schwarz);
 //		pql.insert(pql.begin(),"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
-		pql.insert(pql.begin(),"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND vorname="+sqlft(My->DBS,vname)+" AND gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin(),"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND vorname="+sqlft(My->DBS,vname)+" AND gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" AND pat_id<>0 AND pat_id<100000 GROUP BY pat_id");
 //		pql.insert(pql.begin()+1,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND vorname="+sqlft(My->DBS,vname)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
-		pql.insert(pql.begin()+1,"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND vorname="+sqlft(My->DBS,vname)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+1,"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND vorname="+sqlft(My->DBS,vname)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" AND pat_id<>0 AND pat_id<100000 GROUP BY pat_id");
 		// Pat_ID_3:
-		pql.insert(pql.begin()+2,"SELECT pat_id FROM namen n WHERE gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
-		pql.insert(pql.begin()+3,"SELECT pat_id FROM namen WHERE gebdat="+sqlft(My->DBS,&gebtm)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+2,"SELECT pat_id FROM namen n WHERE gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" AND pat_id<>0 AND pat_id<100000 GROUP BY pat_id");
+		pql.insert(pql.begin()+3,"SELECT pat_id FROM namen WHERE gebdat="+sqlft(My->DBS,&gebtm)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" AND pat_id<>0 AND pat_id<100000 GROUP BY pat_id");
 //		pql.insert(pql.begin()+4,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebtm)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
-		pql.insert(pql.begin()+4,"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND gebdat="+sqlft(My->DBS,&gebtm)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+4,"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND gebdat="+sqlft(My->DBS,&gebtm)+" AND geschlecht='"+(sgschl=="1"?'m':sgschl=="2"?'w':' ')+"' AND kaufdat<="+sqlft(My->DBS,&eingtm)+" AND pat_id<>0 AND pat_id<100000 GROUP BY pat_id");
 //		pql.insert(pql.begin()+5,"SELECT pat_id FROM namen WHERE nachname=CONVERT("+sqlft(My->DBS,nname)+" USING latin1) COLLATE latin1_german2_ci AND gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
-		pql.insert(pql.begin()+5,"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" GROUP BY pat_id");
+		pql.insert(pql.begin()+5,"SELECT pat_id FROM namen WHERE nachname="+sqlft(My->DBS,nname)+" AND gebdat="+sqlft(My->DBS,&gebtm)+" AND kaufdat<="+sqlft(My->DBS,&eingtm)+" AND pat_id<>0 AND pat_id<100000 GROUP BY pat_id");
 		// hier steht dann die Standardvorgabe
 		/*
 		pql<<"SELECT n.pat_id FROM namen n LEFT JOIN laborneu l ON n.pat_id = l.pat_id WHERE n.gebdat="+sqlft(My->DBS,&gebtm)+
