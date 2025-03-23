@@ -310,6 +310,7 @@ class hhcl:public dhcl
 		const static tm tmmax; // {0,0,0,1,0,200,0,0,0}
 		string labind,pneuind,pnbid,hinwind;
 		string datid;
+		string patelid;
 		string usid;
 		svec usids; // alle eingetragenen usids
 		ic_cl *icp[3];
@@ -318,7 +319,7 @@ class hhcl:public dhcl
 		tm maxnachdat{0,0,0,1,0,200,0,0,0}; // maximale Datum der Tabelle tlyus fuer die Nachbearbeitung
 		string nname,vname,titel,nvorsatz,sgschl,pid{"0"},auftrschl,baktid,hinwid,erklid,kommid;
 		svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
-		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw;
+		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw,grenzwi,labk,lwert;
 		tm abndat{0};
 		uchar keimz{0},keimzda{0};
 		svec zlangt,zabk,zwerte,zverfa; // fuer Vergleich mit laborneu
@@ -371,7 +372,7 @@ class hhcl:public dhcl
 		void virttesterg(); //α
 		void virtlieskonfein();
 		void virtautokonfschreib();
-		int dverarbeit(const string& datei,string *datidp);
+		int dverarbeit(const string& datei,string *datidp,string *patelidp);
 		int vverarbeit(const string& datei); // Vergleichsdatei verarbeiten
 		void usschluss(const size_t aktc);
 		void wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep);

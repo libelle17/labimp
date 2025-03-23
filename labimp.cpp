@@ -1531,8 +1531,10 @@ void hhcl::virtpruefweiteres()
 				cout<<befehl<<endl;
 			}
 		} // 		while (cerg=datzahl.HolZeile(),cerg?*cerg:0)
-		const string delausw{" FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'"};
-		RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")",aktc,ZDB,0,0,0,&zahl); 
+		const string delausw{" FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'"},
+								 delaus2{" FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")"};
+		RS lo2(My,"DELETE FROM `"+labpath+"` WHERE elID IN (SELECT ID"+delaus2+")",aktc,ZDB,0,0,0,&zahl);
+		RS lol(My,"DELETE"+delaus2,aktc,ZDB,0,0,0,&zahl); 
 		RS loe(My,"DELETE"+delausw,aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (!loeschid.empty()) {
@@ -1585,8 +1587,11 @@ void hhcl::virtpruefweiteres()
 		const uchar altZDB{ZDB};
 		// ZDB=1;
 		if (!My) initDB();
-		const string delausw{" FROM `"+tlydat+"` WHERE fertig<>1"};
-		RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")",aktc,ZDB,0,0,0,&zahl); 
+		const string delausw{" FROM `"+tlydat+"` WHERE fertig<>1"},
+								 delaus2{" FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")"};
+
+		RS lo2(My,"DELETE FROM `"+labpath+"` WHERE elID IN (SELECT ID"+delaus2+")",aktc,ZDB);
+		RS lol(My,"DELETE"+delaus2,aktc,ZDB); 
 		RS loeschvor(My,"DELETE"+delausw,aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (nachbneu) {
@@ -1795,6 +1800,17 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		keimz=0; // "Labor 20101204 195050.dat"
 		keimzda=0; // "Labor 20101210 034422.dat"
 	} // 					if (rbawep)
+	if (grenzwi!="") {
+				cout<<"mit positivem  Grenzwertindikator einzutragen"<<endl;
+		svec eindfeld; eindfeld<<"id";
+		insv rlpath(My,/*itab*/labpath,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+		rlpath.hz("elID",patelid);
+		rlpath.hz("Pat_ID",pid);
+		rlpath.hz("Name",nname+", "+vname);
+		rlpath.hz("Parameter",labk);
+		rlpath.hz("Wert",lwert);
+		rlpath.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
+	}
 	uNm.clear();
 	oNm.clear();
 	uNw.clear();
@@ -1804,12 +1820,14 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	erklaerung.clear();
 	kommentar.clear();
 	auftrhinw.clear();
+	grenzwi.clear();
 	memset(&abndat,0,sizeof abndat);
 	rlep->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0);
+	
 } // void hhcl::wertschreib
 
 // aufgerufen in pvirtfuehraus; // return 0 = fertig
-int hhcl::dverarbeit(const string& datei,string *datidp)
+int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 {
 #define speichern
 #ifdef speichern
@@ -1841,7 +1859,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 	rpatel.hz("fertig",0);
 #ifdef speichern
 	reing.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/datidp);
-	rpatel.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/datidp);
+	rpatel.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/patelidp);
 #endif 
 	insv raerzte(My,/*itab*/tlyaerzte,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
 	insv rsaetze(My,/*itab*/tlysaetze,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
@@ -1866,7 +1884,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 		string zeile,altz;
 		struct tm berdat{0}; // Berichtsdatum
 		uchar oblaborda=0, arztnameda=0, /*in (Vor)zeile kommt Wort Keimzahl vor*/keimz=0,/*die Keimzahl wurde schon eingesetzt*/keimzda=0;
-		string labk,llang; // letzte Abkürzung, letzter Langtext
+		string llang; // letzte Abkürzung, letzter Langtext
 		string verf,abkue,lanr;
 		float ldtvers{0}; // LDT-Version
 		while(getline(mdat,zeile)) {
@@ -2050,6 +2068,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 			} else if (cd=="8418") {
 				rwe.hz("Teststatus",inh);
 			} else if (cd=="8420") {
+				lwert=inh;
 				rwe.hz("Wert",inh);
 				// caus<<"llang: "<<llang<<", fuege zu zwerte hinzu: "<<inh<<endl;
 				// bei einer von zwei GFR kein Wiederfinden in laborneu Pat. 53919 am 4.7.12
@@ -2070,6 +2089,8 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 				rpar.hz("Einheit",keinh);
 				rpneu.hz("Einheit",keinh);
 			} else if (cd=="8422") {
+				cout<<"Grenzwertindikator positiv"<<endl;
+				grenzwi=inh;
 				rwe.hz("Grenzwerti",inh);
 			} else if (cd=="8301") {
 				BDTtoDate(inh,&eingtm,2000,ldtvers>1014);
@@ -2251,7 +2272,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp)
 					normbereich+=inh;
 				}
 			} else if (cd=="8461") {
-				// in der Annhame, dass 8461 vor 8462 kommt
+				// in der Annahme, dass 8461 vor 8462 kommt
 				uNm.clear();
 				oNm.clear();
 				oNw.clear();
@@ -2440,8 +2461,10 @@ void hhcl::pvirtfuehraus()
 				// wenn Datei schon angefangen wurde zu einzulesen (fertig<>1), dann dieses loeschen
 				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
 				// 16.9.18: Namen sollen eindeutig sein, dafuer koennen die Pfade mal umsortiert werden, ohne dass gleich alle Dateien neu eingelesen werden
-				const string delausw{" FROM `"+tlydat+"` WHERE name="+sqlft(My->DBS,base_name(*aktl))+" AND fertig<>1"};
-				RS lol(My,"DELETE FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")",aktc,ZDB); 
+				const string delausw{" FROM `"+tlydat+"` WHERE name="+sqlft(My->DBS,base_name(*aktl))+" AND fertig<>1"},
+							       delaus2{" FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")"};
+				RS lo2(My,"DELETE FROM `"+labpath+"` WHERE elID IN (SELECT ID"+delaus2+")",aktc,ZDB);
+				RS lol(My,"DELETE"+delaus2,aktc,ZDB); 
 				RS loeschvor(My,"DELETE"+delausw,aktc,ZDB);
 				// der evtl. Fund folgender Suche muss also fertig==1 haben
 				RS rsfertig(My,"SELECT fertig,name,datid FROM `"+tlydat+"` l WHERE name ="+sqlft(My->DBS,base_name(*aktl))
@@ -2449,23 +2472,23 @@ void hhcl::pvirtfuehraus()
 				if (!rsfertig.obqueryfehler) {
 					uchar obverschieb{0};
 					char ***cerg{0};
-					// wenn die gefundene Datei also keinen 'fertig'-Eintrag hat
+					// wenn zur gefundenen Datei also kein Eintrag mit 'fertig' da ist
 					if (!(cerg=rsfertig.HolZeile())||!*cerg) {
 						// caus<<i<<": "<<blau<<*aktl<<schwarz<<endl;
 						// yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
 						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i+1,schwarz,blau,lrue.size(),
 								schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
-						if (!dverarbeit(*aktl,&datid)) {
+						if (!dverarbeit(*aktl,&datid,&patelid)) {
 							verarbeitet++;
 							obverschieb=1;
 						}
-						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s",blau,i+1,schwarz,blau,lrue.size(),
-								schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz);
+						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s %s%s%s",blau,i+1,schwarz,blau,lrue.size(),
+								schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz,blau,patelid.c_str(),schwarz);
 						if (dszahl && verarbeitet==dszahl) break;
 					} else { // 				if (!rsfertig.HolZeile())
 						// wenn Datei schon eingetragen, dann auch verscheiben
 						fLog(rots+Txk[T_datei]+blau+*aktl+rot+Tx[T_war_schon_in]+blau+dbq+rot+Tx[T_eingetragen_]+blau+"\n"+rsfertig.sql+
-								rot+"), datid: "+blau+cjj(cerg,2)+schwarz,1,oblog);
+								rot+"), datid: "+blau+cjj(cerg,2)+schwarz+", patdlid: " +blau+patelid+schwarz,1,oblog);
 						obverschieb=1;
 					}        // 				if (!rsfertig.HolZeile()) else
 					if (obverschieb && fertigvz!=ldatvz) {
