@@ -3033,10 +3033,13 @@ void hhcl::pvirtfuehraus()
 				dateidat="";
 				tm dateidtm;
 				char ddcont[11];
-				string dattag{aktl->substr(1,10)};
+				string dattag{base_name(*aktl).substr(0,10)};
+				// "dattag: "<<dattag<<endl;
         if (strptime(dattag.c_str(),"%d.%m.%Y", &dateidtm)) {
           strftime(ddcont,sizeof(ddcont),"%Y%m%d",&dateidtm);
 					dateidat=ddcont;
+				} else {
+					dateidat="00000000";
 				}
 				// wenn Datei schon angefangen wurde zu einzulesen (fertig<>1), dann dieses loeschen
 				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
