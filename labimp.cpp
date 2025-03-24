@@ -572,6 +572,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"pruefdb","checkdb"},
 	// T_Termine
 	{"Termine","appointments"},
+	// T_Berichtsdatum
+	{"Berichtsdatum","report date"},
+	// T_Dateidatum
+	{"Dateidatum","date in filename"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1158,6 +1162,7 @@ void hhcl::prueflpatel(DB *My, const size_t aktc, const int obverb, const int ob
 			Feld("Name","varchar","100","",Tx[T_Name],0,0,1),
 			Feld("Größe","int","12","",Tx[T_Groesse],0,0,1),
 			Feld("Änderungsdatum","datetime","0","0",Tx[T_Aenderungsdatum],0,0,1),
+			Feld("Dateidat","datetime","0","0",Tx[T_Dateidatum],1,0,1),
 			Feld("fertig","bit","","",Tx[T_dfertig],0,0,1),
 		};
 		Feld ifelder1[] = {Feld("Datum")};   Index i1("Datum",ifelder1,elemzahl(ifelder1));
@@ -1181,6 +1186,7 @@ void hhcl::prueflpath(DB *My, const size_t aktc, const int obverb, const int obl
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("elID","int","10","",Tx[T_ID_der_Einlesung],/*obind*/1,/*obauto*/0,/*nnull*/1,/*vdefa*/string(),/*unsig*/1),
+			Feld("Berdat","datetime","0","0",Tx[T_Berichtsdatum],1,0,1),
 		  Feld("Pat_id","int","6","","",0,0,1),
 			Feld("Name","varchar","20","",Tx[T_Name],0,0,1),
 			Feld("Parameter","varchar","50","",Tx[T_Laborparameter],0,0,1),
@@ -1197,10 +1203,11 @@ void hhcl::prueflpath(DB *My, const size_t aktc, const int obverb, const int obl
 		  Feld("hinwsp","int","10","",Tx[T_hinwsp],0,0,1),
 		  Feld("termsp","int","10","",Tx[T_termsp],0,0,1),
 		  Feld("fICDsp","int","10","",Tx[T_ficdsp],0,0,1),
-			Feld("Termine","longtext","","",Tx[T_Termine],0,0,1),
+			Feld("Termine","longtext","","",Tx[T_Termine],0,0,1,string()),
 		};
 		Feld ifelder1[] = {Feld("Pat_id"),Feld("Parameter")}; Index i1("Patid_Par",ifelder1,elemzahl(ifelder1));
-		Index indices[]={i1};
+//		Feld ifelder2[] = {Feld("Berdat")}; Index i2("Berdat",ifelder2,elemzahl(ifelder2));
+		Index indices[]={i1/*,i2*/};
 		Constraint csts[]{
 			Constraint(labpath+labpatel,new Feld{Feld("elID")},1,labpatel,new Feld{Feld("ID")},1,cascade,cascade),
 		};
@@ -1838,13 +1845,16 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		rlpath.hz("Normbereich",(obnb?normbereich:kommentar));
 		string geskom{(auftrhinw==""?"":auftrhinw+" \r\n")+(kommentar==""?"":(obnb?kommentar+" \r\n":""))+erklaerung}; // 8490, 8480, 8470 
 		rlpath.hz("Labhinw",geskom);
+			char berzt[15];
+			strftime(berzt,sizeof(berzt),"%Y%m%d %H:%M:%S",&berdat);
+//			caus<<gruen<<"berdat: "<<rot<<berzt<<schwarz<<endl;
+//		time_t bt=mktime(&berdat);
+		rlpath.hz("Berdat",&berdat/*&bt*/);
 		char eingzt[9];
 		strftime(eingzt,sizeof(eingzt),"%Y%m%d",&eingtm);
 		string sql;
 		
-			char berzt[15];
-//			strftime(berzt,sizeof(berzt),"%Y%m%d %H:%M:%S",&berdat);
-			strftime(berzt,sizeof(berzt),"%Y%m%d",&berdat);
+		strftime(berzt,sizeof(berzt),"%Y%m%d",&berdat);
 // das Folgende modifiziert aus labpath:
 //									static string altnn,altvn;
 									string /*pid,*/gschl,mfmg,hinw,ficd;
@@ -2415,6 +2425,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 	if (!lstat(datei.c_str(),&pfst)) {
 		reing.hz("geändert",&pfst.st_mtime);
 		rpatel.hz("Änderungsdatum",&pfst.st_mtime);
+		rpatel.hz("Dateidat",dateidat);
 		reing.hz("Größe",pfst.st_size);
 		rpatel.hz("Größe",pfst.st_size);
 	}
@@ -3019,6 +3030,14 @@ void hhcl::pvirtfuehraus()
 					pthread_mutex_unlock(&timemutex);
 					}
 				 */
+				dateidat="";
+				tm dateidtm;
+				char ddcont[11];
+				string dattag{aktl->substr(1,10)};
+        if (strptime(dattag.c_str(),"%d.%m.%Y", &dateidtm)) {
+          strftime(ddcont,sizeof(ddcont),"%Y%m%d",&dateidtm);
+					dateidat=ddcont;
+				}
 				// wenn Datei schon angefangen wurde zu einzulesen (fertig<>1), dann dieses loeschen
 				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
 				// 16.9.18: Namen sollen eindeutig sein, dafuer koennen die Pfade mal umsortiert werden, ohne dass gleich alle Dateien neu eingelesen werden
