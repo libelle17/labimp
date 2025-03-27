@@ -1751,6 +1751,7 @@ void hhcl::usschluss(const size_t aktc)
 // vorher muessen zwerte und zlangt und zabk bzw. zverfa schon gefuellt sein
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep)
 {
+	if (pid=="0") return;
 	if (*usoffenp) {
 		// caus<<rusp->size()<<endl;
 		russchreib(*rusp,aktc,usidp);
@@ -1835,6 +1836,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	if (grenzwi!="") {
 		svec eindfeld; eindfeld<<"id";
 		insv rlpath(My,/*itab*/labpath,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
+		if (lwert=="24.5"&&labk=="GFRCYS") caus<<pid<<" "<<nname<<" "<<vname<<endl;
 		rlpath.hz("elID",patelid);
 		rlpath.hz("Pat_ID",pid);
 		rlpath.hz("Name",nname+", "+vname);
@@ -2496,7 +2498,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 					rsaetze.hz("Satzart",inh);
 					rsaetze.hz("DatID",datid);
 					UsLfd=0;
-					// 8221 Datenpaket-Abschluss
+					// 8221 Datenpaket-Abschluss, am Schluss der Datei
 				} else if (inh.substr(0,4)=="8221") {
 					//					if (inh.length()>4) ... // trat nicht auf
 					lsatzart=2;
@@ -2533,6 +2535,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 						russchreib(rus,aktc,&usid);
 						usoffen=0;
 					} // if (usoffen)
+				wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle); // neu 27.3.25
 					satzart=inh;
 					rus.hz("DatID",datid);
 					rus.hz("SatzID",satzid);
