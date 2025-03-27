@@ -1751,10 +1751,6 @@ void hhcl::usschluss(const size_t aktc)
 // vorher muessen zwerte und zlangt und zabk bzw. zverfa schon gefuellt sein
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep)
 {
-	if (pid=="0") {
-		caus<<"Hier vor return bei wertschreib"<<endl;
-		return;
-	}
 	if (*usoffenp) {
 		// caus<<rusp->size()<<endl;
 		russchreib(*rusp,aktc,usidp);
@@ -2507,6 +2503,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 					lsatzart=2;
 					/* stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 					caus<<rot<<"1 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
+					caus<<"vor Aufruf 4"<<endl;
 					wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
 					// rle.schreib z.B. "Labor 20101201 004634.dat"
 					//					satzid="0";
@@ -2538,8 +2535,10 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 						russchreib(rus,aktc,&usid);
 						usoffen=0;
 					} // if (usoffen)
-					caus<<"Hier vor ausgabe"<<endl;
-				wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle); // neu 27.3.25
+				if (pid!="0") {
+					caus<<"vor Aufruf 1"<<endl;
+					wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle); // neu 27.3.25
+				}
 					satzart=inh;
 					rus.hz("DatID",datid);
 					rus.hz("SatzID",satzid);
@@ -2566,6 +2565,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 			} else if (cd=="8410" || cd=="8434") { 
 				/*stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 				caus<<rot<<"2 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
+					caus<<"vor Aufruf 2"<<endl;
 				wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
 				// rle.schreib z.B. "Labor 20101202 011636.dat"
 				if (cd=="8434") {
@@ -2891,6 +2891,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 		} // 		while(getline(mdat,zeile))
 		/* stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 		caus<<rot<<"3 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
+					caus<<"vor Aufruf 3"<<endl;
 		wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle);
 		usschluss(aktc);
 		reing.hz("codepage",cp);
