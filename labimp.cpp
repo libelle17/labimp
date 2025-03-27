@@ -1751,7 +1751,10 @@ void hhcl::usschluss(const size_t aktc)
 // vorher muessen zwerte und zlangt und zabk bzw. zverfa schon gefuellt sein
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep)
 {
-	if (pid=="0") return;
+	if (pid=="0") {
+		caus<<"Hier vor return bei wertschreib"<<endl;
+		return;
+	}
 	if (*usoffenp) {
 		// caus<<rusp->size()<<endl;
 		russchreib(*rusp,aktc,usidp);
@@ -2535,6 +2538,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 						russchreib(rus,aktc,&usid);
 						usoffen=0;
 					} // if (usoffen)
+					caus<<"Hier vor ausgabe"<<endl;
 				wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rle); // neu 27.3.25
 					satzart=inh;
 					rus.hz("DatID",datid);
