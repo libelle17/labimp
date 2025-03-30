@@ -99,8 +99,8 @@ enum T_
 	T_8615_Auftraggeber_LANR,
 	T_8405_Patienteninformation_Turbomed,
 	T_8407_Geschlecht_Turbomed,
-	T_8490_Auftragsbezogene_Hinweise_Turbomed,
 #ifdef altfelder
+	T_8490_Auftragsbezogene_Hinweise_Turbomed,
 	T_Ursprung_der_Pat_id_E__erwogene_Pat_id_su_L__vergleich_mit_ueber_Turbomed_eingelesenem_Labor,
 	T_erwogene_Pat_id_mit_gleichem_Vornamen_Nachnamen_und_Geburtstag,
 	T_erwogene_Pat_id_mit_gleichem_Vornamen_und_Nachnamen,
@@ -115,7 +115,7 @@ enum T_
 	T_Laborwerte_die_zur_Zuordnung_gefuehrt_haben,
 	T_Datum_zu_dem_Datensatz_zuletzt_verglichen_wurde,
 	T_Affected_Number_Zahl_der_zugehoerigen_Datensaetze_in_Laborneu,
-	T_Laborwert,
+	T_Laborwerte,
 	T_8420_Ergebniswert_Turbomed,
 	T_8422_Grenzwertindikator_Turbomed,
 	T_8418_Teststatus_Turbomed,
@@ -163,12 +163,18 @@ enum T_
 	T_zum_Bezug_fuer_Laborsaetze,
 	T_Bezug_auf_lyaerzte,
 	T_prueflyhinw,
+	T_prueflyqspez,
 	T_Auftragshinweis_Kommentar_oder_Erklaerung,
+	T_Probenmaterial_Spezifikation,
 	T_Hinweise,
+	T_Spezifikation,
 	T_codepage_0_utf8_1_iso88591_2_cp850,
 	T_Auftragshinweis_Bezug_auf_lyhinw,
 	T_Erklaerung_Bezug_auf_lyhinw,
 	T_Kommentar_Bezug_auf_lyhinw,
+	T_Bezug_auflspez,
+	T_Auftragshinweis_Bezug_aufspez,
+	T_Kommentar_Bezug_auf_lqspez,
 	T_letzte_Aenderung,
 	T_Groesse,
 //	T_auswertpql,
@@ -281,6 +287,7 @@ enum T_
 	T_termsp,
 	T_ficdsp,
 	T_Termine,
+	T_Laborwert,
 	T_Berichtsdatum,
 	T_Dateidatum,
 	T_MAX //α
@@ -306,11 +313,12 @@ class hhcl:public dhcl
 		string tlyfehlt; /*=vorsil+"fehlt"*/
 		string tlyparameter; /*=vorsil+"parameter"*/
 		string tlyhinw; /*=vorsil+"hinw"*/
+		string tlyqspez; /*=vorsil+"qspez"*/
 	 string labpatel;
 	 string labpath;
 		const static tm tmnull; // {0}
 		const static tm tmmax; // {0,0,0,1,0,200,0,0,0}
-		string labind,pneuind,pnbid,hinwind;
+		string labind,pneuind,pnbid,hinwind,spezind;
 		string datid;
 		string patelid;
 		string usid;
@@ -319,10 +327,14 @@ class hhcl:public dhcl
 		tm eingtm{0}, gebtm{0};
 		tm minnachdat{0}; // minimales Datum der Tabelle tlyus fuer die Nachbearbeitung
 		tm maxnachdat{0,0,0,1,0,200,0,0,0}; // maximale Datum der Tabelle tlyus fuer die Nachbearbeitung
-		string nname,vname,titel,nvorsatz,sgschl,pid{"0"},auftrschl,baktid,hinwid,erklid,kommid;
+		string nname,vname,titel,nvorsatz,sgschl,pid{"0"},auftrschl,baktid,hinwid,qspezid,erklid,kommid,gschl,obs;
+		int obpid{0};
+		long palter{0};
+		char berzt[15];
+		tm voret{0};
 		svec pql; // Vektor fuer SQL-Abfragen zum Herausfinden der Pat_ID
 		string dateidat;
-		string normbereich,uNm,oNm,uNw,oNw,qspez,erklaerung,kommentar,auftrhinw,grenzwi,labk,lwert,koreinh;
+		string normbereich,uNm,oNm,uNw,oNw,erklaerung,kommentar,auftrhinw,qspez,grenzwi,labk,lwert,koreinh;
 		struct tm berdat{0}; // Berichtsdatum
 		tm abndat{0};
 		uchar keimz{0},keimzda{0};
@@ -369,6 +381,7 @@ class hhcl:public dhcl
 		void prueflyfehlt(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyparameter(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyhinw(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyqspez(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflpath(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflpatel(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueftbl();
@@ -379,7 +392,7 @@ class hhcl:public dhcl
 		int dverarbeit(const string& datei,string *datidp,string *patelidp);
 		int vverarbeit(const string& datei); // Vergleichsdatei verarbeiten
 		void usschluss(const size_t aktc);
-		void wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rlep);
+		void wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rspezp,insv *rlep);
 	protected: 
 		// void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, lieskonfein, hcl::hcl nach holsystemsprache
 		void virtVorgbAllg();

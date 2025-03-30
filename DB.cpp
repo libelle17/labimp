@@ -1100,7 +1100,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
   int gesfehlr=0;
   RS rs(dbp,tbname);
   std::stringstream sql;
-  // eine Indexfeldlaenge groesser als die Feldlaenge fuehrt zu Fehler (zumindest bei MariaDB)
+	// eine Indexfeldlaenge groesser als die Feldlaenge fuehrt zu Fehler (zumindest bei MariaDB)
   for(unsigned i=0;i<indexzahl;i++){
     for(unsigned j=0;j<indices[i].feldzahl;j++){
       for(unsigned k=0;k<feldzahl;k++){
@@ -1150,15 +1150,16 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 						+(felder[i].coll!=""?" COLLATE "+felder[i].coll:"")
 						+(felder[i].unsig  ?  " UNSIGNED":"")
             +(felder[i].nnull  ?  " NOT NULL":"")
-            +(felder[i].defa=="NULL"||felder[i].defa=="null"||((felder[i].defa.empty()&&!felder[i].nnull)||(felder[i].obind && felder[i].obauto)||utyp.find("LONGTEXT")!=string::npos)?"":" DEFAULT '"+felder[i].defa+"'")
-            +(felder[i].obauto?" AUTO_INCREMENT":" ")
-            +(felder[i].obind && felder[i].obauto?" PRIMARY KEY":" ")
+            +(felder[i].defa=="NULL"||felder[i].defa=="null"||((felder[i].defa.empty()&&!felder[i].nnull)||(felder[i].obind && felder[i].obauto)/*||utyp.find("LONGTEXT")!=string::npos rausgenommen 30.3.25 wg. laboryus.Termine*/)?"":" DEFAULT '"+felder[i].defa+"'")
+            +(felder[i].obauto?" AUTO_INCREMENT":"")
+            +(felder[i].obind && felder[i].obauto?" PRIMARY KEY":"")
             +((felder[i].comment.empty())?"":
                 (" COMMENT '"+felder[i].comment+"'"));
           if (felder[i].obind && !felder[i].obauto) {
             istr[i]=", ADD INDEX `"+felder[i].name+"`(`"+felder[i].name+"`)";
           }
         } // for(int i=0;i<feldzahl;i++)
+				// Pruefung, ob die ganze Tabelle erstellt werden muss
         MYSQL_RES *dbres=mysql_list_tables(dbp->conn[aktc],tbname.c_str());
         if (dbres && !dbres->row_count) {
 					fLog(Txd[T_erstelle_Tabelle]+blaus+tbname+schwarz,1,oblog);
@@ -1200,6 +1201,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
             if (gspn) sql<<" AFTER `"<<felder[gspn-1].name<<"`";
             else sql<<" FIRST";
             sql<<istr[gspn];
+						fLog("Fuege hinzu: "+blaus+sql.str()+schwarz,1,1);
             /*int erg=*/rs.Abfrage(sql.str(),aktc,obverb);
             gesfehlr+=rs.obqueryfehler;
             if (gesfehlr) fLog(string("gesfehlr 2: ")+ltoan(gesfehlr),1,1);
@@ -2308,7 +2310,7 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 					exitp(36);
 					break;
 			} // switch (dbp->DBS) 
-		} // if (obeinfuegen)
+		} // if (obanfangen)
 
 		if (obeinfuegen) {
 			switch (dbp->DBS) {
@@ -2343,7 +2345,6 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 			} // switch (dbp->DBS) 
 		} // if (obeinfuegen)
 	} // 	if (einfp)
-
 	if (!sammeln)if (zaehler) {
 		switch (dbp->DBS) {
 			case MySQL:
