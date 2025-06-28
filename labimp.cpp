@@ -2065,7 +2065,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 				if (obpid) {
 #if altvorwert
 					RS llb(My,"CALL geslabdp("+pid+",\"WHERE abkü='"+labk+"' AND einheit='"+koreinh+"' "
-							"AND zeitpunkt<=STR_TO_DATE('"+berzt+"','%Y%m%d') GROUP BY zeitpunkt DESC LIMIT 3\")i",aktc,ZDB);
+							"AND zeitpunkt<=STR_TO_DATE('"+berzt+"','%Y%m%d') GROUP BY zeitpunkt DESC LIMIT 3)i\")",aktc,ZDB);
 					if (!llb.obqueryfehler) {
 						char ***gerg{0};
 						gerg=llb.HolZeile(); 
@@ -2180,7 +2180,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							} // if (rewert<0.25)
 							if (obpid) {
 								RS llb(My,"CALL geslabdp("+pid+",\"WHERE abkü='fT4' AND zeitpunkt>now()-INTERVAL 5 DAY "
-										"GROUP BY zeitpunkt DESC LIMIT 1\")",aktc,ZDB);
+										"GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
 								char ***gerg{0};
 								if (!llb.obqueryfehler) {
 									gerg=llb.HolZeile();
@@ -2215,7 +2215,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							}
 							if (obpid) {
 								RS llb(My,"CALL geslabdp("+pid+",\"WHERE abkü IN ('TSH','TSBF','TSBL') AND"
-										" zeitpunkt>now()-INTERVAL 5 DAY GROUP BY zeitpunkt DESC LIMIT 1\")",aktc,ZDB);
+										" zeitpunkt>now()-INTERVAL 5 DAY GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
 								char ***gerg{0};
 								if (!llb.obqueryfehler) {
 									gerg=llb.HolZeile();
