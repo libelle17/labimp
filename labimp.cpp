@@ -2065,7 +2065,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 				if (obpid) {
 #if altvorwert
 					RS llb(My,"CALL geslabdp("+pid+",\"WHERE abkü='"+labk+"' AND einheit='"+koreinh+"' "
-							"AND zeitpunkt<=STR_TO_DATE('"+berzt+"','%Y%m%d') GROUP BY zeitpunkt DESC LIMIT 3\")",aktc,ZDB);
+							"AND zeitpunkt<=STR_TO_DATE('"+berzt+"','%Y%m%d') GROUP BY zeitpunkt DESC LIMIT 3\")i",aktc,ZDB);
 					if (!llb.obqueryfehler) {
 						char ***gerg{0};
 						gerg=llb.HolZeile(); 
