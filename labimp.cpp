@@ -1966,6 +1966,7 @@ void hhcl::usschluss(const size_t aktc)
 // vorher muessen zwerte und zlangt und zabk bzw. zverfa schon gefuellt sein
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rspezp, insv *rlep)
 {
+	fLog(violetts+"wertschreib: "+blau+*usidp+" "+schwarz+", obverb: "+ltoan(obverb),obverb,0);
 	if (*usoffenp) {
 		// caus<<rusp->size()<<endl;
 		russchreib(*rusp,aktc,usidp);
@@ -2022,7 +2023,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		rhinwp->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&erklid,/*mitupd=*/0); // erklid s.u.
 		//		rbawep->hz("Erklärung",erklaerung);
 		if (!kommentar.empty()) {
-			rhinwp->hz("Text",sersetze(sersetze(sersetze(sersetze(&kommentar,string("\xB0"),string(" ")),string("\xC2"),string(" ")),string("\x0D"),string(" ")),string("\xB5"),string(" ")));
+			rhinwp->hz("Text",sersetze(sersetze(sersetze(sersetze(sersetze(&kommentar,string("\xB0"),string("°")),string("\xC2"),string(" ")),string("\x0D"),string(" ")),string("\xB5"),string("µ")),string("\xA7"),string("§")));
 			rhinwp->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&kommid,/*mitupd=*/0);
 			rbawep->hz("KommID",kommid);
 			//			rbawep->hz("Kommentar",kommentar);
@@ -2471,6 +2472,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 	unsigned UsLfd=0;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen=0, usoffen=0;
+	fLog(violetts+"dverarbeit: "+blau+datei+" "+schwarz+", obverb: "+ltoan(obverb),obverb,0);
 	vordverarb(aktc); // keine Funktion, nur Meldung
 	svec eindfeld; eindfeld<<"id";
 	insv rpatel(My,/*itam*/labpatel,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
