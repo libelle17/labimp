@@ -2023,7 +2023,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		rhinwp->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&erklid,/*mitupd=*/0); // erklid s.u.
 		//		rbawep->hz("Erklärung",erklaerung);
 		if (!kommentar.empty()) {
-			rhinwp->hz("Text",sersetze(sersetze(sersetze(sersetze(sersetze(&kommentar,string("\xB0"),string("°")),string("\xC2"),string(" ")),string("\x0D"),string(" ")),string("\xB5"),string("µ")),string("\xA7"),string("§")));
+			rhinwp->hz("Text",sersetze(sersetze(sersetze(sersetze(sersetze(&kommentar,string("\xB0"),string(" ")),string("\xC2"),string(" ")),string("\x0D"),string(" ")),string("\xB5"),string("µ")),string("\xA7"),string("§")));
 			rhinwp->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&kommid,/*mitupd=*/0);
 			rbawep->hz("KommID",kommid);
 			//			rbawep->hz("Kommentar",kommentar);
