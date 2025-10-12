@@ -63,6 +63,12 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"Einlesezeitpunkt","time of import"},
 	// T_ob_Einlesen_fertig
 	{"ob Einlesen fertig","if import finished"},
+	// T_ob_Hammerschmidt_angeschaut,
+	{"ob von Dr. Hammerschmidt angeschaut","if viewed by Dr. Hammerschmidt"},
+	// T_ob_Kothny_angeschaut,
+	{"ob von Dr. Kothny angeschaut","if viewed by Dr. Kothny"},
+  // T_ob_Schade_angeschaut,
+	{"ob von G.Schade angeschaut","if viewed by G.Schade"},
 	// T_LaborEinlesungen
 	{"LaborDateien","laboratory files"},
 	// T_Bezug_auf_LaborUS
@@ -741,6 +747,9 @@ void hhcl::prueflydat(DB *My, const size_t aktc, const int obverb, const int obl
 			Feld("Dateidat","datetime","0","0",Tx[T_Dateidatum],1,0,1),
 			Feld("codepage","integer","1","",Tx[T_codepage_0_utf8_1_iso88591_2_cp850],1,0,1),
 			Feld("fertig","bit","1","",Tx[T_ob_Einlesen_fertig],0,0,1),
+			Feld("hang","bit","1","",Tx[T_ob_Einlesen_fertig],0,0,1),
+			Feld("kang","bit","1","",Tx[T_ob_Einlesen_fertig],0,0,1),
+			Feld("sang","bit","1","",Tx[T_ob_Einlesen_fertig],0,0,1),
 		};
 		Index indices[]{
 //			Index("NamePfad",new Feld[2]{Feld("Name"),Feld("Pfad")},2),
