@@ -3005,10 +3005,10 @@ void hhcl::prueftbl()
 		// soll gleich lauten wie u:\programmierung\dateielesen\formular.frm, backslashes hier verdppeln!
 		"labor2a",
 			"SELECT Pat_id, eingang Zeitpunkt, befart FertigStGrad, w.Abkü, w.langtext Langtext"
-        ",TRIM(IF(w.Abkü='ALBUM' AND Wert='' AND k.Text LIKE 'nicht berechenb%','< 20',IF(TRIM(Wert) REGEXP '^[0-9]+\\\\,?[0-9]*$', REPLACE(Wert,',','.'),Wert))) Wert"
-				",w.Einheit,w.Grenzwerti "
+				",TRIM(IF(w.Abkü='ALBUM' AND Wert=''AND k.Text LIKE'nicht berechenb%','<20',IF(TRIM(Wert)REGEXP'^[0-9]+\\\\,?[0-9]*$',REPLACE(Wert,',','.'),IF(Wert=''AND k.text RLIKE'^[<>][^ ]+ .*$',LEFT(k.text,INSTR(k.text,' ')-1),Wert))))Wert"
+				",IF(w.Einheit IN ('','\\'kA\\'')AND Wert=''AND k.text RLIKE'^[<>][^ ]+ .*$',MID(k.text,INSTR(k.text,' ')+1),w.Einheit)Einheit,w.Grenzwerti"
         ",CONCAT(IF(e.text IS NULL OR e.text RLIKE '^:[ /\\\\*:]*$','',IF(e.text RLIKE '^:[ /\\\\*]*:'"
-        " ,CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';'),IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar/*, n.id*/ "
+        ",CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';'),IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),IF(ISNULL(k.text),'',k.text)) Kommentar/*, n.id*/ "
 				",n.NB, uNg"
 				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
 				",l.Labor, Pfad, d.DatID "
