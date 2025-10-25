@@ -2002,6 +2002,27 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		rpar->hz("Aktzeit",&aktzp);
 		// z.B. "Labor 20101201 044232.dat"
 		rpar->schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0,/*mitupd=*/1);
+						const string sql{
+							"UPDATE laborypnb "
+							"SET ung="
+							"CASE WHEN nb='negativ'THEN 0 "
+							"     WHEN nb RLIKE '^(?:Grenzbereich:)?[( ]*[0-9 .,]*-[)0-9 .,]+[) ]*$' THEN COALESCE(NULLIF(REPLACE(REGEXP_REPLACE(nb,'^(?:Grenzbereich:)?[( ]*([0-9 .,]*)-[0-9 .,]+[) ]*$','\\\\1'),' ',''), ''), '0')"
+							"     WHEN nb RLIKE '^[( ]*(<|<=|Grenztiter|bis ) *[0-9,. :]*$' THEN 0"
+							"     WHEN nb RLIKE '^[( ]*(>|>=|ab ) *[0-9,. :]*[) ]*$' THEN REGEXP_REPLACE(nb,'^[( ]*(?:>|>=|ab ) *([0-9,. :]*)[) ]*$','\\\\1')"
+							" ELSE''END,"
+							" ong="
+							" CASE WHEN nb='negativ'THEN 0 "
+							"      WHEN nb RLIKE '^(?:Grenzbereich:)?[( ]*[0-9 .,:]*-[0-9 .,:]+[) ]*$' THEN REPLACE(REGEXP_REPLACE(nb,'^(?:Grenzbereich:)?[( ]*[0-9 .,:]*-([0-9 .,:]+)[) ]*$','\\\\1'),' ','')"
+							"      WHEN nb RLIKE '^[( ]*(?:<|<=|Grenztiter|bis ) *[0-9,. :]*[) ]*$' THEN REPLACE(REGEXP_REPLACE(nb,'^[( ]*(?:<|<=|Grenztiter|bis ) *([0-9,. :]*)[) ]*$','\\\\1'),' ','')"
+							"      WHEN nb RLIKE '^[( ]*(>|>=|ab ) *[0-9,. :]*[) ]*$' THEN '∞'"
+							" ELSE''END "
+							"WHERE (ung='' OR ong='') AND nb<>'' "
+							"AND NOT nb RLIKE CONCAT(CHR(13),'|;|pos|.+negativ|tox|über|nicht|bzw|nach|unauf|ratio|unten|normalw|bereich|^['']+$|^0$|^0.00$')"};
+/*							"-- AND NOT nb='negativ'"
+							"-- AND NOT nb RLIKE '^(?:Grenzbereich:)?[( ]*[0-9 .,]*-[0-9 .,]+[) ]*$'"
+							"-- AND not nb RLIKE '^[( ]*(<|<=|Grenztiter|bis ) *[0-9,. :]*[) ]*$'"
+							"-- AND NOT nb RLIKE '^[( ]*(>|>=|ab ) *[0-9,. ]*[) ]*$'" */
+						RS nbkorr(My,sql,aktc,ZDB);
 	} // 	if (rpar->size())
 	if (rpneu->size()) {
 		// rpneu->ausgeb();
