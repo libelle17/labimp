@@ -3035,7 +3035,7 @@ void hhcl::prueftbl()
 				",IF(w.abkü='LDL' AND w.einheit='mg/dl','100',oNg) oNg"
 				",l.Labor, Pfad, d.DatID "
 				",p.Gruppe, p.Reihe,2 Qu "
-        ",CONCAT('2:',DATE_FORMAT(eingang,'%e.%c.%y'),'|',w.Abkü,'|',w.Langtext,'|',Wert,IF(w.grenzwerti='','',CONCAT('(',w.Grenzwerti,')')),'|',w.Einheit,'|[',NB,'](',uNg,'-',oNg,')|',l.Labor,'|',COALESCE(e.text,''),'|',COALESCE(k.text,''))info "
+        ",CONCAT('2:',DATE_FORMAT(eingang,'%e.%c.%y'),'|',w.Abkü,'|',w.Langtext,'|',Wert,IF(w.grenzwerti='','',CONCAT('(',w.Grenzwerti,')')),'|',w.Einheit,'|[',NB,'](',uNg,'-',oNg,')|',l.Labor,'|',COALESCE(e.text,''),'|',COALESCE(k.text,''))COLLATE utf8mb4_german2_ci info "
 				"FROM `"+tlyus+"` u "
 				"LEFT JOIN `"+tlywert+"` w ON w.usid=u.id "
         "LEFT JOIN laborabkum au USING(abkü)"
