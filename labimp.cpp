@@ -2095,7 +2095,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 				vorwert=0;
 				if (obpid) {
 #if altvorwert
-					RS llb(My,"CALL geslabdp("+pid+",\"WHERE abkü='"+labk+"' AND einheit='"+koreinh+"' "
+					RS llb(My,"CALL geslabneu("+pid+",\"\",\"WHERE abkü='"+labk+"' AND einheit='"+koreinh+"' "
 							"AND zeitpunkt<=STR_TO_DATE('"+berzt+"','%Y%m%d') GROUP BY zeitpunkt DESC LIMIT 3)i\")",aktc,ZDB);
 					if (!llb.obqueryfehler) {
 						char ***gerg{0};
@@ -2210,7 +2210,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								hinwsp=255;
 							} // if (rewert<0.25)
 							if (obpid) {
-								RS llb(My,"CALL geslabdp("+pid+",\"WHERE abkü='fT4' AND zeitpunkt>now()-INTERVAL 5 DAY "
+								RS llb(My,"CALL geslabneu("+pid+",\"\",\"WHERE abkü='fT4' AND zeitpunkt>now()-INTERVAL 5 DAY "
 										"GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
 								char ***gerg{0};
 								if (!llb.obqueryfehler) {
@@ -2245,7 +2245,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								hinwsp=255;
 							}
 							if (obpid) {
-								RS llb(My,"CALL geslabdp("+pid+",\"WHERE abkü IN ('TSH','TSBF','TSBL') AND"
+								RS llb(My,"CALL geslabneu("+pid+",\"\",\"WHERE abkü IN ('TSH','TSBF','TSBL') AND"
 										" zeitpunkt>now()-INTERVAL 5 DAY GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
 								char ***gerg{0};
 								if (!llb.obqueryfehler) {
@@ -3032,7 +3032,7 @@ void hhcl::prueftbl()
         " ,CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';'),IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),COALESCE(k.text,'')) Kommentar/*, n.id*/ "
 				",COALESCE(k.text,'')Abschl"
 				",CAST(n.NB AS CHAR)NB, n.uNg"
-				",REGEXP_REPLACE(n.oNg,'^([<>0-9,.-]*).*$','\\1')oNg"
+				",REGEXP_REPLACE(n.oNg,'^([<>0-9,.-]*).*$','\\\\1')oNg"
 				",l.Labor, Pfad, d.DatID "
 				",p.Gruppe, p.Reihe,2 Qu "
         ",CONCAT('2:',DATE_FORMAT(eingang,'%e.%c.%y'),'|',w.Abkü,'|',w.Langtext,'|',Wert,IF(w.grenzwerti='','',CONCAT('(',w.Grenzwerti,')')),'|',w.Einheit,'|[',NB,'](',uNg,'-',oNg,')|',l.Labor,'|',COALESCE(e.text,''),'|',COALESCE(k.text,''))COLLATE utf8mb4_german2_ci info "
