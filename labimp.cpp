@@ -1612,11 +1612,11 @@ void hhcl::virtpruefweiteres()
 				cout<<befehl<<endl;
 			}
 		} // 		while (cerg=datzahl.HolZeile(),cerg?*cerg:0)
-		const string delausw{" FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'"},
-								 delaus2{" FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad"+delausw+")"};
+		const string delbed{string(" WHERE datid")+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'"},
+								 delaus2{" FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad FROM `"+tlydat+"`"+delbed+")"};
 		RS lo2(My,"DELETE FROM `"+labpath+"` WHERE elID IN (SELECT ID"+delaus2+")",aktc,ZDB,0,0,0,&zahl);
 		RS lol(My,"DELETE"+delaus2,aktc,ZDB,0,0,0,&zahl); 
-		RS loe(My,"DELETE"+delausw,aktc,ZDB,0,0,0,&zahl); // kann lange brauchen
+		RS loe(My,"DELETE u.*,w.*,s.*,d.* FROM laboryus u LEFT JOIN laborywert w ON w.usid=u.id LEFT JOIN laborysaetze s ON s.satzid=u.satzid LEFT JOIN laborydat d ON d.datid=s.datid"+delbed,aktc,ZDB,0,0,0,&zahl); // kann lange brauchen
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (!loeschid.empty()) {
 			exit(schluss(systemrueck(befehl+" "+devtty,/*obverb=*/0,/*oblog=*/0,/*rueck=*/0,/*obsudc=*/1),Txk[T_nach__]+befehl,oblog));
