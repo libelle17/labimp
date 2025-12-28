@@ -2158,7 +2158,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							} // 										if (!mf.obqueryfehler)
 							const long imf{atol(mfmg.c_str())};
 							if ((rewert<30 && imf)||(rewert<45 && imf>1000)) {
-								hinw+="eGFR <-> "+mfmg+"mg Mtf/d";
+								hinw+="eGFR<->"+mfmg+"mg Mtf/d";
 								hinwsp=255; // vbred
 							}
 							// Wert 55 am 6.2.23 willkuerlich gewaehlt
