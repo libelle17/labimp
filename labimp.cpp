@@ -2137,14 +2137,14 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						if (obpid) {
 							RS mf(My,"SELECT COALESCE(("
 									" SELECT"
-									" IF(INSTR(lmp.medikament,'500')<>0,500,"
-									"IF(INSTR(lmp.medikament,'850')<>0,850,IF(INSTR(lmp.medikament,'iquid'),200,1000)))*"
+									" CONCAT(IF(INSTR(lmp.medikament,'500')<>0,500,"
+									" IF(INSTR(lmp.medikament,'850')<>0,850,IF(INSTR(lmp.medikament,'iquid'),200,1000)))*"
 									" (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(mo,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(mi,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(nm,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(ab,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(zn,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')"
-									" ) summe"
+									" ),DATE_FORMAT(zeitpunkt,'(%e.%c. %k:%i)')) summe"
 									" FROM lmp LEFT JOIN medarten ma ON ma.Medikament=lmp.medanfang"
 									" WHERE lmp.pat_id="+pid+" AND metf<>0"
 									" GROUP BY lmp.pat_id"
@@ -2158,7 +2158,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							} // 										if (!mf.obqueryfehler)
 							const long imf{atol(mfmg.c_str())};
 							if ((rewert<30 && imf)||(rewert<45 && imf>1000)) {
-								hinw+="eGFR <-> "+mfmg+" mg Metformin/d!";
+								hinw+="eGFR <-> "+mfmg+"mg Mtf/d";
 								hinwsp=255; // vbred
 							}
 							// Wert 55 am 6.2.23 willkuerlich gewaehlt
