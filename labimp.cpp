@@ -2149,6 +2149,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						if (obpid) {
 							mfmg="0"; // 29.12.25 Pat_id 15347
 							caus<<"vor Metformin-Abfrage, pid: "<<blau<<pid<<schwarz<<", ZDB: "<<ZDB<<endl;
+							ZDB=1;
 							RS mf(My,"SELECT COALESCE(("
 									" SELECT"
 									" CONCAT(IF(INSTR(lmp.medikament,'500')<>0,500,"
@@ -2163,19 +2164,20 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									" WHERE lmp.pat_id="+pid+" AND metf<>0"
 									" GROUP BY lmp.pat_id"
 									"),0) mfmg;",aktc,ZDB);
+							ZDB=0;
 							if (!mf.obqueryfehler) {
-								caus<<"!mf.obqueryfehler"<<endl;
+								caus<<"!mf.obqueryfehler"<<", pid: "<<pid<<endl;
 								char ***cerg{0};
 								while (cerg=mf.HolZeile(),cerg?*cerg:0) {
 									mfmg=cjj(cerg,0);
-									caus<<"mfmg: "<<mfmg<<endl;
+									caus<<"mfmg: "<<mfmg<<", pid: "<<pid<<endl;
 									break;
 								}
 							} // 										if (!mf.obqueryfehler)
 							const long imf{atol(mfmg.c_str())};
-							caus<<"imf: "<<imf<<endl;
+							caus<<"imf: "<<imf<<", pid: "<<pid<<endl;
 							if ((rewert<30 && imf)||(rewert<45 && imf>1000)) {
-									caus<<"mfmg: "<<mfmg<<endl;
+									caus<<"mfmg: "<<mfmg<<", pid: "<<pid<<endl;
 								hinw+="eGFR<->"+mfmg+"mg Mtf/d";
 								hinwsp=255; // vbred
 							}
