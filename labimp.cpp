@@ -1738,20 +1738,28 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 	if (obverb) rus.ausgeb();
 	// pruefPatID(aktc,rus);
 	// hLog(violetts+Tx[T_pruefPatID_Standardfunktion]+schwarz);
+	caus<<"pid 1 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 	fuellpql();
+	caus<<"pid 2 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 	for(size_t i=0;i<pql.size();i++) {
 		// folgender Code aehnlich in usmod
 		// <<schwarz<<"i: "<<i<<": "<<pql[i]<<endl;
+	caus<<"pid 3 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 		RS rspat(My,pql[i],aktc,ZDB);
+	caus<<"pid 4 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 		if (!rspat.obqueryfehler && rspat.result) { // 7.9. !obqueryfehler und !result vorgekommen
 			hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+pql[i]+schwarz);
+	caus<<"pid 5 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 			if (rspat.result->row_count==1){
+	caus<<"pid 6 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 				char ***cerg{0};
 				if ((cerg=rspat.HolZeile())) {
+	caus<<"pid 7 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 					if (*cerg &&**cerg) {
+	caus<<"pid 8 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 					  hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
+	caus<<"pid 9 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 						if (pid=="0" || pid.empty()) {
-							lpid=pid;
 							pid=**cerg;
 							// <<"i: "<<i<<": "<<blau<<pql[i]<<schwarz<<endl;
 #ifdef mitsqlnachweis
