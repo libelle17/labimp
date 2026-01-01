@@ -1976,6 +1976,9 @@ void hhcl::usschluss(const size_t aktc)
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rspezp, insv *rlep)
 {
 	fLog(violetts+"wertschreib: "+blau+*usidp+" "+schwarz+", obverb: "+ltoan(obverb),obverb,0);
+						if (pid=="15347") {
+							caus<<"-1 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
+						}
 	if (*usoffenp) {
 		// caus<<rusp->size()<<endl;
 		russchreib(*rusp,aktc,usidp);
@@ -2040,6 +2043,9 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		}
 	} // 	if (rpneu->size())
 
+						if (pid=="15347") {
+							caus<<"0 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
+						}
 	if (rbawep) {
 		if (!pnbid.empty()) {
 			rbawep->hz("NBID",pnbid);
@@ -2133,8 +2139,15 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 #endif
 					const double rewert{atof(lwert.c_str())};
 					// 1. GFR
+						if (pid=="15347") {
+							caus<<"1 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
+						}
 					if (iinstr(labk,string("gfr"))!=-1 || iinstr(labk,string("gfc"))!=-1 || iinstr(labk,string("mdrd"))!=-1) {
+						if (pid=="15347") {
+							caus<<"2 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
+						}
 						if (obpid) {
+							mfmg="0"; // 29.12.25 Pat_id 15347
 							RS mf(My,"SELECT COALESCE(("
 									" SELECT"
 									" CONCAT(IF(INSTR(lmp.medikament,'500')<>0,500,"
@@ -2148,7 +2161,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									" FROM lmp LEFT JOIN medarten ma ON ma.Medikament=lmp.medanfang"
 									" WHERE lmp.pat_id="+pid+" AND metf<>0"
 									" GROUP BY lmp.pat_id"
-									"),0) mfmg;",aktc,ZDB);
+									"),0) mfmg;",aktc,1/*ZDB*/);
 							if (!mf.obqueryfehler) {
 								char ***cerg{0};
 								while (cerg=mf.HolZeile(),cerg?*cerg:0) {
@@ -2595,8 +2608,8 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 					//					if (inh.length()>4) ... // trat nicht auf
 					lsatzart=2;
 					/* stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
-					caus<<rot<<"1 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
-					caus<<"vor Aufruf 4"<<endl;
+					caus<<rot<<"1 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl;
+					caus<<"vor Aufruf 4"<<endl; */
 					wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rspez,&rle);
 					// rle.schreib z.B. "Labor 20101201 004634.dat"
 					//					satzid="0";
@@ -2985,7 +2998,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 		/* stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 		caus<<rot<<"3 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
 		// hier scheint immer Aufruf 4 vorauszugehen 30.3.25
-					caus<<"vor Aufruf 3"<<endl;
+		//			caus<<"vor Aufruf 3"<<endl;
 		wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rspez,&rle);
 		usschluss(aktc);
 		reing.hz("codepage",cp);
