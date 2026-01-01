@@ -2157,7 +2157,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(nm,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(ab,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(zn,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')"
-									" ),DATE_FORMAT(zeitpunkt,'(%e.%c. %k:%i)')) summe"
+									" ),DATE_FORMAT(zeitpunkt,';%e.%c. %k:%i;')) summe"
 									" FROM lmp LEFT JOIN medarten ma ON ma.Medikament=lmp.medanfang"
 									" WHERE lmp.pat_id="+pid+" AND metf<>0"
 									" GROUP BY lmp.pat_id"
