@@ -2161,7 +2161,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									" FROM lmp LEFT JOIN medarten ma ON ma.Medikament=lmp.medanfang"
 									" WHERE lmp.pat_id="+pid+" AND metf<>0"
 									" GROUP BY lmp.pat_id"
-									"),0) mfmg;",aktc,(pid=="15347"?1:ZDB));
+									"),0) mfmg;",aktc,(pid=="15347"?-1:ZDB));
 							if (!mf.obqueryfehler) {
 								char ***cerg{0};
 								while (cerg=mf.HolZeile(),cerg?*cerg:0) {
