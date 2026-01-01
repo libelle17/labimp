@@ -1751,6 +1751,7 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 					if (*cerg &&**cerg) {
 					  hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
 						if (pid=="0" || pid.empty()) {
+							lpid=pid;
 							pid=**cerg;
 							// <<"i: "<<i<<": "<<blau<<pql[i]<<schwarz<<endl;
 #ifdef mitsqlnachweis
@@ -1774,7 +1775,6 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 	rus.hz("NVorsatz",nvorsatz);
 	rus.hz("GebDat",&gebtm);
 	rus.hz("Geschlecht",sgschl);
-	lpid=pid; // 1.1.26
 	rus.hz("Pat_id",pid);
 
 
@@ -1927,6 +1927,7 @@ naeiru:;
 									} // (obpid)
 fertig:;
 	rus.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/usidp);
+	caus<<"Schreibe rus, lpid: "<<rot<<lpid<<schwarz<<", pid: "<<blau<<pid<<schwarz<<", *usidp: "<<blau<<*usidp<<schwarz<<endl;
 	usids<<*usidp;
 	hLog(violetts+Txk[T_Ende]+Tx[T_russchreib_usid]+schwarz+*usidp);
 } // void hhcl::russchreib
