@@ -2148,6 +2148,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						}
 						if (obpid) {
 							mfmg="0"; // 29.12.25 Pat_id 15347
+							caus<<"vor Metformin-Abfrage, pid: "<<blau<<pid<<schwarz<<endl;
 							RS mf(My,"SELECT COALESCE(("
 									" SELECT"
 									" CONCAT(IF(INSTR(lmp.medikament,'500')<>0,500,"
@@ -2157,11 +2158,11 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(nm,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(ab,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(zn,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')"
-									" ),DATE_FORMAT(zeitpunkt,';%e.%c. %k:%i;')) summe"
+									" ),DATE_FORMAT(zeitpunkt,'§%e.%c. %k:%i§')) summe"
 									" FROM lmp LEFT JOIN medarten ma ON ma.Medikament=lmp.medanfang"
 									" WHERE lmp.pat_id="+pid+" AND metf<>0"
 									" GROUP BY lmp.pat_id"
-									"),0) mfmg;",aktc,(pid=="15347"?-1:ZDB));
+									"),0) mfmg;",aktc,-1);
 							if (!mf.obqueryfehler) {
 								char ***cerg{0};
 								while (cerg=mf.HolZeile(),cerg?*cerg:0) {
