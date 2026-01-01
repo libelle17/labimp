@@ -332,6 +332,7 @@ class hhcl:public dhcl
 		tm maxnachdat{0,0,0,1,0,200,0,0,0}; // maximale Datum der Tabelle tlyus fuer die Nachbearbeitung
 		string nname,vname,titel,nvorsatz,sgschl,pid{"0"},auftrschl,baktid,hinwid,qspezid,erklid,kommid,gschl,obs;
 		int obpid{0};
+		string lpid;
 		long palter{0};
 		char berzt[15];
 		tm voret{0};

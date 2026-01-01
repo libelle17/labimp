@@ -1774,6 +1774,7 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 	rus.hz("NVorsatz",nvorsatz);
 	rus.hz("GebDat",&gebtm);
 	rus.hz("Geschlecht",sgschl);
+	lpid=pid; // 1.1.26
 	rus.hz("Pat_id",pid);
 
 
@@ -1976,7 +1977,7 @@ void hhcl::usschluss(const size_t aktc)
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rspezp, insv *rlep)
 {
 	fLog(violetts+"wertschreib: "+blau+*usidp+" "+schwarz+", obverb: "+ltoan(obverb),obverb,0);
-						if (pid=="15347") {
+						if (lpid=="15347") {
 							caus<<"-1 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
 						}
 	if (*usoffenp) {
@@ -2043,7 +2044,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		}
 	} // 	if (rpneu->size())
 
-						if (pid=="15347") {
+						if (lpid=="15347") {
 							caus<<"0 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
 						}
 	if (rbawep) {
@@ -2093,15 +2094,15 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 			string sql;
 			// das Folgende modifiziert aus labpath:
 			//									static string altnn,altvn;
-			string /*pid,*/mfmg,hinw,ficd;
-			obpid=(pid!="0");
+			string /*lpid,*/mfmg,hinw,ficd;
+			obpid=(lpid!="0");
 			double vorwert;
 			long hinwsp{16777215}, ficdsp{16777215};
 			if (1) {
 				vorwert=0;
 				if (obpid) {
 #if altvorwert
-					RS llb(My,"CALL geslabneu("+pid+",\"\",\"AND abkü='"+labk+"' AND einheit='"+koreinh+"' "
+					RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü='"+labk+"' AND einheit='"+koreinh+"' "
 							"AND zeitpunkt<=STR_TO_DATE('"+berzt+"','%Y%m%d') GROUP BY zeitpunkt DESC LIMIT 3)i\")",aktc,ZDB);
 					if (!llb.obqueryfehler) {
 						char ***gerg{0};
@@ -2119,12 +2120,12 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 					for(unsigned vwr=1;vwr<=2;vwr++) {
 						sql=
 							"(SELECT CONCAT(wert,' (',DATE_FORMAT(zeitpunkt,'%d.%m.%y'),')')wert,DATE_FORMAT(zeitpunkt,'%Y%m%d')zp,'l2' "
-							"FROM labor2a l WHERE pat_id="+pid+" AND abkü='"+labk+"' AND einheit='"+koreinh+"' AND zeitpunkt="
+							"FROM labor2a l WHERE pat_id="+lpid+" AND abkü='"+labk+"' AND einheit='"+koreinh+"' AND zeitpunkt="
 							"(SELECT MAX(zeitpunkt) FROM labor2a WHERE pat_id=l.pat_id AND abkü=l.abkü AND einheit=l.Einheit AND zeitpunkt<"+eingzt+")"
 							"LIMIT 1)"
 							"UNION"
 							"(SELECT CONCAT(wert,' (',DATE_FORMAT(zeitpunkt,'%d.%m.%y'),')')wert,DATE_FORMAT(zeitpunkt,'%Y%m%d')zp,'l2' "
-							"FROM labor1a l WHERE pat_id="+pid+" AND abkü='"+labk+"' AND einheit='"+koreinh+"' AND zeitpunkt="
+							"FROM labor1a l WHERE pat_id="+lpid+" AND abkü='"+labk+"' AND einheit='"+koreinh+"' AND zeitpunkt="
 							"(SELECT MAX(zeitpunkt) FROM labor2a WHERE pat_id=l.pat_id AND abkü=l.abkü AND einheit=l.Einheit AND zeitpunkt<"+eingzt+")"
 							"LIMIT 1)"
 							"ORDER BY zp DESC LIMIT 1";
@@ -2139,16 +2140,16 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 #endif
 					const double rewert{atof(lwert.c_str())};
 					// 1. GFR
-						if (pid=="15347") {
+						if (lpid=="15347") {
 							caus<<"1 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
 						}
 					if (iinstr(labk,string("gfr"))!=-1 || iinstr(labk,string("gfc"))!=-1 || iinstr(labk,string("mdrd"))!=-1) {
-						if (pid=="15347") {
+						if (lpid=="15347") {
 							caus<<"2 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
 						}
 						if (obpid) {
 							mfmg="0"; // 29.12.25 Pat_id 15347
-							caus<<"vor Metformin-Abfrage, pid: "<<blau<<pid<<schwarz<<", ZDB: "<<ZDB<<endl;
+							caus<<"vor Metformin-Abfrage, lpid: "<<blau<<lpid<<schwarz<<", ZDB: "<<ZDB<<endl;
 							ZDB=1;
 							RS mf(My,"SELECT COALESCE(("
 									" SELECT"
@@ -2161,23 +2162,23 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(zn,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')"
 									" ),DATE_FORMAT(zeitpunkt,'§%e.%c. %k:%i§')) summe"
 									" FROM lmp LEFT JOIN medarten ma ON ma.Medikament=lmp.medanfang"
-									" WHERE lmp.pat_id="+pid+" AND metf<>0"
+									" WHERE lmp.pat_id="+lpid+" AND metf<>0"
 									" GROUP BY lmp.pat_id"
 									"),0) mfmg;",aktc,ZDB);
 							ZDB=0;
 							if (!mf.obqueryfehler) {
-								caus<<"!mf.obqueryfehler"<<", pid: "<<pid<<endl;
+								caus<<"!mf.obqueryfehler"<<", lpid: "<<lpid<<endl;
 								char ***cerg{0};
 								while (cerg=mf.HolZeile(),cerg?*cerg:0) {
 									mfmg=cjj(cerg,0);
-									caus<<"mfmg: "<<mfmg<<", pid: "<<pid<<endl;
+									caus<<"mfmg: "<<mfmg<<", lpid: "<<lpid<<endl;
 									break;
 								}
 							} // 										if (!mf.obqueryfehler)
 							const long imf{atol(mfmg.c_str())};
-							caus<<"imf: "<<imf<<", pid: "<<pid<<endl;
+							caus<<"imf: "<<imf<<", lpid: "<<lpid<<endl;
 							if ((rewert<30 && imf)||(rewert<45 && imf>1000)) {
-									caus<<"mfmg: "<<mfmg<<", pid: "<<pid<<endl;
+									caus<<"mfmg: "<<mfmg<<", lpid: "<<lpid<<endl;
 								hinw+="eGFR<->"+mfmg+"mg Mtf/d";
 								hinwsp=255; // vbred
 							}
@@ -2185,7 +2186,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							if (rewert<55) {
 								if (ficd!="") ficd+=',';
 								if (rewert<15) ficd+="N18.5"; else if (rewert<30) ficd+="N18.4"; else ficd+="N18.3";
-								RS ni(My,"SELECT gicd FROM diagview WHERE pat_id = "+pid+" AND gicd RLIKE '^N1[89]' AND obdauer<>0",aktc,ZDB);
+								RS ni(My,"SELECT gicd FROM diagview WHERE pat_id = "+lpid+" AND gicd RLIKE '^N1[89]' AND obdauer<>0",aktc,ZDB);
 								if (!ni.obqueryfehler) {
 									const char *const *const *const lerg{ni.HolZeile()};
 									if (lerg?*lerg:0) {
@@ -2202,7 +2203,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						if (obpid && rewert>300) {
 							if (ficd!="") ficd+=',';
 							ficd+="I50.19";
-							RS hi(My,"SELECT gicd FROM diagview WHERE pat_id = "+pid+" AND gicd RLIKE '^I50' AND obdauer<>0",aktc,ZDB);
+							RS hi(My,"SELECT gicd FROM diagview WHERE pat_id = "+lpid+" AND gicd RLIKE '^I50' AND obdauer<>0",aktc,ZDB);
 							if (!hi.obqueryfehler) {
 								const char *const *const *const lerg{hi.HolZeile()};
 								if (lerg?*lerg:0) {
@@ -2230,7 +2231,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								hinwsp=255;
 							} // if (rewert<0.25)
 							if (obpid) {
-								RS llb(My,"CALL geslabneu("+pid+",\"\",\"AND abkü='fT4' AND zeitpunkt>now()-INTERVAL 5 DAY "
+								RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü='fT4' AND zeitpunkt>now()-INTERVAL 5 DAY "
 										"GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
 								char ***gerg{0};
 								if (!llb.obqueryfehler) {
@@ -2265,7 +2266,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								hinwsp=255;
 							}
 							if (obpid) {
-								RS llb(My,"CALL geslabneu("+pid+",\"\",\"AND abkü IN ('TSH','TSBF','TSBL') AND"
+								RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü IN ('TSH','TSBF','TSBL') AND"
 										" zeitpunkt>now()-INTERVAL 5 DAY GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
 								char ***gerg{0};
 								if (!llb.obqueryfehler) {
@@ -2306,9 +2307,9 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							if (obpid) {
 								if (ficd!="") ficd+=',';
 								ficd+="D64.9";
-								// RS an(My,"SELECT icd FROM `diagnosen` WHERE pat_id = "+pid+" AND diagtext LIKE '%anämie%' "
+								// RS an(My,"SELECT icd FROM `diagnosen` WHERE pat_id = "+lpid+" AND diagtext LIKE '%anämie%' "
 								// "AND diagsicherheit NOT IN ('A','Z') AND COALESCE(f6010,0)=0 AND obdauer<>0",aktc,ZDB);
-								RS an(My,"SELECT icd FROM diagview WHERE pat_id="+pid+" AND gicd RLIKE '^D46|^D5[012678]|^D6[14]' AND obdauer<>0",
+								RS an(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^D46|^D5[012678]|^D6[14]' AND obdauer<>0",
 										aktc,ZDB);
 								if (!an.obqueryfehler) {
 									const char *const *const *const lerg{an.HolZeile()};
@@ -2328,7 +2329,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						if (obpid && rewert>7) {
 							if (ficd!="") ficd+=',';
 							ficd+="E79.0";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+pid+" AND gicd RLIKE '^E79.0' AND obdauer<>0",aktc,ZDB);
+							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E79.0' AND obdauer<>0",aktc,ZDB);
 							if (!hs.obqueryfehler) {
 								const char *const *const *const lerg{hs.HolZeile()};
 								if (lerg?*lerg:0) {
@@ -2344,7 +2345,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						if (obpid && (obs=="0") && rewert>140) {
 							if (ficd!="") ficd+=',';
 							ficd+="E78.0";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+pid+" AND gicd RLIKE '^E78' AND obdauer<>0",aktc,ZDB);
+							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E78' AND obdauer<>0",aktc,ZDB);
 							if (!hs.obqueryfehler) {
 								const char *const *const *const lerg{hs.HolZeile()};
 								if (lerg?*lerg:0) {
@@ -2361,7 +2362,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							||((labk=="ALBU"||labk=="ALBUMU")&&(koreinh=="mg/l"))){
 						if (obpid && rewert>30) {
 							// die Diagnose mit 'gesichert' erst beim zweiten Albuminurienachweis verlangen
-							RS voralb(My,"SELECT 0 FROM labor1a WHERE pat_id="+pid+" AND zeitpunkt<STR_TO_DATE('"+berzt+"','%Y%m%d')"
+							RS voralb(My,"SELECT 0 FROM labor1a WHERE pat_id="+lpid+" AND zeitpunkt<STR_TO_DATE('"+berzt+"','%Y%m%d')"
 									"AND (((abkü IN ('ALBCRE','ALBKRE','ALBQ','ALBUM','ALBUP'))"
 									"&&(einheit LIKE 'mg/g %'||einheit IN ('','kA','\\'kA\\'')))"
 									"||((abkü IN ('ALBU','ALBUMU'))&&einheit='mg/l'))"
@@ -2371,7 +2372,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								if (aerg?*aerg:0) {
 									if (ficd!="") ficd+=',';
 									ficd+="N08.3";
-									RS hi(My,"SELECT gicd FROM diagview WHERE pat_id="+pid+" AND gicd='N08.3' AND obdauer<>0",aktc,ZDB);
+									RS hi(My,"SELECT gicd FROM diagview WHERE pat_id="+lpid+" AND gicd='N08.3' AND obdauer<>0",aktc,ZDB);
 									if (!hi.obqueryfehler) {
 										const char *const *const *const lerg{hi.HolZeile()};
 										if (lerg?*lerg:0) {
@@ -2390,7 +2391,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						if (obpid && (koreinh=="pg/ml" && rewert<197)) {
 							if (ficd!="") ficd+=',';
 							ficd+="E53.8";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+pid+" AND gicd RLIKE '^E53.8|^D51' AND obdauer<>0",aktc,ZDB);
+							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E53.8|^D51' AND obdauer<>0",aktc,ZDB);
 							if (!hs.obqueryfehler) {
 								const char *const *const *const lerg{hs.HolZeile()};
 								if (lerg?*lerg:0) {
@@ -2408,7 +2409,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									((labk=="DIHYKP"||labk=="DIHYK"||labk=="VID2")&&rewert<25))) {
 							if (ficd!="") ficd+=',';
 							ficd+="E55.9";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+pid+" AND gicd = 'E55' AND obdauer<>0",aktc,ZDB);
+							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd = 'E55' AND obdauer<>0",aktc,ZDB);
 							if (!hs.obqueryfehler) {
 								const char *const *const *const lerg{hs.HolZeile()};
 								if (lerg?*lerg:0) {
@@ -2423,13 +2424,13 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 					} else if (labk=="PTH"||labk=="PTH-E"||labk=="PTHP"||labk=="PTHI02"||labk=="PTHIT") {
 						//															caus<<rot<<"Parathoromn untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
 						if (obpid && rewert<65) {
-							RS niin(My,"SELECT icd FROM diagview WHERE pat_id="+pid+" AND gicd RLIKE 'N18.[3-5]' AND obdauer<>0",aktc,ZDB);
+							RS niin(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE 'N18.[3-5]' AND obdauer<>0",aktc,ZDB);
 							if (!niin.obqueryfehler) {
 								const char *const *const *const nierg{niin.HolZeile()};
 								if (nierg?*nierg:0) {
 									if (ficd!="") ficd+=',';
 									ficd+="E21.1";
-									RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+pid+" AND gicd RLIKE '^E21' AND obdauer<>0",aktc,ZDB);
+									RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E21' AND obdauer<>0",aktc,ZDB);
 									if (!hs.obqueryfehler) {
 										const char *const *const *const lerg{hs.HolZeile()};
 										if (lerg?*lerg:0) {
@@ -2448,7 +2449,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						if (obpid && rewert>34) {
 							if (ficd!="") ficd+=',';
 							ficd+="E06.3";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+pid+" AND gicd RLIKE '^E06' AND obdauer<>0",aktc,ZDB);
+							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E06' AND obdauer<>0",aktc,ZDB);
 							if (!hs.obqueryfehler) {
 								const char *const *const *const lerg{hs.HolZeile()};
 								if (lerg?*lerg:0) {
@@ -2466,7 +2467,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						if (obpid && rewert>1.58) {
 							if (ficd!="") ficd+=',';
 							ficd+="E05.0";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+pid+" AND gicd RLIKE '^E05.0' AND obdauer<>0",aktc,ZDB);
+							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E05.0' AND obdauer<>0",aktc,ZDB);
 							if (!hs.obqueryfehler) {
 								const char *const *const *const lerg{hs.HolZeile()};
 								if (lerg?*lerg:0) {
