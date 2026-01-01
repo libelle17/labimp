@@ -2618,6 +2618,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 					/* stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 					caus<<rot<<"1 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl;
 					caus<<"vor Aufruf 4"<<endl; */
+					caus<<"vor wertschreib 1: pid="<<blau<<pid<<schwarz<<", lpid="<<blau<<lpid<<schwarz<<endl;
 					wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rspez,&rle);
 					// rle.schreib z.B. "Labor 20101201 004634.dat"
 					//					satzid="0";
@@ -2680,6 +2681,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 				/*stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 				caus<<rot<<"2 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
 //					caus<<"vor Aufruf 2"<<endl;
+				caus<<"vor wertschreib 2: pid="<<blau<<pid<<schwarz<<", lpid="<<blau<<lpid<<schwarz<<endl;
 				wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rspez,&rle);
 				// rle.schreib z.B. "Labor 20101202 011636.dat"
 				if (cd=="8434") {
@@ -3007,6 +3009,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 		caus<<rot<<"3 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
 		// hier scheint immer Aufruf 4 vorauszugehen 30.3.25
 		//			caus<<"vor Aufruf 3"<<endl;
+		caus<<"vor wertschreib 3: pid="<<blau<<pid<<schwarz<<", lpid="<<blau<<lpid<<schwarz<<endl;
 		wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rspez,&rle);
 		usschluss(aktc);
 		reing.hz("codepage",cp);
