@@ -1781,8 +1781,7 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 							//			caus<<gruen<<"berdat: "<<rot<<berzt<<schwarz<<endl;
 							//		time_t bt=mktime(&berdat);
 									strftime(berzt,sizeof(berzt),"%Y%m%d",&berdat);
-									obpid=(pid!="");
-									if (obpid && pid!="0") {
+									if (pid!="" && pid!="0") {
 									gschl="";
 									string itv;
 									strptime("00000000","%Y%m%d",&voret);
@@ -1837,11 +1836,10 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 																if (ferg[3]) gschl=cjj(ferg,3);
 																// mehrere Patienten gefunden: (gestrichen, da schon im urspruenglichen labimp geprueft)
 															} // if (!strcmp(cjj(ferg,0),"1")) ... else if (strcmp(cjj(ferg,0),"0"))
-															obpid=(pid!="");
 															// nach dem Namen noch die anderen Einzelheiten festlegen:
 //			caus<<"Berichtsdatum: "<<berzt<<endl;
 															if (1) {
-																if (obpid) {
+																if (pid!="" && pid!="0") {
 																	RS fb(My,"SELECT "
 																			" CASE "
 																			"  WHEN TKZ<>0 AND GSZ=0 AND wdz=0 AND ahz=0 THEN 14772545 "//vbmittelblau, RGB(65, 105, 225) ' http://www.am.uni-duesseldorf.de/de/Links/Tools/farbtabelle.html
@@ -1915,7 +1913,7 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 																} else {
 																	rus.hz("namsp",16777215);
 																	rus.hz("wertsp",16777215);
-																} // 									if (obpid) else
+																} // 									if (pid!="" && pid!="0") else
 																goto fertig;
 															} // 											if (1)
 														} // 														if (!(ferg?*ferg:0)) else
@@ -1923,10 +1921,10 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 naeiru:;
 												} // 									for(unsigned aru=0;aru<2;aru++)
 											} // for (iru=0;iru<4;
-									} // (obpid)
+									} // (pid!="" && pid!="0")
 fertig:;
 	rus.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/usidp);
-	caus<<"Schreibe rus, lpid: "<<rot<<lpid<<schwarz<<", pid: "<<blau<<pid<<schwarz<<", *usidp: "<<blau<<*usidp<<schwarz<<endl;
+	// caus<<"Schreibe rus, lpid: "<<rot<<lpid<<schwarz<<", pid: "<<blau<<pid<<schwarz<<", *usidp: "<<blau<<*usidp<<schwarz<<endl;
 	usids<<*usidp;
 	hLog(violetts+Txk[T_Ende]+Tx[T_russchreib_usid]+schwarz+*usidp);
 } // void hhcl::russchreib
@@ -1977,11 +1975,8 @@ void hhcl::usschluss(const size_t aktc)
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rspezp, insv *rlep)
 {
 	fLog(violetts+"wertschreib: "+blau+*usidp+" "+schwarz+", obverb: "+ltoan(obverb),obverb,0);
-						if (lpid=="15347") {
-							caus<<"-1 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
-						}
 	if (pid!="0") lpid=pid;
-	caus<<"in wertschreib: pid="<<blau<<pid<<schwarz<<", lpid="<<blau<<lpid<<schwarz<<", labk: "<<blau<<labk<<schwarz<<endl;
+	// caus<<"in wertschreib: pid="<<blau<<pid<<schwarz<<", lpid="<<blau<<lpid<<schwarz<<", labk: "<<blau<<labk<<schwarz<<endl;
 	if (*usoffenp) {
 		// caus<<rusp->size()<<endl;
 		russchreib(*rusp,aktc,usidp);
@@ -2046,9 +2041,6 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 		}
 	} // 	if (rpneu->size())
 
-						if (lpid=="15347") {
-							caus<<"0 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
-						}
 	if (rbawep) {
 		if (!pnbid.empty()) {
 			rbawep->hz("NBID",pnbid);
@@ -2097,12 +2089,11 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 			// das Folgende modifiziert aus labpath:
 			//									static string altnn,altvn;
 			string /*lpid,*/mfmg,hinw,ficd;
-			obpid=(lpid!="0");
 			double vorwert;
 			long hinwsp{16777215}, ficdsp{16777215};
 			if (1) {
 				vorwert=0;
-				if (obpid) {
+				if (lpid!=""&&lpid!="0") {
 #if altvorwert
 					RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü='"+labk+"' AND einheit='"+koreinh+"' "
 							"AND zeitpunkt<=STR_TO_DATE('"+berzt+"','%Y%m%d') GROUP BY zeitpunkt DESC LIMIT 3)i\")",aktc,ZDB);
@@ -2142,17 +2133,10 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 #endif
 					const double rewert{atof(lwert.c_str())};
 					// 1. GFR
-						if (lpid=="15347") {
-							caus<<"1 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
-						}
 					if (iinstr(labk,string("gfr"))!=-1 || iinstr(labk,string("gfc"))!=-1 || iinstr(labk,string("mdrd"))!=-1) {
-						if (lpid=="15347") {
-							caus<<"2 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
-						}
-						if (obpid) {
+						if (lpid!=""&&lpid!="0") {
 							mfmg="0"; // 29.12.25 Pat_id 15347
-							caus<<"vor Metformin-Abfrage, lpid: "<<blau<<lpid<<schwarz<<", ZDB: "<<ZDB<<endl;
-							ZDB=1;
+							// caus<<"vor Metformin-Abfrage, lpid: "<<blau<<lpid<<schwarz<<", ZDB: "<<ZDB<<endl;
 							RS mf(My,"SELECT COALESCE(("
 									" SELECT"
 									" CONCAT(IF(INSTR(lmp.medikament,'500')<>0,500,"
@@ -2162,25 +2146,20 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(nm,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(ab,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')+"
 									" REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(zn,',','.'),'½','.5'),'¼','.25'),'1/2','.5'),' ','')"
-									" ),DATE_FORMAT(zeitpunkt,'§%e.%c. %k:%i§')) summe"
+									" ),DATE_FORMAT(zeitpunkt,'(%e.%c.,%k:%i)')) summe"
 									" FROM lmp LEFT JOIN medarten ma ON ma.Medikament=lmp.medanfang"
 									" WHERE lmp.pat_id="+lpid+" AND metf<>0"
 									" GROUP BY lmp.pat_id"
 									"),0) mfmg;",aktc,ZDB);
-							ZDB=0;
 							if (!mf.obqueryfehler) {
-								caus<<"!mf.obqueryfehler"<<", lpid: "<<lpid<<endl;
 								char ***cerg{0};
 								while (cerg=mf.HolZeile(),cerg?*cerg:0) {
 									mfmg=cjj(cerg,0);
-									caus<<"mfmg: "<<mfmg<<", lpid: "<<lpid<<endl;
 									break;
 								}
 							} // 										if (!mf.obqueryfehler)
 							const long imf{atol(mfmg.c_str())};
-							caus<<"imf: "<<imf<<", lpid: "<<lpid<<endl;
 							if ((rewert<30 && imf)||(rewert<45 && imf>1000)) {
-									caus<<"mfmg: "<<mfmg<<", lpid: "<<lpid<<endl;
 								hinw+="eGFR<->"+mfmg+"mg Mtf/d";
 								hinwsp=255; // vbred
 							}
@@ -2199,10 +2178,10 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									}
 								} // 	if (!ni.obqueryfehler)
 							} // rewert < 45
-						} // obpid
+						} // lpid!=""&&lpid!="0"
 							// 2. nt-Pro-BNP
 					} else if (labk=="BNPS"||labk=="NTBNPKO") {
-						if (obpid && rewert>300) {
+						if (lpid!=""&&lpid!="0" && rewert>300) {
 							if (ficd!="") ficd+=',';
 							ficd+="I50.19";
 							RS hi(My,"SELECT gicd FROM diagview WHERE pat_id = "+lpid+" AND gicd RLIKE '^I50' AND obdauer<>0",aktc,ZDB);
@@ -2215,7 +2194,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									ficdsp=255;
 								}
 							} // 	if (!ni.obqueryfehler)
-						} // if (obpid && rewert>300)
+						} // if (lpid!=""&&lpid!="0" && rewert>300)
 							// 3. CK
 					} else if (iinstr(labk,string("ck"))!=-1) {
 						if (rewert>999) {
@@ -2232,7 +2211,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								hinw="mögl.unzur.SD-Substitution";
 								hinwsp=255;
 							} // if (rewert<0.25)
-							if (obpid) {
+							if (lpid!=""&&lpid!="0") {
 								RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü='fT4' AND zeitpunkt>now()-INTERVAL 5 DAY "
 										"GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
 								char ***gerg{0};
@@ -2255,7 +2234,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 										hinw+=")";
 									} // 													if (gerg?*gerg:0)
 								} // 												if (!llb.obqueryfehler)
-							} // 											if (obpid)
+							} // 											if (lpid!=""&&lpid!="0")
 						} // 										if (rewert>(palter<25?2.5:palter>65?8:5)||rewert<0.25)
 							// 5. fT4
 					} else if (iinstr(labk,string("ft4"))!=-1) {
@@ -2267,7 +2246,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								hinw="V.a. zu wenig SD-Hormon";
 								hinwsp=255;
 							}
-							if (obpid) {
+							if (lpid!=""&&lpid!="0") {
 								RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü IN ('TSH','TSBF','TSBL') AND"
 										" zeitpunkt>now()-INTERVAL 5 DAY GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
 								char ***gerg{0};
@@ -2288,7 +2267,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 										hinw+=")";
 									} // 													if (gerg?*gerg:0)
 								} // 												if (!llb.obqueryfehler)
-							} // 											if (obpid)
+							} // 											if (lpid!=""&&lpid!="0")
 						} // 										if (rewert<12||rewert>22)
 							// SELECT abkü from laborparameter WHERE langtext IN  ('Kalium','Kalium im Heparinblut');
 							// 6. Kalium
@@ -2306,7 +2285,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							hinwsp=255;
 						} else if ((obm&&rewert<13.5)||rewert<11.5) {
 							hinw="V.a. Anämie";
-							if (obpid) {
+							if (lpid!=""&&lpid!="0") {
 								if (ficd!="") ficd+=',';
 								ficd+="D64.9";
 								// RS an(My,"SELECT icd FROM `diagnosen` WHERE pat_id = "+lpid+" AND diagtext LIKE '%anämie%' "
@@ -2324,11 +2303,11 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 										hinwsp=255;
 									}
 								} // 	if (!ni.obqueryfehler)
-							} // if (obpid)
+							} // if (lpid!=""&&lpid!="0")
 						} //										if (vorwert!=0 && vorwert-rewert>1.5)    else if
 							// 8. Harnsäure
 					} else if (labk=="HS") {
-						if (obpid && rewert>7) {
+						if (lpid!=""&&lpid!="0" && rewert>7) {
 							if (ficd!="") ficd+=',';
 							ficd+="E79.0";
 							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E79.0' AND obdauer<>0",aktc,ZDB);
@@ -2344,7 +2323,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						// 9. Cholesterin
 					} else if (labk=="LDLB"||labk=="LDLMG"||labk=="LDLH01"||labk=="LDL") {
 						//																	const int obs{strcmp(cjj(ferg,5),"0")};
-						if (obpid && (obs=="0") && rewert>140) {
+						if (lpid!=""&&lpid!="0" && (obs=="0") && rewert>140) {
 							if (ficd!="") ficd+=',';
 							ficd+="E78.0";
 							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E78' AND obdauer<>0",aktc,ZDB);
@@ -2362,7 +2341,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 					} else if (((labk=="ALBCRE"||labk=="ALBKRE"||labk=="ALBQ"||labk=="ALBUM"||labk=="ALBUP") 
 								&&(koreinh.substr(0,5)=="mg/g "||koreinh==""||koreinh=="kA"||koreinh=="'kA'"))
 							||((labk=="ALBU"||labk=="ALBUMU")&&(koreinh=="mg/l"))){
-						if (obpid && rewert>30) {
+						if (lpid!=""&&lpid!="0" && rewert>30) {
 							// die Diagnose mit 'gesichert' erst beim zweiten Albuminurienachweis verlangen
 							RS voralb(My,"SELECT 0 FROM labor1a WHERE pat_id="+lpid+" AND zeitpunkt<STR_TO_DATE('"+berzt+"','%Y%m%d')"
 									"AND (((abkü IN ('ALBCRE','ALBKRE','ALBQ','ALBUM','ALBUP'))"
@@ -2386,11 +2365,11 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									} // 	if (!ni.obqueryfehler)
 								} // aerg?*aerg:0
 							} // !voralb.obqueryfehler
-						} // if (obpid && rewert>30)
+						} // if (lpid!=""&&lpid!="0" && rewert>30)
 							// 11. Vit B12
 					} else if (labk=="B12N"||labk=="VB12"||labk=="VI1201") {
 						//															caus<<rot<<"Vit-B12 untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (obpid && (koreinh=="pg/ml" && rewert<197)) {
+						if (lpid!=""&&lpid!="0" && (koreinh=="pg/ml" && rewert<197)) {
 							if (ficd!="") ficd+=',';
 							ficd+="E53.8";
 							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E53.8|^D51' AND obdauer<>0",aktc,ZDB);
@@ -2403,11 +2382,11 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									ficdsp=255;
 								} // if (lerg?*lerg:0)
 							} // 	if (!ni.obqueryfehler)
-						} // 	if (obpid && (einh=="pg/ml" && rewert<197))
+						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
 							// 12. Vit D
 					} else if (labk=="VIT3KL"||labk=="VITD01"||labk=="VITD"||labk=="DIHYKP"||labk=="DIHYK"||labk=="VID2") {
 						//															caus<<rot<<"Vit-D untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (obpid && (((labk=="VIT3KL"||labk=="VITD01"||labk=="VITD") && rewert<20)||
+						if (lpid!=""&&lpid!="0" && (((labk=="VIT3KL"||labk=="VITD01"||labk=="VITD") && rewert<20)||
 									((labk=="DIHYKP"||labk=="DIHYK"||labk=="VID2")&&rewert<25))) {
 							if (ficd!="") ficd+=',';
 							ficd+="E55.9";
@@ -2425,7 +2404,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							// 13. Parathormon
 					} else if (labk=="PTH"||labk=="PTH-E"||labk=="PTHP"||labk=="PTHI02"||labk=="PTHIT") {
 						//															caus<<rot<<"Parathoromn untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (obpid && rewert<65) {
+						if (lpid!=""&&lpid!="0" && rewert<65) {
 							RS niin(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE 'N18.[3-5]' AND obdauer<>0",aktc,ZDB);
 							if (!niin.obqueryfehler) {
 								const char *const *const *const nierg{niin.HolZeile()};
@@ -2444,11 +2423,11 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									} // 	if (!ni.obqueryfehler)
 								} // 	if (nierg?*nierg:0)
 							} // 	if (!niin.obqueryfehler) 
-						} // if (obpid && rewert<65)
+						} // if (lpid!=""&&lpid!="0" && rewert<65)
 							// 11. MAK
 					} else if (labk=="MAK"||labk=="TPO.01") {
 						//															caus<<rot<<"Thyreoiditis untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (obpid && rewert>34) {
+						if (lpid!=""&&lpid!="0" && rewert>34) {
 							if (ficd!="") ficd+=',';
 							ficd+="E06.3";
 							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E06' AND obdauer<>0",aktc,ZDB);
@@ -2461,12 +2440,12 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									ficdsp=255;
 								} // if (lerg?*lerg:0)
 							} // 	if (!ni.obqueryfehler)
-						} // 	if (obpid && (einh=="pg/ml" && rewert<197))
+						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
 							// 11. TRAK
 					} else if (labk=="TRAKKM"||labk=="TRAKPM"||labk=="TRAKPR"||labk=="TRAK"||labk=="TRAK_K"
 							||labk=="TSRE01"||labk=="TSRE") {
 						//															caus<<rot<<"Basedow untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (obpid && rewert>1.58) {
+						if (lpid!=""&&lpid!="0" && rewert>1.58) {
 							if (ficd!="") ficd+=',';
 							ficd+="E05.0";
 							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E05.0' AND obdauer<>0",aktc,ZDB);
@@ -2479,7 +2458,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									ficdsp=255;
 								} // if (lerg?*lerg:0)
 							} // 	if (!ni.obqueryfehler)
-						} // 	if (obpid && (einh=="pg/ml" && rewert<197))
+						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
 					} // if (labk==  ...			else if (labk=="HB")
 						//									if (hinw!="") KLA
 						//																<<"Hier vor Hinweisen"<<endl;
@@ -2489,7 +2468,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 					rbawep->hz("fICD",ficd);
 					rbawep->hz("fICDsp",ficdsp);
 					//									KLZ
-				} // 											if (obpid)
+				} // 											if (lpid!=""&&lpid!="0")
 			} // 											if (1)
 		} // 	if (grenzwi!="")
 
