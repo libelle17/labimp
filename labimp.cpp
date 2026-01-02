@@ -1738,27 +1738,18 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 	if (obverb) rus.ausgeb();
 	// pruefPatID(aktc,rus);
 	// hLog(violetts+Tx[T_pruefPatID_Standardfunktion]+schwarz);
-	caus<<"pid 1 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 	fuellpql();
-	caus<<"pid 2 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 	for(size_t i=0;i<pql.size();i++) {
 		// folgender Code aehnlich in usmod
 		// <<schwarz<<"i: "<<i<<": "<<pql[i]<<endl;
-	caus<<"pid 3 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 		RS rspat(My,pql[i],aktc,ZDB);
-	caus<<"pid 4 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 		if (!rspat.obqueryfehler && rspat.result) { // 7.9. !obqueryfehler und !result vorgekommen
 			hLog(gruens+Tx[T_Zahl]+blau+ltoan(rspat.result->row_count)+gruen+Txk[T_bei]+blau+pql[i]+schwarz);
-	caus<<"pid 5 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 			if (rspat.result->row_count==1){
-	caus<<"pid 6 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 				char ***cerg{0};
 				if ((cerg=rspat.HolZeile())) {
-	caus<<"pid 7 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 					if (*cerg &&**cerg) {
-	caus<<"pid 8 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 					  hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
-	caus<<"pid 9 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 						if (pid=="0" || pid.empty()) {
 							pid=**cerg;
 							// <<"i: "<<i<<": "<<blau<<pql[i]<<schwarz<<endl;
@@ -1990,6 +1981,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							caus<<"-1 labk: "<<labk<<", obpid: "<<(obpid?"1":"0")<<endl;
 						}
 	if (pid!="0") lpid=pid;
+	caus<<"in wertschreib: pid="<<blau<<pid<<schwarz<<", lpid="<<blau<<lpid<<schwarz<<", labk: "<<blau<<labk<<schwarz<<endl;
 	if (*usoffenp) {
 		// caus<<rusp->size()<<endl;
 		russchreib(*rusp,aktc,usidp);
@@ -2628,7 +2620,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 					/* stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 					caus<<rot<<"1 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl;
 					caus<<"vor Aufruf 4"<<endl; */
-					caus<<"vor wertschreib 1: pid="<<blau<<pid<<schwarz<<", lpid="<<blau<<lpid<<schwarz<<endl;
 					wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rspez,&rle);
 					// rle.schreib z.B. "Labor 20101201 004634.dat"
 					//					satzid="0";
@@ -2691,7 +2682,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 				/*stringstream gebdp; gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 				caus<<rot<<"2 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
 //					caus<<"vor Aufruf 2"<<endl;
-				caus<<"vor wertschreib 2: pid="<<blau<<pid<<schwarz<<", lpid="<<blau<<lpid<<schwarz<<endl;
 				wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rspez,&rle);
 				// rle.schreib z.B. "Labor 20101202 011636.dat"
 				if (cd=="8434") {
@@ -3019,7 +3009,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 		caus<<rot<<"3 vor wertschreib, gebdat "<<violett<<gebdp.str()<<schwarz<<endl; */
 		// hier scheint immer Aufruf 4 vorauszugehen 30.3.25
 		//			caus<<"vor Aufruf 3"<<endl;
-		caus<<"vor wertschreib 3: pid="<<blau<<pid<<schwarz<<", lpid="<<blau<<lpid<<schwarz<<endl;
 		wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rspez,&rle);
 		usschluss(aktc);
 		reing.hz("codepage",cp);
