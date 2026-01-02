@@ -1760,6 +1760,7 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 					  hLog(Tx[T_Pat_id_fuer]+blaus+nname+", "+vname+": "+schwarz+**cerg);
 	caus<<"pid 9 in russcheib: "<<gruen<<pid<<schwarz<<endl;
 						if (pid=="0" || pid.empty()) {
+							lpid=pid;
 							pid=**cerg;
 							// <<"i: "<<i<<": "<<blau<<pql[i]<<schwarz<<endl;
 #ifdef mitsqlnachweis
