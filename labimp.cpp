@@ -2353,16 +2353,20 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								if (aerg?*aerg:0) {
 									if (ficd!="") ficd+=',';
 									ficd+="N08.3";
+                  if (lpid=="68576") ZDB=1;
 									RS hi(My,"SELECT gicd FROM diagview WHERE pat_id="+lpid+" AND gicd='N08.3' AND obdauer<>0",aktc,ZDB);
 									if (!hi.obqueryfehler) {
+                  if (lpid=="68576") caus<<"!hi.obqueryfehler"<<endl;
 										const char *const *const *const lerg{hi.HolZeile()};
 										if (lerg?*lerg:0) {
+											if (lpid=="68576") caus<<"lerg?*lerg:0"<<endl;
 											if (ficdsp!=255) ficdsp=33023; // orange
 										} else {
-											//																				caus<<rot<<"neue Nephropathie!"<<schwarz<<endl;
+											if (lpid=="68576") caus<<rot<<"neue Nephropathie!"<<schwarz<<endl;
 											ficdsp=255;
 										}
 									} // 	if (!ni.obqueryfehler)
+                  if (lpid=="68576") ZDB=0;
 								} // aerg?*aerg:0
 							} // !voralb.obqueryfehler
 						} // if (lpid!=""&&lpid!="0" && rewert>30)
