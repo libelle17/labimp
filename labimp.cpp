@@ -2220,17 +2220,17 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 									gerg=llb.HolZeile();
 									if (gerg?*gerg:0) {
 										hinw+=" (";
-										hinw+=cjj(gerg,1); // fT4
+										hinw+=cjj(gerg,11); // fT4
 										hinw+=" ";
-										hinw+=cjj(gerg,0); // (lwert)
+										hinw+=cjj(gerg,10); // (lwert)
 										hinw+=" ";
-										hinw+=cjj(gerg,2); // pmol/l
+										hinw+=cjj(gerg,12); // pmol/l
 										hinw+=" ";
-										hinw+=cjj(gerg,3)[8]; // 2021-04-29
-										hinw+=cjj(gerg,3)[9]; // 2021-04-29
+										hinw+=cjj(gerg,14)[8]; // 2021-04-29
+										hinw+=cjj(gerg,14)[9]; // 2021-04-29
 										hinw+='.';
-										hinw+=cjj(gerg,3)[5]; // 2021-04-29
-										hinw+=cjj(gerg,3)[6]; // 2021-04-29
+										hinw+=cjj(gerg,14)[5]; // 2021-04-29
+										hinw+=cjj(gerg,14)[6]; // 2021-04-29
 										hinw+='.';
 										hinw+=")";
 									} // 													if (gerg?*gerg:0)
