@@ -2202,7 +2202,8 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							hinwsp=255;
 						}
 						// 4. TSH
-					} else if (iinstr(labk,string("tsh"))!=-1 || iinstr(labk,string("tsbf"))!=-1|| iinstr(labk,string("tsbl"))!=-1) {
+					} else if (labk=="tsh"||iinstr(labk,string("tsh-"))!=-1||iinstr(labk,string("tsh<"))!=-1||iinstr(labk,string("tshe"))!=-1||iinstr(labk,string("xtsh"))!=-1||iinstr(labk,string("tsbl"))!=-1||iinstr(labk,string("ts1e01"))!=-1||iinstr(labk,string("tsbf"))!=-1) {
+						// (iinstr(labk,string("tsh"))!=-1 || iinstr(labk,string("tsbf"))!=-1|| iinstr(labk,string("tsbl"))!=-1) {
 						if (rewert>(palter<25?2.5:palter>65?8:5)||rewert<0.25) {
 							if (rewert<0.25) {
 								hinw="V.a. zu viel SD-Hormon";
@@ -2247,22 +2248,23 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								hinwsp=255;
 							}
 							if (lpid!=""&&lpid!="0") {
-								RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü IN ('TSH','TSBF','TSBL') AND"
+								RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü RLIKE '>?TS(?:1E01|B[FL]|H(?!(?:[S2D]|TRH|LG)))' AND"
 										" zeitpunkt>now()-INTERVAL 5 DAY GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
+								// oder auch: abkü RLIKE '^TSH$|TSH-|TSH<|TSHE|XTSH|TSBL|TS1E01|TSBF'
 								char ***gerg{0};
 								if (!llb.obqueryfehler) {
 									gerg=llb.HolZeile();
 									if (gerg?*gerg:0) {
 										hinw+=" (TSH "; // cjj(gerg,1); // TSH
-										hinw+=cjj(gerg,0); // (lwert)
+										hinw+=cjj(gerg,10); // (lwert)
 										hinw+=" ";
-										hinw+=cjj(gerg,2); // IU/ml
+										hinw+=cjj(gerg,12); // IU/ml
 										hinw+=" ";
-										hinw+=cjj(gerg,3)[8]; // 2021-04-29
-										hinw+=cjj(gerg,3)[9]; // 2021-04-29
+										hinw+=cjj(gerg,14)[8]; // 2021-04-29
+										hinw+=cjj(gerg,14)[9]; // 2021-04-29
 										hinw+='.';
-										hinw+=cjj(gerg,3)[5]; // 2021-04-29
-										hinw+=cjj(gerg,3)[6]; // 2021-04-29
+										hinw+=cjj(gerg,14)[5]; // 2021-04-29
+										hinw+=cjj(gerg,14)[6]; // 2021-04-29
 										hinw+='.';
 										hinw+=")";
 									} // 													if (gerg?*gerg:0)
