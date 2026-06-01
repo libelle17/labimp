@@ -195,7 +195,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"Untersuchungen","examinations"},
 	// T_Bezug_auf_LaborWert
 	{"Bezug auf LaborWert","reference to laboratory value"},
-	// T_Bezug_auf_LaborXSaetze
+	// T_Bezug_auf_laborysaetze
 	{"Bezug auf LaborXSätze","reference to LaborXSätze"},
 	// T_8310_Anforderungsident_Turbomed
 	{"8310 Anforderungsident (Turbomed)","8310 Anforderungsident (Turbomed)"},
@@ -932,7 +932,7 @@ void hhcl::prueflyus(DB *My, const size_t aktc, const int obverb, const int oblo
 		fdr<<new Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1);
 		fdr<<new Feld("UsLfd","int","10","",Tx[T_Bezug_auf_LaborWert],1,0,0,string(),1);
 		fdr<<new Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborDat],1,0,1,string(),1);
-		fdr<<new Feld("SatzID","int","10","",Tx[T_Bezug_auf_LaborXSaetze],1,0,1,string(),1);
+		fdr<<new Feld("SatzID","int","10","",Tx[T_Bezug_auf_laborysaetze],1,0,1,string(),1);
 		fdr<<new Feld("Satzart","varchar","4","",Tx[T_8000_Satzart_Turbomed],0,0,0);
 		fdr<<new Feld("Satzlänge","varchar","5","",Tx[T_8100_Satzlaenge_Turbomed],0,0,0);
 		fdr<<new Feld("Auftragsnummer","varchar","10","",Tx[T_8310_Anforderungsident_Turbomed],0,0,0);
@@ -986,7 +986,7 @@ void hhcl::prueflyus(DB *My, const size_t aktc, const int obverb, const int oblo
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("UsLfd","int","10","",Tx[T_Bezug_auf_LaborWert],1,0,0,string(),1),
 			Feld("DatID","int","10","",Tx[T_Bezug_zu_LaborDat],1,0,1,string(),1),
-			Feld("SatzID","int","10","",Tx[T_Bezug_auf_LaborXSaetze],1,0,1,string(),1),
+			Feld("SatzID","int","10","",Tx[T_Bezug_auf_laborysaetze],1,0,1,string(),1),
 			Feld("Satzart","varchar","11","",Tx[T_8000_Satzart_Turbomed],0,0,0),
 			Feld("Satzlänge","varchar","11","",Tx[T_8100_Satzlaenge_Turbomed],0,0,0),
 			Feld("Auftragsnummer","varchar","11","",Tx[T_8310_Anforderungsident_Turbomed],0,0,0),

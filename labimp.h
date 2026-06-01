@@ -92,7 +92,7 @@ enum T_
 	T_9202_Gesamtlaenge_des_Datenpaketes_Turbomed,
 	T_Laborus,
 	T_Bezug_auf_LaborWert,
-	T_Bezug_auf_LaborXSaetze,
+	T_Bezug_auf_laborysaetze,
 	T_8310_Anforderungsident_Turbomed,
 	T_8311_Anforderungsnr_d_Labors_Turbomed,
 	T_8302_Berichtsdatum,
