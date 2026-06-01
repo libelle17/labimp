@@ -1423,7 +1423,7 @@ void hhcl::pvirtvorrueckfragen()
 			// schon vor pruefggfdoppelt
 #ifdef sqlos
 			svec datr;
-			systemrueck("mysql -u"+muser+" -p"+mpwd+" "+dbq+" -e'SELECT datid,pfad,geändert,größe,zp,codepage,!!fertig FROM `"+tlydat+"`'",obverb,oblog,&datr);
+			systemrueck("maridb -u"+muser+" -p"+mpwd+" "+dbq+" -e'SELECT datid,pfad,geändert,größe,zp,codepage,!!fertig FROM `"+tlydat+"`'",obverb,oblog,&datr);
 			for(auto aktdat:datr) {
 				caus<<aktdat<<endl;
 			}
