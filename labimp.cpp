@@ -3148,17 +3148,23 @@ void hhcl::pvirtfuehraus()
 				tm dateidtm;
 				char ddcont[11];
 				string dattag{base_name(*aktl).substr(0,10)};
-				if (dattag.substr(0,6)=="Labor ") {
-					dattag=base_name(*aktl).substr(6,13);
-				}
-				caus<<"base_name: "<<base_name(*aktl)<<", dattag (substr(0,10): "<<dattag<<endl;
-				// "dattag: "<<dattag<<endl;
         if (strptime(dattag.c_str(),"%d.%m.%Y", &dateidtm)) {
           strftime(ddcont,sizeof(ddcont),"%Y%m%d",&dateidtm);
 					dateidat=ddcont;
 				} else {
 					dateidat="00000000";
 				}
+				if (dattag.substr(0,6)=="Labor ") {
+					dattag=base_name(*aktl).substr(6,13);
+					if (strptime(dattag.c_str(),"%Y%m%d", &dateidtm)) {
+						strftime(ddcont,sizeof(ddcont),"%Y%m%d",&dateidtm);
+						dateidat=ddcont;
+					} else {
+						dateidat="00000000";
+					}
+				}
+				caus<<"base_name: "<<base_name(*aktl)<<", dattag (substr(0,10): "<<dattag<<", dateidat: "<<ddcont<<endl;
+				// "dattag: "<<dattag<<endl;
 				// wenn Datei schon angefangen wurde zu einzulesen (fertig<>1), dann dieses loeschen
 				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
 				// 16.9.18: Namen sollen eindeutig sein, dafuer koennen die Pfade mal umsortiert werden, ohne dass gleich alle Dateien neu eingelesen werden
