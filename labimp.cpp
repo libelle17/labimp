@@ -3155,7 +3155,7 @@ void hhcl::pvirtfuehraus()
 					dateidat="00000000";
 				}
 				if (dattag.substr(0,6)=="Labor ") {
-					dattag=base_name(*aktl).substr(6,13);
+					dattag=base_name(*aktl).substr(6,10);
 					if (strptime(dattag.c_str(),"%Y%m%d", &dateidtm)) {
 						strftime(ddcont,sizeof(ddcont),"%Y%m%d",&dateidtm);
 						dateidat=ddcont;
