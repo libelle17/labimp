@@ -3148,7 +3148,7 @@ void hhcl::pvirtfuehraus()
 				tm dateidtm;
 				char ddcont[11];
 				string dattag{base_name(*aktl).substr(0,10)};
-				if (dattag.substr(0,5)=="Labor ") {
+				if (dattag.substr(0,6)=="Labor ") {
 					dattag=base_name(*aktl).substr(6,13);
 				}
 				caus<<"base_name: "<<base_name(*aktl)<<", dattag (substr(0,10): "<<dattag<<endl;
