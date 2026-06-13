@@ -3146,21 +3146,36 @@ void hhcl::pvirtfuehraus()
 				 */
 				dateidat="";
 				tm dateidtm;
-				char ddcont[11];
+				char ddcont[17];
 				string dattag{base_name(*aktl).substr(0,10)};
-        if (strptime(dattag.c_str(),"%d.%m.%Y", &dateidtm)) {
+        if (strptime(dattag.c_str(),"%d.%m.%Y %H_%M_%S", &dateidtm)) {
+          strftime(ddcont,sizeof(ddcont),"%Y%m%d%H%M%S",&dateidtm);
+					dateidat=ddcont;
+				} else if (strptime(dattag.c_str(),"%d.%m.%Y %H_%i", &dateidtm)) {
+          strftime(ddcont,sizeof(ddcont),"%Y%m%d%H%M00",&dateidtm);
+					dateidat=ddcont;
+				} else if (strptime(dattag.c_str(),"%d.%m.%Y", &dateidtm)) {
           strftime(ddcont,sizeof(ddcont),"%Y%m%d",&dateidtm);
 					dateidat=ddcont;
 				} else {
 					dateidat="00000000";
 				}
 				if (dattag.substr(0,6)=="Labor ") {
-					dattag=base_name(*aktl).substr(6,10);
-					if (strptime(dattag.c_str(),"%Y%m%d", &dateidtm)) {
-						strftime(ddcont,sizeof(ddcont),"%Y%m%d",&dateidtm);
+					dattag=base_name(*aktl).substr(6,17);
+					if (strptime(dattag.c_str(),"%Y%m%d %H%M%S", &dateidtm)) {
+						strftime(ddcont,sizeof(ddcont),"%Y%m%d %H%M%S",&dateidtm);
+						dateidat=ddcont;
+					} else if (strptime(dattag.c_str(),"%Y%m%d %H%M", &dateidtm)) {
+						strftime(ddcont,sizeof(ddcont),"%Y%m%d %H%M00",&dateidtm);
 						dateidat=ddcont;
 					} else {
-						dateidat="00000000";
+						dattag=base_name(*aktl).substr(6,10);
+						if (strptime(dattag.c_str(),"%Y%m%d", &dateidtm)) {
+							strftime(ddcont,sizeof(ddcont),"%Y%m%d",&dateidtm);
+							dateidat=ddcont;
+						} else {
+							dateidat="00000000";
+						}
 					}
 				}
 				caus<<"base_name: "<<base_name(*aktl)<<", dattag (substr(0,10): "<<dattag<<", dateidat: "<<ddcont<<endl;
