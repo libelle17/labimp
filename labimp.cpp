@@ -3163,10 +3163,10 @@ void hhcl::pvirtfuehraus()
 				if (dattag.substr(0,6)=="Labor ") {
 					dattag=base_name(*aktl).substr(6,17);
 					if (strptime(dattag.c_str(),"%Y%m%d %H%M%S", &dateidtm)) {
-						strftime(ddcont,sizeof(ddcont),"%Y%m%d %H%M%S",&dateidtm);
+						strftime(ddcont,sizeof(ddcont),"%Y%m%d%H%M%S",&dateidtm);
 						dateidat=ddcont;
 					} else if (strptime(dattag.c_str(),"%Y%m%d %H%M", &dateidtm)) {
-						strftime(ddcont,sizeof(ddcont),"%Y%m%d %H%M00",&dateidtm);
+						strftime(ddcont,sizeof(ddcont),"%Y%m%d%H%M00",&dateidtm);
 						dateidat=ddcont;
 					} else {
 						dattag=base_name(*aktl).substr(6,10);
