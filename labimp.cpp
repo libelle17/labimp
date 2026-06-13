@@ -3147,11 +3147,11 @@ void hhcl::pvirtfuehraus()
 				dateidat="";
 				tm dateidtm;
 				char ddcont[17];
-				string dattag{base_name(*aktl).substr(0,10)};
+				string dattag{base_name(*aktl).substr(0,19)};
         if (strptime(dattag.c_str(),"%d.%m.%Y %H_%M_%S", &dateidtm)) {
           strftime(ddcont,sizeof(ddcont),"%Y%m%d%H%M%S",&dateidtm);
 					dateidat=ddcont;
-				} else if (strptime(dattag.c_str(),"%d.%m.%Y %H_%i", &dateidtm)) {
+				} else if (strptime(dattag.c_str(),"%d.%m.%Y %H_%M", &dateidtm)) {
           strftime(ddcont,sizeof(ddcont),"%Y%m%d%H%M00",&dateidtm);
 					dateidat=ddcont;
 				} else if (strptime(dattag.c_str(),"%d.%m.%Y", &dateidtm)) {
