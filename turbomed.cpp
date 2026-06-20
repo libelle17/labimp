@@ -1,6 +1,7 @@
 #include "kons.h"
 #include "DB.h"
 #include "labimp.h"
+#include "docnet.h"
 
 enum Txt_ {
 	T_ergpql_ueberladene_Funktion,
@@ -41,6 +42,9 @@ void hhcl::pvirtVorgbSpeziell()
 		ldatvz=gethome()+vtz+Tx[T_labor];
 	}
 	fertigvz=ldatvz+vtz+Tx[T_fertige];
+	// doc.net-Verzeichnisse (qvz, pdfvz) werden NICHT vorbelegt.
+	// Leerer Wert nach virtlieskonfein() → woher bleibt 0 → rzf → interaktiv.
+	// hhcl_docnet_verarbeitqvz() überspringt leere qvz stillschweigend.
 } // void hhcl::pvirtVorgbSpeziell
 
 // passt anhand spaeterer Informationen die Pat_id an

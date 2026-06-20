@@ -1358,30 +1358,40 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pptr*/&pruefauft,/*art*/puchar,T_pruefauft_k,T_pruefauft_l,/*TxBp*/&Tx,/*Txi*/T_pruefe_alle_Auftraege,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 //   // ── doc.net-Optionen (docnet.cpp) ──
+	// ── doc.net-Erweiterungsoptionen ────────────────────────────────────────
+	// wi=1  → erscheint in -h, löst rzf aus wenn nicht in Konfig
+	// wi=0  → nur in -vi; zvz1-4 sind optional, daher kein rzf
+	// woher=0 immer: wird erst durch virtlieskonfein() auf >=2 gesetzt
+	//         wenn der Eintrag in der Konfig-Datei gefunden wurde.
+	//         pvirtVorgbSpeziell() setzt Standardwerte NUR wenn woher<2,
+	//         damit Konfig-Einträge Vorrang haben.
+	// zvz1-4 als pstri (nicht pverz): leerer Wert und "-" werden akzeptiert
+	//         (optionale Kopierziele dürfen fehlen).
+// ── doc.net-Erweiterungsoptionen ──────────────────────────────────────
 	opn<<new optcl(/*pname*/"qvz",/*pptr*/&docnet::qvz,/*art*/pverz,
 		TDN_qvz_k,TDN_qvz_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Quelldateiverzeichnis_doc_net,
-		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
-		/*woher*/!docnet::qvz.empty(),TxtDN[TDN_Quelldateiverzeichnis_doc_net]);
-	opn<<new optcl(/*pname*/"zvz1",/*pptr*/&docnet::zvz[0],/*art*/pverz,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Quelldateiverzeichnis_doc_net]);
+	opn<<new optcl(/*pname*/"zvz1",/*pptr*/&docnet::zvz[0],/*art*/pstri,
 		TDN_zvz1_k,TDN_zvz1_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_1,
 		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
-		/*woher*/!docnet::zvz[0].empty(),TxtDN[TDN_Kopierziel_1]);
-	opn<<new optcl(/*pname*/"zvz2",/*pptr*/&docnet::zvz[1],/*art*/pverz,
+		/*woher*/0,TxtDN[TDN_Kopierziel_1]);
+	opn<<new optcl(/*pname*/"zvz2",/*pptr*/&docnet::zvz[1],/*art*/pstri,
 		TDN_zvz2_k,TDN_zvz2_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_2,
 		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
-		/*woher*/!docnet::zvz[1].empty(),TxtDN[TDN_Kopierziel_2]);
-	opn<<new optcl(/*pname*/"zvz3",/*pptr*/&docnet::zvz[2],/*art*/pverz,
+		/*woher*/0,TxtDN[TDN_Kopierziel_2]);
+	opn<<new optcl(/*pname*/"zvz3",/*pptr*/&docnet::zvz[2],/*art*/pstri,
 		TDN_zvz3_k,TDN_zvz3_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_3,
 		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
-		/*woher*/!docnet::zvz[2].empty(),TxtDN[TDN_Kopierziel_3]);
-	opn<<new optcl(/*pname*/"zvz4",/*pptr*/&docnet::zvz[3],/*art*/pverz,
+		/*woher*/0,TxtDN[TDN_Kopierziel_3]);
+	opn<<new optcl(/*pname*/"zvz4",/*pptr*/&docnet::zvz[3],/*art*/pstri,
 		TDN_zvz4_k,TDN_zvz4_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_4,
 		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
-		/*woher*/!docnet::zvz[3].empty(),TxtDN[TDN_Kopierziel_4]);
+		/*woher*/0,TxtDN[TDN_Kopierziel_4]);
 	opn<<new optcl(/*pname*/"pdfvz",/*pptr*/&docnet::pdfvz,/*art*/pverz,
 		TDN_pdfvz_k,TDN_pdfvz_l,/*TxBp*/&TxtDN,/*Txi*/TDN_PDF_Ausgabeverzeichnis,
-		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
-		/*woher*/!docnet::pdfvz.empty(),TxtDN[TDN_PDF_Ausgabeverzeichnis]);
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_PDF_Ausgabeverzeichnis]);  
 	dhcl::virtinitopt(); //α
 //	vorclvors=vorsl;
 } // void hhcl::virtinitopt

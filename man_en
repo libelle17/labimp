@@ -139,13 +139,13 @@ Depending on operating system, accessability and preferences the users thus coul
 .br
 \fB -qdir, --sourcedir <path>\fR: source directory (doc.net) ('\fB\fR')
 .br
-\fB -cdir1, --copydir1 <path>\fR: copy target 1 ('\fB\fR')
+\fB -cdir1, --copydir1 <string>\fR: copy target 1 ('\fB\fR')
 .br
-\fB -cdir2, --copydir2 <path>\fR: copy target 2 ('\fB\fR')
+\fB -cdir2, --copydir2 <string>\fR: copy target 2 ('\fB\fR')
 .br
-\fB -cdir3, --copydir3 <path>\fR: copy target 3 ('\fB\fR')
+\fB -cdir3, --copydir3 <string>\fR: copy target 3 ('\fB\fR')
 .br
-\fB -cdir4, --copydir4 <path>\fR: copy target 4 ('\fB\fR')
+\fB -cdir4, --copydir4 <string>\fR: copy target 4 ('\fB\fR')
 .br
 \fB -pdfdir, --pdfdirectory <path>\fR: PDF output directory ('\fB\fR')
 .br

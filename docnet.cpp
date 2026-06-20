@@ -654,8 +654,8 @@ namespace docnet {
 
 } // namespace docnet
 
-// pvirtVorgbSpeziell() ist in turbomed.cpp definiert und dort um die
-// doc.net-Vorgaben (qvz, pdfvz) erweitert – siehe turbomed.cpp.
+// pvirtVorgbSpeziell() ist in turbomed.cpp definiert und dort um den
+// docnet.h-Include erweitert. Keine zweite Definition hier (ODR).
 
 // ── Zusätzliche Kommandozeilenoptionen eintragen ─────────────────────────────
 // virtinitopt() wird in labimp.cpp definiert und ruft dhcl::virtinitopt() auf.
@@ -736,12 +736,14 @@ void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 
 		// 3. Kopieren in Zielverzeichnisse zvz1..zvz4
 		for (int i = 0; i < 4; ++i) {
-			if (docnet::zvz[i].empty()) continue;
-			string cpfad = docnet::zvz[i] + "/" + zname;
+			const string &z = docnet::zvz[i];
+			// leer oder "-" bedeutet: Kopierziel nicht gesetzt → überspringen
+			if (z.empty() || z == "-") continue;
+			string cpfad = z + "/" + zname;
 			fLog(blaus + string(TxtDN[TDN_Kopiere_nach]) +
 			     cpfad + schwarz, obverb, oblog);
 			try {
-				fs::create_directories(docnet::zvz[i]);
+				fs::create_directories(z);
 				fs::copy_file(zpfad, cpfad, fs::copy_options::overwrite_existing);
 			} catch (const exception &e) {
 				fLog(rots + string(TxtDN[TDN_Fehler_beim_Kopieren]) +
