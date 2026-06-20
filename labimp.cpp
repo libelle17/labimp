@@ -1,14 +1,20 @@
 // '//α' oder '//ω' als Kommentar sind nur fuer die Verwendung dieses Programms als Programmvorlage wichtig
 // sed -n '/\/\/α/,/\/\/ω/p;/\/\/ω/a\\' test
 // sed -n '/\/\/α/,/\/\/ω/p' test
+// Vorwärtsdeklaration docnet.cpp
+class hhcl;
+extern void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog);
+// (Die vollständigen externen Variablen kommen aus docnet.cpp via Linker)
 const double& versnr= //α
 #include "versdt"
 ;
 #include "kons.h" //α
 #include "DB.h" 
+extern string docnet_qvz;
 #include <tiffio.h>
 #define VOMHAUPTCODE // um Funktionsdefinition manchmal mit "__attribute__((weak)) " versehen zu können //ω
 #include "labimp.h"
+#include "docnet.h"
 // fuer verschiedene Sprachen //α
 #define vorsilbe "labory"
 const tm hhcl::tmnull{0};
@@ -1351,6 +1357,31 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pptr*/&nurusmod,/*art*/puchar,T_nurusmod_k,T_nurusmod_l,/*TxBp*/&Tx,/*Txi*/T_nur_usmod,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pptr*/&pruefauft,/*art*/puchar,T_pruefauft_k,T_pruefauft_l,/*TxBp*/&Tx,/*Txi*/T_pruefe_alle_Auftraege,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-2,/*woher*/1);
 	opn<<new optcl(/*pptr*/&dszahl,/*art*/plong,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
+//   // ── doc.net-Optionen (docnet.cpp) ──
+	opn<<new optcl(/*pname*/"qvz",/*pptr*/&docnet::qvz,/*art*/pverz,
+		TDN_qvz_k,TDN_qvz_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Quelldateiverzeichnis_doc_net,
+		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/!docnet::qvz.empty(),TxtDN[TDN_Quelldateiverzeichnis_doc_net]);
+	opn<<new optcl(/*pname*/"zvz1",/*pptr*/&docnet::zvz[0],/*art*/pverz,
+		TDN_zvz1_k,TDN_zvz1_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_1,
+		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/!docnet::zvz[0].empty(),TxtDN[TDN_Kopierziel_1]);
+	opn<<new optcl(/*pname*/"zvz2",/*pptr*/&docnet::zvz[1],/*art*/pverz,
+		TDN_zvz2_k,TDN_zvz2_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_2,
+		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/!docnet::zvz[1].empty(),TxtDN[TDN_Kopierziel_2]);
+	opn<<new optcl(/*pname*/"zvz3",/*pptr*/&docnet::zvz[2],/*art*/pverz,
+		TDN_zvz3_k,TDN_zvz3_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_3,
+		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/!docnet::zvz[2].empty(),TxtDN[TDN_Kopierziel_3]);
+	opn<<new optcl(/*pname*/"zvz4",/*pptr*/&docnet::zvz[3],/*art*/pverz,
+		TDN_zvz4_k,TDN_zvz4_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_4,
+		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/!docnet::zvz[3].empty(),TxtDN[TDN_Kopierziel_4]);
+	opn<<new optcl(/*pname*/"pdfvz",/*pptr*/&docnet::pdfvz,/*art*/pverz,
+		TDN_pdfvz_k,TDN_pdfvz_l,/*TxBp*/&TxtDN,/*Txi*/TDN_PDF_Ausgabeverzeichnis,
+		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/!docnet::pdfvz.empty(),TxtDN[TDN_PDF_Ausgabeverzeichnis]);
 	dhcl::virtinitopt(); //α
 //	vorclvors=vorsl;
 } // void hhcl::virtinitopt
@@ -3119,11 +3150,16 @@ void hhcl::pvirtfuehraus()
 	} else if (!loeschalle && !loeschunvollst && umben.empty()) {
 		if (!nurnachb && !nachbneu && !nurusmod && !pruefauft) {
 			pruefverz(fertigvz,obverb,oblog);
+      // ── doc.net: Quelldateien aus qvz einlesen, verschieben, PDF extrahieren
+      hhcl_docnet_verarbeitqvz(this, obverb, oblog);
 			systemrueck("Q="+ldatvz+"/;P="+fertigvz+";find /opt/turbomed/LaborStaber/DFUE/Update_Staber/LDTArchiv -iname '*.ldt' -newer \"$(printf $P/;ls -t $P|head -n1)\"|while read U;do cp \"$U\" \"$Q\"; find /DATA/Patientendokumente/ -mindepth 1 -maxdepth 1 -type d -regex '.*/[^/]+Labor$' -exec cp \"$U\" {} \\; ; done;",2);
 			sleep(2);
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 			systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
 			svec lrue;
+// In labimp.cpp::hhcl::pvirtfuehraus() AM ANFANG des normalen
+// find()-Datei-Verarbeitungsblocks einfügen (vor systemrueck("find …")):
+      hhcl_docnet_verarbeitqvz(this, obverb, oblog);
 			systemrueck("find "+ldatvz+" -maxdepth 1 -type f \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 			//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);

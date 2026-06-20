@@ -455,4 +455,8 @@ class hhcl:public dhcl
 	public: //α
 		hhcl(const int argc, const char *const *const argv);
 		~hhcl();
+		// doc.net-Erweiterung (docnet.cpp)
+		int dverarbeit_public(const string& datei,string *datidp,string *patelidp)
+			{ return dverarbeit(datei, datidp, patelidp); }
+		const string& getLdatvz() const { return ldatvz; }
 }; // class hhcl //ω
