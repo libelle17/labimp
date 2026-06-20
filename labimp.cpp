@@ -1374,20 +1374,20 @@ void hhcl::virtinitopt()
 		/*woher*/0,TxtDN[TDN_Quelldateiverzeichnis_doc_net]);
 	opn<<new optcl(/*pname*/"zvz1",/*pptr*/&docnet::zvz[0],/*art*/pstri,
 		TDN_zvz1_k,TDN_zvz1_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_1,
-		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
 		/*woher*/0,TxtDN[TDN_Kopierziel_1]);
 	opn<<new optcl(/*pname*/"zvz2",/*pptr*/&docnet::zvz[1],/*art*/pstri,
 		TDN_zvz2_k,TDN_zvz2_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_2,
 		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
-		/*woher*/0,TxtDN[TDN_Kopierziel_2]);
+		/*woher*/1,TxtDN[TDN_Kopierziel_2]);
 	opn<<new optcl(/*pname*/"zvz3",/*pptr*/&docnet::zvz[2],/*art*/pstri,
 		TDN_zvz3_k,TDN_zvz3_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_3,
 		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
-		/*woher*/0,TxtDN[TDN_Kopierziel_3]);
+		/*woher*/1,TxtDN[TDN_Kopierziel_3]);
 	opn<<new optcl(/*pname*/"zvz4",/*pptr*/&docnet::zvz[3],/*art*/pstri,
 		TDN_zvz4_k,TDN_zvz4_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Kopierziel_4,
 		/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
-		/*woher*/0,TxtDN[TDN_Kopierziel_4]);
+		/*woher*/1,TxtDN[TDN_Kopierziel_4]);
 	opn<<new optcl(/*pname*/"pdfvz",/*pptr*/&docnet::pdfvz,/*art*/pverz,
 		TDN_pdfvz_k,TDN_pdfvz_l,/*TxBp*/&TxtDN,/*Txi*/TDN_PDF_Ausgabeverzeichnis,
 		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,

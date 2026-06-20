@@ -59,7 +59,7 @@ const char *dn_T[TDN_MAX + 1][SprachZahl] = {
 	// TDN_qvz_k
 	{"qvz", "qdir"},
 	// TDN_qvz_l
-	{"quelldatenvz", "sourcedir"},
+	{"quellverzeichnis", "sourcedir"},
 	// TDN_zvz1_k
 	{"zvz1", "cdir1"},
 	// TDN_zvz1_l
@@ -81,17 +81,17 @@ const char *dn_T[TDN_MAX + 1][SprachZahl] = {
 	// TDN_pdfvz_l
 	{"pdfverzeichnis", "pdfdirectory"},
 	// TDN_Quelldateiverzeichnis_doc_net
-	{"Quelldateiverzeichnis (doc.net)", "source directory (doc.net)"},
+	{"Quellverzeichnis fuer doc.net-Uebertragung", "source directory for doc.net transfer"},
 	// TDN_Kopierziel_1
-	{"Kopierziel 1", "copy target 1"},
+	{"Ziel 1 fuer automatische Kopie", "copy target 1"},
 	// TDN_Kopierziel_2
-	{"Kopierziel 2", "copy target 2"},
+	{"Ziel 2 fuer automatische Kopie", "copy target 2"},
 	// TDN_Kopierziel_3
-	{"Kopierziel 3", "copy target 3"},
+	{"Ziel 3 fuer automatische Kopie", "copy target 3"},
 	// TDN_Kopierziel_4
-	{"Kopierziel 4", "copy target 4"},
+	{"Ziel 4 fuer automatische Kopie", "copy target 4"},
 	// TDN_PDF_Ausgabeverzeichnis
-	{"PDF-Ausgabeverzeichnis", "PDF output directory"},
+	{"Verzeichnis fuer extrahierte PDF-Befunde", "directory for extracted PDF reports"},
 	// TDN_Verschiebe_von
 	{"Verschiebe: ", "Moving: "},
 	// TDN_nach

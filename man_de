@@ -137,17 +137,17 @@ Der Benutzer könnte also je nach Betriebssystem, Zugriffsmöglichkeit und Präf
 .br
 \fB -fgvz, --fertigvz <pfad>\fR: Verzeichnis der Fertigen ('\fB/root/labor/fertige\fR')
 .br
-\fB -qvz, --quelldatenvz <pfad>\fR: Quelldateiverzeichnis (doc.net) ('\fB\fR')
+\fB -qvz, --quellverzeichnis <pfad>\fR: Quellverzeichnis fuer doc.net-Uebertragung ('\fB\fR')
 .br
-\fB -zvz1, --zielverzeichnis1 <string>\fR: Kopierziel 1 ('\fB\fR')
+\fB -zvz1, --zielverzeichnis1 <string>\fR: Ziel 1 fuer automatische Kopie ('\fB\fR')
 .br
-\fB -zvz2, --zielverzeichnis2 <string>\fR: Kopierziel 2 ('\fB\fR')
+\fB -zvz2, --zielverzeichnis2 <string>\fR: Ziel 2 fuer automatische Kopie ('\fB\fR')
 .br
-\fB -zvz3, --zielverzeichnis3 <string>\fR: Kopierziel 3 ('\fB\fR')
+\fB -zvz3, --zielverzeichnis3 <string>\fR: Ziel 3 fuer automatische Kopie ('\fB\fR')
 .br
-\fB -zvz4, --zielverzeichnis4 <string>\fR: Kopierziel 4 ('\fB\fR')
+\fB -zvz4, --zielverzeichnis4 <string>\fR: Ziel 4 fuer automatische Kopie ('\fB\fR')
 .br
-\fB -pdfvz, --pdfverzeichnis <pfad>\fR: PDF-Ausgabeverzeichnis ('\fB\fR')
+\fB -pdfvz, --pdfverzeichnis <pfad>\fR: Verzeichnis fuer extrahierte PDF-Befunde ('\fB\fR')
 .br
 \fB -host, --host <string>\fR: verwendet die Datenbank auf Host <string> anstatt auf ('\fBlocalhost\fR')
 .br
