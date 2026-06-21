@@ -38,6 +38,16 @@
 // Kompilierung: wie turbomed.cpp, z. B.:
 //   $(CXX) … docnet.cpp labimp.o kons.o DB.o -o labimp_docnet
 
+// ===========================================================================
+// ABHAENGIGKEITEN
+// ===========================================================================
+// kons.h  - Konsolhilfsfunktionen (fLog, caus, Farbcodes rot/blau/schwarz)
+// DB.h    - Datenbankabstraktion (RS, insv, DB)
+// labimp.h - hhcl-Klasse (Hauptprogramm-Klasse)
+// docnet.h - Enums (TDN_*) und Deklaration hhcl_docnet_verarbeitqvz()
+// filesystem - C++17 fuer Verzeichnisoperationen
+
+
 #include "kons.h"
 #include "DB.h"
 #include "labimp.h"
@@ -54,6 +64,14 @@ namespace fs = std::filesystem;
 
 // ── Hilfstexte (zweisprachig wie im Rest des Projekts) ──────────────────────
 // (TDN_-Enum ist in docnet.h definiert)
+
+// ===========================================================================
+// HILFSTEXTE (zweisprachig Deutsch/Englisch)
+// ===========================================================================
+// Jeder Eintrag entspricht einem TDN_*-Enum-Wert aus docnet.h.
+// Reihenfolge muss exakt mit der Enum-Reihenfolge uebereinstimmen.
+// Erscheinen in Kommandozeilenhilfe und Logmeldungen.
+
 
 const char *dn_T[TDN_MAX + 1][SprachZahl] = {
 	// TDN_qvz_k
@@ -120,6 +138,18 @@ class TxB TxtDN((const char * const * const * const *)dn_T);
 // Da wir kein Erbrecht auf hhcl haben, nutzen wir file-scope Variablen.
 // (Alternative: Patch in labimp.h – hier bewusst non-invasiv gehalten.)
 
+// ===========================================================================
+// NAMESPACE docnet - Konfigurationsvariablen und Hilfsfunktionen
+// ===========================================================================
+// Alle doc.net-spezifischen Funktionen und Variablen leben in diesem
+// Namespace um Namenskonflikte mit dem Rest von labimp zu vermeiden.
+//
+// Verzeichniskonfiguration (aus ~/.config/labimp.conf):
+//   qvz    - Quelldateiverz.: doc.net legt LDT3-Dateien hier ab
+//   zvz[4] - bis zu 4 optionale Kopierziele (z.B. Turbomed-Einleseverz.)
+//   pdfvz  - Ausgabeverzeichnis fuer extrahierte PDF-Befunde
+
+
 namespace docnet {
 	string qvz;           // Quelldateiverzeichnis (doc.net legt hier ab)
 	string zvz[4];        // bis zu 4 Kopierziele
@@ -128,6 +158,12 @@ namespace docnet {
 	// ── Basis64-Dekodierungstabelle ──────────────────────────────────────────
 	static const string b64chars =
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+
+// -- Base64-Dekodierung ------------------------------------------------------
+// Standard RFC 4648 Dekodierung. LDT3-Anhaenge (FK 6329) enthalten den
+// PDF-Befund als Base64-kodierte Zeichenkette, die hier in Bytes
+// umgewandelt wird, um die PDF-Datei zu schreiben.
 
 	// Dekodiert einen Base64-String in Bytes
 	static vector<unsigned char> b64decode(const string &encoded) {
@@ -150,6 +186,14 @@ namespace docnet {
 	}
 
 	// ── Zeitstempel-Parser für LDT3 (Felder 7278=Datum, 7279=Uhrzeit) ───────
+
+// -- LDT3-Zeitstempel-Parser -------------------------------------------------
+// LDT3 kodiert Zeitstempel in separaten Feldern:
+//   FK 7278 = Datum im Format YYYYMMDD
+//   FK 7279 = Uhrzeit im Format HHMMSS
+// Beide Felder stehen innerhalb eines Obj_0054-Blocks.
+// Gibt true zurueck wenn ein gueltiger Zeitstempel rekonstruiert wurde.
+
 	// Gibt true zurück und befüllt *tm, wenn beide Felder gültig sind.
 	static bool parseLDT3Timestamp(const string &dat8, const string &tim6, struct tm *out) {
 		if (dat8.size() < 8 || tim6.size() < 6)
@@ -169,6 +213,13 @@ namespace docnet {
 
 	// ── Zieldateiname aus Zeitstempel + laufender Nummer ─────────────────────
 	// Muster: Labor<YYYYMMDD>_<HHMMSS>_<lfdnr>.ldt
+
+// -- Zieldateiname berechnen -------------------------------------------------
+// Erzeugt eindeutigen Dateinamen: Labor<YYYYMMDD>_<HHMMSS>_<lfdnr>.ldt
+// Die laufende Nummer wird hochgezaehlt bis der Name im Zielverzeichnis
+// noch nicht existiert. Verhindert Ueberschreibungen wenn mehrere Dateien
+// im selben Sekundentakt ankommen.
+
 	// Erhöht lfdnr so lange, bis kein gleichnamiges File in zieldir existiert.
 	static string zieldateiname(const string &zieldir, const struct tm &ts) {
 		char buf[64];
@@ -190,6 +241,16 @@ namespace docnet {
 
 	// ── Timestamp aus LDT3-Datei lesen (Kopfbereich) ─────────────────────────
 	// Sucht nach Feldkennung 8218 = "Timestamp_Erstellung_Datensatz"
+
+// -- Timestamp aus LDT3-Datei lesen (Vorabledurchlauf) ----------------------
+// Sucht im Dateikopf nach:
+//   FK 8218 = "Timestamp_Erstellung_Datensatz" (Label)
+//   -> FK 8002 Obj_0054 (Beginn Timestamp-Objekt)
+//      FK 7278 = Datum, FK 7279 = Uhrzeit
+//   -> FK 8003 Obj_0054 (Ende Timestamp-Objekt)
+// Fallback: Dateidatum (st_mtime) falls kein Timestamp in Datei.
+// Dieser Timestamp wird fuer die Umbenennung der Datei verwendet.
+
 	// und liest die unmittelbar folgenden 7278/7279 innerhalb des nächsten Obj_0054.
 	static bool leseTimestamp(const string &pfad, struct tm *ts) {
 		// Zeichensatzerkennung wie in dverarbeit
@@ -258,6 +319,18 @@ namespace docnet {
 
 	// ── PDF aus LDT3-Datei extrahieren ───────────────────────────────────────
 	// Sucht 8242 = "base64-kodierte_Anlage" gefolgt von 6329-Blöcken.
+
+// -- PDF-Extraktion aus LDT3-Datei -------------------------------------------
+// LDT3 kann Anhaenge (PDF-Befunde) Base64-kodiert enthalten.
+// Struktur:
+//   FK 8242 = "base64-kodierte_Anlage" (Ankuendigung des Anhangs)
+//   FK 6329 = <chunk>  (ein Stueck des Base64-Textes, beliebig viele Zeilen)
+//   naechste andere FK = Ende des Anhangs
+//
+// Alle Chunks werden zusammengefuegt, Base64-dekodiert und als .pdf
+// in pdfvz gespeichert. Bei Namenskollision wird _1, _2, ... angehaengt.
+// FK 6329 wird in ldt3ToTmp() ignoriert (wird nur hier extrahiert).
+
 	// Speichert in pdfvz/<zieldatname_ohne_ldt>.pdf
 	static void extrahierePDF(const string &ldtpfad,
 	                           const string &zielname_ohne_endung,
@@ -372,6 +445,52 @@ namespace docnet {
 	//   7306 (Ergebniscode)         → 8418 (Teststatus)
 	//   7302 (Normbereich-Code kA)  → ignorieren (Normbereich kommt via 8460)
 	//   7301 (Keimzahl)             → 8480 als Text
+
+// ===========================================================================
+// LDT3 -> LDT2-KONVERTIERUNG  (Kernfunktion des Moduls)
+// ===========================================================================
+// Liest eine LDT3-Datei und schreibt eine temporaere LDT1/2-kompatible
+// Datei nach /tmp/, die dverarbeit() in labimp.cpp direkt lesen kann.
+//
+// HINTERGRUND: LDT3 ist hierarchisch (Objekte mit Unterobjekten),
+// LDT2 ist flat (einfache Feldliste). dverarbeit() kennt nur LDT2.
+//
+// ZWEISTUFIGER ANSATZ:
+//
+// Stufe 1 - Vorabledurchlauf:
+//   Liest die Datei einmal durch um Metadaten zu sammeln:
+//   - Arztdaten (Name, Nr, LANR, Adresse) aus dem Patientenblock
+//     (vor dem ersten Geburtstagsdatum FK 3103)
+//   - Laborname aus dem ersten 1250-Feld nach FK 8239
+//     (auch wenn 8002/8003-Strukturfelder dazwischen liegen)
+//
+// Stufe 2 - Konvertierung:
+//   Zweiter Lesedurchlauf. Ausgabe in tmp-Datei.
+//   Zustandsvariablen:
+//   - in_header: wir sind im 8220-Datenpaket-Header
+//   - header_emitted: LDT2-Header wurde schon geschrieben
+//   - in_ts_obj: wir sind in einem Obj_0054-Timestamp-Block
+//   - objstack: Stack der geoeffneten Objekte
+//   - emit8302/emit8311/emit8418: Flags gegen Mehrfachausgabe
+//     (werden bei jedem neuen Patientenblock zurueckgesetzt)
+//
+// WICHTIGE FELDMAPPINGS (LDT3 -> LDT2):
+//   8000 8220 -> emit Header (8000 8220 + Arztdaten + Labor 8320/8323)
+//   8000 8205 -> emit 8000 8205 (Patient), Flags zuruecksetzen
+//   8002/8003 -> Objekt-Start/Ende, Timestamp-Tracking
+//   7278+7279 in Obj_0054 -> 8301 (Eingang) oder 8302 (Befund) + 8303
+//   7305 -> 8311 (Auftragsschluessel, nur einmal pro Patient)
+//   7306 -> 8418 (Teststatus: 01=E, 04=T, nur einmal pro Wert)
+//   3564 -> 8480 (Ergebnistext/Kommentar)
+//   7301 -> 8480 "Keimzahl: <n>"
+//   0105 -> ignoriert (Auftragsnr kommt direkt als 8310 im Patientenblock)
+//   8239 -> ignoriert (Laborname kommt aus pre_labor via 8320/8323)
+//   8418 direkt -> ignoriert (nur 7306-Mapping verwenden)
+//   8428/8430/8431 -> nur im Patientenblock ausgeben (Probenmaterial)
+//   6329 -> ignoriert (PDF-Base64, wird nur in extrahierePDF() verarbeitet)
+//   8401 -> ignoriert (Befundart-Code, Teststatus kommt via 7306)
+//   Viele LDT3-Strukturfelder -> ignoriert (8110, 8114, 8117, ...)
+
 
 	static string ldt3ToTmp(const string &ldtpfad)
 	{
@@ -542,6 +661,27 @@ namespace docnet {
 // ── doc.net-Hauptschleife: Quelldatei-Polling, Verschieben, Konvertieren ─────
 // Diese Funktion wird AUS pvirtfuehraus() aufgerufen (Patch, s.u.).
 // Sie kann auch standalone als Testfunktion genutzt werden.
+
+
+// ===========================================================================
+// HAUPTSCHLEIFE: Quelldatei-Polling, Verschieben, Konvertieren
+// ===========================================================================
+// Diese Funktion wird von pvirtfuehraus() in labimp.cpp aufgerufen,
+// bevor die normale find()-Schleife die Dateien aus ldatvz verarbeitet.
+//
+// ABLAUF fuer jede .ldt-Datei in qvz:
+//   1. Timestamp aus Dateiinhalt lesen (oder Dateidatum als Fallback)
+//   2. Umbenennen nach ldatvz/Labor<YYYYMMDD>_<HHMMSS>_<lfdnr>.ldt
+//   3. Kopieren in bis zu 4 Zielverzeichnisse (zvz1..zvz4)
+//   4. PDF-Anhang extrahieren und in pdfvz speichern
+//   5. LDT3 -> LDT2-Konvertierung (ldt3ToTmp) nach /tmp/
+//   6. dverarbeit_public() mit der Tmp-Datei aufrufen
+//   7. Tmp-Datei loeschen
+//   8. Original-LDT3-Datei nach fertigvz verschieben (verhindert
+//      Doppelverarbeitung durch die normale find()-Schleife)
+//
+// AM ANFANG: Cleanup alter _tmp.ldt-Dateien in ldatvz und
+//            Labor*.ldt-Dateien in /tmp/ aus abgebrochenen Laeufen.
 
 void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 {

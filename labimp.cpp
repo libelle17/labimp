@@ -1333,6 +1333,21 @@ void hhcl::pvirtVorgbSpeziell()
 
 int hhcl::fui0(){return !vorsl.empty();};
 
+
+// ===========================================================================
+// virtinitopt() - Kommandozeilenoptionen registrieren
+// ===========================================================================
+// Registriert alle Optionen die labimp kennt:
+//   -ldatvz/-la  : Verzeichnis der LDT-Eingabedateien
+//   -fertigvz/-fe: Verzeichnis fuer fertig verarbeitete Dateien
+//   -vorsilbe/-vs: Tabellenprafix (Standard: "labory")
+//   -loeunv      : loescht Eintraege aus unvollstaendig eingelesenen Dateien
+//   -w           : "was", zeigt was getan werden wuerde (Probe)
+//   ... und viele mehr (s. Hilfstextarray DPROG_T)
+//
+// doc.net-Erweiterung: Zusaetzliche Optionen fuer qvz, zvz1..zvz4, pdfvz
+// werden hier ebenfalls registriert (Patch in docnet.cpp).
+
 // wird aufgerufen in lauf
 void hhcl::virtinitopt()
 { //ω
@@ -1772,6 +1787,25 @@ void BDTtoDate(const string& inh,struct tm *tm,int abjahr/*=1900*/,uchar objahrz
 } // void BDTtoDate
 
 // aufgerufen in wertschreib und dverarbeit
+
+// ===========================================================================
+// russchreib() - Laboruntersuchungs-Satz (laboryus) in DB schreiben
+// ===========================================================================
+// Wird aufgerufen wenn ein vollstaendiger Patienten-/Untersuchungsblock
+// vorliegt (beim naechsten 8000-Satz oder am Dateiende).
+//
+// Ablauf:
+//   1. fuellpql() - baut SQL-Abfragen zum Patientenidentifizieren
+//   2. Geht pql-Liste durch; bei genau 1 Treffer: pid = gefundene Pat_id
+//   3. Schreibt Patientendaten in rus (Nachname, Vorname, GebDat, ...)
+//   4. usmod() - Nachbearbeitung (z.B. Vergleich mit laborneu)
+//   5. rus.schreib() schreibt den laboryus-Satz in die DB
+//
+// Parameter:
+//   rus    - insv-Objekt fuer laboryus (enthaelt bereits SatzID, DatID etc.)
+//   aktc   - Verbositaet der DB-Ausgaben
+//   usidp  - Rueckgabe der neu vergebenen laboryus.id
+
 // vorher muessen zwerte und zlangt und zakb schon gefuellt sein
 void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 {
@@ -2012,6 +2046,26 @@ void hhcl::usschluss(const size_t aktc)
 } // void hhcl::usschluss
 
 // aufgerufen in dverarbeit
+
+// ===========================================================================
+// wertschreib() - Laborwert-Block abschliessen und in DB schreiben
+// ===========================================================================
+// Wird aufgerufen wenn ein Test-Block endet (neues 8410, Dateiende,
+// naechster 8000-Satz oder naechste Satzart).
+//
+// Ablauf:
+//   1. Wenn usoffen: russchreib() aufrufen (Patienten-Satz erst hier final)
+//   2. Normbereich in rpar und rpnb eintragen
+//   3. rpneu.schreib() - Neuparam-Tabelle (laborypneu)
+//   4. rpar.schreib()  - Parameter-Tabelle (laboryparameter)
+//   5. rpnb.schreib()  - Normbereich-Tabelle (laborypnb)
+//   6. rbawep->schreib() - Wert (laborywert) oder Bakt (laborybakt)
+//   7. Alle Zustandsvariablen zuruecksetzen (pnbid, labk, lwert, ...)
+//
+// Parameter:
+//   rbawep - Zeiger auf rwe (Wert) oder rba (Bakt), je nach Messung
+//   Die anderen Parameter sind die jeweiligen insv-Objekte der Tabellen.
+
 // vorher muessen zwerte und zlangt und zabk bzw. zverfa schon gefuellt sein
 void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,insv *rpar, insv *rpneu, insv *rpnb, insv *rwe, insv *rbawep,insv *rhinwp,insv *rspezp, insv *rlep)
 {
@@ -2536,6 +2590,64 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	
 } // void hhcl::wertschreib
 
+
+// ===========================================================================
+// dverarbeit() - Kern des Laborimports: LDT-Datei einlesen und in DB laden
+// ===========================================================================
+// Liest eine LDT1/2-Datei (oder per ldt3ToTmp() konvertierte LDT3-Datei)
+// und schreibt alle Daten in die labory*-Tabellen der Datenbank.
+//
+// DATENBANKSTRUKTUR (vereinfacht):
+//   laborydat     - eine Zeile pro LDT-Datei (Dateiname, Datum, fertig)
+//   laborysaetze  - ein Satz pro Datenpaket (8220/8205)
+//   laboryaerzte  - Arztdaten (Name, LANR)
+//   laboryplab    - Labor (Name, Ort)
+//   laboryus      - ein Untersuchungs-Satz pro Patient pro Datei
+//   laborywert    - einzelne Laborwerte (Abk, Langtext, Wert, Einheit, NB)
+//   laborybakt    - Bakteriologische Befunde
+//   laboryparameter - Parametertabelle (Abk, Langtext, Normbereich)
+//   laborypneu    - "neu" gesehene Parameter
+//   laborypnb     - Normbereiche
+//   laboryfehlt   - unbekannte Felder (zur Analyse/Erweiterung)
+//
+// ABLAUF:
+//   1. Zeichensatz erkennen (UTF-8, ISO-8859-15 oder CP850)
+//   2. laborydat-Eintrag anlegen (reing.schreib), datid merken
+//      Membervariable datid wird mit *datidp synchronisiert
+//   3. Zeilenweise lesen, Feldkennung (3 Zeichen) + Code (4 Zeichen) parsen
+//   4. Je nach Code:
+//      8000 8220 -> Datenpaket-Header: rsaetze fuer Header-Satz
+//      8000 8205 -> Patientenblock: rsaetze fuer Befund-Satz
+//                  Falls usoffen: russchreib() fuer vorigen Patienten
+//                  UsLfd hochzaehlen
+//      8000 8221 -> Abschluss: wertschreib(), usschluss()
+//      3101/3102/3103/3110 -> Nachname/Vorname/GebDat/Geschlecht
+//      3000/3119 -> Kassennummer/KV-Nummer
+//      8320+8323 -> Labor: rlab.schreib() -> labind gesetzt
+//      8410      -> Test-Ident: wertschreib() fuer vorigen Wert,
+//                  rbawep=&rwe (Wert) oder &rba (Bakt)
+//      8411      -> Testbezeichnung (Langtext)
+//      8420      -> Ergebniswert
+//      8421      -> Einheit
+//      8422      -> Grenzwertindikator (N/A/B/C)
+//      8460      -> Normbereich
+//      8480      -> Ergebnistext/Kommentar
+//      8418      -> Teststatus (E=Endbefund, T=Teilbefund)
+//      8301/8302/8303 -> Eingangs-/Befundsdatum
+//      3564      -> Keimname (-> 8480)
+//      u.v.m.
+//   5. Am Dateiende: wertschreib(), UPDATE laborydat SET fertig=1
+//
+// DOCNET-INTEGRATION:
+//   Wird via dverarbeit_public() aus docnet.cpp aufgerufen.
+//   datid-Synchronisierung: reing.schreib() setzt *datidp,
+//   danach wird this->datid = *datidp gesetzt (wichtig fuer rsaetze.hz).
+//
+// Parameter:
+//   datei   - Pfad zur LDT-Datei (i.d.R. Tmp-Datei in /tmp/)
+//   datidp  - Rueckgabe der neuen laborydat.datid
+//   patelidp - Rueckgabe der laboryus.id des letzten Patienten
+
 // aufgerufen in pvirtfuehraus; // return 0 = fertig
 int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 {
@@ -3044,6 +3156,14 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 	return 1;
 } // void hhcl::dverarbeit
 
+// ===========================================================================
+// prueftbl() - Datenbanktabellen pruefen und ggf. anlegen/erweitern
+// ===========================================================================
+// Prueft ob alle labory*-Tabellen existieren und die erwarteten Spalten
+// haben. Fehlende Tabellen werden angelegt, fehlende Spalten hinzugefuegt.
+// Wird einmalig beim Start aufgerufen.
+
+
 void hhcl::prueftbl()
 {
 	const size_t aktc{0};
@@ -3148,6 +3268,22 @@ void hhcl::prueftbl()
 void hhcl::pvirtnachrueckfragen()
 {
 } // void hhcl::pvirtnachrueckfragen
+
+
+// ===========================================================================
+// pvirtfuehraus() - Hauptschleife des Laborimports
+// ===========================================================================
+// Wird nach der Initialisierung aufgerufen und steuert den gesamten
+// Importvorgang. Ablauf:
+//
+//   1. prueftbl() - Tabellen pruefen/anlegen
+//   2. hhcl_docnet_verarbeitqvz() - doc.net LDT3-Dateien verarbeiten
+//      (verschiebt .ldt-Dateien aus qvz nach ldatvz, konvertiert LDT3->LDT2,
+//      ruft dverarbeit() auf, verschiebt nach fertigvz)
+//   3. find()-Schleife: sucht .ldt-Dateien in ldatvz, die neuer sind als
+//      die letzte Datei in fertigvz; verarbeitet sie per dverarbeit()
+//   4. Bei Fehler: Logging, Abbruch oder naechste Datei
+//   5. Ggf. Nachbearbeitung (nachbearbeit())
 
 // wird aufgerufen in lauf
 void hhcl::pvirtfuehraus()
