@@ -3,7 +3,7 @@
 // sed -n '/\/\/α/,/\/\/ω/p' test
 // Vorwärtsdeklaration docnet.cpp
 class hhcl;
-extern void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog);
+extern int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog);
 // (Die vollständigen externen Variablen kommen aus docnet.cpp via Linker)
 const double& versnr= //α
 #include "versdt"
@@ -3329,7 +3329,7 @@ void hhcl::pvirtfuehraus()
 			systemrueck("chmod --reference '"+ldatvz+"' '"+fertigvz+"'");
 			systemrueck("chown --reference '"+ldatvz+"' '"+fertigvz+"'");
 			svec lrue;
-      hhcl_docnet_verarbeitqvz(this, obverb, oblog);
+      verarbeitet += hhcl_docnet_verarbeitqvz(this, obverb, oblog);
 			systemrueck("find "+ldatvz+" -maxdepth 1 -type f \\( -iname '1b*.ld*' -or -iname '*.ldt' -or -iname 'x*.ld*' -or -iname 'labor*.dat' \\) -printf '%TY%Tm%Td%TH%TM%TS\t%p\n' "+string(obverb?"":"2>/dev/null")+"|sort|cut -f2", obverb,oblog,&lrue,/*obsudc=*/0);
 			//	systemrueck("find "+ldatvz+" -type f -iname '*' "+string(obverb?"":" 2>/dev/null")+"| sort -r", obverb,oblog,&lrue,/*obsudc=*/0);
 			fLog(blaus+Tx[T_Dateien_gefunden]+schwarz+ltoan(lrue.size()),1,oblog);
@@ -3403,10 +3403,7 @@ void hhcl::pvirtfuehraus()
                                                 }
                                         }
                                 }
-				{ string _lv; { ifstream _f(*aktl); string _z;
-  while(std::getline(_f,_z)) { if (_z.size()>10 && _z.substr(3,4)=="0001") { _lv=_z.substr(7); break; } } }
-  caus<<"base_name: "<<base_name(*aktl)<<", dattag (substr(0,19): "<<dattag<<", dateidat: "<<ddcont
-       <<(_lv.empty()?"":", LDT: "+_lv)<<endl; }
+				caus<<"base_name: "<<base_name(*aktl)<<", dattag (substr(0,19): "<<dattag<<", dateidat: "<<ddcont<<endl;
 				// "dattag: "<<dattag<<endl;
 				// wenn Datei schon angefangen wurde zu einzulesen (fertig<>1), dann dieses loeschen
 				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);
@@ -3435,9 +3432,6 @@ void hhcl::pvirtfuehraus()
 								if (docnet_isLDT3(*aktl)) {
 									ldt3tmp = docnet_ldt3ToTmp(*aktl);
 								// PDF-Extraktion fuer find-Schleife
-								{ string _bn=aktl->substr(aktl->rfind("/")+1);
-								  string _bno=_bn.substr(0,_bn.rfind("."));
-								  docnet_extrahierePDF(*aktl,_bno,obverb,oblog); }
 									if (!ldt3tmp.empty()) {
 										aktl_verarbeit = ldt3tmp;
 										string bn = aktl->substr(aktl->rfind("/")+1);

@@ -268,37 +268,50 @@ namespace docnet {
 		if (zielverz.empty()) return;
 		ifstream f(ldtpfad);
 		if (!f.is_open()) return;
+
+		// Pro Patient einen PDF-Block sammeln.
+		// 8145 "Patient" markiert dass folgende 3101/3102/3103 zum Patienten gehoeren
 		struct PdfBlock { vector<string> chunks; string nname,vname,gebdat; };
 		vector<PdfBlock> alle_pdfs;
 		vector<string> b64chunks;
-		// 3101/3102 kommen mehrfach (Laborarzt, Praxisarzt, Patient)
-		// Das letzte 3101/3102 vor 3103 (GebDat) ist der Patient
-		string last_nname, last_vname;
 		string pat_nname, pat_vname, pat_gebdat;
+		bool in_patient = false;   // nach "8145 Patient"
 		bool in_attachment = false;
 		string zeile;
+
 		while (getline(f, zeile)) {
 			if (zeile.size() < 7) continue;
 			if (!zeile.empty() && zeile.back() == '\r') zeile.pop_back();
 			string fid = zeile.substr(3, 4);
 			string inh = zeile.substr(7);
-			if      (fid == "3101") { last_nname = inh; last_vname = ""; }
-			else if (fid == "3102") { last_vname = inh; }
-			else if (fid == "3103") {
-				pat_nname = last_nname; pat_vname = last_vname;
-				if (inh.size()>=8) pat_gebdat=inh.substr(6,2)+"."+inh.substr(4,2)+"."+inh.substr(2,2);
-				else pat_gebdat = inh;
+
+			// 8145 "Patient" schaltet Patientenmodus ein
+			if (fid == "8145") {
+				string il=inh; transform(il.begin(),il.end(),il.begin(),::tolower);
+				in_patient = (il == "patient");
+			}
+			// 8000 neuer Satz: Patientenmodus zuruecksetzen
+			else if (fid == "8000") { in_patient = false; }
+			else if (fid == "3101" && in_patient) { pat_nname = inh; }
+			else if (fid == "3102" && in_patient) { pat_vname = inh; }
+			else if (fid == "3103" && in_patient) {
+				if (inh.size()>=8)
+					pat_gebdat=inh.substr(6,2)+"."+inh.substr(4,2)+"."+inh.substr(2,2);
+				else pat_gebdat=inh;
+				in_patient = false; // Patientendaten komplett
 			}
 			else if (fid == "8242") {
-				string il=inh; transform(il.begin(),il.end(),il.begin(),::tolower);
-				if (il.find("base64")!=string::npos) {
+				string il=inh;
+				transform(il.begin(),il.end(),il.begin(),::tolower);
+				if (il.find("base64") != string::npos) {
+					// Vorherigen Block abschliessen falls vorhanden
 					if (!b64chunks.empty()) {
 						alle_pdfs.push_back({b64chunks,pat_nname,pat_vname,pat_gebdat});
 						b64chunks.clear();
 					}
 					in_attachment = true;
 				}
-			} else if (fid=="6329" && in_attachment) {
+			} else if (fid == "6329" && in_attachment) {
 				b64chunks.push_back(inh);
 			} else if (in_attachment && fid!="6329" && fid!="8002" && fid!="8003") {
 				in_attachment = false;
@@ -308,39 +321,51 @@ namespace docnet {
 			alle_pdfs.push_back({b64chunks,pat_nname,pat_vname,pat_gebdat});
 		f.close();
 		if (alle_pdfs.empty()) return;
+
+		// Zielverzeichnis sicherstellen
 		try { fs::create_directories(zielverz); }
 		catch (const exception &e) {
-			fLog(rots+string(TxtDN_ref[TDN_Fehler_beim_PDF_Schreiben])+zielverz+": "+e.what()+schwarz,1,oblog);
+			fLog(rots+string(TxtDN_ref[TDN_Fehler_beim_PDF_Schreiben])+
+			     zielverz+": "+e.what()+schwarz, 1, oblog);
 			return;
 		}
 		string _zvz=zielverz;
 		while (!_zvz.empty() && _zvz.back()=='/') _zvz.pop_back();
+
+		// Jedes PDF einzeln schreiben
 		for (size_t pi=0; pi<alle_pdfs.size(); ++pi) {
 			string raw_b64;
-			for (const auto &chunk:alle_pdfs[pi].chunks) raw_b64+=chunk;
+			for (const auto &chunk : alle_pdfs[pi].chunks) raw_b64 += chunk;
 			raw_b64.erase(remove_if(raw_b64.begin(),raw_b64.end(),
 				[](char c){return c=='\n'||c=='\r'||c==' ';}),raw_b64.end());
-			auto pdf_bytes=b64decode(raw_b64);
+			auto pdf_bytes = b64decode(raw_b64);
 			if (pdf_bytes.empty()) continue;
-			const string &nn=alle_pdfs[pi].nname,&vn=alle_pdfs[pi].vname,&gd=alle_pdfs[pi].gebdat;
-			string patpfx=(!nn.empty()?nn+"_"+vn+"_"+gd+"_":"");
-			string suffix=(alle_pdfs.size()>1?"_"+to_string(pi+1):"");
-			string pdfpfad=_zvz+"/"+patpfx+zielname_ohne_endung+suffix+".pdf";
+
+			// Dateiname: Nachname_Vorname_dd.mm.yy_Basisname[_N].pdf
+			const string &nn=alle_pdfs[pi].nname;
+			const string &vn=alle_pdfs[pi].vname;
+			const string &gd=alle_pdfs[pi].gebdat;
+			string patpfx = (!nn.empty() ? nn+"_"+vn+"_"+gd+"_" : "");
+			string suffix  = (alle_pdfs.size()>1 ? "_"+to_string(pi+1) : "");
+			string pdfpfad = _zvz+"/"+patpfx+zielname_ohne_endung+suffix+".pdf";
 			if (fs::exists(pdfpfad)) {
 				unsigned n=1;
-				do { pdfpfad=_zvz+"/"+patpfx+zielname_ohne_endung+suffix+"_"+to_string(n++)+".pdf";
-				} while (fs::exists(pdfpfad)&&n<9999);
+				do { pdfpfad=_zvz+"/"+patpfx+zielname_ohne_endung+
+				          suffix+"_"+to_string(n++)+".pdf";
+				} while (fs::exists(pdfpfad) && n<9999);
 			}
-			ofstream pf(pdfpfad,ios::binary);
+			ofstream pf(pdfpfad, ios::binary);
 			if (!pf.is_open()) {
-				fLog(rots+string(TxtDN_ref[TDN_Fehler_beim_PDF_Schreiben])+pdfpfad+schwarz,1,oblog);
+				fLog(rots+string(TxtDN_ref[TDN_Fehler_beim_PDF_Schreiben])+
+				     pdfpfad+schwarz, 1, oblog);
 				continue;
 			}
 			pf.write(reinterpret_cast<const char*>(pdf_bytes.data()),pdf_bytes.size());
 			pf.close();
-			fLog(gruens+string(TxtDN_ref[TDN_PDF_gespeichert])+blau+pdfpfad+schwarz,obverb,oblog);
+			fLog(gruens+string(TxtDN_ref[TDN_PDF_gespeichert])+blau+pdfpfad+schwarz,
+			     obverb, oblog);
 		}
-	} // extrahierePDF
+	}
 
 	// ── LDT3 → LDT2 Konvertierung (flaches Mapping) ─────────────────────────
 	// Liest eine LDT3-Datei und schreibt eine temporäre LDT1/2-kompatible Datei,
@@ -564,8 +589,9 @@ void docnet_extrahierePDF(const std::string &ldtpfad,
 // Diese Funktion wird AUS pvirtfuehraus() aufgerufen (Patch, s.u.).
 // Sie kann auch standalone als Testfunktion genutzt werden.
 
-void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
+int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 {
+	int _verarbeitet = 0;
 	const string &qvz    = docnet::qvz;
 	const string &ldatvz = h->getLdatvz();   // Accessor nötig – s.u.
 	// Aufr�umen: veraltete Tmp-Dateien in /tmp/ und ldatvz l�schen
@@ -588,7 +614,7 @@ void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 	}
 	const string &pdfvz  = docnet::pdfvz;
 
-	if (qvz.empty() || !fs::exists(qvz)) return;
+	if (qvz.empty() || !fs::exists(qvz)) return 0;
 
 	// Alle *.ldt-Dateien im qvz sammeln
 	vector<fs::path> dateien;
@@ -604,7 +630,7 @@ void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 	} catch (const exception &e) {
 		fLog(rots + "docnet: Fehler beim Lesen von " + qvz + ": " + e.what() + schwarz,
 		     1, oblog);
-		return;
+		return 0;
 	}
 
 	for (const auto &qpfad : dateien) {
@@ -691,6 +717,7 @@ void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 		}
 		h->initDB_public();
 		h->dverarbeit_public(tmppfad, &datid, &patelid);
+			_verarbeitet++;
 
 		// Temp-Datei aufräumen
 		try { fs::remove(tmppfad); } catch (...) {}
@@ -710,6 +737,7 @@ void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 			}
 		}
 	}
+	return _verarbeitet;
 }
 
 // ── Hinweis für virtinitopt-Patch ────────────────────────────────────────────
