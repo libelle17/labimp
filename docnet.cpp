@@ -485,7 +485,7 @@ namespace docnet {
 				else pending_label.clear();
 				continue;
 			}
-			if (fid=="8110"||fid=="6303"||fid=="9300"||fid=="7302"||fid=="7304"||fid=="8428"||fid=="8430"||fid=="8431"||fid=="8401") continue;
+			if (fid=="8110"||fid=="6303"||fid=="9300"||fid=="7302"||fid=="7304"||fid=="8401"||fid=="6329") continue; // 6329=PDF-Base64
 			if (fid=="8114"||fid=="8122"||fid=="8136"||fid=="8147"||fid=="8145"||fid=="8117") continue;
 			if (fid=="8119"||fid=="8131"||fid=="8132"||fid=="8143"||fid=="8151"||fid=="8160") continue;
 			if (fid=="8161"||fid=="8212"||fid=="8225"||fid=="8228"||fid=="8229") continue;
@@ -502,11 +502,13 @@ namespace docnet {
 			if (fid=="0105") continue; // 8310-Auftragsnummer kommt direkt aus Patientenblock
 			if (fid=="8219") { pending_label="ts_befund"; continue; }
 			if (fid=="8215") { pending_label="ts_eingang"; continue; }
-				// 8401 bereits in ignore-Liste
-				if (fid=="8418") continue; // nur 7306-Mapping verwenden
-				if ((fid=="3101"||fid=="3102"||fid=="3115"||fid=="3107"||fid=="3109"||fid=="3112"||fid=="3113"||fid=="3114")&&in_header) continue; // Arztfelder im Header ignorieren
-				if (fid=="8311") { if (!emit8311) { emit("8311",inh); emit8311=true; } continue; }
-				if (fid=="8216") continue;
+			// 8401 bereits in ignore-Liste
+			if (fid=="8418") continue; // nur 7306-Mapping verwenden
+			if ((fid=="3101"||fid=="3102"||fid=="3115"||fid=="3107"||fid=="3109"||fid=="3112"||fid=="3113"||fid=="3114")&&in_header) continue; // Arztfelder im Header ignorieren
+			if (fid=="8311") { if (!emit8311) { emit("8311",inh); emit8311=true; } continue; }
+			if (fid=="8216") continue;
+			// Probenmaterial: nur im Patientenblock ausgeben, nicht im Header
+			if (fid=="8428"||fid=="8430"||fid=="8431") { if (!in_header) emit(fid,inh); continue; }
 			emit(fid,inh);
 		}
 		if (header_emitted) fout << "01380008221\r\n";
