@@ -321,12 +321,13 @@ namespace docnet {
 			return;
 		}
 
-		string pdfpfad = zielverz + "/" + zielname_ohne_endung + ".pdf";
+		string _zvz = zielverz; while (!_zvz.empty() && _zvz.back()=='/') _zvz.pop_back();
+		string pdfpfad = _zvz + "/" + zielname_ohne_endung + ".pdf";
 		// Falls Datei schon existiert: nummerieren
 		if (fs::exists(pdfpfad)) {
 			unsigned n = 1;
 			do {
-				pdfpfad = zielverz + "/" + zielname_ohne_endung +
+				pdfpfad = _zvz + "/" + zielname_ohne_endung +
 				          "_" + to_string(n++) + ".pdf";
 			} while (fs::exists(pdfpfad) && n < 9999);
 		}
