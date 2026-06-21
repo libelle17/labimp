@@ -488,7 +488,7 @@ namespace docnet {
 			if (fid=="8110"||fid=="6303"||fid=="9300"||fid=="7302"||fid=="7304"||fid=="8401"||fid=="6329") continue; // 6329=PDF-Base64
 			if (fid=="8114"||fid=="8122"||fid=="8136"||fid=="8147"||fid=="8145"||fid=="8117") continue;
 			if (fid=="8119"||fid=="8131"||fid=="8132"||fid=="8143"||fid=="8151"||fid=="8160") continue;
-			if (fid=="8161"||fid=="8212"||fid=="8225"||fid=="8228"||fid=="8229") continue;
+			if (fid=="8161"||fid=="8212"||fid=="8225"||fid=="8228"||fid=="8229"||fid=="7364"||fid=="7420"||fid=="8990"||fid=="8141"||fid=="7358"||fid=="8142"||fid=="8424"||fid=="8137"||fid=="7304"||fid=="8135"||fid=="8236"||fid=="8419"||fid=="8220") continue; // LDT3-only
 			if (fid=="0001") { ldt_version=inh; emit("9212","LDT"+(inh.size()>4?inh.substr(4):inh)); continue; }
 			// Arztfelder werden bereits im Header ausgegeben - hier ignorieren
 			if (fid=="0201"||fid=="0203"||fid=="0212"||fid=="0205"||fid=="0215"||fid=="0216") continue;
@@ -531,7 +531,6 @@ bool docnet_isLDT3(const std::string &pfad) {
 	std::string z;
 	while(std::getline(f,z)) {
 		if (z.size()>10 && z.substr(3,4)=="0001" && z.substr(7,4)=="LDT3") return true;
-		if (z.size()>6 && z.substr(3,4)=="8002") return false; // LDT2 hat keine Obj-Struktur
 	}
 	return false;
 }

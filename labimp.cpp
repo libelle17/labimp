@@ -2656,6 +2656,8 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 	const size_t aktc=0;
 #endif 
 	string satzid,arztid,satzart;
+	uchar ob8302=0; // wurde 8302 vor 8303 gelesen?
+	uchar ob8428=0; // erstes Material schon gesetzt?
 	unsigned UsLfd=0;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
 	uchar saetzeoffen=0, usoffen=0;
@@ -2872,13 +2874,13 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 				rpar.hz("Langtext",inh);
 				rpneu.hz("Langtext",inh);
 			} else if (cd=="8428") {
-				if (!rbawep) cerr<<rot<<"4 Fehler rbawep 0"<<schwarz<<endl;
-				if (rbawep) rbawep->hz("KuQu",inh);
+				
+				if (rbawep && !ob8428) { rbawep->hz("KuQu",inh); ob8428=1; }
 			} else if (cd=="8430") {
-				if (!rbawep) cerr<<rot<<"3 Fehler rbawep 0"<<schwarz<<endl;
-				if (rbawep) rbawep->hz("Quelle",inh);
+				
+				if (rbawep && ob8428==1) { rbawep->hz("Quelle",inh); ob8428=2; }
 			} else if (cd=="8431") {
-				if (!rbawep) cerr<<rot<<"2 Fehler rbawep 0"<<schwarz<<endl;
+				
 				if (qspez.empty()) qspez=inh;
 				else {
 					qspez+=" \r\n";
@@ -2932,12 +2934,12 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 				if (!memcmp(&maxnachdat,&tmmax,sizeof maxnachdat)|| difftime(mktime(&eingtm),mktime(&maxnachdat))>0) {
 					memcpy(&maxnachdat,&eingtm,sizeof maxnachdat);
 				}
-				rus.hz("Eingang",&eingtm);
+				rus.hz("Eingang",&eingtm); ob8302=0;
 			} else if (cd=="8302") {
-				BDTtoDate(inh,&berdat,2000,ldtvers>1014);
+				BDTtoDate(inh,&berdat,2000,ldtvers>1014); ob8302=1;
 			} else if (cd=="8303") {
 				strptime(inh.c_str(),"%H%M",&berdat);
-				rus.hz("Berichtsdatum",&berdat);
+				if (ob8302) rus.hz("Berichtsdatum",&berdat);
 				//// <<"3 berdat: "<<ztacl(&berdat,"%F %T")<<endl;
 			} else if (cd=="8609") {
 				rus.hz("Abrechnungstyp",inh);
