@@ -275,6 +275,7 @@ namespace docnet {
 		vector<PdfBlock> alle_pdfs;
 		vector<string> b64chunks;
 		string pat_nname, pat_vname, pat_gebdat;
+		string cur_nname, cur_vname, cur_gebdat; // aktuell gesammelt
 		bool in_patient = false;   // nach "8145 Patient"
 		bool in_attachment = false;
 		string zeile;
@@ -286,23 +287,25 @@ namespace docnet {
 			string inh = zeile.substr(7);
 
 			// 8145 "Patient" schaltet Patientenmodus ein
-			// Obj_0045 = Patientenobjekt (nicht Arzt oder Einsender)
-			if (fid == "8002") {
-				in_patient = (inh == "Obj_0045");
+			// Obj_0045 = Patientenobjekt
+			// Patientendaten werden gesammelt und bei 8003 Obj_0045 fixiert
+			if (fid == "8002" && inh == "Obj_0045") {
+				in_patient = true;
 			}
-			else if (fid == "8003" && in_patient) { in_patient = false; }
-			else if (fid == "8000") { in_patient = false; }
-			else if (fid == "3101" && in_patient) { pat_nname = inh; }
-			else if (fid == "3102" && in_patient) { pat_vname = inh; }
-			else if (fid == "3103" && in_patient) {
-				if (inh.size()>=8) pat_gebdat=inh.substr(6,2)+"."+inh.substr(4,2)+"."+inh.substr(2,2);
-				else pat_gebdat=inh;
+			else if (fid == "8003" && inh == "Obj_0045") {
+				// Patientendaten einfrieren
+				pat_nname = cur_nname; pat_vname = cur_vname; pat_gebdat = cur_gebdat;
+				in_patient = false;
 			}
+			else if (fid == "8000") {
+				in_patient = false;
+				cur_nname = ""; cur_vname = ""; cur_gebdat = "";
+			}
+			else if (fid == "3101" && in_patient) { cur_nname = inh; }
+			else if (fid == "3102" && in_patient) { cur_vname = inh; }
 			else if (fid == "3103" && in_patient) {
-				if (inh.size()>=8)
-					pat_gebdat=inh.substr(6,2)+"."+inh.substr(4,2)+"."+inh.substr(2,2);
-				else pat_gebdat=inh;
-				in_patient = false; // Patientendaten komplett
+				if (inh.size()>=8) cur_gebdat=inh.substr(6,2)+"."+inh.substr(4,2)+"."+inh.substr(2,2);
+				else cur_gebdat=inh;
 			}
 			else if (fid == "8242") {
 				string il=inh;
@@ -363,7 +366,7 @@ namespace docnet {
 				return s;
 			};
 			string _nn=umlaute(nn), _vn=umlaute(vn);
-			string patpfx = (!nn.empty() ? nn+"_"+vn+"_"+gd+"_" : "");
+			string patpfx = (!_nn.empty() ? _nn+"_"+_vn+"_"+gd+"_" : "");
 			string suffix  = (alle_pdfs.size()>1 ? "_"+to_string(pi+1) : "");
 			string pdfpfad = _zvz+"/"+patpfx+zielname_ohne_endung+suffix+".pdf";
 			if (fs::exists(pdfpfad)) {
