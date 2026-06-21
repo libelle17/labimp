@@ -265,9 +265,11 @@ namespace docnet {
 	                           const TxB &TxtDN_ref,
 	                           const int obverb, const int oblog)
 	{
-		if (zielverz.empty()) return;
+			fLog(blaus+"extrahierePDF: zielverz="+gruen+zielverz+schwarz+", ldtpfad="+blau+ldtpfad+schwarz,1,1);
+		if (zielverz.empty()) return; // pdfvz check
 
 		ifstream f(ldtpfad);
+			fLog(blaus+"extrahierePDF: f.is_open="+gruen+string(f.is_open()?"ja":"nein")+schwarz,1,1);
 		if (!f.is_open()) return;
 
 		vector<string> b64chunks;
@@ -281,6 +283,7 @@ namespace docnet {
 			string fid = zeile.substr(3, 4);
 			string inh = zeile.substr(7);
 
+				if (b64chunks.size()==0 && in_attachment==false) fLog(blaus+"8242 check: fid="+gruen+fid+", inh="+blau+inh.substr(0,20)+schwarz,b64chunks.size()==0&&(fid=="8242"||fid=="6329"),1);
 			if (fid == "8242") {
 				// "base64-kodierte_Anlage"
 				string inh_low = inh;
@@ -297,6 +300,7 @@ namespace docnet {
 		}
 		f.close();
 
+			fLog(blaus+"extrahierePDF: b64chunks="+gruen+to_string(b64chunks.size())+schwarz,1,1);
 		if (b64chunks.empty()) return;
 
 		// Zusammenführen und dekodieren
@@ -533,6 +537,14 @@ bool docnet_isLDT3(const std::string &pfad) {
 		if (z.size()>10 && z.substr(3,4)=="0001" && z.substr(7,4)=="LDT3") return true;
 	}
 	return false;
+}
+
+// Oeffentliche PDF-Extraktionsfunktion fuer Zugriff aus labimp.cpp
+void docnet_extrahierePDF(const std::string &ldtpfad,
+                          const std::string &zielname_ohne_endung,
+                          const int obverb, const int oblog) {
+	docnet::extrahierePDF(ldtpfad, zielname_ohne_endung,
+	                      docnet::pdfvz, TxtDN, obverb, oblog);
 }
 
 // pvirtVorgbSpeziell() ist in turbomed.cpp definiert und dort um den

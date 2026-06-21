@@ -1613,10 +1613,12 @@ void hhcl::virtpruefweiteres()
 			fLog(Tx[T_Eingelesene_Labordateien]+blaus+((!x.obqueryfehler&&(cerg=x.HolZeile())&&*cerg)?cjj(cerg,0):"0")+schwarz,1,oblog);
 			if (umben.empty()) break;
 		}
+		/*
 		if (!Tippob(rots+Tx[umben.empty()?T_Soll_ich_wirklich_alle_Tabellen_mit:T_Soll_ich_wirklich_alle_Tabellen_mit___]+blau+vorsl+rot+(vonvorne?Tx[T_loeschen_und_von_vorne_anfangen]:loeschalle?Tx[T_loeschen]:Tx[T_nach___]+blaus+umben+schwarz+Tx[T_umbenennen])+schwarz,"n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
 			exit(0);
 		}
+		*/
 		if (umben.empty()) {
 			droptables(aktc);
 			fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsl+schwarz,1,1);
@@ -2190,7 +2192,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 				vorwert=0;
 				if (lpid!=""&&lpid!="0") {
 #if altvorwert
-					RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü='"+labk+"' AND einheit='"+koreinh+"' "
+					RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND `Abkü`='"+labk+"' AND einheit='"+koreinh+"' "
 							"AND zeitpunkt<=STR_TO_DATE('"+berzt+"','%Y%m%d') GROUP BY zeitpunkt DESC LIMIT 3)i\")",aktc,ZDB);
 					if (!llb.obqueryfehler) {
 						char ***gerg{0};
@@ -2206,17 +2208,19 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 					} // 										if (!llb.obqueryfehler)
 #else
 					for(unsigned vwr=1;vwr<=2;vwr++) {
-						sql=
-							"(SELECT CONCAT(wert,' (',DATE_FORMAT(zeitpunkt,'%d.%m.%y'),')')wert,DATE_FORMAT(zeitpunkt,'%Y%m%d')zp,'l2' "
-							"FROM labor2a l WHERE pat_id="+lpid+" AND abkü='"+labk+"' AND einheit='"+koreinh+"' AND zeitpunkt="
-							"(SELECT MAX(zeitpunkt) FROM labor2a WHERE pat_id=l.pat_id AND abkü=l.abkü AND einheit=l.Einheit AND zeitpunkt<"+eingzt+")"
-							"LIMIT 1)"
-							"UNION"
-							"(SELECT CONCAT(wert,' (',DATE_FORMAT(zeitpunkt,'%d.%m.%y'),')')wert,DATE_FORMAT(zeitpunkt,'%Y%m%d')zp,'l2' "
-							"FROM labor1a l WHERE pat_id="+lpid+" AND abkü='"+labk+"' AND einheit='"+koreinh+"' AND zeitpunkt="
-							"(SELECT MAX(zeitpunkt) FROM labor2a WHERE pat_id=l.pat_id AND abkü=l.abkü AND einheit=l.Einheit AND zeitpunkt<"+eingzt+")"
-							"LIMIT 1)"
-							"ORDER BY zp DESC LIMIT 1";
+								sql=
+									"(SELECT CONCAT(wert,' (',DATE_FORMAT(zeitpunkt,'%d.%m.%y'),')')wert"
+									",DATE_FORMAT(zeitpunkt,'%Y%m%d')zp,'l2' "
+									"FROM labor2a l WHERE pat_id="+lpid+" AND `Abkü`='"+labk+"' "
+									"AND einheit='"+koreinh+"' AND zeitpunkt<'"+eingzt+"' "
+									"ORDER BY zeitpunkt DESC LIMIT 1)"
+									"UNION"
+									"(SELECT CONCAT(wert,' (',DATE_FORMAT(zeitpunkt,'%d.%m.%y'),')')wert"
+									",DATE_FORMAT(zeitpunkt,'%Y%m%d')zp,'l1' "
+									"FROM labor1a l WHERE pat_id="+lpid+" AND `Abkü`='"+labk+"' "
+									"AND einheit='"+koreinh+"' AND zeitpunkt<'"+eingzt+"' "
+									"ORDER BY zeitpunkt DESC LIMIT 1)"
+									"ORDER BY zp DESC LIMIT 1";
 						RS vorw(My,sql,aktc,ZDB);
 						char ***cerg{0};
 						if (!vorw.obqueryfehler&&(cerg=vorw.HolZeile())&&*cerg) {
