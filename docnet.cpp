@@ -59,7 +59,7 @@ const char *dn_T[TDN_MAX + 1][SprachZahl] = {
 	// TDN_qvz_k
 	{"qvz", "qdir"},
 	// TDN_qvz_l
-	{"quellverzeichnis", "sourcedir"},
+	{"quelldatenvz", "sourcedir"},
 	// TDN_zvz1_k
 	{"zvz1", "cdir1"},
 	// TDN_zvz1_l
@@ -81,17 +81,17 @@ const char *dn_T[TDN_MAX + 1][SprachZahl] = {
 	// TDN_pdfvz_l
 	{"pdfverzeichnis", "pdfdirectory"},
 	// TDN_Quelldateiverzeichnis_doc_net
-	{"Quellverzeichnis fuer doc.net-Uebertragung", "source directory for doc.net transfer"},
+	{"Quelldateiverzeichnis (doc.net)", "source directory (doc.net)"},
 	// TDN_Kopierziel_1
-	{"Ziel 1 fuer automatische Kopie", "copy target 1"},
+	{"Kopierziel 1", "copy target 1"},
 	// TDN_Kopierziel_2
-	{"Ziel 2 fuer automatische Kopie", "copy target 2"},
+	{"Kopierziel 2", "copy target 2"},
 	// TDN_Kopierziel_3
-	{"Ziel 3 fuer automatische Kopie", "copy target 3"},
+	{"Kopierziel 3", "copy target 3"},
 	// TDN_Kopierziel_4
-	{"Ziel 4 fuer automatische Kopie", "copy target 4"},
+	{"Kopierziel 4", "copy target 4"},
 	// TDN_PDF_Ausgabeverzeichnis
-	{"Verzeichnis fuer extrahierte PDF-Befunde", "directory for extracted PDF reports"},
+	{"PDF-Ausgabeverzeichnis", "PDF output directory"},
 	// TDN_Verschiebe_von
 	{"Verschiebe: ", "Moving: "},
 	// TDN_nach
@@ -375,282 +375,146 @@ namespace docnet {
 
 	static string ldt3ToTmp(const string &ldtpfad)
 	{
-		// Temp-Datei anlegen
-		string tmp = ldtpfad + ".docnet_tmp";
-
+		string tmp = "/tmp/" + fs::path(ldtpfad).filename().string();
+		// LDT3: 8000=Satzstart, 8001=Satzende, 8002=Obj-Start, 8003=Obj-Ende
+		// Zweistufig: erst Arztdaten sammeln, dann konvertieren
+		// Stufe 1: Arztdaten der Praxis aus Patientenblock vorab lesen
+		string pre203, pre201, pre212, pre205, pre215, pre216;
+		string pre_labor, pre_ort;
+		{
+			ifstream f1(ldtpfad);
+			string z; bool in_pat=false, after8239=false;
+			while(getline(f1,z)) {
+				if (z.size()<7) continue;
+				if (!z.empty()&&z.back()=='\r') z.pop_back();
+				string fid=z.substr(3,4), inh=z.substr(7);
+				// Laborname aus Header sammeln (vor in_pat)
+				if (fid=="8239") { after8239=true; continue; }
+				if (fid=="1250"&&after8239&&pre_labor.empty()) { pre_labor=inh; after8239=false; continue; }
+				if (fid!="1250"&&fid!="8239"&&fid!="8002"&&fid!="8003") after8239=false;
+				if (fid=="8000") { in_pat=(inh!="8220"&&inh.substr(0,4)!="8220"&&inh!="8221"&&inh.substr(0,4)!="8221"); continue; }
+				if (fid=="8001") { in_pat=false; continue; }
+				if (!in_pat) continue;
+				if (fid=="3103") break;
+				if (fid=="0203") pre203=inh;
+				if (fid=="0201") pre201=inh;
+				if (fid=="0212") pre212=inh;
+				if (fid=="0205") pre205=inh;
+				if (fid=="0215") pre215=inh;
+				if (fid=="0216") pre216=inh;
+			}
+		}
+		// Stufe 2: Konvertierung
 		ifstream fin(ldtpfad);
 		if (!fin.is_open()) return "";
 		ofstream fout(tmp);
 		if (!fout.is_open()) return "";
-
-		// Hilfslambda: schreibt eine LDT2-Zeile mit korrekter Längenangabe
 		auto emit = [&](const string &fid, const string &inh) {
-			// LDT2-Zeile: LLL FFFF Inhalt CRLF
-			// LLL = Gesamtlänge inklusive LLL (3), FFFF (4), Inhalt, CRLF (2)
 			size_t len = 3 + 4 + inh.size() + 2;
-			// Längenbegrenzung auf 3 Stellen
 			if (len > 999) len = 999;
 			char buf[8];
 			snprintf(buf, sizeof(buf), "%03zu", len);
 			fout << buf << fid << inh << "\r\n";
 		};
-
-		// Zustand
-		struct ObjCtx {
-			string name;        // z.B. "Obj_0054"
-			string label;       // semantische Bedeutung, z.B. "ts_eingang"
-		};
-		vector<ObjCtx> objstack;
-
-		string cur_ts_dat, cur_ts_tim, cur_ts_label;
-		// Timestamp-Labels:
-		//   "ts_erstellung" – Timestamp_Erstellung_Datensatz (Kopf)
-		//   "ts_eingang"    – Timestamp_Auftragseingang
-		//   "ts_befund"     – Timestamp_Befunderstellung
-		//   "ts_abnahme"    – Timestamp_Materialabnahme_entnahme
-
-		bool in_header = false; // Kopfblock (8220)
-		bool in_patient = false; // Patientenblock (8201/8202/8203/8205)
-		bool header_emitted = false;
+		vector<string> objstack;
+		string cur_ts_dat, cur_ts_tim, cur_ts_label, pending_label;
+		bool in_header=false, header_emitted=false, in_ts_obj=false;
+		bool emit8302=false, emit8311=false, emit8418=false; // nur einmal ausgeben
 		string ldt_version;
-		string header_8218label; // zuletzt gesehenes 8218-Label
-
-		// Kopfzeile: 8220-Block mit Mindestinhalt
 		auto emitHeader = [&]() {
 			if (header_emitted) return;
-			emit("8000", "8220");
-			emit("8100", "0000");
-			if (!ldt_version.empty())
-				emit("9212", ldt_version);
-			header_emitted = true;
+			emit("8000","8220"); emit("8100","0000");
+			if (!ldt_version.empty()) emit("9212",ldt_version);
+			// Arztdaten in den 8220-Header einfuegen (wie LDT2)
+			if (!pre201.empty()) emit("0201",pre201);
+			if (!pre203.empty()) emit("0203",pre203);
+			if (!pre205.empty()) emit("0205",pre205);
+			if (!pre212.empty()) emit("0212",pre212);
+			if (!pre215.empty()) emit("0215",pre215);
+			if (!pre216.empty()) emit("0216",pre216);
+			// Labor: 8320=Name triggert rlab.schreib() in dverarbeit via 8323
+			if (!pre_labor.empty()) { emit("8320",pre_labor); emit("8323",""); }
+			header_emitted=true;
 		};
-
-		auto emitFooter = [&]() {
-			emit("8000", "8221");
-			emit("8100", "0000");
-		};
-
-		// Patientenblock beenden
-		// (wird vom Aufrufer gelegentlich aufgerufen)
-
 		string zeile;
-		while (getline(fin, zeile)) {
-			if (zeile.size() < 7) continue;
-			if (!zeile.empty() && zeile.back() == '\r')
-				zeile.pop_back();
-			string fid = zeile.substr(3, 4);
-			string inh = zeile.substr(7);
-
-			// ── Objekt-Stack-Verwaltung ──────────────────────────────────────
-			if (fid == "8001") {
-				// Objekt-Start: 8001 <Name>
-				ObjCtx ctx;
-				ctx.name = inh;
-				ctx.label = "";
-				// Label vom zuletzt gesehenen semantischen Feld ableiten
-				if (!header_8218label.empty()) {
-					ctx.label = header_8218label;
-					// Obj_0054 bekommt dieses Label wenn es direkt nach 8218 kommt
-					// Das wird unten ausgewertet
-				}
-				objstack.push_back(ctx);
-				if (inh.find("Obj_0054") != string::npos) {
-					// Timestamp-Obj beginnt
-					cur_ts_dat.clear();
-					cur_ts_tim.clear();
-					cur_ts_label = header_8218label;
-				}
-				header_8218label.clear();
+		while (getline(fin,zeile)) {
+			if (zeile.size()<7) continue;
+			if (!zeile.empty()&&zeile.back()=='\r') zeile.pop_back();
+			string fid=zeile.substr(3,4), inh=zeile.substr(7);
+			if (fid=="8002") {
+				objstack.push_back(inh);
+				if (inh.find("Obj_0054")!=string::npos) {
+					in_ts_obj=true; cur_ts_dat.clear(); cur_ts_tim.clear();
+					cur_ts_label=pending_label; pending_label.clear();
+				} else { pending_label.clear(); }
 				continue;
 			}
-			if (fid == "8003") {
-				// Objekt-Ende: 8003 <Name>
-				if (inh.find("Obj_0054") != string::npos && !cur_ts_dat.empty()) {
-					// Timestamp auflösen → passende LDT2-Felder
-					if (cur_ts_label == "ts_eingang") {
-						emit("8301", cur_ts_dat);
-						emit("8303", cur_ts_tim.size() >= 4
-						             ? cur_ts_tim.substr(0, 4) : cur_ts_tim);
-					} else if (cur_ts_label == "ts_befund") {
-						emit("8302", cur_ts_dat);
-						emit("8303", cur_ts_tim.size() >= 4
-						             ? cur_ts_tim.substr(0, 4) : cur_ts_tim);
-					} else if (cur_ts_label == "ts_abnahme") {
-						emit("8432", cur_ts_dat);
-						if (!cur_ts_tim.empty())
-							emit("8433", cur_ts_tim.size() >= 4
-							             ? cur_ts_tim.substr(0, 4) : cur_ts_tim);
-					}
-					// ts_erstellung und ts_eingang_material: keine direkte LDT2-Entsprechung
-					cur_ts_dat.clear();
-					cur_ts_tim.clear();
-					cur_ts_label.clear();
-				}
-				if (!objstack.empty()) {
-					// Labels für Satz-Grenzen
-					string leaving = objstack.back().name;
-					objstack.pop_back();
-
-					// Ende des Patienten-Ergebnisblocks (Obj_0017 = Befundinformationen)
-					if (leaving.find("Obj_0017") != string::npos && in_patient) {
-						// nichts extra, Satzende kommt später mit 8000
-					}
-				}
-				continue;
-			}
-			if (fid == "8002") {
-				// 8002 = Obj_Ende (älteres LDT3-Format alternativ zu 8003)
-				// Analog zu 8003 behandeln
+			if (fid=="8003") {
+				if (in_ts_obj&&inh.find("Obj_0054")!=string::npos&&!cur_ts_dat.empty()) {
+					string t4=cur_ts_tim.size()>=4?cur_ts_tim.substr(0,4):cur_ts_tim;
+					if (cur_ts_label=="ts_eingang") { emit("8301",cur_ts_dat); if (!t4.empty()) emit("8303",t4); }
+					else if (cur_ts_label=="ts_befund") { if (!emit8302) { emit("8302",cur_ts_dat); if (!t4.empty()) emit("8303",t4); emit8302=true; } }
+					else if (cur_ts_label=="ts_abnahme") { emit("8432",cur_ts_dat); if (!t4.empty()) emit("8433",t4); }
+					in_ts_obj=false; cur_ts_dat.clear(); cur_ts_tim.clear(); cur_ts_label.clear();
+				} else if (inh.find("Obj_0054")!=string::npos) { in_ts_obj=false; }
 				if (!objstack.empty()) objstack.pop_back();
 				continue;
 			}
-
-			// ── Satzgrenzen (8000) ───────────────────────────────────────────
-			if (fid == "8000") {
-				if (inh == "8220" || inh.substr(0, 4) == "8220") {
-					in_header = true;
-					emitHeader();
-				} else if (inh == "8221" || inh.substr(0, 4) == "8221") {
-					in_header = false;
-					in_patient = false;
-					emitFooter();
+			if (fid=="8001") continue;
+			if (fid=="8000") {
+				if (inh=="8220"||(!inh.empty()&&inh.substr(0,4)=="8220")) {
+					in_header=true; emitHeader();
+				} else if (inh=="8221"||(!inh.empty()&&inh.substr(0,4)=="8221")) {
+					in_header=false; emit("8000","8221"); emit("8100","0000");
 				} else {
-					// 8201 / 8202 / 8203 / 8205 usw.
-					in_header = false;
-					emitHeader(); // sicherstellen dass Kopf draußen ist
-					emit("8000", inh);
-					in_patient = true;
+					in_header=false; emitHeader();
+					emit8302=false; emit8311=false; emit8418=false;
+					emit("8000",inh); emit("8100","0000");
 				}
 				continue;
 			}
-
-			// ── Semantische Feld-Labels (8218) für nachfolgende Timestamps ───
-			if (fid == "8218") {
-				if (inh.find("Timestamp_Auftragseingang") != string::npos)
-					header_8218label = "ts_eingang";
-				else if (inh.find("Timestamp_Befunderstellung") != string::npos)
-					header_8218label = "ts_befund";
-				else if (inh.find("Timestamp_Materialabnahme") != string::npos ||
-				         inh.find("Timestamp_Materialentnahme") != string::npos)
-					header_8218label = "ts_abnahme";
-				else if (inh.find("Timestamp_Eingangserfassung") != string::npos)
-					header_8218label = "ts_eingang_material";
-				else if (inh.find("Timestamp_Erstellung_Datensatz") != string::npos)
-					header_8218label = "ts_erstellung";
-				else if (inh.find("Timestamp_Messung") != string::npos)
-					header_8218label = "ts_messung";
-				else
-					header_8218label.clear();
+			if (in_ts_obj&&fid=="7278") { cur_ts_dat=inh; continue; }
+			if (in_ts_obj&&fid=="7279") { cur_ts_tim=inh; continue; }
+			if (fid=="7273"||fid=="7278"||fid=="7279") continue;
+			if (fid=="8218") {
+				if (inh.find("Timestamp_Auftragseingang")!=string::npos) pending_label="ts_eingang";
+				else if (inh.find("Timestamp_Befunderstellung")!=string::npos) pending_label="ts_befund";
+				else if (inh.find("Timestamp_Materialabnahme")!=string::npos||inh.find("Timestamp_Materialentnahme")!=string::npos) pending_label="ts_abnahme";
+				else if (inh.find("Timestamp_Eingangserfassung")!=string::npos) pending_label="ts_eingang_material";
+				else if (inh.find("Timestamp_Erstellung_Datensatz")!=string::npos) pending_label="ts_erstellung";
+				else pending_label.clear();
 				continue;
 			}
-
-			// ── Timestamp-Felder innerhalb Obj_0054 ─────────────────────────
-			if (fid == "7278") { cur_ts_dat = inh; continue; }
-			if (fid == "7279") { cur_ts_tim = inh; continue; }
-			if (fid == "7273") { /* UTC-Offset – wird ignoriert */ continue; }
-
-			// ── LDT3-Versionsfeld ────────────────────────────────────────────
-			if (fid == "0001") {
-				// z.B. "LDT3.2.19" → für 9212 intern merken
-				ldt_version = inh;
-				emit("9212", "LDT" +
-				     (inh.size() > 4 ? inh.substr(4) : inh));
-				continue;
-			}
-
-			// ── Ergebnistext aus BAK-Blöcken (Feldkennung 3564) → 8480 ──────
-			if (fid == "3564") { emit("8480", inh); continue; }
-
-			// ── Ergebniscode (7306) → 8418 Teststatus ───────────────────────
-			if (fid == "7306") {
-				// 01 = Endbefund, 04 = Vorbefund / in Arbeit, 99 = Befund ersetzen
-				string ts;
-				if      (inh == "01") ts = "E";
-				else if (inh == "04") ts = "T";
-				else if (inh == "99") ts = "E"; // Ersatzbefund = auch Endbefund
-				else ts = inh;
-				emit("8418", ts);
-				continue;
-			}
-
-			// ── 7301 (Keimzahl-Text) → 8480 ─────────────────────────────────
-			if (fid == "7301") {
-				if (!inh.empty() && inh != "0")
-					emit("8480", "Keimzahl: " + inh);
-				continue;
-			}
-
-			// ── 7302 (Normalbereich-Code) – wird ignoriert (8460 liefert Text) ─
-			if (fid == "7302") { continue; }
-
-			// ── 7304 (Labor-interne Ergebnis-ID) – als 8310-Alternative ──────
-			if (fid == "7304") {
-				// nur übernehmen wenn noch kein 8310 gesetzt
-				// (8310 kommt separat, 7304 ist Labor-intern)
-				// → in fehlt-Tabelle (rfe) landen lassen, hier ignorieren
-				continue;
-			}
-
-			// ── 7305 (Auftragsschlüssel) → 8311 ─────────────────────────────
-			if (fid == "7305") { emit("8311", inh); continue; }
-
-			// ── 8110 (Blockbezeichnung = "Anhang") – kein LDT2-Äquivalent ───
-			if (fid == "8110") { continue; }
-
-			// ── 6303 (MIME-Typ, z.B. "PDF") – kein LDT2-Äquivalent ──────────
-			if (fid == "6303") { continue; }
-
-			// ── 9300 (SHA1-Prüfsumme der Datei) – ignorieren ────────────────
-			if (fid == "9300") { continue; }
-
-			// ── 8219 (Timestamp_Befunderstellung, Label-Variante) ────────────
-			if (fid == "8219") {
-				header_8218label = "ts_befund"; continue;
-			}
-			if (fid == "8215") {
-				header_8218label = "ts_eingang"; continue;
-			}
-			if (fid == "8220") {
-				header_8218label = "ts_eingang_material"; continue;
-			}
-
-			// ── Patientenkennung 3119 (KV-Nr.) → 3112 (analog LDT2) ─────────
-			if (fid == "3119") { emit("3119", inh); continue; }
-
-			// ── 3000 (Kassenpatientennummer) ─────────────────────────────────
-			if (fid == "3000") { emit("3000", inh); continue; }
-
-			// ── Labor-Kennung aus Kopfblock ───────────────────────────────────
-			// 8239 = Laborbezeichnung (LDT3) → wie 8320 (LDT2)
-			if (fid == "8239") { emit("8320", inh); continue; }
-
-			// ── 0105 = Auftrags-ID (eindeutige Dateikennung) → als 8310 ──────
-			if (fid == "0105") {
-				// Nur wenn wir im Header sind, als Auftragsnummer setzen
-				if (in_header) emit("8310", inh);
-				continue;
-			}
-
-			// ── Alles Übrige 1:1 durchreichen ────────────────────────────────
-			// (3101, 3102, 3103, 3110, 8310, 8311, 8401, 8403, 8405, 8407,
-			//  8409, 8410, 8411, 8418, 8420, 8421, 8422, 8460, 8461, 8462,
-			//  8428, 8430, 8431, 8432, 8433, 8480, 8490, 8614, 8615,
-			//  8320, 8321, 8322, 8323,
-			//  0201, 0203, 0205, 0211, 0212, 0215, 0216,
-			//  8242, 6329, 9970, 8244, 8245, 8237, …)
-			emit(fid, inh);
+			if (fid=="8110"||fid=="6303"||fid=="9300"||fid=="7302"||fid=="7304"||fid=="8428"||fid=="8430"||fid=="8431"||fid=="8401") continue;
+			if (fid=="8114"||fid=="8122"||fid=="8136"||fid=="8147"||fid=="8145"||fid=="8117") continue;
+			if (fid=="8119"||fid=="8131"||fid=="8132"||fid=="8143"||fid=="8151"||fid=="8160") continue;
+			if (fid=="8161"||fid=="8212"||fid=="8225"||fid=="8228"||fid=="8229") continue;
+			if (fid=="0001") { ldt_version=inh; emit("9212","LDT"+(inh.size()>4?inh.substr(4):inh)); continue; }
+			// Arztfelder werden bereits im Header ausgegeben - hier ignorieren
+			if (fid=="0201"||fid=="0203"||fid=="0212"||fid=="0205"||fid=="0215"||fid=="0216") continue;
+			if (fid=="3564") { emit("8480",inh); continue; }
+			if (fid=="7301") { if (!inh.empty()&&inh!="0") emit("8480","Keimzahl: "+inh); continue; }
+			if (fid=="7305") { if (!emit8311) { emit("8311",inh); emit8311=true; } else (void)0; continue; }
+			if (fid=="7306") { if (!emit8418) { emit("8418",(inh=="01"?"E":inh=="04"?"T":inh=="99"?"E":inh)); emit8418=true; } else (void)0; continue; }
+			if (fid=="8239") continue; // Laborname kommt aus pre_labor in emitHeader
+			if (fid=="3119") { emit("3119",inh); continue; }
+			if (fid=="3000") { emit("3000",inh); continue; }
+			if (fid=="0105") continue; // 8310-Auftragsnummer kommt direkt aus Patientenblock
+			if (fid=="8219") { pending_label="ts_befund"; continue; }
+			if (fid=="8215") { pending_label="ts_eingang"; continue; }
+				// 8401 bereits in ignore-Liste
+				if (fid=="8418") continue; // nur 7306-Mapping verwenden
+				if ((fid=="3101"||fid=="3102"||fid=="3115"||fid=="3107"||fid=="3109"||fid=="3112"||fid=="3113"||fid=="3114")&&in_header) continue; // Arztfelder im Header ignorieren
+				if (fid=="8311") { if (!emit8311) { emit("8311",inh); emit8311=true; } continue; }
+				if (fid=="8216") continue;
+			emit(fid,inh);
 		}
-
-		// Sicherstellen, dass Footer vorhanden
-		if (header_emitted) {
-			// Falls 8221 noch nicht emittiert wurde
-			fout << "01380008221\r\n";
-		}
-
-		fin.close();
-		fout.close();
+		if (header_emitted) fout << "01380008221\r\n";
+		fin.close(); fout.close();
 		return tmp;
 	}
+
+
 
 } // namespace docnet
 
@@ -771,10 +635,42 @@ void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 		// von find() nicht gefunden (sie endet auf .docnet_tmp, nicht .ldt).
 		// Stattdessen: direkt aufrufen.
 		string datid, patelid;
+
+		// Dateidat aus Originaldateinamen parsen (LaborYYYYMMDD_HHMMSS)
+		{
+			string bn = zname; // z.B. Labor20260620_221857_0001.ldt
+			string dateidat_str;
+			if (bn.substr(0,5)=="Labor" && bn.size()>13) {
+				string dt = bn.substr(5,15);
+				struct tm dtm{}; char buf[15];
+				if (strptime(dt.c_str(),"%Y%m%d_%H%M%S",&dtm)) { strftime(buf,sizeof(buf),"%Y%m%d%H%M%S",&dtm); dateidat_str=buf; }
+				else { dt=bn.substr(5,13); if (strptime(dt.c_str(),"%Y%m%d_%H%M",&dtm)) { strftime(buf,sizeof(buf),"%Y%m%d%H%M00",&dtm); dateidat_str=buf; } }
+			}
+			caus<<rot<<"DEBUG dateidat_str='"<<blau<<dateidat_str<<"'"<<schwarz<<endl; h->setDateidat(dateidat_str);
+		}
+		h->initDB_public();
+		caus<<rot<<"DEBUG vor dverarbeit_public"<<schwarz<<endl;
 		h->dverarbeit_public(tmppfad, &datid, &patelid);
+		caus<<rot<<"DEBUG nach dverarbeit_public"<<schwarz<<endl;
 
 		// Temp-Datei aufräumen
 		try { fs::remove(tmppfad); } catch (...) {}
+
+		// Original-LDT3-Datei nach fertigvz verschieben damit
+		// die normale find-Schleife sie nicht nochmal verarbeitet
+		const string &fertigvz = h->getFertigvz();
+		caus<<rot<<"DEBUG fertigvz='"<<blau<<fertigvz<<"', ldatvz='"<<blau<<ldatvz<<"', zpfad='"<<blau<<zpfad<<"'"<<schwarz<<endl;
+		if (!fertigvz.empty() && fertigvz != ldatvz) {
+			string ziel = fertigvz + "/" + zname;
+			error_code ec2;
+			fs::rename(zpfad, ziel, ec2);
+			if (ec2) {
+				try {
+					fs::copy_file(zpfad, ziel, fs::copy_options::overwrite_existing);
+					fs::remove(zpfad);
+				} catch (...) {}
+			}
+		}
 	}
 }
 

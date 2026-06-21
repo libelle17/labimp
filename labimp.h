@@ -459,4 +459,7 @@ class hhcl:public dhcl
 		int dverarbeit_public(const string& datei,string *datidp,string *patelidp)
 			{ return dverarbeit(datei, datidp, patelidp); }
 		const string& getLdatvz() const { return ldatvz; }
+		const string& getFertigvz() const { return fertigvz; }
+		void initDB_public() { if (!My) initDB(); }
+			void setDateidat(const string& d) { dateidat=d; }
 }; // class hhcl //ω
