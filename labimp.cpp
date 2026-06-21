@@ -2118,7 +2118,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							"-- AND NOT nb RLIKE '^(?:Grenzbereich:)?[( ]*[0-9 .,]*-[0-9 .,]+[) ]*$'"
 							"-- AND not nb RLIKE '^[( ]*(<|<=|Grenztiter|bis ) *[0-9,. :]*[) ]*$'"
 							"-- AND NOT nb RLIKE '^[( ]*(>|>=|ab ) *[0-9,. ]*[) ]*$'" */
-						RS nbkorr(My,sql,aktc,ZDB);
+									obpnbkorr=1;
 	} // 	if (rpar->size())
 	if (rpneu->size()) {
 		// rpneu->ausgeb();
@@ -2657,6 +2657,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 #endif 
 	string satzid,arztid,satzart;
 	uchar ob8302=0; // wurde 8302 vor 8303 gelesen?
+	uchar obpnbkorr=0;
 	uchar ob8428=0; // erstes Material schon gesetzt?
 	unsigned UsLfd=0;
 	uchar lsatzart=0; // für Bedeutung von nachfolgendem 8100 (Satzlaenge): 1=8220 (Datenpaket-Header), 2=8221 (Datenpaketheader-Ende), 3=8201,8202 oder 8203 (Labor)
@@ -3152,6 +3153,21 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 		usschluss(aktc);
 		reing.hz("codepage",cp);
 		reing.hz("fertig",1);
+		if (obpnbkorr) {
+			RS nbkorr(My,
+				"UPDATE laborypnb "
+				"SET ung=CASE WHEN nb='negativ'THEN 0 "
+				"WHEN nb RLIKE '^(?:Grenzbereich:)?[( ]*[0-9 .,]*-[)0-9 .,]+[) ]*$' THEN COALESCE(NULLIF(REPLACE(REGEXP_REPLACE(nb,'^(?:Grenzbereich:)?[( ]*([0-9 .,]*)-[0-9 .,]+[) ]*$','\\\\1'),' ',''),''),'0') "
+				"WHEN nb RLIKE '^[( ]*(<|<=|Grenztiter|bis ) *[0-9,. :]*$' THEN 0 "
+				"WHEN nb RLIKE '^[( ]*(>|>=|ab ) *[0-9,. :]*[) ]*$' THEN REGEXP_REPLACE(nb,'^[( ]*(?:>|>=|ab ) *([0-9,. :]*)[) ]*$','\\\\1') "
+				"ELSE''END,ong=CASE WHEN nb='negativ'THEN 0 "
+				"WHEN nb RLIKE '^(?:Grenzbereich:)?[( ]*[0-9 .,:]*-[0-9 .,:]+[) ]*$' THEN REPLACE(REGEXP_REPLACE(nb,'^(?:Grenzbereich:)?[( ]*[0-9 .,:]*-([0-9 .,:]+)[) ]*$','\\\\1'),' ','') "
+				"WHEN nb RLIKE '^[( ]*(?:<|<=|Grenztiter|bis ) *[0-9,. :]*[) ]*$' THEN REPLACE(REGEXP_REPLACE(nb,'^[( ]*(?:<|<=|Grenztiter|bis ) *([0-9,. :]*)[) ]*$','\\\\1'),' ','') "
+				"WHEN nb RLIKE '^[( ]*(>|>=|ab ) *[0-9,. :]*[) ]*$' THEN '\xe2\x88\x9e' "
+				"ELSE''END WHERE (ung='' OR ong='') AND nb<>'' "
+				"AND NOT nb RLIKE CONCAT(CHR(13),'|;|pos|.+negativ|tox|\xfc\x62\x65\x72|nicht|bzw|nach|unauf|ratio|unten|normalw|bereich|^[''''+$|^0$|^0.00$')",
+				aktc,ZDB);
+		}
 		{ RS updfr(My,"UPDATE `"+tlydat+"` SET fertig=1,codepage='"+ltoan(cp)+"' WHERE datid="+datid,aktc,ZDB); }
 		return reing.rsp->fnr;
 	} // 	if (mdat.is_open())

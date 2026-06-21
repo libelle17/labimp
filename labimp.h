@@ -341,7 +341,7 @@ class hhcl:public dhcl
 		string normbereich,uNm,oNm,uNw,oNw,erklaerung,kommentar,auftrhinw,qspez,grenzwi,labk,lwert,koreinh;
 		struct tm berdat{0}; // Berichtsdatum
 		tm abndat{0};
-		uchar keimz{0},keimzda{0};
+		uchar keimz{0},keimzda{0},obpnbkorr{0};
 		svec zlangt,zabk,zwerte,zverfa; // fuer Vergleich mit laborneu
 	protected: //α //ω
 //		long listz=30; //ω

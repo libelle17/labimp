@@ -125,7 +125,7 @@ l l.
 .SH OPTIONEN
 Optionen können kurz (\fB\-x\fR) oder lang (\fB\-\-xxxx\fR) angegeben werden
 .br
-                                                                                                                                                           \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11582 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11582 \fR (Laborimport) 
 .br
 \fBOptionen, die nicht gespeichert werden (aktueller Wert in Klammern): \fR
 .br
