@@ -265,11 +265,9 @@ namespace docnet {
 	                           const TxB &TxtDN_ref,
 	                           const int obverb, const int oblog)
 	{
-			fLog(blaus+"extrahierePDF: zielverz="+gruen+zielverz+schwarz+", ldtpfad="+blau+ldtpfad+schwarz,1,1);
 		if (zielverz.empty()) return; // pdfvz check
 
 		ifstream f(ldtpfad);
-			fLog(blaus+"extrahierePDF: f.is_open="+gruen+string(f.is_open()?"ja":"nein")+schwarz,1,1);
 		if (!f.is_open()) return;
 
 		vector<string> b64chunks;
@@ -283,7 +281,6 @@ namespace docnet {
 			string fid = zeile.substr(3, 4);
 			string inh = zeile.substr(7);
 
-				if (b64chunks.size()==0 && in_attachment==false) fLog(blaus+"8242 check: fid="+gruen+fid+", inh="+blau+inh.substr(0,20)+schwarz,b64chunks.size()==0&&(fid=="8242"||fid=="6329"),1);
 			if (fid == "8242") {
 				// "base64-kodierte_Anlage"
 				string inh_low = inh;
@@ -293,14 +290,13 @@ namespace docnet {
 				}
 			} else if (fid == "6329" && in_attachment) {
 				b64chunks.push_back(inh);
-			} else if (in_attachment && fid != "6329") {
+			} else if (in_attachment && fid != "6329" && fid != "8002" && fid != "8003") {
 				// Ende des Anhangs
 				in_attachment = false;
 			}
 		}
 		f.close();
 
-			fLog(blaus+"extrahierePDF: b64chunks="+gruen+to_string(b64chunks.size())+schwarz,1,1);
 		if (b64chunks.empty()) return;
 
 		// Zusammenführen und dekodieren
