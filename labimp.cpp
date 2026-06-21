@@ -3401,10 +3401,27 @@ void hhcl::pvirtfuehraus()
 						// yLog(-1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i,schwarz,blau,lrue.size(),schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
 						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s ...",blau,i+1,schwarz,blau,lrue.size(),
 								schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,blau);
-						if (!dverarbeit(*aktl,&datid,&patelid)) {
-							verarbeitet++;
-							obverschieb=1;
-						}
+							// LDT3-Erkennung: wenn Datei 0001 LDT3.x.y enthaelt -> konvertieren
+							{
+								string aktl_verarbeit = *aktl;
+								string ldt3tmp;
+								if (docnet_isLDT3(*aktl)) {
+									ldt3tmp = docnet_ldt3ToTmp(*aktl);
+									if (!ldt3tmp.empty()) {
+										aktl_verarbeit = ldt3tmp;
+										string bn = aktl->substr(aktl->rfind("/")+1);
+										if (bn.size()>13 && bn.substr(0,5)=="Labor") {
+											string dt=bn.substr(5,15); struct tm dtm{}; char buf[15];
+											if (strptime(dt.c_str(),"%Y%m%d_%H%M%S",&dtm)) { strftime(buf,sizeof(buf),"%Y%m%d%H%M%S",&dtm); setDateidat(string(buf)); }
+										}
+									}
+								}
+								if (!dverarbeit(aktl_verarbeit,&datid,&patelid)) {
+									if (!ldt3tmp.empty()) { remove(ldt3tmp.c_str()); }
+									verarbeitet++;
+									obverschieb=1;
+								}
+							}
 						yLog(obverb+1,oblog,0,0,"%s%i%s/%s%i%s%s %s%s%s %s: %s%s%s %s%s%s",blau,i+1,schwarz,blau,lrue.size(),
 								schwarz,Txk[T_Datei],violett,aktl->c_str(),schwarz,Tx[T_fertig_mit_datid],blau,datid.c_str(),schwarz,blau,patelid.c_str(),schwarz);
 						if (dszahl && verarbeitet==dszahl) break;
