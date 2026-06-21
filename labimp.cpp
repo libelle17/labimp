@@ -3409,6 +3409,7 @@ void hhcl::pvirtfuehraus()
 								string ldt3tmp;
 								if (docnet_isLDT3(*aktl)) {
 									ldt3tmp = docnet_ldt3ToTmp(*aktl);
+								// PDF-Extraktion fuer find-Schleife
 									if (!ldt3tmp.empty()) {
 										aktl_verarbeit = ldt3tmp;
 										string bn = aktl->substr(aktl->rfind("/")+1);
