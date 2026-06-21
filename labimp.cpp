@@ -2561,7 +2561,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 	struct stat pfst{0};
 	if (!lstat(datei.c_str(),&pfst)) {
 		reing.hz("geändert",&pfst.st_mtime);
-		caus<<rot<<"DEBUG in dverarbeit dateidat='"<<blau<<dateidat<<"'"<<schwarz<<endl;
 		reing.hz("Dateidat",dateidat);
 		rpatel.hz("Änderungsdatum",&pfst.st_mtime);
 		rpatel.hz("Dateidat",dateidat);
@@ -2574,7 +2573,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 #ifdef speichern
 	reing.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/datidp);
 		if (datidp && !datidp->empty()) datid=*datidp; // Membervariable synchronisieren
-		caus<<rot<<"DEBUG nach reing.schreib datid='"<<blau<<(datidp?*datidp:"null")<<"'"<<schwarz<<endl;
 	rpatel.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/patelidp);
 #endif 
 	insv raerzte(My,/*itab*/tlyaerzte,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
@@ -2593,7 +2591,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 	insv rle(My,/*itab*/tlyleist,aktc,/*eindeutig*/0,eindfeld,/*asy*/0,/*csets*/0);
 
 	mdatei mdat(datei,ios::in);
-		caus<<rot<<"DEBUG mdat.is_open='"<<blau<<(mdat.is_open()?"ja":"nein")<<"'"<<schwarz<<endl;
 	if (mdat.is_open()) {
 		// Zeichensatz ermitteln und verwenden
 		uchar cp=0; // 0=utf-8, 1=iso-8859-15, 2=cp850
@@ -2605,7 +2602,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 		string verf,abkue,lanr;
 		float ldtvers{0}; // LDT-Version
 		while(getline(mdat,zeile)) {
-			caus<<rot<<"DBG: "<<blau<<(zeile.size()>7?zeile.substr(3,4):zeile)<<schwarz<<endl;
 			string bzahl=zeile.substr(0,3);
 			string cd,inh;
 			if (zeile.size()>3) cd=zeile.substr(3,4);
@@ -2632,7 +2628,6 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 #ifdef speichern
 
 			if (cd=="8000") {
-        caus<<violett<<"DEBUG 8000: inh='"<<blau<<inh<<"'"<<schwarz<<", saetzeoffen="<<(int)saetzeoffen<<", usoffen="<<(int)usoffen<<endl;
 				usschluss(aktc);
 				// 8220 Datenpaket-Header
 				if (inh.substr(0,4)=="8220") {
@@ -2666,23 +2661,19 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 						// z.B. "Labor 20101201 044232.dat"
 						raerzte.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&arztid);
 						rsaetze.hz("ArztID",arztid);
-            caus<<rot<<"DEBUG satzid nach rsaetze.schreib: '"<<blau<<satzid<<"'"<<schwarz<<", saetzeoffen: "<<(int)saetzeoffen<<endl;
 						rsaetze.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&satzid);
 								if (satzid.empty()) { const char*const*const* cerg2; RS lii(My,"SELECT LAST_INSERT_ID()",aktc,ZDB); if (!lii.obqueryfehler&&(cerg2=lii.HolZeile())&&*cerg2) satzid=cjj(cerg2,0); }
 						arztnameda=0;
-								caus<<rot<<"DEBUG nach LAST_INSERT_ID: satzid='"<<blau<<satzid<<"'"<<schwarz<<endl;
 						saetzeoffen=0;
 					}
 					//					rus.zeig("0");
 					if (usoffen) {
 						// caus<<rus.size()<<endl;
 						// z.B. "Labor 20091126 162200.dat"
-							caus<<rot<<"DEBUG russchreib aufgerufen, satzid='"<<blau<<satzid<<"', usoffen="<<(int)usoffen<<schwarz<<endl;
 									stringstream gebdp;
 									gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 							for(auto& f:rus.ivec) if(f.feld=="SatzID") { f.wert=sqlft(My->DBS,satzid); break; } // INSERTED
 						russchreib(rus,aktc,&usid);
-							caus<<rot<<"DEBUG nach russchreib"<<schwarz<<endl;
 						usoffen=0;
 					} // if (usoffen)
 //				if (pid!="0") {
@@ -2691,14 +2682,9 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 //				}
 					satzart=inh;
 					rus.hz("DatID",datid);
-          caus<<rot<<"DEBUG rus.hz SatzID: '"<<blau<<satzid<<"'"<<schwarz<<endl;
 					rus.hz("SatzID",satzid);
 					rus.hz("SatzArt",satzart);
-							caus<<rot<<"DEBUG nach hz SatzArt"<<schwarz<<endl;
-							caus<<rot<<"DEBUG vor UsLfd"<<schwarz<<endl;
 					rus.hz("UsLfd",++UsLfd);
-							caus<<rot<<"DEBUG nach UsLfd"<<schwarz<<endl;
-							caus<<rot<<"DEBUG usoffen=1 gesetzt bei inh='"<<blau<<inh<<"'"<<schwarz<<endl;
 					usoffen=1;
 				} // 				if (inh.substr(0,4)=="8220") else else
 			} else if (cd=="8100") {
@@ -3051,11 +3037,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 		wertschreib(aktc,&usoffen,&rus,&usid,&rpar,&rpneu,&rpnb,&rwe,rbawep,&rhinw,&rspez,&rle);
 		usschluss(aktc);
 		reing.hz("codepage",cp);
-		caus<<rot<<"DEBUG vor fertig=1"<<schwarz<<endl;
 		reing.hz("fertig",1);
-		caus<<rot<<"DEBUG datid vor ergaenz='"<<blau<<datid<<"'"<<schwarz<<endl;
-		caus<<rot<<"DEBUG reing.ivec.size='"<<blau<<ltoan(reing.ivec.size())<<"'"<<schwarz<<endl;
-		caus<<rot<<"DEBUG reing.rsp='"<<blau<<(reing.rsp?"ja":"nein")<<"'"<<schwarz<<endl;
 		{ RS updfr(My,"UPDATE `"+tlydat+"` SET fertig=1,codepage='"+ltoan(cp)+"' WHERE datid="+datid,aktc,ZDB); }
 		return reing.rsp->fnr;
 	} // 	if (mdat.is_open())
@@ -3223,7 +3205,6 @@ void hhcl::pvirtfuehraus()
 					dateidat=ddcont;
 				} else {
 					dateidat="00000000";
-					caus<<rot<<"DEBUG dateidat nach 00000000-branch: '"<<blau<<dateidat<<"'"<<schwarz<<endl;
 					if (base_name(*aktl).substr(0,5)=="Labor"&&base_name(*aktl).size()>13) {
 						string dt=base_name(*aktl).substr(5,15);
 						if (strptime(dt.c_str(),"%Y%m%d_%H%M%S",&dateidtm)) { strftime(ddcont,sizeof(ddcont),"%Y%m%d%H%M%S",&dateidtm); dateidat=ddcont; }

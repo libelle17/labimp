@@ -545,6 +545,24 @@ void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 {
 	const string &qvz    = docnet::qvz;
 	const string &ldatvz = h->getLdatvz();   // Accessor nÃ¶tig â€“ s.u.
+	// Aufräumen: veraltete Tmp-Dateien in /tmp/ und ldatvz löschen
+	{
+		error_code ec_cl;
+		// _tmp.ldt-Dateien in ldatvz löschen
+		if (!ldatvz.empty()) {
+			for (auto& e : fs::directory_iterator(ldatvz, ec_cl)) {
+				string fn = e.path().filename().string();
+				if (fn.size()>8 && fn.substr(fn.size()-8)=="_tmp.ldt")
+					try { fs::remove(e.path()); } catch(...) {}
+			}
+		}
+		// Labor*-Dateien in /tmp/ löschen
+		for (auto& e : fs::directory_iterator("/tmp", ec_cl)) {
+			string fn = e.path().filename().string();
+			if (fn.size()>4 && fn.substr(0,5)=="Labor" && fn.substr(fn.size()-4)==".ldt")
+				try { fs::remove(e.path()); } catch(...) {}
+		}
+	}
 	const string &pdfvz  = docnet::pdfvz;
 
 	if (qvz.empty() || !fs::exists(qvz)) return;
@@ -646,12 +664,10 @@ void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 				if (strptime(dt.c_str(),"%Y%m%d_%H%M%S",&dtm)) { strftime(buf,sizeof(buf),"%Y%m%d%H%M%S",&dtm); dateidat_str=buf; }
 				else { dt=bn.substr(5,13); if (strptime(dt.c_str(),"%Y%m%d_%H%M",&dtm)) { strftime(buf,sizeof(buf),"%Y%m%d%H%M00",&dtm); dateidat_str=buf; } }
 			}
-			caus<<rot<<"DEBUG dateidat_str='"<<blau<<dateidat_str<<"'"<<schwarz<<endl; h->setDateidat(dateidat_str);
+			h->setDateidat(dateidat_str);
 		}
 		h->initDB_public();
-		caus<<rot<<"DEBUG vor dverarbeit_public"<<schwarz<<endl;
 		h->dverarbeit_public(tmppfad, &datid, &patelid);
-		caus<<rot<<"DEBUG nach dverarbeit_public"<<schwarz<<endl;
 
 		// Temp-Datei aufrÃ¤umen
 		try { fs::remove(tmppfad); } catch (...) {}
@@ -659,7 +675,6 @@ void hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 		// Original-LDT3-Datei nach fertigvz verschieben damit
 		// die normale find-Schleife sie nicht nochmal verarbeitet
 		const string &fertigvz = h->getFertigvz();
-		caus<<rot<<"DEBUG fertigvz='"<<blau<<fertigvz<<"', ldatvz='"<<blau<<ldatvz<<"', zpfad='"<<blau<<zpfad<<"'"<<schwarz<<endl;
 		if (!fertigvz.empty() && fertigvz != ldatvz) {
 			string ziel = fertigvz + "/" + zname;
 			error_code ec2;
