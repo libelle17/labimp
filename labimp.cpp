@@ -2788,6 +2788,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 									stringstream gebdp;
 									gebdp<<ztacl(&gebtm,"%Y-%m-%d");
 							for(auto& f:rus.ivec) if(f.feld=="SatzID") { f.wert=sqlft(My->DBS,satzid); break; } // INSERTED
+							{ RS _tr(My,"START TRANSACTION",aktc,ZDB); }
 						russchreib(rus,aktc,&usid);
 						usoffen=0;
 					} // if (usoffen)
@@ -3168,6 +3169,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 				"AND NOT nb RLIKE CONCAT(CHR(13),'|;|pos|.+negativ|tox|\xfc\x62\x65\x72|nicht|bzw|nach|unauf|ratio|unten|normalw|bereich|^[''''+$|^0$|^0.00$')",
 				aktc,ZDB);
 		}
+		{ RS _co(My,"COMMIT",aktc,ZDB); }
 		{ RS updfr(My,"UPDATE `"+tlydat+"` SET fertig=1,codepage='"+ltoan(cp)+"' WHERE datid="+datid,aktc,ZDB); }
 		return reing.rsp->fnr;
 	} // 	if (mdat.is_open())
