@@ -348,30 +348,11 @@ namespace docnet {
 			auto pdf_bytes = b64decode(raw_b64);
 			if (pdf_bytes.empty()) continue;
 
-			// Dateiname: Nachname_Vorname_dd.mm.yy_Basisname[_N].pdf
-			const string &nn=alle_pdfs[pi].nname;
-			const string &vn=alle_pdfs[pi].vname;
-			const string &gd=alle_pdfs[pi].gebdat;
-			// Umlaute fuer Dateinamen umwandeln
-			auto umlaute = [](string s) {
-				const pair<string,string> rep[] = {
-					{"\xc4","Ae"},{"\xe4","ae"},{"\xd6","Oe"},{"\xf6","oe"},
-					{"\xdc","Ue"},{"\xfc","ue"},{"\xdf","ss"},
-					{"\xc3\x84","Ae"},{"\xc3\xa4","ae"},{"\xc3\x96","Oe"},
-					{"\xc3\xb6","oe"},{"\xc3\x9c","Ue"},{"\xc3\xbc","ue"},
-					{"\xc3\x9f","ss"}};
-				for (auto &p:rep) { size_t pos=0;
-					while((pos=s.find(p.first,pos))!=string::npos)
-						{ s.replace(pos,p.first.size(),p.second); pos+=p.second.size(); } }
-				return s;
-			};
-			string _nn=umlaute(nn), _vn=umlaute(vn);
-			string patpfx = (!_nn.empty() ? _nn+"_"+_vn+"_"+gd+"_" : "");
-			string suffix  = (alle_pdfs.size()>1 ? "_"+to_string(pi+1) : "");
-			string pdfpfad = _zvz+"/"+patpfx+zielname_ohne_endung+suffix+".pdf";
+			string suffix = (alle_pdfs.size()>1 ? "_"+to_string(pi+1) : "");
+			string pdfpfad = _zvz+"/"+zielname_ohne_endung+suffix+".pdf";
 			if (fs::exists(pdfpfad)) {
 				unsigned n=1;
-				do { pdfpfad=_zvz+"/"+patpfx+zielname_ohne_endung+
+				do { pdfpfad=_zvz+"/"+zielname_ohne_endung+
 				          suffix+"_"+to_string(n++)+".pdf";
 				} while (fs::exists(pdfpfad) && n<9999);
 			}
@@ -383,6 +364,48 @@ namespace docnet {
 			}
 			pf.write(reinterpret_cast<const char*>(pdf_bytes.data()),pdf_bytes.size());
 			pf.close();
+			// Patientennamen aus PDF extrahieren und Datei umbenennen
+			{
+				fLog(blaus+"pdftotext: "+gruen+pdfpfad+schwarz,1,1); FILE* pp = popen(("pdftotext -f 1 -l 1 '"+pdfpfad+"' -").c_str(),"r");
+				if (pp) {
+					string pdfnn,pdfvn,pdfgd,zeile2;
+					char buf2[512];
+					while (fgets(buf2,sizeof(buf2),pp)) {
+						string z(buf2);
+						while (!z.empty()&&(z.back()=='\n'||z.back()=='\r')) z.pop_back();
+						// Zeile mit ", " = Nachname, Vorname
+						if (pdfnn.empty() && z.find(", ")!=string::npos) {
+							size_t p=z.find(", ");
+							pdfnn=z.substr(0,p);
+							pdfvn=z.substr(p+2);
+							// Leerzeichen in Vornamen durch _ ersetzen
+							for(auto &c:pdfvn) if(c==' ') c='_';
+						} else if (!pdfnn.empty() && pdfgd.empty()) {
+							// Naechste Zeile: Geburtsdatum vor " (M)" oder " (W)"
+							size_t pm=z.find(" (M)"), pw=z.find(" (W)");
+							size_t pe=min(pm,pw);
+							if (pe!=string::npos) {
+								pdfgd=z.substr(0,pe);
+								// dd.mm.yyyy -> dd.mm.yy
+								if (pdfgd.size()==10) pdfgd=pdfgd.substr(0,6)+pdfgd.substr(8,2);
+								break;
+							}
+						}
+					}
+					pclose(pp);
+					if (!pdfnn.empty()) {
+						string newpfad=_zvz+"/"+pdfnn+"_"+pdfvn+"_"+pdfgd+"_"+zielname_ohne_endung+suffix+".pdf";
+						if (!fs::exists(newpfad)) rename(pdfpfad.c_str(),newpfad.c_str());
+						else {
+							unsigned n=1;
+							do { newpfad=_zvz+"/"+pdfnn+"_"+pdfvn+"_"+pdfgd+"_"+zielname_ohne_endung+suffix+"_"+to_string(n++)+".pdf";
+							} while(fs::exists(newpfad)&&n<9999);
+							rename(pdfpfad.c_str(),newpfad.c_str());
+						}
+						pdfpfad=newpfad;
+					}
+				}
+			}
 			fLog(gruens+string(TxtDN_ref[TDN_PDF_gespeichert])+blau+pdfpfad+schwarz,
 			     obverb, oblog);
 		}

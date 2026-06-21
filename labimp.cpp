@@ -1878,7 +1878,7 @@ void hhcl::russchreib(insv &rus,const int aktc,string *usidp)
 															"LEFT JOIN namen n USING (pat_id) "
 															"LEFT JOIN sws s ON s.pat_id=f.pat_id AND s.voret>f.qanf "
 															"WHERE n.pat_id="+pid+" " // n.nachname='"+nname+"' AND n.vorname LIKE '"+vname+"%' "
-															"AND BhFB<"+berzt+" " // "AND BhFB<STR_TO_DATE('"+berzt+"','%Y%m%d') AND "
+															"AND BhFB<="+berzt+" " // "AND BhFB<STR_TO_DATE('"+berzt+"','%Y%m%d') AND "
 															"ORDER BY BhFE1 DESC,BhFB DESC LIMIT 1",aktc,ZDB);
 //															" AND (BhFE1>ADDDATE("+berzt+",-"+itv+") OR BhFE1=18991230) "
 //															"(BhFE1>ADDDATE(STR_TO_DATE('"+berzt+"','%Y%m%d'),-"+itv+") OR BhFE1=18991230) "
