@@ -1613,12 +1613,10 @@ void hhcl::virtpruefweiteres()
 			fLog(Tx[T_Eingelesene_Labordateien]+blaus+((!x.obqueryfehler&&(cerg=x.HolZeile())&&*cerg)?cjj(cerg,0):"0")+schwarz,1,oblog);
 			if (umben.empty()) break;
 		}
-		/*
 		if (!Tippob(rots+Tx[umben.empty()?T_Soll_ich_wirklich_alle_Tabellen_mit:T_Soll_ich_wirklich_alle_Tabellen_mit___]+blau+vorsl+rot+(vonvorne?Tx[T_loeschen_und_von_vorne_anfangen]:loeschalle?Tx[T_loeschen]:Tx[T_nach___]+blaus+umben+schwarz+Tx[T_umbenennen])+schwarz,"n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
 			exit(0);
 		}
-		*/
 		if (umben.empty()) {
 			droptables(aktc);
 			fLog(blaus+Tx[vonvorne?T_Loesche_alle_Tabellen_und_fange_von_vorne_an:T_loescht_alle_Tabellen]+schwarz+Txd[T_mit]+blau+vorsl+schwarz,1,1);
@@ -1714,10 +1712,12 @@ void hhcl::virtpruefweiteres()
 			}
 		} // 		if (nachbneu)
 		if (loeschunvollst||nachbneu) {
+			/*
 			if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit__]+blau+vorsl+rot+Tx[T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden]+schwarz,"n")) {
 				fLog(Tx[T_Aktion_abgebrochen],1,1);
 				exit(0);
 			}
+			*/
 		} // 		if (loeschunvollst||nachbneu)
 		if (pruefauft) {
 			caus<<"So, jetzt pruefe ich die Auftraege"<<endl;
