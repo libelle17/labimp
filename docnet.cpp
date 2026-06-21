@@ -286,14 +286,18 @@ namespace docnet {
 			string inh = zeile.substr(7);
 
 			// 8145 "Patient" schaltet Patientenmodus ein
-			if (fid == "8145") {
-				string il=inh; transform(il.begin(),il.end(),il.begin(),::tolower);
-				in_patient = (il == "patient");
+			// Obj_0045 = Patientenobjekt (nicht Arzt oder Einsender)
+			if (fid == "8002") {
+				in_patient = (inh == "Obj_0045");
 			}
-			// 8000 neuer Satz: Patientenmodus zuruecksetzen
+			else if (fid == "8003" && in_patient) { in_patient = false; }
 			else if (fid == "8000") { in_patient = false; }
 			else if (fid == "3101" && in_patient) { pat_nname = inh; }
 			else if (fid == "3102" && in_patient) { pat_vname = inh; }
+			else if (fid == "3103" && in_patient) {
+				if (inh.size()>=8) pat_gebdat=inh.substr(6,2)+"."+inh.substr(4,2)+"."+inh.substr(2,2);
+				else pat_gebdat=inh;
+			}
 			else if (fid == "3103" && in_patient) {
 				if (inh.size()>=8)
 					pat_gebdat=inh.substr(6,2)+"."+inh.substr(4,2)+"."+inh.substr(2,2);
@@ -345,6 +349,20 @@ namespace docnet {
 			const string &nn=alle_pdfs[pi].nname;
 			const string &vn=alle_pdfs[pi].vname;
 			const string &gd=alle_pdfs[pi].gebdat;
+			// Umlaute fuer Dateinamen umwandeln
+			auto umlaute = [](string s) {
+				const pair<string,string> rep[] = {
+					{"\xc4","Ae"},{"\xe4","ae"},{"\xd6","Oe"},{"\xf6","oe"},
+					{"\xdc","Ue"},{"\xfc","ue"},{"\xdf","ss"},
+					{"\xc3\x84","Ae"},{"\xc3\xa4","ae"},{"\xc3\x96","Oe"},
+					{"\xc3\xb6","oe"},{"\xc3\x9c","Ue"},{"\xc3\xbc","ue"},
+					{"\xc3\x9f","ss"}};
+				for (auto &p:rep) { size_t pos=0;
+					while((pos=s.find(p.first,pos))!=string::npos)
+						{ s.replace(pos,p.first.size(),p.second); pos+=p.second.size(); } }
+				return s;
+			};
+			string _nn=umlaute(nn), _vn=umlaute(vn);
 			string patpfx = (!nn.empty() ? nn+"_"+vn+"_"+gd+"_" : "");
 			string suffix  = (alle_pdfs.size()>1 ? "_"+to_string(pi+1) : "");
 			string pdfpfad = _zvz+"/"+patpfx+zielname_ohne_endung+suffix+".pdf";
