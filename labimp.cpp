@@ -2083,7 +2083,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 	} // 	if (rpneu->size())
 
 	if (rbawep) {
-		if (!pnbid.empty()) {
+		if (!pnbid.empty() && pnbid!="null") {
 			rbawep->hz("NBID",pnbid);
 		}
 		// z.B. "Labor 20101201 004634.dat"

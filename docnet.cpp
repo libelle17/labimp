@@ -433,7 +433,7 @@ namespace docnet {
 			if (!pre215.empty()) emit("0215",pre215);
 			if (!pre216.empty()) emit("0216",pre216);
 			// Labor: 8320=Name triggert rlab.schreib() in dverarbeit via 8323
-			if (!pre_labor.empty()) { emit("8320",pre_labor); emit("8323",""); }
+			if (!pre_labor.empty()) { emit("8320",pre_labor); emit("8323","."); }
 			header_emitted=true;
 		};
 		string zeile;

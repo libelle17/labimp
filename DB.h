@@ -333,7 +333,7 @@ struct DB
 	////	char* ConStr;
 	////  const char* db;
 	const string mysqlbef{"mariadb"}, 
-				mysqlben{"mariadb"}; // mysql-Befehl, mysql-Benutzer
+				mysqlben{"mysql"}; // mysql-Befehl, mysql-Benutzer
 	////  const char* host;
 	const string host;
 	////  const char* user;
