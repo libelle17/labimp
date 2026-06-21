@@ -3432,6 +3432,7 @@ void hhcl::pvirtfuehraus()
 								if (docnet_isLDT3(*aktl)) {
 									ldt3tmp = docnet_ldt3ToTmp(*aktl);
 								// PDF-Extraktion fuer find-Schleife
+								{ string _bn=aktl->substr(aktl->rfind("/")+1); string _bno=_bn.substr(0,_bn.rfind(".")); docnet_extrahierePDF(*aktl,_bno,obverb,oblog); }
 									if (!ldt3tmp.empty()) {
 										aktl_verarbeit = ldt3tmp;
 										string bn = aktl->substr(aktl->rfind("/")+1);
