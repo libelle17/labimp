@@ -111,6 +111,39 @@ const char *dn_T[TDN_MAX + 1][SprachZahl] = {
 	 "No Timestamp_Erstellung_Datensatz in file, using file date: "},
 	// TDN_pvirtVorgbSpeziell
 	{"pvirtVorgbSpeziell() (doc.net)", "pvirtVorgbSpeziell() (doc.net)"},
+	// TDN_dokvz_k/l
+	{"dokvz", "dokvz"},
+	{"Dokumentenverzeichnis (lok. Pfad)", "Document directory (local path)"},
+	// TDN_dokdb_host_k/l
+	{"dokdb_host", "dokdb_host"},
+	{"Datenbank-Host fuer Patientennummer", "DB host for patient number lookup"},
+	// TDN_dokdb_user_k/l
+	{"dokdb_user", "dokdb_user"},
+	{"Datenbank-Benutzername", "DB user name"},
+	// TDN_dokdb_pass_k/l
+	{"dokdb_pass", "dokdb_pass"},
+	{"Datenbank-Passwort", "DB password"},
+	// TDN_dokdb_name_k/l
+	{"dokdb_name", "dokdb_name"},
+	{"Datenbank-Name", "DB name"},
+	// TDN_dokdb_port_k/l
+	{"dokdb_port", "dokdb_port"},
+	{"Datenbank-Port (Standard: 3306)", "DB port (default: 3306)"},
+	// TDN_Dokumentenverzeichnis
+	{"Dokumentenverzeichnis", "Document directory"},
+	// TDN_Dokument_DB_Host
+	{"Dok-DB-Host", "Doc DB host"},
+	// TDN_Dokument_DB_Benutzer
+	{"Dok-DB-Benutzer", "Doc DB user"},
+	// TDN_Dokument_DB_Passwort
+	{"Dok-DB-Passwort", "Doc DB password"},
+	// TDN_Dokument_DB_Name
+	{"Dok-DB-Name", "Doc DB name"},
+	// TDN_Dokument_DB_Port
+	{"Dok-DB-Port", "Doc DB port"},
+	{"doksubvz", "doksubvz"},
+	{"Unterverzeichnis in dok/<nr>/ (z.B. Eigenlabor)", "Subdirectory in dok/<nr>/ (e.g. Eigenlabor)"},
+	{"Dok-Unterverzeichnis", "Doc subdirectory"},
 	{"", ""}
 };
 
@@ -124,6 +157,13 @@ namespace docnet {
 	string qvz;           // Quelldateiverzeichnis (doc.net legt hier ab)
 	string zvz[4];        // bis zu 4 Kopierziele
 	string pdfvz;         // PDF-Ausgabeverzeichnis
+	string dokvz;         // Dokumentenverzeichnis
+	string dokdb_host;    // DB-Host
+	string dokdb_user;    // DB-Benutzer
+	string dokdb_pass;    // DB-Passwort
+	string dokdb_name;    // DB-Name
+	string dokdb_port;    // DB-Port (Default: 3306)
+	string doksubvz;
 
 	// ── Basis64-Dekodierungstabelle ──────────────────────────────────────────
 	static const string b64chars =
@@ -392,6 +432,59 @@ namespace docnet {
 							}
 						}
 					}
+			if (!docnet::dokvz.empty() && !docnet::dokdb_host.empty() && !pdfnn.empty()) {
+				// Geburtsdatum dd.mm.yyyy -> yyyymmdd
+				string gd8;
+				if (pdfgd.size()==10)
+					gd8=pdfgd.substr(6,4)+pdfgd.substr(3,2)+pdfgd.substr(0,2);
+				// Nachname/Vorname bis erstem Leerzeichen (Vornametrenner ist _)
+				string nn1=pdfnn, vn1=pdfvn;
+				{ size_t p=nn1.find(' '); if(p!=string::npos) nn1=nn1.substr(0,p); }
+				{ size_t p=vn1.find('_'); if(p!=string::npos) vn1=vn1.substr(0,p); }
+				MYSQL *mdb = mysql_init(nullptr);
+				if (mdb) {
+					unsigned int dbport = docnet::dokdb_port.empty() ? 3306u : (unsigned)stoul(docnet::dokdb_port);
+					if (mysql_real_connect(mdb,
+							docnet::dokdb_host.c_str(),
+							docnet::dokdb_user.c_str(),
+							docnet::dokdb_pass.c_str(),
+							docnet::dokdb_name.c_str(),
+							dbport, nullptr, 0)) {
+						string sql =
+							"SELECT FSurogat FROM patstamm WHERE "
+							"REGEXP_REPLACE(REGEXP_REPLACE(FNachname,'^zzz',''),'^([^ ]*).*','\\\\1')='"+nn1+"' AND "
+							"REGEXP_REPLACE(FVorname,'^([^ ]*).*','\\\\1')='"+vn1+"' AND "
+							"FGeburtsdatum='"+gd8+"' ORDER BY FSurogat DESC LIMIT 1";
+						if (!mysql_query(mdb, sql.c_str())) {
+							MYSQL_RES *res = mysql_store_result(mdb);
+							if (res) {
+								MYSQL_ROW row = mysql_fetch_row(res);
+								if (row && row[0]) {
+									string surogat(row[0]);
+									string dokziel = docnet::dokvz;
+									while (!dokziel.empty() && dokziel.back()=='/') dokziel.pop_back();
+									dokziel += "/"+surogat+"/";
+									if (!docnet::doksubvz.empty()) dokziel += docnet::doksubvz+'/';
+									try {
+										fs::create_directories(dokziel);
+										string zieldatei = dokziel + fs::path(pdfpfad).filename().string();
+										fs::copy_file(pdfpfad, zieldatei,
+											fs::copy_options::overwrite_existing);
+										fLog(gruens+"PDF->dok: "+blau+zieldatei+schwarz,obverb,oblog);
+									} catch(const exception &e) {
+										fLog(rots+"PDF->dok Fehler: "+e.what()+schwarz,1,oblog);
+									}
+								} else {
+									fLog(rots+"PDF->dok: kein FSurogat fuer "
+										+blau+nn1+" "+vn1+" "+gd8+schwarz,1,oblog);
+								}
+								mysql_free_result(res);
+							}
+						}
+					}
+					mysql_close(mdb);
+				}
+			}
 					pclose(pp);
 					if (!pdfnn.empty()) {
 						string newpfad=_zvz+"/"+pdfnn+"_"+pdfvn+"_"+pdfgd+"_"+zielname_ohne_endung+suffix+".pdf";
@@ -405,6 +498,7 @@ namespace docnet {
 						pdfpfad=newpfad;
 					}
 				}
+			// Patientennummer aus externer DB ermitteln und PDF in Unterordner kopieren
 			}
 			fLog(gruens+string(TxtDN_ref[TDN_PDF_gespeichert])+blau+pdfpfad+schwarz,
 			     obverb, oblog);

@@ -207,6 +207,20 @@ Optionen können kurz (\fB\-x\fR) oder lang (\fB\-\-xxxx\fR) angegeben werden
 .br
 \fB -pdfvz, --pdfverzeichnis <pfad>\fR: PDF-Ausgabeverzeichnis ('\fB\fR')
 .br
+\fB -dokvz, --Dokumentenverzeichnis (lok. Pfad) <pfad>\fR: Dokumentenverzeichnis ('\fB\fR')
+.br
+\fB -dokdb_host, --Datenbank-Host fuer Patientennummer <string>\fR: Dok-DB-Host ('\fB\fR')
+.br
+\fB -dokdb_user, --Datenbank-Benutzername <string>\fR: Dok-DB-Benutzer ('\fB\fR')
+.br
+\fB -dokdb_pass, --Datenbank-Passwort <string>\fR: Dok-DB-Passwort ('\fB\fR')
+.br
+\fB -dokdb_name, --Datenbank-Name <string>\fR: Dok-DB-Name ('\fB\fR')
+.br
+\fB -dokdb_port, --Datenbank-Port (Standard: 3306) <string>\fR: Dok-DB-Port ('\fB\fR')
+.br
+\fB -doksubvz, --Unterverzeichnis in dok/<nr>/ (z.B. Eigenlabor) <string>\fR: Dok-Unterverzeichnis ('\fB\fR')
+.br
 \fB -host, --host <string>\fR: verwendet die Datenbank auf Host <string> anstatt auf ('\fBlocalhost\fR')
 .br
 \fB -muser, --muser <string>\fR: verwendet fuer MySQL/MariaDB den Benutzer <string> anstatt ('\fB\fR')

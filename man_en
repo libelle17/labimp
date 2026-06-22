@@ -207,6 +207,20 @@ Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 .br
 \fB -pdfdir, --pdfdirectory <path>\fR: PDF output directory ('\fB\fR')
 .br
+\fB -dokvz, --Document directory (local path) <path>\fR: Document directory ('\fB\fR')
+.br
+\fB -dokdb_host, --DB host for patient number lookup <string>\fR: Doc DB host ('\fB\fR')
+.br
+\fB -dokdb_user, --DB user name <string>\fR: Doc DB user ('\fB\fR')
+.br
+\fB -dokdb_pass, --DB password <string>\fR: Doc DB password ('\fB\fR')
+.br
+\fB -dokdb_name, --DB name <string>\fR: Doc DB name ('\fB\fR')
+.br
+\fB -dokdb_port, --DB port (default: 3306) <string>\fR: Doc DB port ('\fB\fR')
+.br
+\fB -doksubvz, --Subdirectory in dok/<nr>/ (e.g. Eigenlabor) <string>\fR: Doc subdirectory ('\fB\fR')
+.br
 \fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
 .br
 \fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')

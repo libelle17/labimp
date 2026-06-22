@@ -1407,6 +1407,34 @@ void hhcl::virtinitopt()
 		TDN_pdfvz_k,TDN_pdfvz_l,/*TxBp*/&TxtDN,/*Txi*/TDN_PDF_Ausgabeverzeichnis,
 		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
 		/*woher*/0,TxtDN[TDN_PDF_Ausgabeverzeichnis]);  
+	opn<<new optcl(/*pname*/"dokvz",/*pptr*/&docnet::dokvz,/*art*/pverz,
+		TDN_dokvz_k,TDN_dokvz_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokumentenverzeichnis,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Dokumentenverzeichnis]);
+	opn<<new optcl(/*pname*/"dokdb_host",/*pptr*/&docnet::dokdb_host,/*art*/pstri,
+		TDN_dokdb_host_k,TDN_dokdb_host_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokument_DB_Host,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Dokument_DB_Host]);
+	opn<<new optcl(/*pname*/"dokdb_user",/*pptr*/&docnet::dokdb_user,/*art*/pstri,
+		TDN_dokdb_user_k,TDN_dokdb_user_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokument_DB_Benutzer,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Dokument_DB_Benutzer]);
+	opn<<new optcl(/*pname*/"dokdb_pass",/*pptr*/&docnet::dokdb_pass,/*art*/pstri,
+		TDN_dokdb_pass_k,TDN_dokdb_pass_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokument_DB_Passwort,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Dokument_DB_Passwort]);
+	opn<<new optcl(/*pname*/"dokdb_name",/*pptr*/&docnet::dokdb_name,/*art*/pstri,
+		TDN_dokdb_name_k,TDN_dokdb_name_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokument_DB_Name,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Dokument_DB_Name]);
+	opn<<new optcl(/*pname*/"dokdb_port",/*pptr*/&docnet::dokdb_port,/*art*/pstri,
+		TDN_dokdb_port_k,TDN_dokdb_port_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokument_DB_Port,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Dokument_DB_Port]);
+	opn<<new optcl(/*pname*/"doksubvz",/*pptr*/&docnet::doksubvz,/*art*/pstri,
+		TDN_doksubvz_k,TDN_doksubvz_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokument_Unterverzeichnis,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Dokument_Unterverzeichnis]);
 	dhcl::virtinitopt(); //α
 //	vorclvors=vorsl;
 } // void hhcl::virtinitopt
@@ -1491,9 +1519,9 @@ void hhcl::pvirtvorrueckfragen()
 				while (cerg=li.HolZeile(),cerg?*cerg:0) {
 					if (!zru++) {
 						cout<<violett<<Tx[T_listet_alle_eingelesenen_Dateien_auf]<<schwarz<<endl;
-						cout<<schwarz<<setw(6)<<"DATID"<<"|"<<setw(60)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T_Eingang]<<"|"<<setw(9)<<Tx[T_Groesse]<<"|"<<setw(19)<<Tx[T_eingelesen]<<"|"<<setw(2)<<Tx[T_Zeichensatz]<<"|"<<setw(1)<<Tx[T_fertig_]<<"|"<<setw(4)<<Tx[T_saetze]<<"|"<<setw(4)<<Tx[T_unters]<<"|"<<setw(5)<<Tx[T_werte]<<"|"<<setw(4)<<Tx[T_bakt]<<schwarz<<endl;
+						cout<<schwarz<<setw(6)<<"DATID"<<"|"<<setw(64)<<Tx[T_Pfad_]<<"|"<<setw(19)<<Tx[T_Eingang]<<"|"<<setw(9)<<Tx[T_Groesse]<<"|"<<setw(19)<<Tx[T_eingelesen]<<"|"<<setw(2)<<Tx[T_Zeichensatz]<<"|"<<setw(1)<<Tx[T_fertig_]<<"|"<<setw(4)<<Tx[T_saetze]<<"|"<<setw(4)<<Tx[T_unters]<<"|"<<setw(5)<<Tx[T_werte]<<"|"<<setw(4)<<Tx[T_bakt]<<schwarz<<endl;
 					} // 								if (!zru++)
-					cout<<blau<<setw(6)<<cjj(cerg,0)<<"|"<<violett<<setw(60)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"
+					cout<<blau<<setw(6)<<cjj(cerg,0)<<"|"<<violett<<setw(64)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(19)<<cjj(cerg,2)<<"|"
 						<<schwarz<<setw(9)<<cjj(cerg,3)<<"|"<<blau<<setw(19)<<cjj(cerg,4)<<"|"<<violett<<setw(2)<<cjj(cerg,5)<<"|"
 						<<blau<<setw(1)<<cjj(cerg,6)<<"|"<<setw(4)<<cjj(cerg,7)<<"|"<<setw(4)<<cjj(cerg,8)<<"|"<<setw(5)<<cjj(cerg,9)<<"|"<<setw(4)<<cjj(cerg,10)<<schwarz<<endl;
 				} // while (cerg=li.HolZeile(),cerg?*cerg:0) 
