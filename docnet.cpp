@@ -437,6 +437,9 @@ namespace docnet {
 				{ size_t p=vn1.find('_'); if(p!=string::npos) vn1=vn1.substr(0,p); }
 				MYSQL *mdb = mysql_init(nullptr);
 				if (mdb) {
+					unsigned int ssl_off = 1;
+					mysql_optionsv(mdb, MYSQL_OPT_SSL_ENFORCE, (void*)&ssl_off);
+					mysql_options(mdb, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (void*)&ssl_off);
 					unsigned int dbport = docnet::dokdb_port.empty() ? 3306u : (unsigned)stoul(docnet::dokdb_port);
 					if (mysql_real_connect(mdb,
 							docnet::dokdb_host.c_str(),

@@ -2,7 +2,7 @@
 .\" Manual-Seite für labimp
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH labimp 1 "22.06.26" "labimp" "Handbuch"
+.TH labimp 1 "23.06.26" "labimp" "Handbuch"
 .SH NAME
 \fBlabimp\fR \- Laborwerte aus LDT\-Dateien (QC\-Labmessenger und doc.net) in eine MariaDB\-Datenbank einlesen
 .br
