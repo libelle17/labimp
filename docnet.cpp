@@ -390,12 +390,6 @@ namespace docnet {
 
 			string suffix = (alle_pdfs.size()>1 ? "_"+to_string(pi+1) : "");
 			string pdfpfad = _zvz+"/"+zielname_ohne_endung+suffix+".pdf";
-			if (fs::exists(pdfpfad)) {
-				unsigned n=1;
-				do { pdfpfad=_zvz+"/"+zielname_ohne_endung+
-				          suffix+"_"+to_string(n++)+".pdf";
-				} while (fs::exists(pdfpfad) && n<9999);
-			}
 			ofstream pf(pdfpfad, ios::binary);
 			if (!pf.is_open()) {
 				fLog(rots+string(TxtDN_ref[TDN_Fehler_beim_PDF_Schreiben])+
