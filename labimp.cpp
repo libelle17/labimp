@@ -3247,7 +3247,7 @@ void hhcl::prueftbl()
 		"labor2a",
 			"SELECT Pat_id, eingang ZEitpunkt, befart FertigStGrad, COALESCE(au.abküstand,w.Abkü)Abkü, w.langtext Langtext"
 				",TRIM(IF(w.Abkü='ALBUM' AND Wert='' AND k.Text LIKE 'nicht berechenb%','<20',IF(TRIM(Wert)REGEXP'^[0-9]+\\\\,?[0-9]*$',REPLACE(Wert,',','.'),IF(Wert=''AND k.text RLIKE'^[<>][^ ]+ .*$',LEFT(k.text,INSTR(k.text,' ')-1),Wert)))) Wert"
-				",IF(w.Einheit IN ('','\\'kA\\'')AND Wert=''AND k.text RLIKE'^[<>][^ ]+ .*$',MID(k.text,INSTR(k.text,' ')+1),COALESCE(um.Einhstand,w.Einheit))Einheit,w.Grenzwerti obpath"
+				",IF(w.Einheit IN ('','\\'kA\\'')AND Wert=''AND k.text RLIKE'^[<>][^ ]+ .*$',MID(k.text,INSTR(k.text,' ')+1),COALESCE(um.Einhstand,w.Einheit))Einheit,IF(w.Grenzwerti IN('','N'),'',w.Grenzwerti)obpath"
         ",CONCAT(IF(e.text IS NULL OR e.text RLIKE '^:[ /\\\\*:]*$','',IF(e.text RLIKE '^:[ /\\\\*]*:'"
         " ,CONCAT(MID(e.text,LOCATE(':',e.text,2)+1),';'),IF(e.text='.','',IF(e.text='','',CONCAT(e.text,';'))))),COALESCE(k.text,'')) Kommentar/*, n.id*/ "
 				",COALESCE(k.text,'')Abschl"
@@ -3255,7 +3255,7 @@ void hhcl::prueftbl()
 				",REGEXP_REPLACE(n.oNg,'^([<>0-9,.-]*).*$','\\\\1')oNg"
 				",l.Labor, Pfad, d.DatID "
 				",p.Gruppe, p.Reihe,2 Qu "
-        ",CONCAT('2:',DATE_FORMAT(eingang,'%e.%c.%y'),'|',w.Abkü,'|',w.Langtext,'|',Wert,IF(w.grenzwerti='','',CONCAT('(',w.Grenzwerti,')')),'|',w.Einheit,'|[',NB,'](',uNg,'-',oNg,')|',l.Labor,'|',COALESCE(e.text,''),'|',COALESCE(k.text,''))COLLATE utf8mb4_german2_ci info "
+        ",CONCAT('2:',DATE_FORMAT(eingang,'%e.%c.%y'),'|',w.Abkü,'|',w.Langtext,'|',Wert,IF(w.Grenzwerti IN('','N'),'',CONCAT('(',w.Grenzwerti,')')),'|',w.Einheit,'|[',NB,'](',uNg,'-',oNg,')|',l.Labor,'|',COALESCE(e.text,''),'|',COALESCE(k.text,''))COLLATE utf8mb4_german2_ci info "
 				"FROM `"+tlyus+"` u "
 				"LEFT JOIN `"+tlywert+"` w ON w.usid=u.id "
         "LEFT JOIN laborabkum au USING(abkü)"
