@@ -3431,7 +3431,19 @@ void hhcl::pvirtfuehraus()
                                                 }
                                         }
                                 }
-				caus<<"base_name: "<<base_name(*aktl)<<", dattag (substr(0,19): "<<dattag<<", dateidat: "<<ddcont<<endl;
+				{ string _lv;
+				  { ifstream _f(*aktl); string _z;
+				    while(getline(_f,_z)) {
+				      if (_z.size()>10 && _z.substr(3,4)=="0001") {
+				        _lv=_z.substr(7);
+				        if (!_lv.empty()&&_lv.back()=='\r') _lv.pop_back();
+				        break;
+				      }
+				    }
+				  }
+				  caus<<"base_name: "<<base_name(*aktl)<<", dattag (substr(0,19): "<<dattag<<", dateidat: "<<ddcont
+				      <<(_lv.empty()?"":", LDT: "+_lv)<<endl;
+				}
 				// "dattag: "<<dattag<<endl;
 				// wenn Datei schon angefangen wurde zu einzulesen (fertig<>1), dann dieses loeschen
 				// RS loeschvor(My,"DELETE FROM `"+tlydat+"` WHERE pfad="+sqlft(My->DBS,*aktl)+" AND fertig<>1",aktc,ZDB);

@@ -184,10 +184,10 @@ namespace docnet {
 			if (bits >= 0) {
 				out.push_back((unsigned char)((val >> bits) & 0xFF));
 				bits -= 8;
-			}
-		}
+			} // if (bits >= 0...)
+		} // for
 		return out;
-	}
+	} // static vector<unsigned char> b64decode(c
 
 	// ── Zeitstempel-Parser für LDT3 (Felder 7278=Datum, 7279=Uhrzeit) ───────
 	// Gibt true zurück und befüllt *tm, wenn beide Felder gültig sind.
@@ -205,7 +205,7 @@ namespace docnet {
 		out->tm_sec  = atoi(tim6.substr(4, 2).c_str());
 		out->tm_isdst = -1;
 		return (out->tm_year > 100 && out->tm_mday >= 1 && out->tm_mday <= 31);
-	}
+	} // static bool parseLDT3Timestamp(const str
 
 	// ── Zieldateiname aus Zeitstempel + laufender Nummer ─────────────────────
 	// Muster: Labor<YYYYMMDD>_<HHMMSS>_<lfdnr>.ldt
@@ -219,14 +219,14 @@ namespace docnet {
 			         ts.tm_hour, ts.tm_min, ts.tm_sec, lfd);
 			if (!fs::exists(fs::path(zieldir) / buf))
 				return string(buf);
-		}
+		} // for
 		// Fallback (sollte nie auftreten)
 		snprintf(buf, sizeof(buf),
 		         "Labor%04d%02d%02d_%02d%02d%02d_XXXX.ldt",
 		         ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday,
 		         ts.tm_hour, ts.tm_min, ts.tm_sec);
 		return string(buf);
-	}
+	} // static string zieldateiname(const string
 
 	// ── Timestamp aus LDT3-Datei lesen (Kopfbereich) ─────────────────────────
 	// Sucht nach Feldkennung 8218 = "Timestamp_Erstellung_Datensatz"
@@ -263,13 +263,13 @@ namespace docnet {
 				dat8.clear();
 				tim6.clear();
 				continue;
-			}
+			} // if (fid == "8218" && inh.find("Timestamp_Ers...)
 			if (found8218) {
 				// Nächstes Obj_0054 beginnt: 8001 Obj_0054
 				if (fid == "8001" && inh.find("Obj_0054") != string::npos) {
 					in_timestamp_obj = true;
 					continue;
-				}
+				} // if (fid == "8001" && inh.find("Obj_0054"...)
 				// Obj endet: 8003 Obj_0054
 				if (fid == "8003" && inh.find("Obj_0054") != string::npos) {
 					if (in_timestamp_obj && !dat8.empty()) {
@@ -277,13 +277,13 @@ namespace docnet {
 					}
 					in_timestamp_obj = false;
 					found8218 = false;
-				}
+				} // if (fid == "8003" && inh.find("Obj_0054"...)
 				if (in_timestamp_obj) {
 					if (fid == "7278") dat8 = inh;
 					else if (fid == "7279") tim6 = inh;
-				}
-			}
-		}
+				} // if (in_timestamp_obj...)
+			} // if (found8218...)
+		} // while
 		// Fallback: Dateidatum
 		struct stat st{};
 		if (!lstat(pfad.c_str(), &st)) {
@@ -291,10 +291,10 @@ namespace docnet {
 			if (lt) {
 				*ts = *lt;
 				return true;
-			}
-		}
+			} // if (lt...)
+		} // if (!lstat(pfad.c_str(...)
 		return false;
-	}
+	} // static bool leseTimestamp(const string &
 
 	// ── PDF aus LDT3-Datei extrahieren ───────────────────────────────────────
 	// Sucht 8242 = "base64-kodierte_Anlage" gefolgt von 6329-Blöcken.
@@ -336,17 +336,17 @@ namespace docnet {
 				// Patientendaten einfrieren
 				pat_nname = cur_nname; pat_vname = cur_vname; pat_gebdat = cur_gebdat;
 				in_patient = false;
-			}
+			} // else if (fid == "8003" && inh == "Obj_00
 			else if (fid == "8000") {
 				in_patient = false;
 				cur_nname = ""; cur_vname = ""; cur_gebdat = "";
-			}
+			} // else if (fid == "8000")
 			else if (fid == "3101" && in_patient) { cur_nname = inh; }
 			else if (fid == "3102" && in_patient) { cur_vname = inh; }
 			else if (fid == "3103" && in_patient) {
 				if (inh.size()>=8) cur_gebdat=inh.substr(6,2)+"."+inh.substr(4,2)+"."+inh.substr(2,2);
 				else cur_gebdat=inh;
-			}
+			} // else if (fid == "3103" && in_patient)
 			else if (fid == "8242") {
 				string il=inh;
 				transform(il.begin(),il.end(),il.begin(),::tolower);
@@ -355,15 +355,15 @@ namespace docnet {
 					if (!b64chunks.empty()) {
 						alle_pdfs.push_back({b64chunks,pat_nname,pat_vname,pat_gebdat});
 						b64chunks.clear();
-					}
+					} // if (!b64chunks.empty(...)
 					in_attachment = true;
-				}
+				} // if (il.find("base64"...)
 			} else if (fid == "6329" && in_attachment) {
 				b64chunks.push_back(inh);
 			} else if (in_attachment && fid!="6329" && fid!="8002" && fid!="8003") {
 				in_attachment = false;
-			}
-		}
+			} // else if (fid == "8242")
+		} // while
 		if (!b64chunks.empty())
 			alle_pdfs.push_back({b64chunks,pat_nname,pat_vname,pat_gebdat});
 		f.close();
@@ -375,7 +375,7 @@ namespace docnet {
 			fLog(rots+string(TxtDN_ref[TDN_Fehler_beim_PDF_Schreiben])+
 			     zielverz+": "+e.what()+schwarz, 1, oblog);
 			return;
-		}
+		} // catch
 		string _zvz=zielverz;
 		while (!_zvz.empty() && _zvz.back()=='/') _zvz.pop_back();
 
@@ -395,7 +395,7 @@ namespace docnet {
 				fLog(rots+string(TxtDN_ref[TDN_Fehler_beim_PDF_Schreiben])+
 				     pdfpfad+schwarz, 1, oblog);
 				continue;
-			}
+			} // if (!pf.is_open(...)
 			pf.write(reinterpret_cast<const char*>(pdf_bytes.data()),pdf_bytes.size());
 			pf.close();
 			// Patientennamen aus PDF extrahieren und Datei umbenennen
@@ -423,64 +423,107 @@ namespace docnet {
 								// dd.mm.yyyy -> dd.mm.yy
 								if (pdfgd.size()==10) pdfgd=pdfgd.substr(0,6)+pdfgd.substr(8,2);
 								break;
-							}
-						}
-					}
+							} // if (pe!=string::npos...)
+						} // if (pdfnn.empty(...)
+					} // while
 					pclose(pp);
 					if (!pdfnn.empty()) {
 						string newpfad=_zvz+"/"+pdfnn+"_"+pdfvn+"_"+pdfgd+"_"+zielname_ohne_endung+".pdf";
 						rename(pdfpfad.c_str(),newpfad.c_str()); // overwrite
 						pdfpfad=newpfad;
 						// PDF in Patientenordner kopieren via mariadb-CLI
-						// PDF in Patientenordner kopieren via systemrueck()
-						if (!docnet::dokvz.empty()&&!docnet::dokdb_host.empty()) {
-							string gd8;
-							if (pdfgd.size()==8) { int yy=stoi(pdfgd.substr(6,2)); string cent=(yy>25?"19":"20"); gd8=cent+pdfgd.substr(6,2)+pdfgd.substr(3,2)+pdfgd.substr(0,2); }
-							else if (pdfgd.size()==10) gd8=pdfgd.substr(6,4)+pdfgd.substr(3,2)+pdfgd.substr(0,2);
-							string nn1=pdfnn,vn1=pdfvn;
+						// PDF in Patientenordner kopieren
+						// Ablauf:
+						//   1. Suche FSurogat in externer DB (wser)
+						//   2. Falls nicht gefunden: Fallback auf lokale DB quelle
+						//   3. Falls gefunden: kopiere PDF nach dokvz/<surogat>/[doksubvz/]
+						//   4. Falls nicht gefunden: Fehlerausgabe
+						if (!docnet::dokvz.empty()) {
+							// Geburtsdatum aus pdfgd (dd.mm.yy oder dd.mm.yyyy) nach yyyymmdd.
+							// Bei zweistelligem Jahr sind beide Jahrhunderte moeglich -
+							// die SQL-Abfrage prueft beide mit IN(...).
+							string gd19, gd20;
+							if (pdfgd.size()==8) {
+								string mm=pdfgd.substr(3,2), dd=pdfgd.substr(0,2), yy=pdfgd.substr(6,2);
+								gd19="19"+yy+mm+dd;
+								gd20="20"+yy+mm+dd;
+							} else if (pdfgd.size()==10) {
+								gd19=pdfgd.substr(6,4)+pdfgd.substr(3,2)+pdfgd.substr(0,2);
+								gd20=gd19;
+							} // if pdfgd.size()
+							string nn1=pdfnn, vn1=pdfvn;
 							{size_t p=nn1.find(' ');if(p!=string::npos)nn1=nn1.substr(0,p);}
 							{size_t p=vn1.find('_');if(p!=string::npos)vn1=vn1.substr(0,p);}
-							string port2=docnet::dokdb_port.empty()?"3306":docnet::dokdb_port;
-							string sql2=
-								"SELECT FSurogat FROM patstamm WHERE "
-								"REGEXP_REPLACE(REGEXP_REPLACE(FNachname,'^zzz',''),'^([^ ]*).*','\\1')='"+nn1+"' AND "
-								"REGEXP_REPLACE(FVorname,'^([^ ]*).*','\\1')='"+vn1+"' AND "
-								"FGeburtsdatum='"+gd8+"' ORDER BY FSurogat DESC LIMIT 1";
-							string cmd2="mariadb -h "+docnet::dokdb_host+" -P "+port2
-								+" -u "+docnet::dokdb_user+" -p"+docnet::dokdb_pass
-								+" --ssl=0 --skip-column-names "+docnet::dokdb_name
-								+" -e \""+sql2+"\" 2>/dev/null";
-							vector<string> rueck;
-							systemrueck(cmd2,0,oblog,&rueck,1);
-							if (!rueck.empty()&&!rueck[0].empty()) {
-								string surogat=rueck[0];
-								while(!surogat.empty()&&(surogat.back()=='\n'||surogat.back()=='\r'||surogat.back()==' '))surogat.pop_back();
-								if (!surogat.empty()) {
-									string dokziel=docnet::dokvz;
-									while(!dokziel.empty()&&dokziel.back()=='/')dokziel.pop_back();
-									dokziel+="/"+surogat+"/";
-									if (!docnet::doksubvz.empty())dokziel+=docnet::doksubvz+'/';
-									try {
-										fs::create_directories(dokziel);
-										string zieldatei=dokziel+fs::path(pdfpfad).filename().string();
-										fs::copy_file(pdfpfad,zieldatei,fs::copy_options::overwrite_existing);
-										fLog(gruens+"PDF->dok: "+blau+zieldatei+schwarz,obverb,oblog);
-									} catch(const exception &e) {
-										fLog(rots+"PDF->dok Fehler: "+e.what()+schwarz,1,oblog);
-									}
+							string gdIn=(gd19==gd20)?"'"+gd19+"'":"'"+gd19+"','"+gd20+"'"; // fuer IN(...)
+							string surogat;
+
+							// Schritt 1: Externe DB auf wser
+							if (!docnet::dokdb_host.empty()) {
+								string port2=docnet::dokdb_port.empty()?"3306":docnet::dokdb_port;
+								string sql_wser=
+									"SELECT FSurogat FROM patstamm WHERE "
+									"REGEXP_REPLACE(REGEXP_REPLACE(FNachname,'^zzz',''),'^([^ ]*).*','\\1')='"+nn1+"' AND "
+									"REGEXP_REPLACE(FVorname,'^([^ ]*).*','\\1')='"+vn1+"' AND "
+									"FGeburtsdatum IN ("+gdIn+") ORDER BY FSurogat DESC LIMIT 1";
+								string cmd_wser="mariadb -h "+docnet::dokdb_host+" -P "+port2
+									+" -u "+docnet::dokdb_user+" -p"+docnet::dokdb_pass
+									+" --ssl=0 --skip-column-names "+docnet::dokdb_name
+									+" -e \""+sql_wser+"\" 2>/dev/null";
+								vector<string> rueck_wser;
+								systemrueck(cmd_wser,0,oblog,&rueck_wser,1);
+								if (!rueck_wser.empty()&&!rueck_wser[0].empty()) {
+									surogat=rueck_wser[0];
+									while(!surogat.empty()&&(surogat.back()=='\n'||surogat.back()=='\r'||surogat.back()==' '))surogat.pop_back();
 								} else {
-									fLog(rots+"PDF->dok: kein FSurogat fuer "+blau+nn1+" "+vn1+" "+gd8+schwarz,1,oblog);
-								}
-							} else {
-								fLog(rots+"PDF->dok: DB-Abfrage leer fuer "+blau+nn1+" "+vn1+" "+gd8+schwarz,1,oblog);
-							}
-						}
-					}
-				}
+									// Kein Ergebnis von wser - Meldung auf Konsole
+									fLog(rots+"PDF->dok: wser liefert kein Ergebnis fuer "
+										+blau+nn1+" "+vn1+" "+gdIn+schwarz,1,oblog);
+								} // if/else wser-Ergebnis
+							} // if dokdb_host
+
+							// Schritt 2: Fallback auf lokale DB quelle
+							if (surogat.empty()) {
+								string sql_lok=
+									"SELECT pat_id FROM namen WHERE "
+									"REGEXP_REPLACE(REGEXP_REPLACE(Nachname,'^zzz',''),'^([^ ]*).*','\\1')='"+nn1+"' AND "
+									"REGEXP_REPLACE(Vorname,'^([^ ]*).*','\\1')='"+vn1+"' AND "
+									"gebdat IN ("+gdIn+") ORDER BY pat_id DESC LIMIT 1";
+								string cmd_lok=string("mariadb --defaults-extra-file=$HOME/.mariadbpwd quelle")
+									+" --skip-column-names -e \""+sql_lok+"\" 2>/dev/null";
+								vector<string> rueck_lok;
+								systemrueck(cmd_lok,0,oblog,&rueck_lok,1);
+								if (!rueck_lok.empty()&&!rueck_lok[0].empty()) {
+									surogat=rueck_lok[0];
+									while(!surogat.empty()&&(surogat.back()=='\n'||surogat.back()=='\r'||surogat.back()==' '))surogat.pop_back();
+									fLog(violetts+"PDF->dok: Fallback lok. DB, pat_id="+blau+surogat+schwarz,1,oblog);
+								} else {
+									fLog(rots+"PDF->dok: lok. DB liefert kein pat_id fuer "
+										+blau+nn1+" "+vn1+" "+gdIn+schwarz,1,oblog);
+								} // if/else lok-Ergebnis
+							} // if surogat.empty() - Fallback
+
+							// Schritt 3: PDF kopieren wenn Surogat/pat_id gefunden
+							if (!surogat.empty()) {
+								string dokziel=docnet::dokvz;
+								while(!dokziel.empty()&&dokziel.back()=='/')dokziel.pop_back();
+								dokziel+="/"+surogat+"/";
+								if (!docnet::doksubvz.empty()) dokziel+=docnet::doksubvz+'/';
+								try {
+									fs::create_directories(dokziel);
+									string zieldatei=dokziel+fs::path(pdfpfad).filename().string();
+									fs::copy_file(pdfpfad,zieldatei,fs::copy_options::overwrite_existing);
+									fLog(gruens+"PDF->dok: "+blau+zieldatei+schwarz,obverb,oblog);
+								} catch(const exception &e) {
+									fLog(rots+"PDF->dok Fehler: "+e.what()+schwarz,1,oblog);
+								} // try/catch
+							} // if surogat gefunden
+						} // if dokvz
+					} // if (!pdfnn.empty(...)
+				} // if (pp...)
 			}
 			fLog(gruens+string(TxtDN_ref[TDN_PDF_gespeichert])+blau+pdfpfad+schwarz,
 			     obverb, oblog);
-		}
+		} // for
 	}
 
 	// ── LDT3 → LDT2 Konvertierung (flaches Mapping) ─────────────────────────
@@ -512,6 +555,14 @@ namespace docnet {
 	//   7302 (Normbereich-Code kA)  → ignorieren (Normbereich kommt via 8460)
 	//   7301 (Keimzahl)             → 8480 als Text
 
+	// ================================================================
+	// ldt3ToTmp() - LDT3 nach LDT2 konvertieren
+	//
+	// Konvertiert eine LDT3-Datei in eine temporaere LDT2-kompatible
+	// Datei unter /tmp/, die dann von dverarbeit() eingelesen werden kann.
+	// Zweistufig: erst Arztdaten sammeln (Stufe 1), dann konvertieren
+	// (Stufe 2) mit Objekt-Stack fuer die hierarchische LDT3-Struktur.
+	// ================================================================
 	string ldt3ToTmp(const string &ldtpfad)
 	{
 		string tmp = "/tmp/" + fs::path(ldtpfad).filename().string();
@@ -541,7 +592,7 @@ namespace docnet {
 				if (fid=="0205") pre205=inh;
 				if (fid=="0215") pre215=inh;
 				if (fid=="0216") pre216=inh;
-			}
+			} // while
 		}
 		// Stufe 2: Konvertierung
 		ifstream fin(ldtpfad);
@@ -585,9 +636,9 @@ namespace docnet {
 				if (inh.find("Obj_0054")!=string::npos) {
 					in_ts_obj=true; cur_ts_dat.clear(); cur_ts_tim.clear();
 					cur_ts_label=pending_label; pending_label.clear();
-				} else { pending_label.clear(); }
+				} else { pending_label.clear(); } // if (inh.find("Obj_0054"...)
 				continue;
-			}
+			} // if (fid=="8002"...)
 			if (fid=="8003") {
 				if (in_ts_obj&&inh.find("Obj_0054")!=string::npos&&!cur_ts_dat.empty()) {
 					string t4=cur_ts_tim.size()>=4?cur_ts_tim.substr(0,4):cur_ts_tim;
@@ -595,10 +646,10 @@ namespace docnet {
 					else if (cur_ts_label=="ts_befund") { if (!emit8302) { emit("8302",cur_ts_dat); if (!t4.empty()) emit("8303",t4); emit8302=true; } }
 					else if (cur_ts_label=="ts_abnahme") { emit("8432",cur_ts_dat); if (!t4.empty()) emit("8433",t4); }
 					in_ts_obj=false; cur_ts_dat.clear(); cur_ts_tim.clear(); cur_ts_label.clear();
-				} else if (inh.find("Obj_0054")!=string::npos) { in_ts_obj=false; }
+				} else if (inh.find("Obj_0054")!=string::npos) { in_ts_obj=false; } // if (in_ts_obj&&inh.find("Obj_0054"...)
 				if (!objstack.empty()) objstack.pop_back();
 				continue;
-			}
+			} // if (fid=="8003"...)
 			if (fid=="8001") continue;
 			if (fid=="8000") {
 				if (inh=="8220"||(!inh.empty()&&inh.substr(0,4)=="8220")) {
@@ -609,9 +660,9 @@ namespace docnet {
 					in_header=false; emitHeader();
 					emit8302=false; emit8311=false; emit8418=false;
 					emit("8000",inh); emit("8100","0000");
-				}
+				} // if (inh=="8220"||(!inh.empty(...)
 				continue;
-			}
+			} // if (fid=="8000"...)
 			if (in_ts_obj&&fid=="7278") { cur_ts_dat=inh; continue; }
 			if (in_ts_obj&&fid=="7279") { cur_ts_tim=inh; continue; }
 			if (fid=="7273"||fid=="7278"||fid=="7279") continue;
@@ -623,7 +674,7 @@ namespace docnet {
 				else if (inh.find("Timestamp_Erstellung_Datensatz")!=string::npos) pending_label="ts_erstellung";
 				else pending_label.clear();
 				continue;
-			}
+			} // if (fid=="8218"...)
 			if (fid=="8110"||fid=="6303"||fid=="9300"||fid=="7302"||fid=="7304"||fid=="8401"||fid=="6329") continue; // 6329=PDF-Base64
 			if (fid=="8114"||fid=="8122"||fid=="8136"||fid=="8147"||fid=="8145"||fid=="8117") continue;
 			if (fid=="8119"||fid=="8131"||fid=="8132"||fid=="8143"||fid=="8151"||fid=="8160") continue;
@@ -649,7 +700,7 @@ namespace docnet {
 			// Probenmaterial: nur im Patientenblock ausgeben, nicht im Header
 			if (fid=="8428"||fid=="8430"||fid=="8431") { if (!in_header) emit(fid,inh); continue; }
 			emit(fid,inh);
-		}
+		} // while
 		if (header_emitted) fout << "01380008221\r\n";
 		fin.close(); fout.close();
 		return tmp;
@@ -672,7 +723,7 @@ bool docnet_isLDT3(const std::string &pfad) {
 		if (z.size()>10 && z.substr(3,4)=="0001" && z.substr(7,4)=="LDT3") return true;
 	}
 	return false;
-}
+} // docnet_isLDT3
 
 // Oeffentliche PDF-Extraktionsfunktion fuer Zugriff aus labimp.cpp
 void docnet_extrahierePDF(const std::string &ldtpfad,
@@ -680,7 +731,7 @@ void docnet_extrahierePDF(const std::string &ldtpfad,
                           const int obverb, const int oblog) {
 	docnet::extrahierePDF(ldtpfad, zielname_ohne_endung,
 	                      docnet::pdfvz, TxtDN, obverb, oblog);
-}
+} // const int obverb, const int oblog)
 
 // pvirtVorgbSpeziell() ist in turbomed.cpp definiert und dort um den
 // docnet.h-Include erweitert. Keine zweite Definition hier (ODR).
@@ -705,6 +756,18 @@ void docnet_extrahierePDF(const std::string &ldtpfad,
 // Diese Funktion wird AUS pvirtfuehraus() aufgerufen (Patch, s.u.).
 // Sie kann auch standalone als Testfunktion genutzt werden.
 
+// ================================================================
+// hhcl_docnet_verarbeitqvz() - doc.net-Quelldateien verarbeiten
+//
+// Verarbeitet alle LDT-Dateien im doc.net-Quelldateiverzeichnis (qvz).
+// Fuer jede Datei:
+//   1. Zeitstempel aus Dateinamen lesen
+//   2. Kopien in Zielverzeichnisse erstellen
+//   3. PDF-Anhaenge extrahieren (extrahierePDF)
+//   4. LDT3 -> LDT2 konvertieren (ldt3ToTmp) und dverarbeit() aufrufen
+//   5. Quelldatei nach fertigvz verschieben
+// Rueckgabewert: Anzahl erfolgreich verarbeiteter Dateien.
+// ================================================================
 int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 {
 	int _verarbeitet = 0;
@@ -719,14 +782,14 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 				string fn = e.path().filename().string();
 				if (fn.size()>8 && fn.substr(fn.size()-8)=="_tmp.ldt")
 					try { fs::remove(e.path()); } catch(...) {}
-			}
-		}
+			} // for
+		} // if (!ldatvz.empty(...)
 		// Labor*-Dateien in /tmp/ l�schen
 		for (auto& e : fs::directory_iterator("/tmp", ec_cl)) {
 			string fn = e.path().filename().string();
 			if (fn.size()>4 && fn.substr(0,5)=="Labor" && fn.substr(fn.size()-4)==".ldt")
 				try { fs::remove(e.path()); } catch(...) {}
-		}
+		} // for
 	}
 	const string &pdfvz  = docnet::pdfvz;
 
@@ -742,12 +805,12 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 			transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 			if (ext == ".ldt")
 				dateien.push_back(entry.path());
-		}
+		} // for
 	} catch (const exception &e) {
 		fLog(rots + "docnet: Fehler beim Lesen von " + qvz + ": " + e.what() + schwarz,
 		     1, oblog);
 		return 0;
-	}
+	} // try
 
 	for (const auto &qpfad : dateien) {
 		// 1. Zeitstempel aus Datei lesen
@@ -757,7 +820,7 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 			fLog(rots + string(TxtDN[TDN_kein_Timestamp_gefunden]) +
 			     qpfad.string() + schwarz, 1, oblog);
 			// trotzdem weitermachen mit Dateidatum (leseTimestamp hat Fallback)
-		}
+		} // if (!ts_ok...)
 
 		// Zieldateiname berechnen
 		string zname = docnet::zieldateiname(ldatvz, ts);
@@ -778,8 +841,8 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 				fLog(rots + string(TxtDN[TDN_Fehler_beim_Verschieben]) +
 				     qpfad.string() + ": " + e2.what() + schwarz, 1, oblog);
 				continue;
-			}
-		}
+			} // try
+		} // if (ec...)
 
 		// 3. Kopieren in Zielverzeichnisse zvz1..zvz4
 		for (int i = 0; i < 4; ++i) {
@@ -795,8 +858,8 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 			} catch (const exception &e) {
 				fLog(rots + string(TxtDN[TDN_Fehler_beim_Kopieren]) +
 				     cpfad + ": " + e.what() + schwarz, 1, oblog);
-			}
-		}
+			} // try
+		} // for
 
 		// 4. PDF extrahieren
 		string zname_ohne_endung = zname.substr(0, zname.rfind('.'));
@@ -809,7 +872,7 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 			fLog(rots + "docnet: Konvertierung fehlgeschlagen: " + zpfad + schwarz,
 			     1, oblog);
 			continue;
-		}
+		} // if (tmppfad.empty(...)
 
 		// dverarbeit() über den normalen Mechanismus aufrufen:
 		// Da pvirtfuehraus() die Dateien aus ldatvz einliest und dverarbeit()
@@ -828,7 +891,7 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 				struct tm dtm{}; char buf[15];
 				if (strptime(dt.c_str(),"%Y%m%d_%H%M%S",&dtm)) { strftime(buf,sizeof(buf),"%Y%m%d%H%M%S",&dtm); dateidat_str=buf; }
 				else { dt=bn.substr(5,13); if (strptime(dt.c_str(),"%Y%m%d_%H%M",&dtm)) { strftime(buf,sizeof(buf),"%Y%m%d%H%M00",&dtm); dateidat_str=buf; } }
-			}
+			} // if (bn.substr(0,5...)
 			h->setDateidat(dateidat_str);
 		}
 		h->initDB_public();
@@ -849,10 +912,10 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 				try {
 					fs::copy_file(zpfad, ziel, fs::copy_options::overwrite_existing);
 					fs::remove(zpfad);
-				} catch (...) {}
-			}
-		}
-	}
+				} catch (...) {} // try
+			} // if (ec2...)
+		} // if (!fertigvz.empty(...)
+	} // for
 	return _verarbeitet;
 }
 
