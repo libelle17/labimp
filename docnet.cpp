@@ -426,76 +426,57 @@ namespace docnet {
 							}
 						}
 					}
-			if (!docnet::dokvz.empty() && !docnet::dokdb_host.empty() && !pdfnn.empty()) {
-				// Geburtsdatum dd.mm.yyyy -> yyyymmdd
-				string gd8;
-				if (pdfgd.size()==10)
-					gd8=pdfgd.substr(6,4)+pdfgd.substr(3,2)+pdfgd.substr(0,2);
-				// Nachname/Vorname bis erstem Leerzeichen (Vornametrenner ist _)
-				string nn1=pdfnn, vn1=pdfvn;
-				{ size_t p=nn1.find(' '); if(p!=string::npos) nn1=nn1.substr(0,p); }
-				{ size_t p=vn1.find('_'); if(p!=string::npos) vn1=vn1.substr(0,p); }
-				MYSQL *mdb = mysql_init(nullptr);
-				if (mdb) {
-					unsigned int ssl_off = 1;
-					mysql_optionsv(mdb, MYSQL_OPT_SSL_ENFORCE, (void*)&ssl_off);
-					mysql_options(mdb, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (void*)&ssl_off);
-					unsigned int dbport = docnet::dokdb_port.empty() ? 3306u : (unsigned)stoul(docnet::dokdb_port);
-					if (mysql_real_connect(mdb,
-							docnet::dokdb_host.c_str(),
-							docnet::dokdb_user.c_str(),
-							docnet::dokdb_pass.c_str(),
-							docnet::dokdb_name.c_str(),
-							dbport, nullptr, 0)) {
-						string sql =
-							"SELECT FSurogat FROM patstamm WHERE "
-							"REGEXP_REPLACE(REGEXP_REPLACE(FNachname,'^zzz',''),'^([^ ]*).*','\\\\1')='"+nn1+"' AND "
-							"REGEXP_REPLACE(FVorname,'^([^ ]*).*','\\\\1')='"+vn1+"' AND "
-							"FGeburtsdatum='"+gd8+"' ORDER BY FSurogat DESC LIMIT 1";
-						if (!mysql_query(mdb, sql.c_str())) {
-							MYSQL_RES *res = mysql_store_result(mdb);
-							if (res) {
-								MYSQL_ROW row = mysql_fetch_row(res);
-								if (row && row[0]) {
-									string surogat(row[0]);
-									string dokziel = docnet::dokvz;
-									while (!dokziel.empty() && dokziel.back()=='/') dokziel.pop_back();
-									dokziel += "/"+surogat+"/";
-									if (!docnet::doksubvz.empty()) dokziel += docnet::doksubvz+'/';
+					pclose(pp);
+					if (!pdfnn.empty()) {
+						string newpfad=_zvz+"/"+pdfnn+"_"+pdfvn+"_"+pdfgd+"_"+zielname_ohne_endung+".pdf";
+						rename(pdfpfad.c_str(),newpfad.c_str()); // overwrite
+						pdfpfad=newpfad;
+						// PDF in Patientenordner kopieren via mariadb-CLI
+						// PDF in Patientenordner kopieren via systemrueck()
+						if (!docnet::dokvz.empty()&&!docnet::dokdb_host.empty()) {
+							string gd8;
+							if (pdfgd.size()==8) { int yy=stoi(pdfgd.substr(6,2)); string cent=(yy>25?"19":"20"); gd8=cent+pdfgd.substr(6,2)+pdfgd.substr(3,2)+pdfgd.substr(0,2); }
+							else if (pdfgd.size()==10) gd8=pdfgd.substr(6,4)+pdfgd.substr(3,2)+pdfgd.substr(0,2);
+							string nn1=pdfnn,vn1=pdfvn;
+							{size_t p=nn1.find(' ');if(p!=string::npos)nn1=nn1.substr(0,p);}
+							{size_t p=vn1.find('_');if(p!=string::npos)vn1=vn1.substr(0,p);}
+							string port2=docnet::dokdb_port.empty()?"3306":docnet::dokdb_port;
+							string sql2=
+								"SELECT FSurogat FROM patstamm WHERE "
+								"REGEXP_REPLACE(REGEXP_REPLACE(FNachname,'^zzz',''),'^([^ ]*).*','\\1')='"+nn1+"' AND "
+								"REGEXP_REPLACE(FVorname,'^([^ ]*).*','\\1')='"+vn1+"' AND "
+								"FGeburtsdatum='"+gd8+"' ORDER BY FSurogat DESC LIMIT 1";
+							string cmd2="mariadb -h "+docnet::dokdb_host+" -P "+port2
+								+" -u "+docnet::dokdb_user+" -p"+docnet::dokdb_pass
+								+" --ssl=0 --skip-column-names "+docnet::dokdb_name
+								+" -e \""+sql2+"\" 2>/dev/null";
+							vector<string> rueck;
+							systemrueck(cmd2,0,oblog,&rueck,1);
+							if (!rueck.empty()&&!rueck[0].empty()) {
+								string surogat=rueck[0];
+								while(!surogat.empty()&&(surogat.back()=='\n'||surogat.back()=='\r'||surogat.back()==' '))surogat.pop_back();
+								if (!surogat.empty()) {
+									string dokziel=docnet::dokvz;
+									while(!dokziel.empty()&&dokziel.back()=='/')dokziel.pop_back();
+									dokziel+="/"+surogat+"/";
+									if (!docnet::doksubvz.empty())dokziel+=docnet::doksubvz+'/';
 									try {
 										fs::create_directories(dokziel);
-										string zieldatei = dokziel + fs::path(pdfpfad).filename().string();
-										fs::copy_file(pdfpfad, zieldatei,
-											fs::copy_options::overwrite_existing);
+										string zieldatei=dokziel+fs::path(pdfpfad).filename().string();
+										fs::copy_file(pdfpfad,zieldatei,fs::copy_options::overwrite_existing);
 										fLog(gruens+"PDF->dok: "+blau+zieldatei+schwarz,obverb,oblog);
 									} catch(const exception &e) {
 										fLog(rots+"PDF->dok Fehler: "+e.what()+schwarz,1,oblog);
 									}
 								} else {
-									fLog(rots+"PDF->dok: kein FSurogat fuer "
-										+blau+nn1+" "+vn1+" "+gd8+schwarz,1,oblog);
+									fLog(rots+"PDF->dok: kein FSurogat fuer "+blau+nn1+" "+vn1+" "+gd8+schwarz,1,oblog);
 								}
-								mysql_free_result(res);
+							} else {
+								fLog(rots+"PDF->dok: DB-Abfrage leer fuer "+blau+nn1+" "+vn1+" "+gd8+schwarz,1,oblog);
 							}
 						}
 					}
-					mysql_close(mdb);
 				}
-			}
-					pclose(pp);
-					if (!pdfnn.empty()) {
-						string newpfad=_zvz+"/"+pdfnn+"_"+pdfvn+"_"+pdfgd+"_"+zielname_ohne_endung+suffix+".pdf";
-						if (!fs::exists(newpfad)) rename(pdfpfad.c_str(),newpfad.c_str());
-						else {
-							unsigned n=1;
-							do { newpfad=_zvz+"/"+pdfnn+"_"+pdfvn+"_"+pdfgd+"_"+zielname_ohne_endung+suffix+"_"+to_string(n++)+".pdf";
-							} while(fs::exists(newpfad)&&n<9999);
-							rename(pdfpfad.c_str(),newpfad.c_str());
-						}
-						pdfpfad=newpfad;
-					}
-				}
-			// Patientennummer aus externer DB ermitteln und PDF in Unterordner kopieren
 			}
 			fLog(gruens+string(TxtDN_ref[TDN_PDF_gespeichert])+blau+pdfpfad+schwarz,
 			     obverb, oblog);
