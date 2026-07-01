@@ -3,7 +3,8 @@
 // Dieses Modul wird analog zu turbomed.cpp eingebunden.
 // Es überschreibt bzw. ergänzt:
 //   pvirtVorgbSpeziell() – Vorgaben für Verzeichnisse
-//   virtinitopt()        – neue Kommandozeilenoptionen (qvz, zvz1..zvz4, pdfvz)
+//   virtinitopt()        – neue Kommandozeilenoptionen (qvz, zvz1..zvz4, pdfvz,
+//                          dok_user, dok_group)
 //   pvirtfuehraus()      – Hauptschleife mit Datei-Verschiebe-/Kopier-/PDF-Logik
 //   dverarbeit()  wird NICHT überschrieben – stattdessen wird
 //   docnet_dverarbeit()  als Präprozess-Schritt eingehängt, der
@@ -35,6 +36,13 @@
 //   Base64-Blöcke (Feldkennung 8242 + 6329) werden je Auftrag
 //   in pdfvz/<auftragsschluessel>_<YYYYMMDD>.pdf gespeichert.
 //
+// Verzeichnis-Besitzer/Rechte:
+//   Jedes von docnet.cpp neu angelegte Verzeichnis (Kopierziele zvz1..zvz4,
+//   pdfvz, dokvz/<surogat>/[doksubvz]) wird nach der Anlage auf Rechte 770
+//   (rwxrwx---) gesetzt. Sind die Parameter dok_user bzw. dok_group gesetzt,
+//   wird zusaetzlich der Besitzer per chown() entsprechend gesetzt (dafuer
+//   sind i.d.R. Root-Rechte des laufenden Prozesses noetig).
+//
 // Kompilierung: wie turbomed.cpp, z. B.:
 //   $(CXX) … docnet.cpp labimp.o kons.o DB.o -o labimp_docnet
 
@@ -49,6 +57,9 @@
 #include <cerrno>
 #include <ctime>
 #include <sys/stat.h>
+#include <pwd.h>
+#include <grp.h>
+#include <unistd.h>
 
 namespace fs = std::filesystem;
 
@@ -144,6 +155,18 @@ const char *dn_T[TDN_MAX + 1][SprachZahl] = {
 	{"doksubvz", "doksubvz"},
 	{"Unterverzeichnis in dok/<nr>/ (z.B. Eigenlabor)", "Subdirectory in dok/<nr>/ (e.g. Eigenlabor)"},
 	{"Dok-Unterverzeichnis", "Doc subdirectory"},
+	// TDN_dok_user_k/l
+	{"dok_user", "dok_user"},
+	{"Besitzer (Benutzer) neu angelegter Verzeichnisse", "Owner (user) of newly created directories"},
+	// TDN_dok_group_k/l
+	{"dok_group", "dok_group"},
+	{"Besitzer (Gruppe) neu angelegter Verzeichnisse", "Owner (group) of newly created directories"},
+	// TDN_Dokument_Owner_User
+	{"Dok-Verzeichnis-Besitzer (User)", "Doc directory owner (user)"},
+	// TDN_Dokument_Owner_Gruppe
+	{"Dok-Verzeichnis-Besitzer (Gruppe)", "Doc directory owner (group)"},
+	// TDN_Fehler_beim_Setzen_Rechte
+	{"Fehler beim Setzen von Besitzer/Rechten: ", "Error setting owner/permissions: "},
 	{"", ""}
 };
 
@@ -164,6 +187,54 @@ namespace docnet {
 	string dokdb_name;    // DB-Name
 	string dokdb_port;    // DB-Port (Default: 3306)
 	string doksubvz;
+	string dok_user;      // Besitzer (Benutzer) neu angelegter Verzeichnisse
+	string dok_group;     // Besitzer (Gruppe) neu angelegter Verzeichnisse
+
+	// ── Verzeichnis-Besitzer/Rechte setzen ───────────────────────────────────
+	// Wird nach JEDER von docnet.cpp neu angelegten Verzeichnisstruktur
+	// aufgerufen (fs::create_directories). Setzt, falls konfiguriert, den
+	// Besitzer auf dok_user:dok_group und die Rechte immer auf 770
+	// (rwxrwx---). Leere dok_user/dok_group lassen den Besitzer unveraendert
+	// (chown mit uid/gid == -1 aendert das jeweilige Feld nicht).
+	// Erfordert i.d.R. Root-Rechte fuer den chown()-Aufruf; schlaegt dieser
+	// fehl, wird nur eine Logmeldung geschrieben, kein Abbruch.
+	static void setzeVerzeichnisRechte(const string &pfad, const int oblog) {
+		if (pfad.empty()) return;
+
+		// Rechte immer auf 770 setzen
+		if (chmod(pfad.c_str(), S_IRWXU | S_IRWXG) != 0) {
+			fLog(rots + string(TxtDN[TDN_Fehler_beim_Setzen_Rechte]) +
+			     pfad + " (chmod 770): " + strerror(errno) + schwarz, 1, oblog);
+		} // if (chmod(pfad.c_str(...)
+
+		// Besitzer nur aendern, wenn dok_user oder dok_group gesetzt sind
+		if (dok_user.empty() && dok_group.empty()) return;
+
+		uid_t uid = (uid_t)-1;
+		gid_t gid = (gid_t)-1;
+
+		if (!dok_user.empty()) {
+			struct passwd *pw = getpwnam(dok_user.c_str());
+			if (pw) uid = pw->pw_uid;
+			else fLog(rots + string(TxtDN[TDN_Fehler_beim_Setzen_Rechte]) +
+			          "Benutzer '" + dok_user + "' (dok_user) nicht gefunden" +
+			          schwarz, 1, oblog);
+		} // if (!dok_user.empty(...)
+
+		if (!dok_group.empty()) {
+			struct group *gr = getgrnam(dok_group.c_str());
+			if (gr) gid = gr->gr_gid;
+			else fLog(rots + string(TxtDN[TDN_Fehler_beim_Setzen_Rechte]) +
+			          "Gruppe '" + dok_group + "' (dok_group) nicht gefunden" +
+			          schwarz, 1, oblog);
+		} // if (!dok_group.empty(...)
+
+		if (chown(pfad.c_str(), uid, gid) != 0) {
+			fLog(rots + string(TxtDN[TDN_Fehler_beim_Setzen_Rechte]) +
+			     pfad + " (chown " + dok_user + ":" + dok_group + "): " +
+			     strerror(errno) + schwarz, 1, oblog);
+		} // if (chown(pfad.c_str(...)
+	} // static void setzeVerzeichnisRechte(...)
 
 	// ── Basis64-Dekodierungstabelle ──────────────────────────────────────────
 	static const string b64chars =
@@ -370,7 +441,10 @@ namespace docnet {
 		if (alle_pdfs.empty()) return;
 
 		// Zielverzeichnis sicherstellen
-		try { fs::create_directories(zielverz); }
+		try {
+			fs::create_directories(zielverz);
+			setzeVerzeichnisRechte(zielverz, oblog);
+		}
 		catch (const exception &e) {
 			fLog(rots+string(TxtDN_ref[TDN_Fehler_beim_PDF_Schreiben])+
 			     zielverz+": "+e.what()+schwarz, 1, oblog);
@@ -510,6 +584,7 @@ namespace docnet {
 								if (!docnet::doksubvz.empty()) dokziel+=docnet::doksubvz+'/';
 								try {
 									fs::create_directories(dokziel);
+									setzeVerzeichnisRechte(dokziel, oblog);
 									string zieldatei=dokziel+fs::path(pdfpfad).filename().string();
 									fs::copy_file(pdfpfad,zieldatei,fs::copy_options::overwrite_existing);
 									fLog(gruens+"PDF->dok: "+blau+zieldatei+schwarz,obverb,oblog);
@@ -854,6 +929,7 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 			     cpfad + schwarz, obverb, oblog);
 			try {
 				fs::create_directories(z);
+				docnet::setzeVerzeichnisRechte(z, oblog);
 				fs::copy_file(zpfad, cpfad, fs::copy_options::overwrite_existing);
 			} catch (const exception &e) {
 				fLog(rots + string(TxtDN[TDN_Fehler_beim_Kopieren]) +
@@ -948,6 +1024,19 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 //                  TDN_pdfvz_k,TDN_pdfvz_l,&TxtDN,TDN_PDF_Ausgabeverzeichnis,
 //                  0,-1,string(),-1,!docnet::pdfvz.empty(),
 //                  TxtDN[TDN_PDF_Ausgabeverzeichnis]);
+//   opn<<new optcl("dok_user",&docnet::dok_user,pstring,
+//                  TDN_dok_user_k,TDN_dok_user_l,&TxtDN,TDN_Dokument_Owner_User,
+//                  0,-1,string(),-1,!docnet::dok_user.empty(),
+//                  TxtDN[TDN_Dokument_Owner_User]);
+//   opn<<new optcl("dok_group",&docnet::dok_group,pstring,
+//                  TDN_dok_group_k,TDN_dok_group_l,&TxtDN,TDN_Dokument_Owner_Gruppe,
+//                  0,-1,string(),-1,!docnet::dok_group.empty(),
+//                  TxtDN[TDN_Dokument_Owner_Gruppe]);
+//
+// Hinweis: "pstring" steht hier fuer den optcl-Typ eines einfachen
+// String-Parameters (analog zu den bestehenden dokdb_user/dokdb_pass
+// Optionen) - bitte an den in labimp.cpp fuer dokdb_user verwendeten
+// Options-Typ angleichen, falls dieser anders benannt ist.
 //
 // In labimp.cpp::hhcl::pvirtfuehraus() AM ANFANG des normalen
 // find()-Datei-Verarbeitungsblocks einfügen (vor systemrueck("find …")):

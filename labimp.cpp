@@ -1435,6 +1435,14 @@ void hhcl::virtinitopt()
 		TDN_doksubvz_k,TDN_doksubvz_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokument_Unterverzeichnis,
 		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
 		/*woher*/0,TxtDN[TDN_Dokument_Unterverzeichnis]);
+	opn<<new optcl(/*pname*/"dok_user",/*pptr*/&docnet::dok_user,/*art*/pstri,
+		TDN_dok_user_k,TDN_dok_user_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokument_Owner_User,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Dokument_Owner_User]);
+	opn<<new optcl(/*pname*/"dok_group",/*pptr*/&docnet::dok_group,/*art*/pstri,
+		TDN_dok_group_k,TDN_dok_group_l,/*TxBp*/&TxtDN,/*Txi*/TDN_Dokument_Owner_Gruppe,
+		/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,
+		/*woher*/0,TxtDN[TDN_Dokument_Owner_Gruppe]);
 	dhcl::virtinitopt(); //α
 //	vorclvors=vorsl;
 } // void hhcl::virtinitopt

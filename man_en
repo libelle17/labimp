@@ -2,7 +2,7 @@
 .\" Manual page for labimp
 .\" Please write to geraldschade@gmx.de if you find errors or deficiencies
 .pc
-.TH labimp 1 "23.06.26" "labimp" "User Manual"
+.TH labimp 1 "01.07.26" "labimp" "User Manual"
 .SH NAME
 \fBlabimp\fR \- import laboratory values from LDT files (QC\-Labmessenger and doc.net) into a MariaDB database
 .br
@@ -220,6 +220,10 @@ Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 \fB -dokdb_port, --DB port (default: 3306) <string>\fR: Doc DB port ('\fB\fR')
 .br
 \fB -doksubvz, --Subdirectory in dok/<nr>/ (e.g. Eigenlabor) <string>\fR: Doc subdirectory ('\fB\fR')
+.br
+\fB -dok_user, --Owner (user) of newly created directories <string>\fR: Doc directory owner (user) ('\fB\fR')
+.br
+\fB -dok_group, --Owner (group) of newly created directories <string>\fR: Doc directory owner (group) ('\fB\fR')
 .br
 \fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
 .br

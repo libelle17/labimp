@@ -57,6 +57,13 @@ enum TDN_ {
 	TDN_doksubvz_k,
 	TDN_doksubvz_l,
 	TDN_Dokument_Unterverzeichnis,
+	TDN_dok_user_k,
+	TDN_dok_user_l,
+	TDN_dok_group_k,
+	TDN_dok_group_l,
+	TDN_Dokument_Owner_User,
+	TDN_Dokument_Owner_Gruppe,
+	TDN_Fehler_beim_Setzen_Rechte,
 	TDN_MAX
 };
 
@@ -75,6 +82,8 @@ namespace docnet {
 	extern std::string dokdb_name;  // DB-Name
 	extern std::string dokdb_port;  // DB-Port (Default: 3306)
 	extern std::string doksubvz;    // Unterverzeichnis unter dok/<nr>/
+	extern std::string dok_user;    // Besitzer (Benutzer) neu angelegter Verzeichnisse
+	extern std::string dok_group;   // Besitzer (Gruppe) neu angelegter Verzeichnisse
 } // namespace docnet
 
 // ── Freie Funktion (definiert in docnet.cpp) ─────────────────────────────────
