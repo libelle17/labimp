@@ -1607,7 +1607,9 @@ uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rew
 			if (sig==untensig) untenkand.push_back(&r);
 		}
 	} // for (const auto& r:labgrenzregeln)
-	// hinwsp folgt bei ICD-Vorschlag der Ampelfarbe (orange bei schon dokumentiertem ICD), sonst immer rot;
+	// hinwsp folgt bei ICD-Vorschlag der Ampelfarbe (orange bei schon dokumentiertem ICD), sonst immer rot -
+	// aber nur, wenn Hinweis ueberhaupt Text enthaelt; eine leere Hinweiszelle wird nie eingefaerbt
+	// (analog zu den frueheren hartkodierten reinen fICD-Vorschlaegen wie TRAK/BNP/LDL/MAK, die hinwsp nie anfassten)
 	// bei Dosisgrenze wird ein etwaiger %DOSIS%-Platzhalter in Hinweis durch die errechnete Tagesdosis ersetzt
 	// (dient der Kontrolle durch den Arzt, z.B. falls der hartkodierte Pause/abgesetzt-Ausdruck mal nicht passt)
 	double berdosis{0};
@@ -1615,8 +1617,9 @@ uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rew
 	for (const auto *r:obenkand) if (labgrenzfeuert(*r,rewert,lp,aktc,ficd,ficdsp,berdosis)) {gefeuert=r;break;}
 	if (!gefeuert) for (const auto *r:untenkand) if (labgrenzfeuert(*r,rewert,lp,aktc,ficd,ficdsp,berdosis)) {gefeuert=r;break;}
 	if (gefeuert) {
-		hinw=gefeuert->hinweis;hinwsp=gefeuert->icdvorschlag.empty()?255:ficdsp;
+		hinw=gefeuert->hinweis;
 		if (gefeuert->obdosis) ersetzAlle(hinw,"%DOSIS%",dosisstr(berdosis));
+		if (hinw!="") hinwsp=gefeuert->icdvorschlag.empty()?255:ficdsp;
 	}
 	return obgefunden;
 } // uchar hhcl::labgrenzpruef
