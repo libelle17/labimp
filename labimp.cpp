@@ -2793,25 +2793,9 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								} // 	if (nierg?*nierg:0)
 							} // 	if (!niin.obqueryfehler) 
 						} // if (lpid!=""&&lpid!="0" && rewert<65)
-							// 11. MAK
-					} else if (labk=="MAK"||labk=="TPO.01") {
-						//															caus<<rot<<"Thyreoiditis untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (lpid!=""&&lpid!="0" && rewert>34) {
-							if (ficd!="") ficd+=',';
-							ficd+="E06.3";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E06' AND obdauer<>0",aktc,ZDB);
-							if (!hs.obqueryfehler) {
-								const char *const *const *const lerg{hs.HolZeile()};
-								if (lerg?*lerg:0) {
-									if (ficdsp!=255) ficdsp=33023; // orange
-								} else {
-									//																			caus<<rot<<"neue Thyreoiditis"<<schwarz<<endl;
-									ficdsp=255;
-								} // if (lerg?*lerg:0)
-							} // 	if (!ni.obqueryfehler)
-						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
+						// MAK jetzt ueber labgrenz (ICDVorschlag E06.3, ICDPruefmuster ^E06), s.u.
 						// TRAK/TSRE* jetzt ueber labgrenz (ICDVorschlag E05.0), s. u.
-						// 15. generisch aus Tabelle labgrenz, z.B. INR, TRAK (siehe ladelabgrenz())
+						// 15. generisch aus Tabelle labgrenz, z.B. INR, TRAK, MAK (siehe ladelabgrenz())
 					} else if (labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp,ficd,ficdsp)) {
 					} // if (labk==  ...			else if (labk=="HB")
 						//									if (hinw!="") KLA
