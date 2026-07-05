@@ -1510,7 +1510,7 @@ uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const stri
 	string bed;
 	if (!r.medmuster.empty()) bed+=" AND medanfang RLIKE '"+r.medmuster+"'";
 	if (!r.medflag.empty()) bed+=" AND ma.`"+r.medflag+"`<>0";
-	RS dchk(My,"SELECT medikament,mo,mi,nm,ab FROM wmedplan mp LEFT JOIN medarten ma ON ma.medikament=mp.medanfang AND mp.medanfang<>'' "
+	RS dchk(My,"SELECT mp.medikament,mo,mi,nm,ab FROM wmedplan mp LEFT JOIN medarten ma ON ma.medikament=mp.medanfang AND mp.medanfang<>'' "
 			"WHERE mp.pat_id="+lp+" AND rni=1"+bed+" AND bemerkung NOT RLIKE 'Paus|abges|beendet|zur Zeit nicht' ORDER BY zeitpunkt DESC LIMIT 1",aktc,ZDB);
 	if (dchk.obqueryfehler) return 0;
 	const char *const *const *const derg{dchk.HolZeile()};
