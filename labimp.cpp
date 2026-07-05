@@ -633,6 +633,9 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	 "exclusive criterion age < X in years (empty=no criterion); unlike AlterGrenze, selects exclusively between rules per age band (rule family)"},
 	// T_lg_AlterUeber
 	{"ausschliessendes Kriterium Alter > X in Jahren (leer=kein Kriterium), s. AlterUnter","exclusive criterion age > X in years (empty=no criterion), see AlterUnter"},
+	// T_lg_Geschlecht
+	{"ausschliessendes Kriterium: 'w'=nur weiblich, 'm'=nicht weiblich, leer=kein Kriterium (Regelfamilie wie AlterUnter/AlterUeber)",
+	 "exclusive criterion: 'w'=female only, 'm'=not female, empty=no criterion (rule family like AlterUnter/AlterUeber)"},
 	// T_lg_Mindesttreffer
 	{"noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium (0=alle gesetzten)","required number of hits among value/age/weight criteria (0=all set ones)"},
 	// T_lg_Dosisgrenze
@@ -1371,6 +1374,7 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 			Feld("GewichtGrenze","varchar","10","",Tx[T_lg_GewichtGrenze],0,0,1,""),
 			Feld("AlterUnter","varchar","10","",Tx[T_lg_AlterUnter],0,0,1,""),
 			Feld("AlterUeber","varchar","10","",Tx[T_lg_AlterUeber],0,0,1,""),
+			Feld("Geschlecht","varchar","1","",Tx[T_lg_Geschlecht],0,0,1,""),
 			Feld("Mindesttreffer","int","2","",Tx[T_lg_Mindesttreffer],0,0,1,"0"),
 			Feld("Dosisgrenze","varchar","10","",Tx[T_lg_Dosisgrenze],0,0,1,""),
 			Feld("ICDVorschlag","varchar","20","",Tx[T_lg_ICDVorschlag],0,0,1,""),
@@ -1397,7 +1401,7 @@ void hhcl::ladelabgrenz(const size_t aktc)
 {
 	labgrenzregeln.clear();
 	RS lg(My,"SELECT Abkumuster,Einheitmuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,MedMuster,MedFlag,MedVorhanden,"
-			"AlterGrenze,GewichtGrenze,AlterUnter,AlterUeber,Mindesttreffer,Dosisgrenze,ICDVorschlag,ICDPruefmuster,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
+			"AlterGrenze,GewichtGrenze,AlterUnter,AlterUeber,Geschlecht,Mindesttreffer,Dosisgrenze,ICDVorschlag,ICDPruefmuster,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
 	if (!lg.obqueryfehler) {
 		char ***lerg{0};
 		while (lerg=lg.HolZeile(),lerg?*lerg:0) {
@@ -1432,12 +1436,13 @@ void hhcl::ladelabgrenz(const size_t aktc)
 			if ((r.obalterunter=!alterunter.empty())) r.alterunter=atof(alterunter.c_str());
 			const string alterueber{cjj(lerg,12)};
 			if ((r.obalterueber=!alterueber.empty())) r.alterueber=atof(alterueber.c_str());
-			r.mindesttreffer=atoi(cjj(lerg,13));
-			const string dosisgrenze{cjj(lerg,14)};
+			r.geschlecht=cjj(lerg,13);
+			r.mindesttreffer=atoi(cjj(lerg,14));
+			const string dosisgrenze{cjj(lerg,15)};
 			if ((r.obdosis=!dosisgrenze.empty())) r.dosisgrenze=atof(dosisgrenze.c_str());
-			r.icdvorschlag=cjj(lerg,15);
-			r.icdpruefmuster=cjj(lerg,16);
-			r.hinweis=cjj(lerg,17);
+			r.icdvorschlag=cjj(lerg,16);
+			r.icdpruefmuster=cjj(lerg,17);
+			r.hinweis=cjj(lerg,18);
 			labgrenzregeln.push_back(r);
 		} // while(lerg=lg.HolZeile(),lerg?*lerg:0)
 	} // if (!lg.obqueryfehler)
@@ -1585,9 +1590,15 @@ uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rew
 		if (obzutreffend && (r.obalterunter||r.obalterueber)) {
 			obzutreffend=(!r.obalterunter||palter<r.alterunter)&&(!r.obalterueber||palter>r.alterueber);
 		}
+		// Geschlechts-Bedingung, ebenfalls ausschliessend (s.o.); 'w'=nur weiblich, 'm'=nicht weiblich
+		if (obzutreffend && !r.geschlecht.empty()) {
+			const uchar obweiblich{gschl=="w"||gschl=="W"};
+			obzutreffend=(tolower(r.geschlecht[0])=='w')?obweiblich:!obweiblich;
+		}
 		if (!obzutreffend) continue;
 		const string sig{r.icdmuster+"\x01"+to_string(r.icdvorhanden)+"\x01"+r.medmuster+"\x01"+r.medflag+"\x01"+to_string(r.medvorhanden)
-				+"\x01"+to_string(r.obalterunter)+"\x01"+to_string(r.alterunter)+"\x01"+to_string(r.obalterueber)+"\x01"+to_string(r.alterueber)};
+				+"\x01"+to_string(r.obalterunter)+"\x01"+to_string(r.alterunter)+"\x01"+to_string(r.obalterueber)+"\x01"+to_string(r.alterueber)
+				+"\x01"+r.geschlecht};
 		if (r.richtung=="oben") {
 			if (obenkand.empty()) obensig=sig;
 			if (sig==obensig) obenkand.push_back(&r);
@@ -2679,32 +2690,16 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							// Kalium jetzt ueber labgrenz, s.u.
 						// 7. Hämoglobin
 					} else if (labk=="HB") {
-						const uchar obm{gschl!="w"&&gschl!="W"};
 						if (vorwert!=0 && vorwert-rewert>1.5) {
+							// Hb-Abfall bleibt hartkodiert (Delta gegen Vorwert, kein generisches Kriterium dafuer);
+							// hat Vorrang vor der V.a.-Anämie-Regel, die daher nur im else-Zweig geprueft wird
 							hinw="Hb-Abfall!";
 							hinwsp=255;
-						} else if ((obm&&rewert<13.5)||rewert<11.5) {
-							hinw="V.a. Anämie";
-							if (lpid!=""&&lpid!="0") {
-								if (ficd!="") ficd+=',';
-								ficd+="D64.9";
-								// RS an(My,"SELECT icd FROM `diagnosen` WHERE pat_id = "+lpid+" AND diagtext LIKE '%anämie%' "
-								// "AND diagsicherheit NOT IN ('A','Z') AND COALESCE(f6010,0)=0 AND obdauer<>0",aktc,ZDB);
-								RS an(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^D46|^D5[012678]|^D6[14]' AND obdauer<>0",
-										aktc,ZDB);
-								if (!an.obqueryfehler) {
-									const char *const *const *const lerg{an.HolZeile()};
-									if (lerg?*lerg:0) {
-										if (ficdsp!=255) ficdsp=33023; // orange
-										hinwsp=33023; // orange
-									} else {
-										//																			caus<<rot<<"neue Anämie!"<<schwarz<<endl;
-										ficdsp=255;
-										hinwsp=255;
-									}
-								} // 	if (!ni.obqueryfehler)
-							} // if (lpid!=""&&lpid!="0")
-						} //										if (vorwert!=0 && vorwert-rewert>1.5)    else if
+						} else {
+							// V.a. Anämie jetzt ueber labgrenz (Geschlecht 'm'/'w' fuer die Grenzwerte 13.5/11.5,
+							// ICDPruefmuster fuer die breitere Anämie-Gruppe), s.u.
+							labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp,ficd,ficdsp);
+						} //										if (vorwert!=0 && vorwert-rewert>1.5)    else
 							// 8. Harnsäure
 					} else if (labk=="HS") {
 						if (lpid!=""&&lpid!="0" && rewert>7) {

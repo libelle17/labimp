@@ -309,6 +309,7 @@ enum T_
 	T_lg_GewichtGrenze,
 	T_lg_AlterUnter,
 	T_lg_AlterUeber,
+	T_lg_Geschlecht,
 	T_lg_Mindesttreffer,
 	T_lg_Dosisgrenze,
 	T_lg_ICDVorschlag,
@@ -342,6 +343,9 @@ struct LGrenzRegel
 	                                              // Mindesttreffer) ist dies wie ICDMuster Teil der Regelfamilie (s. labgrenzpruef)
 	                                              // und waehlt so exklusiv zwischen Regeln fuer verschiedene Altersbaender
 	double alterueber{0}; uchar obalterueber{0}; // labgrenz.AlterUeber: ausschliessendes Kriterium "Alter > AlterUeber", falls gesetzt (s. AlterUnter)
+	string geschlecht; // labgrenz.Geschlecht: 'w'=nur weiblich (gschl IN ('w','W')), 'm'=nicht weiblich (analog zum
+	                   // uebrigen Code, der alles ausser 'w'/'W' als maennlich behandelt), leer=keine Bedingung;
+	                   // ebenfalls ausschliessend, Teil der Regelfamilie wie AlterUnter/AlterUeber
 	unsigned mindesttreffer{0}; // labgrenz.Mindesttreffer: noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium; 0=alle gesetzten
 	double dosisgrenze{0}; uchar obdosis{0}; // labgrenz.Dosisgrenze (mg/Tag): wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis ueberschritten sein
 	string icdvorschlag; // labgrenz.ICDVorschlag: bei Feuern vorgeschlagener ICD (an fICD angehaengt), leer = kein Vorschlag;
