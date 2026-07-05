@@ -642,7 +642,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	// T_lg_Reihenfolge
 	{"Rangfolge der Auswertung je Abkuerzung und Richtung","evaluation order per abbreviation and direction"},
 	// T_lg_Hinweis
-	{"Hinweistext bei Ueberschreitung","hint text when exceeded"},
+	{"Hinweistext bei Ueberschreitung; bei gesetzter Dosisgrenze wird %DOSIS% durch die errechnete Tagesdosis ersetzt",
+	 "hint text when exceeded; if Dosisgrenze is set, %DOSIS% is replaced by the calculated daily dose"},
 	// T_lg_Aktiv
 	{"1=aktiv, 0=deaktiviert","1=active, 0=disabled"},
 	// T_lg_Kommentar
@@ -1431,6 +1432,18 @@ void hhcl::ladelabgrenz(const size_t aktc)
 	} // if (!lg.obqueryfehler)
 } // void hhcl::ladelabgrenz
 
+// formatiert eine errechnete Dosis fuer den %DOSIS%-Platzhalter in labgrenz.Hinweis (s. labgrenzpruef);
+// ohne unnoetige Nachkommastellen, z.B. "5" statt "5.00", aber "2.5" statt "2.50"
+static string dosisstr(const double d)
+{
+	char buf[32];
+	snprintf(buf,sizeof(buf),"%.2f",d);
+	string s{buf};
+	while (s.back()=='0') s.pop_back();
+	if (s.back()=='.') s.pop_back();
+	return s;
+} // string dosisstr
+
 // setzt bei Feuern ggf. den ICD-Vorschlag samt Ampelfarbe (rot=neu, orange=schon dokumentiert),
 // analog zu den bisherigen hartkodierten fICD-Pruefungen
 void hhcl::labgrenzampel(const LGrenzRegel& r, const string& lp, const size_t aktc, string& ficd, long& ficdsp)
@@ -1449,8 +1462,9 @@ void hhcl::labgrenzampel(const LGrenzRegel& r, const string& lp, const size_t ak
 
 // aufgerufen in labgrenzpruef fuer die (per Reihenfolge) erstzutreffende Regel je Richtung;
 // wertet die Kriterien (Wert-, ggf. Alters- und Gewichtskriterium, per Mindesttreffer) und danach,
-// falls Dosisgrenze gesetzt, die aktuelle Tagesdosis aus dem Medikamentenplan aus; setzt bei Feuern die fICD-Ampel
-uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc, string& ficd, long& ficdsp)
+// falls Dosisgrenze gesetzt, die aktuelle Tagesdosis aus dem Medikamentenplan aus; setzt bei Feuern die fICD-Ampel;
+// liefert bei Dosisgrenze zusaetzlich die errechnete Tagesdosis (fuer den %DOSIS%-Platzhalter in Hinweis) nach berdosis
+uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc, string& ficd, long& ficdsp, double& berdosis)
 {
 	unsigned treffer{0},moeglich{1};
 	if (r.richtung=="oben"?(rewert>r.grenzwert):(rewert<r.grenzwert)) treffer++;
@@ -1503,7 +1517,8 @@ uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const stri
 		ersetzAlle(sz,",",".");
 		staerke=atof(sz.c_str());
 	}
-	if (!((einheiten*staerke)>r.dosisgrenze)) return 0;
+	berdosis=einheiten*staerke;
+	if (!(berdosis>r.dosisgrenze)) return 0;
 	labgrenzampel(r,lp,aktc,ficd,ficdsp);
 	return 1;
 } // uchar hhcl::labgrenzfeuert
@@ -1553,9 +1568,17 @@ uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rew
 		if (r.richtung=="oben" && !roben) roben=&r;
 		else if (r.richtung=="unten" && !runten) runten=&r;
 	} // for (const auto& r:labgrenzregeln)
-	// hinwsp folgt bei ICD-Vorschlag der Ampelfarbe (orange bei schon dokumentiertem ICD), sonst immer rot
-	if (roben && labgrenzfeuert(*roben,rewert,lp,aktc,ficd,ficdsp)) {hinw=roben->hinweis;hinwsp=roben->icdvorschlag.empty()?255:ficdsp;}
-	else if (runten && labgrenzfeuert(*runten,rewert,lp,aktc,ficd,ficdsp)) {hinw=runten->hinweis;hinwsp=runten->icdvorschlag.empty()?255:ficdsp;}
+	// hinwsp folgt bei ICD-Vorschlag der Ampelfarbe (orange bei schon dokumentiertem ICD), sonst immer rot;
+	// bei Dosisgrenze wird ein etwaiger %DOSIS%-Platzhalter in Hinweis durch die errechnete Tagesdosis ersetzt
+	// (dient der Kontrolle durch den Arzt, z.B. falls der hartkodierte Pause/abgesetzt-Ausdruck mal nicht passt)
+	double berdosis{0};
+	if (roben && labgrenzfeuert(*roben,rewert,lp,aktc,ficd,ficdsp,berdosis)) {
+		hinw=roben->hinweis;hinwsp=roben->icdvorschlag.empty()?255:ficdsp;
+		if (roben->obdosis) ersetzAlle(hinw,"%DOSIS%",dosisstr(berdosis));
+	} else if (runten && labgrenzfeuert(*runten,rewert,lp,aktc,ficd,ficdsp,berdosis)) {
+		hinw=runten->hinweis;hinwsp=runten->icdvorschlag.empty()?255:ficdsp;
+		if (runten->obdosis) ersetzAlle(hinw,"%DOSIS%",dosisstr(berdosis));
+	}
 	return obgefunden;
 } // uchar hhcl::labgrenzpruef
 

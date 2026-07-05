@@ -343,7 +343,9 @@ struct LGrenzRegel
 	string icdpruefmuster; // labgrenz.ICDPruefmuster: RLIKE-Muster gegen diagview fuer die rot/orange-Unterscheidung,
 	                       // falls es (z.B. als ganze ICD-Gruppe) vom vorgeschlagenen Einzelcode icdvorschlag abweicht;
 	                       // leer = icdvorschlag selbst wird als Muster verwendet
-	string hinweis;
+	string hinweis; // labgrenz.Hinweis: bei gesetzter Dosisgrenze ersetzt labgrenzpruef() darin die
+	                // Pseudovariable %DOSIS% durch die errechnete Tagesdosis (s. dosisstr() in labimp.cpp),
+	                // damit der Arzt die von der Maschine ermittelte Dosis kontrollieren kann
 };
 
 //α
@@ -441,7 +443,7 @@ class hhcl:public dhcl
 		void prueflgrenz(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void ladelabgrenz(const size_t aktc);
 		uchar labgrenzpruef(const string& lk, const string& einh, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp, string& ficd, long& ficdsp);
-		uchar labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc, string& ficd, long& ficdsp);
+		uchar labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc, string& ficd, long& ficdsp, double& berdosis);
 		void labgrenzampel(const LGrenzRegel& r, const string& lp, const size_t aktc, string& ficd, long& ficdsp);
 		void prueftbl();
 		void droptables(const size_t aktc=0,uchar obumben=0);
