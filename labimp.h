@@ -301,6 +301,9 @@ enum T_
 	T_lg_Grenzwert,
 	T_lg_ICDMuster,
 	T_lg_ICDVorhanden,
+	T_lg_MedMuster,
+	T_lg_MedFlag,
+	T_lg_MedVorhanden,
 	T_lg_Reihenfolge,
 	T_lg_Hinweis,
 	T_lg_Aktiv,
@@ -319,6 +322,9 @@ struct LGrenzRegel
 	double grenzwert{0};
 	string icdmuster; // labgrenz.ICDMuster, leer = keine ICD-Bedingung
 	int icdvorhanden{0}; // labgrenz.ICDVorhanden: 1=Regel nur wenn ICD dokumentiert, 0=nur wenn nicht dokumentiert
+	string medmuster; // labgrenz.MedMuster, reg. Ausdruck auf wmedplan.medanfang, leer = keine Bedingung
+	string medflag; // labgrenz.MedFlag, Spaltenname in medarten (z.B. "metf"), leer = keine Bedingung
+	int medvorhanden{0}; // labgrenz.MedVorhanden: 1=Regel nur wenn passende aktive Medikation vorhanden, 0=nur wenn nicht vorhanden
 	string hinweis;
 };
 

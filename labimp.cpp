@@ -616,6 +616,12 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"reg. Ausdruck fuer ICD (leer=keine Bedingung)","reg. expr. for ICD (empty=no condition)"},
 	// T_lg_ICDVorhanden
 	{"1=Regel nur wenn ICD vorhanden, 0=nur wenn nicht vorhanden","1=rule only if ICD present, 0=only if absent"},
+	// T_lg_MedMuster
+	{"reg. Ausdruck fuer Medikament (wmedplan.medanfang, leer=keine Bedingung)","reg. expr. for medication (wmedplan.medanfang, empty=no condition)"},
+	// T_lg_MedFlag
+	{"Spaltenname in medarten, z.B. 'metf' (leer=keine Bedingung)","column name in medarten, e.g. 'metf' (empty=no condition)"},
+	// T_lg_MedVorhanden
+	{"1=Regel nur wenn Medikation vorhanden, 0=nur wenn nicht vorhanden","1=rule only if medication present, 0=only if absent"},
 	// T_lg_Reihenfolge
 	{"Rangfolge der Auswertung je Abkuerzung und Richtung","evaluation order per abbreviation and direction"},
 	// T_lg_Hinweis
@@ -1334,6 +1340,9 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 			Feld("Grenzwert","varchar","20","",Tx[T_lg_Grenzwert],0,0,1,""),
 			Feld("ICDMuster","varchar","60","",Tx[T_lg_ICDMuster],0,0,1,""),
 			Feld("ICDVorhanden","int","1","",Tx[T_lg_ICDVorhanden],0,0,1,"0",1),
+			Feld("MedMuster","varchar","120","",Tx[T_lg_MedMuster],0,0,1,""),
+			Feld("MedFlag","varchar","30","",Tx[T_lg_MedFlag],0,0,1,""),
+			Feld("MedVorhanden","int","1","",Tx[T_lg_MedVorhanden],0,0,1,"0",1),
 			Feld("Reihenfolge","int","3","",Tx[T_lg_Reihenfolge],0,0,1,"0"),
 			Feld("Hinweis","varchar","60","",Tx[T_lg_Hinweis],0,0,1,""),
 			Feld("Aktiv","int","1","",Tx[T_lg_Aktiv],0,0,1,"1",1),
@@ -1355,7 +1364,7 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 void hhcl::ladelabgrenz(const size_t aktc)
 {
 	labgrenzregeln.clear();
-	RS lg(My,"SELECT Abkumuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
+	RS lg(My,"SELECT Abkumuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,MedMuster,MedFlag,MedVorhanden,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
 	if (!lg.obqueryfehler) {
 		char ***lerg{0};
 		while (lerg=lg.HolZeile(),lerg?*lerg:0) {
@@ -1370,7 +1379,10 @@ void hhcl::ladelabgrenz(const size_t aktc)
 			r.grenzwert=atof(cjj(lerg,2));
 			r.icdmuster=cjj(lerg,3);
 			r.icdvorhanden=atoi(cjj(lerg,4));
-			r.hinweis=cjj(lerg,5);
+			r.medmuster=cjj(lerg,5);
+			r.medflag=cjj(lerg,6);
+			r.medvorhanden=atoi(cjj(lerg,7));
+			r.hinweis=cjj(lerg,8);
 			labgrenzregeln.push_back(r);
 		} // while(lerg=lg.HolZeile(),lerg?*lerg:0)
 	} // if (!lg.obqueryfehler)
@@ -1389,13 +1401,33 @@ uchar hhcl::labgrenzpruef(const string& lk, const double rewert, const string& l
 	for (const auto& r:labgrenzregeln) {
 		if (!regex_search(lk,r.abkure)) continue;
 		obgefunden=1;
-		uchar obzutreffend{r.icdmuster.empty()};
-		if (!obzutreffend && lp!=""&&lp!="0") {
-			RS icdchk(My,"SELECT 1 FROM diagview WHERE pat_id="+lp+" AND gicd RLIKE '"+r.icdmuster+"' AND obdauer<>0 LIMIT 1",aktc,ZDB);
-			if (!icdchk.obqueryfehler) {
-				const char *const *const *const ierg{icdchk.HolZeile()};
-				const uchar obicdda((ierg&&*ierg)?1:0);
-				obzutreffend=r.icdvorhanden?obicdda:!obicdda;
+		uchar obzutreffend{1};
+		if (!r.icdmuster.empty()) {
+			obzutreffend=0;
+			if (lp!=""&&lp!="0") {
+				RS icdchk(My,"SELECT 1 FROM diagview WHERE pat_id="+lp+" AND gicd RLIKE '"+r.icdmuster+"' AND obdauer<>0 LIMIT 1",aktc,ZDB);
+				if (!icdchk.obqueryfehler) {
+					const char *const *const *const ierg{icdchk.HolZeile()};
+					const uchar obicdda((ierg&&*ierg)?1:0);
+					obzutreffend=r.icdvorhanden?obicdda:!obicdda;
+				}
+			}
+		}
+		// Medikamentenplan-Bedingung (wmedplan/medarten), UND-verknuepft mit der ICD-Bedingung;
+		// rni=1 und der Ausschluss pausierter/beendeter Eintraege sind fest verdrahtet
+		if (obzutreffend && (!r.medmuster.empty()||!r.medflag.empty())) {
+			obzutreffend=0;
+			if (lp!=""&&lp!="0") {
+				string bed;
+				if (!r.medmuster.empty()) bed+=" AND medanfang RLIKE '"+r.medmuster+"'";
+				if (!r.medflag.empty()) bed+=" AND ma.`"+r.medflag+"`<>0";
+				RS medchk(My,"SELECT 1 FROM wmedplan mp LEFT JOIN medarten ma ON ma.medikament=mp.medanfang AND mp.medanfang<>'' "
+						"WHERE mp.pat_id="+lp+" AND rni=1"+bed+" AND bemerkung NOT RLIKE 'Paus|abges|beendet|zur Zeit nicht' LIMIT 1",aktc,ZDB);
+				if (!medchk.obqueryfehler) {
+					const char *const *const *const merg{medchk.HolZeile()};
+					const uchar obmedda((merg&&*merg)?1:0);
+					obzutreffend=r.medvorhanden?obmedda:!obmedda;
+				}
 			}
 		}
 		if (!obzutreffend) continue;

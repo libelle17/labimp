@@ -227,6 +227,8 @@ Optionen können kurz (\fB\-x\fR) oder lang (\fB\-\-xxxx\fR) angegeben werden
 .br
 \fB -host, --host <string>\fR: verwendet die Datenbank auf Host <string> anstatt auf ('\fBlocalhost\fR')
 .br
+\fB -mcnfdat, --mcnfdat <string>\fR: verwendet fuer MySQL/MariaDB-Rootbefehle die defaults-extra-file <string> anstatt ('\fB\fR')
+.br
 \fB -muser, --muser <string>\fR: verwendet fuer MySQL/MariaDB den Benutzer <string> anstatt ('\fB\fR')
 .br
 \fB -mpwd, --mpwd <string>\fR: verwendet fuer MySQL/MariaDB das Passwort <string>
