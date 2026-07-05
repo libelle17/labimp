@@ -2575,22 +2575,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								} // 	if (!ni.obqueryfehler)
 							} // rewert < 45
 						} // lpid!=""&&lpid!="0"
-							// 2. nt-Pro-BNP
-					} else if (labk=="BNPS"||labk=="NTBNPKO") {
-						if (lpid!=""&&lpid!="0" && rewert>300) {
-							if (ficd!="") ficd+=',';
-							ficd+="I50.19";
-							RS hi(My,"SELECT gicd FROM diagview WHERE pat_id = "+lpid+" AND gicd RLIKE '^I50' AND obdauer<>0",aktc,ZDB);
-							if (!hi.obqueryfehler) {
-								const char *const *const *const lerg{hi.HolZeile()};
-								if (lerg?*lerg:0) {
-									if (ficdsp!=255) ficdsp=33023; // orange
-								} else {
-									//																		caus<<rot<<"neue Herzinsuffizienz!"<<schwarz<<endl;
-									ficdsp=255;
-								}
-							} // 	if (!ni.obqueryfehler)
-						} // if (lpid!=""&&lpid!="0" && rewert>300)
+						// BNP jetzt ueber labgrenz (ICDVorschlag I50.19, ICDPruefmuster ^I50), s.u.
 							// 3. CK
 					} else if (iinstr(labk,string("ck"))!=-1) {
 						if (rewert>999) {
