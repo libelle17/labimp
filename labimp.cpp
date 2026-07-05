@@ -2649,38 +2649,32 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						} // 											if (hinw!="" && lpid!=""&&lpid!="0")
 							// 5. fT4
 					} else if (iinstr(labk,string("ft4"))!=-1) {
-						if (rewert<12||rewert>22) {
-							if (rewert>22) {
-								hinw="V.a. zu viel SD-Hormon";
-								hinwsp=255;
-							} else {
-								hinw="V.a. zu wenig SD-Hormon";
-								hinwsp=255;
-							}
-							if (lpid!=""&&lpid!="0") {
-								RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü RLIKE '>?TS(?:1E01|B[FL]|H(?!(?:[S2D]|TRH|LG)))' AND"
-										" zeitpunkt>now()-INTERVAL 5 DAY GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
-								// oder auch: abkü RLIKE '^TSH$|TSH-|TSH<|TSHE|XTSH|TSBL|TS1E01|TSBF'
-								char ***gerg{0};
-								if (!llb.obqueryfehler) {
-									gerg=llb.HolZeile();
-									if (gerg?*gerg:0) {
-										hinw+=" (TSH "; // cjj(gerg,1); // TSH
-										hinw+=cjj(gerg,10); // (lwert)
-										hinw+=" ";
-										hinw+=cjj(gerg,12); // IU/ml
-										hinw+=" ";
-										hinw+=cjj(gerg,14)[8]; // 2021-04-29
-										hinw+=cjj(gerg,14)[9]; // 2021-04-29
-										hinw+='.';
-										hinw+=cjj(gerg,14)[5]; // 2021-04-29
-										hinw+=cjj(gerg,14)[6]; // 2021-04-29
-										hinw+='.';
-										hinw+=")";
-									} // 													if (gerg?*gerg:0)
-								} // 												if (!llb.obqueryfehler)
-							} // 											if (lpid!=""&&lpid!="0")
-						} // 										if (rewert<12||rewert>22)
+						// Schwellwerte (fix: <12/>22) jetzt ueber labgrenz, s.u.; der TSH-Kontext-Lookup bleibt
+						// hartkodiert (dynamische Fremdwert-Abfrage, kein generischer Mechanismus dafuer)
+						labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp,ficd,ficdsp);
+						if (hinw!="" && lpid!=""&&lpid!="0") {
+							RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü RLIKE '>?TS(?:1E01|B[FL]|H(?!(?:[S2D]|TRH|LG)))' AND"
+									" zeitpunkt>now()-INTERVAL 5 DAY GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
+							// oder auch: abkü RLIKE '^TSH$|TSH-|TSH<|TSHE|XTSH|TSBL|TS1E01|TSBF'
+							char ***gerg{0};
+							if (!llb.obqueryfehler) {
+								gerg=llb.HolZeile();
+								if (gerg?*gerg:0) {
+									hinw+=" (TSH "; // cjj(gerg,1); // TSH
+									hinw+=cjj(gerg,10); // (lwert)
+									hinw+=" ";
+									hinw+=cjj(gerg,12); // IU/ml
+									hinw+=" ";
+									hinw+=cjj(gerg,14)[8]; // 2021-04-29
+									hinw+=cjj(gerg,14)[9]; // 2021-04-29
+									hinw+='.';
+									hinw+=cjj(gerg,14)[5]; // 2021-04-29
+									hinw+=cjj(gerg,14)[6]; // 2021-04-29
+									hinw+='.';
+									hinw+=")";
+								} // 													if (gerg?*gerg:0)
+							} // 												if (!llb.obqueryfehler)
+						} // 											if (hinw!="" && lpid!=""&&lpid!="0")
 							// SELECT abkü from laborparameter WHERE langtext IN  ('Kalium','Kalium im Heparinblut');
 							// 6. Kalium
 					} else if (labk=="k"||labk=="K"||labk=="KALI"||labk=="KHEP"||labk=="TM<>K<>Labor2"||
