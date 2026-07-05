@@ -1530,7 +1530,12 @@ uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const stri
 uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp, string& ficd, long& ficdsp)
 {
 	uchar obgefunden{0};
-	const LGrenzRegel *roben{0},*runten{0};
+	// je Richtung werden alle strukturell zutreffenden Regeln derselben "Bedingungsfamilie" gesammelt
+	// (gleiches ICDMuster/ICDVorhanden/MedMuster/MedFlag/MedVorhanden wie die erste zutreffende Regel);
+	// eine andere Familie (z.B. ein abweichendes ICDMuster) kommt erst zum Zug, wenn die erste gar
+	// nicht zutrifft - innerhalb der Familie wird per Reihenfolge kaskadiert (s.u.)
+	vector<const LGrenzRegel*> obenkand,untenkand;
+	string obensig,untensig;
 	for (const auto& r:labgrenzregeln) {
 		if (!regex_search(lk,r.abkure)) continue;
 		obgefunden=1;
@@ -1565,19 +1570,25 @@ uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rew
 			}
 		}
 		if (!obzutreffend) continue;
-		if (r.richtung=="oben" && !roben) roben=&r;
-		else if (r.richtung=="unten" && !runten) runten=&r;
+		const string sig{r.icdmuster+"\x01"+to_string(r.icdvorhanden)+"\x01"+r.medmuster+"\x01"+r.medflag+"\x01"+to_string(r.medvorhanden)};
+		if (r.richtung=="oben") {
+			if (obenkand.empty()) obensig=sig;
+			if (sig==obensig) obenkand.push_back(&r);
+		} else if (r.richtung=="unten") {
+			if (untenkand.empty()) untensig=sig;
+			if (sig==untensig) untenkand.push_back(&r);
+		}
 	} // for (const auto& r:labgrenzregeln)
 	// hinwsp folgt bei ICD-Vorschlag der Ampelfarbe (orange bei schon dokumentiertem ICD), sonst immer rot;
 	// bei Dosisgrenze wird ein etwaiger %DOSIS%-Platzhalter in Hinweis durch die errechnete Tagesdosis ersetzt
 	// (dient der Kontrolle durch den Arzt, z.B. falls der hartkodierte Pause/abgesetzt-Ausdruck mal nicht passt)
 	double berdosis{0};
-	if (roben && labgrenzfeuert(*roben,rewert,lp,aktc,ficd,ficdsp,berdosis)) {
-		hinw=roben->hinweis;hinwsp=roben->icdvorschlag.empty()?255:ficdsp;
-		if (roben->obdosis) ersetzAlle(hinw,"%DOSIS%",dosisstr(berdosis));
-	} else if (runten && labgrenzfeuert(*runten,rewert,lp,aktc,ficd,ficdsp,berdosis)) {
-		hinw=runten->hinweis;hinwsp=runten->icdvorschlag.empty()?255:ficdsp;
-		if (runten->obdosis) ersetzAlle(hinw,"%DOSIS%",dosisstr(berdosis));
+	const LGrenzRegel *gefeuert{0};
+	for (const auto *r:obenkand) if (labgrenzfeuert(*r,rewert,lp,aktc,ficd,ficdsp,berdosis)) {gefeuert=r;break;}
+	if (!gefeuert) for (const auto *r:untenkand) if (labgrenzfeuert(*r,rewert,lp,aktc,ficd,ficdsp,berdosis)) {gefeuert=r;break;}
+	if (gefeuert) {
+		hinw=gefeuert->hinweis;hinwsp=gefeuert->icdvorschlag.empty()?255:ficdsp;
+		if (gefeuert->obdosis) ersetzAlle(hinw,"%DOSIS%",dosisstr(berdosis));
 	}
 	return obgefunden;
 } // uchar hhcl::labgrenzpruef
@@ -2553,6 +2564,10 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 					const double rewert{atof(lwert.c_str())};
 					// 1. GFR
 					if (iinstr(labk,string("gfr"))!=-1 || iinstr(labk,string("gfc"))!=-1 || iinstr(labk,string("mdrd"))!=-1) {
+						// gestufter N18.x-ICD-Vorschlag (N18.5/.4/.3) jetzt ueber labgrenz (drei kaskadierende
+						// unten-Regeln gleicher Bedingungsfamilie, ICDPruefmuster ^N1[89]), s.u.; muss vor dem
+						// Mtf-Hinweis laufen, damit dessen hinw+= nicht durch labgrenzpruef ueberschrieben wird
+						labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp,ficd,ficdsp);
 						if (lpid!=""&&lpid!="0") {
 							mfmg="0"; // 29.12.25 Pat_id 15347
 							// caus<<"vor Metformin-Abfrage, lpid: "<<blau<<lpid<<schwarz<<", ZDB: "<<ZDB<<endl;
@@ -2582,21 +2597,6 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								hinw+="eGFR<->"+mfmg+"mg Mtf/d";
 								hinwsp=255; // vbred
 							}
-							// Wert 55 am 6.2.23 willkuerlich gewaehlt
-							if (rewert<55) {
-								if (ficd!="") ficd+=',';
-								if (rewert<15) ficd+="N18.5"; else if (rewert<30) ficd+="N18.4"; else ficd+="N18.3";
-								RS ni(My,"SELECT gicd FROM diagview WHERE pat_id = "+lpid+" AND gicd RLIKE '^N1[89]' AND obdauer<>0",aktc,ZDB);
-								if (!ni.obqueryfehler) {
-									const char *const *const *const lerg{ni.HolZeile()};
-									if (lerg?*lerg:0) {
-										if (ficdsp!=255) ficdsp=33023; // orange
-									} else {
-										//																			caus<<rot<<"neue Niereninsuffizienz!"<<schwarz<<endl;
-										ficdsp=255;
-									}
-								} // 	if (!ni.obqueryfehler)
-							} // rewert < 45
 						} // lpid!=""&&lpid!="0"
 						// BNP jetzt ueber labgrenz (ICDVorschlag I50.19, ICDPruefmuster ^I50), s.u.
 							// 3. CK
