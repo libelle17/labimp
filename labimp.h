@@ -309,6 +309,7 @@ enum T_
 	T_lg_GewichtGrenze,
 	T_lg_Mindesttreffer,
 	T_lg_Dosisgrenze,
+	T_lg_ICDVorschlag,
 	T_lg_Reihenfolge,
 	T_lg_Hinweis,
 	T_lg_Aktiv,
@@ -335,6 +336,8 @@ struct LGrenzRegel
 	double gewichtgrenze{0}; uchar obgewicht{0}; // labgrenz.GewichtGrenze: Kriterium "Gewicht <= GewichtGrenze", falls gesetzt
 	unsigned mindesttreffer{0}; // labgrenz.Mindesttreffer: noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium; 0=alle gesetzten
 	double dosisgrenze{0}; uchar obdosis{0}; // labgrenz.Dosisgrenze (mg/Tag): wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis ueberschritten sein
+	string icdvorschlag; // labgrenz.ICDVorschlag: bei Feuern vorgeschlagener ICD (an fICD angehaengt), leer = kein Vorschlag;
+	                     // dient zugleich als RLIKE-Praefixmuster gegen diagview, um rot (neu) von orange (schon dokumentiert) zu unterscheiden
 	string hinweis;
 };
 
@@ -432,8 +435,9 @@ class hhcl:public dhcl
 		void prueflpatel(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflgrenz(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void ladelabgrenz(const size_t aktc);
-		uchar labgrenzpruef(const string& lk, const string& einh, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp);
-		uchar labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc);
+		uchar labgrenzpruef(const string& lk, const string& einh, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp, string& ficd, long& ficdsp);
+		uchar labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc, string& ficd, long& ficdsp);
+		void labgrenzampel(const LGrenzRegel& r, const string& lp, const size_t aktc, string& ficd, long& ficdsp);
 		void prueftbl();
 		void droptables(const size_t aktc=0,uchar obumben=0);
 		void virttesterg(); //α

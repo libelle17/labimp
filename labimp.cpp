@@ -633,6 +633,9 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	// T_lg_Dosisgrenze
 	{"Dosisgrenze in mg/Tag; wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis (aus Medikamentenplan, Wirkstaerke aus erster Zahl im Medikamentennamen) ueberschritten sein (leer=kein Dosischeck)",
 	 "dose limit in mg/day; if set, the current daily dose (from medication plan, strength from the first number in the medication name) must additionally be exceeded (empty=no dose check)"},
+	// T_lg_ICDVorschlag
+	{"vorgeschlagener ICD bei Feuern (an fICD angehaengt, leer=kein Vorschlag); dient auch als RLIKE-Praefix gegen diagview fuer rot/orange",
+	 "suggested ICD when firing (appended to fICD, empty=no suggestion); also used as RLIKE prefix against diagview for red/orange"},
 	// T_lg_Reihenfolge
 	{"Rangfolge der Auswertung je Abkuerzung und Richtung","evaluation order per abbreviation and direction"},
 	// T_lg_Hinweis
@@ -1359,6 +1362,7 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 			Feld("GewichtGrenze","varchar","10","",Tx[T_lg_GewichtGrenze],0,0,1,""),
 			Feld("Mindesttreffer","int","2","",Tx[T_lg_Mindesttreffer],0,0,1,"0"),
 			Feld("Dosisgrenze","varchar","10","",Tx[T_lg_Dosisgrenze],0,0,1,""),
+			Feld("ICDVorschlag","varchar","20","",Tx[T_lg_ICDVorschlag],0,0,1,""),
 			Feld("Reihenfolge","int","3","",Tx[T_lg_Reihenfolge],0,0,1,"0"),
 			Feld("Hinweis","varchar","60","",Tx[T_lg_Hinweis],0,0,1,""),
 			Feld("Aktiv","int","1","",Tx[T_lg_Aktiv],0,0,1,"1",1),
@@ -1381,7 +1385,7 @@ void hhcl::ladelabgrenz(const size_t aktc)
 {
 	labgrenzregeln.clear();
 	RS lg(My,"SELECT Abkumuster,Einheitmuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,MedMuster,MedFlag,MedVorhanden,"
-			"AlterGrenze,GewichtGrenze,Mindesttreffer,Dosisgrenze,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
+			"AlterGrenze,GewichtGrenze,Mindesttreffer,Dosisgrenze,ICDVorschlag,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
 	if (!lg.obqueryfehler) {
 		char ***lerg{0};
 		while (lerg=lg.HolZeile(),lerg?*lerg:0) {
@@ -1415,16 +1419,32 @@ void hhcl::ladelabgrenz(const size_t aktc)
 			r.mindesttreffer=atoi(cjj(lerg,11));
 			const string dosisgrenze{cjj(lerg,12)};
 			if ((r.obdosis=!dosisgrenze.empty())) r.dosisgrenze=atof(dosisgrenze.c_str());
-			r.hinweis=cjj(lerg,13);
+			r.icdvorschlag=cjj(lerg,13);
+			r.hinweis=cjj(lerg,14);
 			labgrenzregeln.push_back(r);
 		} // while(lerg=lg.HolZeile(),lerg?*lerg:0)
 	} // if (!lg.obqueryfehler)
 } // void hhcl::ladelabgrenz
 
+// setzt bei Feuern ggf. den ICD-Vorschlag samt Ampelfarbe (rot=neu, orange=schon dokumentiert),
+// analog zu den bisherigen hartkodierten fICD-Pruefungen
+void hhcl::labgrenzampel(const LGrenzRegel& r, const string& lp, const size_t aktc, string& ficd, long& ficdsp)
+{
+	if (r.icdvorschlag.empty() || lp==""||lp=="0") return;
+	if (ficd!="") ficd+=',';
+	ficd+=r.icdvorschlag;
+	RS hi(My,"SELECT gicd FROM diagview WHERE pat_id="+lp+" AND gicd RLIKE '^"+r.icdvorschlag+"' AND obdauer<>0 LIMIT 1",aktc,ZDB);
+	if (!hi.obqueryfehler) {
+		const char *const *const *const lerg{hi.HolZeile()};
+		if (lerg&&*lerg) {if (ficdsp!=255) ficdsp=33023;} // orange: schon dokumentiert
+		else ficdsp=255; // rot: neu
+	}
+} // void hhcl::labgrenzampel
+
 // aufgerufen in labgrenzpruef fuer die (per Reihenfolge) erstzutreffende Regel je Richtung;
 // wertet die Kriterien (Wert-, ggf. Alters- und Gewichtskriterium, per Mindesttreffer) und danach,
-// falls Dosisgrenze gesetzt, die aktuelle Tagesdosis aus dem Medikamentenplan aus
-uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc)
+// falls Dosisgrenze gesetzt, die aktuelle Tagesdosis aus dem Medikamentenplan aus; setzt bei Feuern die fICD-Ampel
+uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc, string& ficd, long& ficdsp)
 {
 	unsigned treffer{0},moeglich{1};
 	if (r.richtung=="oben"?(rewert>r.grenzwert):(rewert<r.grenzwert)) treffer++;
@@ -1445,7 +1465,10 @@ uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const stri
 		if (gew>0 && gew<=r.gewichtgrenze) treffer++;
 	}
 	if (treffer<(r.mindesttreffer?r.mindesttreffer:moeglich)) return 0;
-	if (!r.obdosis) return 1;
+	if (!r.obdosis) {
+		labgrenzampel(r,lp,aktc,ficd,ficdsp);
+		return 1;
+	}
 	// Dosis-Kontrolle: aktuelle Tagesdosis (in Einheiten/Tag mal Wirkstaerke aus dem Medikamentennamen) gegen Dosisgrenze (mg/Tag)
 	if (lp==""||lp=="0") return 0;
 	string bed;
@@ -1474,14 +1497,16 @@ uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const stri
 		ersetzAlle(sz,",",".");
 		staerke=atof(sz.c_str());
 	}
-	return (einheiten*staerke)>r.dosisgrenze;
+	if (!((einheiten*staerke)>r.dosisgrenze)) return 0;
+	labgrenzampel(r,lp,aktc,ficd,ficdsp);
+	return 1;
 } // uchar hhcl::labgrenzfeuert
 
 // aufgerufen in wertschreib, als generischer Abschluss der labk-Fallunterscheidung
 // prueft ob labk (und ggf. einh) auf eine der aus labgrenz geladenen Regeln passt und setzt ggf. hinw/hinwsp;
 // Rueckgabe 1 wenn labk ueberhaupt zustaendigkeitshalber erfasst ist (unabhaengig vom Ergebnis),
 // damit der Aufrufer dies als eigenen else-if-Zweig verwenden kann
-uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp)
+uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp, string& ficd, long& ficdsp)
 {
 	uchar obgefunden{0};
 	const LGrenzRegel *roben{0},*runten{0};
@@ -1522,8 +1547,9 @@ uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rew
 		if (r.richtung=="oben" && !roben) roben=&r;
 		else if (r.richtung=="unten" && !runten) runten=&r;
 	} // for (const auto& r:labgrenzregeln)
-	if (roben && labgrenzfeuert(*roben,rewert,lp,aktc)) {hinw=roben->hinweis;hinwsp=255;}
-	else if (runten && labgrenzfeuert(*runten,rewert,lp,aktc)) {hinw=runten->hinweis;hinwsp=255;}
+	// hinwsp folgt bei ICD-Vorschlag der Ampelfarbe (orange bei schon dokumentiertem ICD), sonst immer rot
+	if (roben && labgrenzfeuert(*roben,rewert,lp,aktc,ficd,ficdsp)) {hinw=roben->hinweis;hinwsp=roben->icdvorschlag.empty()?255:ficdsp;}
+	else if (runten && labgrenzfeuert(*runten,rewert,lp,aktc,ficd,ficdsp)) {hinw=runten->hinweis;hinwsp=runten->icdvorschlag.empty()?255:ficdsp;}
 	return obgefunden;
 } // uchar hhcl::labgrenzpruef
 
@@ -2826,7 +2852,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							} // 	if (!ni.obqueryfehler)
 						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
 						// 15. generisch aus Tabelle labgrenz, z.B. INR (siehe ladelabgrenz())
-					} else if (labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp)) {
+					} else if (labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp,ficd,ficdsp)) {
 					} // if (labk==  ...			else if (labk=="HB")
 						//									if (hinw!="") KLA
 						//																<<"Hier vor Hinweisen"<<endl;
