@@ -2599,12 +2599,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							}
 						} // lpid!=""&&lpid!="0"
 						// BNP jetzt ueber labgrenz (ICDVorschlag I50.19, ICDPruefmuster ^I50), s.u.
-							// 3. CK
-					} else if (iinstr(labk,string("ck"))!=-1) {
-						if (rewert>999) {
-							hinw="CK hoch";
-							hinwsp=255;
-						}
+						// CK jetzt ueber labgrenz, s.u.
 						// 4. TSH
 					} else if (labk=="tsh"||iinstr(labk,string("tsh-"))!=-1||iinstr(labk,string("tsh<"))!=-1||iinstr(labk,string("tshe"))!=-1||iinstr(labk,string("xtsh"))!=-1||iinstr(labk,string("tsbl"))!=-1||iinstr(labk,string("ts1e01"))!=-1||iinstr(labk,string("tsbf"))!=-1) {
 						// (iinstr(labk,string("tsh"))!=-1 || iinstr(labk,string("tsbf"))!=-1|| iinstr(labk,string("tsbl"))!=-1) {
