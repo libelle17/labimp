@@ -2703,22 +2703,8 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								}
 							} // 	if (!ni.obqueryfehler)
 						}
-						// 9. Cholesterin
-					} else if (labk=="LDLB"||labk=="LDLMG"||labk=="LDLH01"||labk=="LDL") {
-						//																	const int obs{strcmp(cjj(ferg,5),"0")};
-						if (lpid!=""&&lpid!="0" && (obs=="0") && rewert>140) {
-							if (ficd!="") ficd+=',';
-							ficd+="E78.0";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E78' AND obdauer<>0",aktc,ZDB);
-							if (!hs.obqueryfehler) {
-								const char *const *const *const lerg{hs.HolZeile()};
-								if (lerg?*lerg:0) {
-									if (ficdsp!=255) ficdsp=33023; // orange
-								} else {
-									ficdsp=255;
-								}
-							} // 	if (!ni.obqueryfehler)
-						}
+						// LDL jetzt ueber labgrenz (ICDVorschlag E78.0, ICDPruefmuster ^E78), s.u.;
+						// die bisherige Bedingung obs=="0" (kein gelbes Kachel-Icon) entfaellt dabei
 						// 10. Nephropathie
 						// s. Zieldbfunktionen obLabI
 					} else if (((labk=="ALBCRE"||labk=="ALBKRE"||labk=="ALBQ"||labk=="ALBUM"||labk=="ALBUP") 
