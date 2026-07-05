@@ -2676,13 +2676,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							} // 												if (!llb.obqueryfehler)
 						} // 											if (hinw!="" && lpid!=""&&lpid!="0")
 							// SELECT abkü from laborparameter WHERE langtext IN  ('Kalium','Kalium im Heparinblut');
-							// 6. Kalium
-					} else if (labk=="k"||labk=="K"||labk=="KALI"||labk=="KHEP"||labk=="TM<>K<>Labor2"||
-							labk=="TM<>KALI<>Labor Schottdorf"||labk=="TM<>K<>"||labk=="TM<>K<>Labor1") {
-						if (rewert<3.5 ||rewert>5.5) {
-							hinw="V.a. Dyskaliämie";
-							hinwsp=255;
-						}
+							// Kalium jetzt ueber labgrenz, s.u.
 						// 7. Hämoglobin
 					} else if (labk=="HB") {
 						const uchar obm{gschl!="w"&&gschl!="W"};
