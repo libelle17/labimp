@@ -2748,24 +2748,8 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							} // !voralb.obqueryfehler
 						} // if (lpid!=""&&lpid!="0" && rewert>30)
 						// Vit B12 jetzt ueber labgrenz (Einheitmuster ^pg/ml$, ICDVorschlag E53.8, ICDPruefmuster ^E53.8|^D51), s.u.
-							// 12. Vit D
-					} else if (labk=="VIT3KL"||labk=="VITD01"||labk=="VITD"||labk=="DIHYKP"||labk=="DIHYK"||labk=="VID2") {
-						//															caus<<rot<<"Vit-D untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (lpid!=""&&lpid!="0" && (((labk=="VIT3KL"||labk=="VITD01"||labk=="VITD") && rewert<20)||
-									((labk=="DIHYKP"||labk=="DIHYK"||labk=="VID2")&&rewert<25))) {
-							if (ficd!="") ficd+=',';
-							ficd+="E55.9";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd = 'E55' AND obdauer<>0",aktc,ZDB);
-							if (!hs.obqueryfehler) {
-								const char *const *const *const lerg{hs.HolZeile()};
-								if (lerg?*lerg:0) {
-									if (ficdsp!=255) ficdsp=33023; // orange
-								} else {
-									//																		caus<<rot<<"neuer Vit-D-Mangel!"<<schwarz<<endl;
-									ficdsp=255;
-								} // if (lerg?*lerg:0)
-							} // 	if (!ni.obqueryfehler)
-						} // ((labk=="DIHYKP"||labk=="DIHYK"||labk=="VID2")&&rewert<25))) 
+						// Vit D jetzt ueber labgrenz (zwei Regeln nach Abkumuster: VIT3KL/VITD01/VITD Grenzwert 20,
+						// DIHYKP/DIHYK/VID2 Grenzwert 25; ICDVorschlag E55.9, ICDPruefmuster ^E55$), s.u.
 							// 13. Parathormon
 					} else if (labk=="PTH"||labk=="PTH-E"||labk=="PTHP"||labk=="PTHI02"||labk=="PTHIT") {
 						//															caus<<rot<<"Parathoromn untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
