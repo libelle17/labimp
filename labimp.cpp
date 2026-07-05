@@ -634,8 +634,11 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"Dosisgrenze in mg/Tag; wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis (aus Medikamentenplan, Wirkstaerke aus erster Zahl im Medikamentennamen) ueberschritten sein (leer=kein Dosischeck)",
 	 "dose limit in mg/day; if set, the current daily dose (from medication plan, strength from the first number in the medication name) must additionally be exceeded (empty=no dose check)"},
 	// T_lg_ICDVorschlag
-	{"vorgeschlagener ICD bei Feuern (an fICD angehaengt, leer=kein Vorschlag); dient auch als RLIKE-Praefix gegen diagview fuer rot/orange",
-	 "suggested ICD when firing (appended to fICD, empty=no suggestion); also used as RLIKE prefix against diagview for red/orange"},
+	{"vorgeschlagener ICD bei Feuern (an fICD angehaengt, leer=kein Vorschlag); ohne ICDPruefmuster auch RLIKE-Praefix gegen diagview fuer rot/orange",
+	 "suggested ICD when firing (appended to fICD, empty=no suggestion); without ICDPruefmuster also RLIKE prefix against diagview for red/orange"},
+	// T_lg_ICDPruefmuster
+	{"RLIKE-Muster gegen diagview fuer rot/orange, falls abweichend von ICDVorschlag (z.B. ganze ICD-Gruppe statt Einzelcode); leer=ICDVorschlag wird verwendet",
+	 "RLIKE pattern against diagview for red/orange, if different from ICDVorschlag (e.g. whole ICD group instead of single code); empty=ICDVorschlag is used"},
 	// T_lg_Reihenfolge
 	{"Rangfolge der Auswertung je Abkuerzung und Richtung","evaluation order per abbreviation and direction"},
 	// T_lg_Hinweis
@@ -1363,6 +1366,7 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 			Feld("Mindesttreffer","int","2","",Tx[T_lg_Mindesttreffer],0,0,1,"0"),
 			Feld("Dosisgrenze","varchar","10","",Tx[T_lg_Dosisgrenze],0,0,1,""),
 			Feld("ICDVorschlag","varchar","20","",Tx[T_lg_ICDVorschlag],0,0,1,""),
+			Feld("ICDPruefmuster","varchar","60","",Tx[T_lg_ICDPruefmuster],0,0,1,""),
 			Feld("Reihenfolge","int","3","",Tx[T_lg_Reihenfolge],0,0,1,"0"),
 			Feld("Hinweis","varchar","60","",Tx[T_lg_Hinweis],0,0,1,""),
 			Feld("Aktiv","int","1","",Tx[T_lg_Aktiv],0,0,1,"1",1),
@@ -1385,7 +1389,7 @@ void hhcl::ladelabgrenz(const size_t aktc)
 {
 	labgrenzregeln.clear();
 	RS lg(My,"SELECT Abkumuster,Einheitmuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,MedMuster,MedFlag,MedVorhanden,"
-			"AlterGrenze,GewichtGrenze,Mindesttreffer,Dosisgrenze,ICDVorschlag,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
+			"AlterGrenze,GewichtGrenze,Mindesttreffer,Dosisgrenze,ICDVorschlag,ICDPruefmuster,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
 	if (!lg.obqueryfehler) {
 		char ***lerg{0};
 		while (lerg=lg.HolZeile(),lerg?*lerg:0) {
@@ -1420,7 +1424,8 @@ void hhcl::ladelabgrenz(const size_t aktc)
 			const string dosisgrenze{cjj(lerg,12)};
 			if ((r.obdosis=!dosisgrenze.empty())) r.dosisgrenze=atof(dosisgrenze.c_str());
 			r.icdvorschlag=cjj(lerg,13);
-			r.hinweis=cjj(lerg,14);
+			r.icdpruefmuster=cjj(lerg,14);
+			r.hinweis=cjj(lerg,15);
 			labgrenzregeln.push_back(r);
 		} // while(lerg=lg.HolZeile(),lerg?*lerg:0)
 	} // if (!lg.obqueryfehler)
@@ -1433,7 +1438,8 @@ void hhcl::labgrenzampel(const LGrenzRegel& r, const string& lp, const size_t ak
 	if (r.icdvorschlag.empty() || lp==""||lp=="0") return;
 	if (ficd!="") ficd+=',';
 	ficd+=r.icdvorschlag;
-	RS hi(My,"SELECT gicd FROM diagview WHERE pat_id="+lp+" AND gicd RLIKE '^"+r.icdvorschlag+"' AND obdauer<>0 LIMIT 1",aktc,ZDB);
+	const string& pruefmuster{r.icdpruefmuster.empty()?r.icdvorschlag:r.icdpruefmuster};
+	RS hi(My,"SELECT gicd FROM diagview WHERE pat_id="+lp+" AND gicd RLIKE '^"+pruefmuster+"' AND obdauer<>0 LIMIT 1",aktc,ZDB);
 	if (!hi.obqueryfehler) {
 		const char *const *const *const lerg{hi.HolZeile()};
 		if (lerg&&*lerg) {if (ficdsp!=255) ficdsp=33023;} // orange: schon dokumentiert

@@ -310,6 +310,7 @@ enum T_
 	T_lg_Mindesttreffer,
 	T_lg_Dosisgrenze,
 	T_lg_ICDVorschlag,
+	T_lg_ICDPruefmuster,
 	T_lg_Reihenfolge,
 	T_lg_Hinweis,
 	T_lg_Aktiv,
@@ -337,7 +338,11 @@ struct LGrenzRegel
 	unsigned mindesttreffer{0}; // labgrenz.Mindesttreffer: noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium; 0=alle gesetzten
 	double dosisgrenze{0}; uchar obdosis{0}; // labgrenz.Dosisgrenze (mg/Tag): wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis ueberschritten sein
 	string icdvorschlag; // labgrenz.ICDVorschlag: bei Feuern vorgeschlagener ICD (an fICD angehaengt), leer = kein Vorschlag;
-	                     // dient zugleich als RLIKE-Praefixmuster gegen diagview, um rot (neu) von orange (schon dokumentiert) zu unterscheiden
+	                     // dient, falls icdpruefmuster leer ist, zugleich als RLIKE-Praefixmuster gegen diagview,
+	                     // um rot (neu) von orange (schon dokumentiert) zu unterscheiden
+	string icdpruefmuster; // labgrenz.ICDPruefmuster: RLIKE-Muster gegen diagview fuer die rot/orange-Unterscheidung,
+	                       // falls es (z.B. als ganze ICD-Gruppe) vom vorgeschlagenen Einzelcode icdvorschlag abweicht;
+	                       // leer = icdvorschlag selbst wird als Muster verwendet
 	string hinweis;
 };
 
