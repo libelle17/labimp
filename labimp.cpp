@@ -608,6 +608,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"Grenzwerte fuer Laborpathologie-Kennzeichnung","limits for lab pathology flagging"},
 	// T_lg_Abkumuster
 	{"reg. Ausdruck fuer Abkuerzung","reg. expr. for abbreviation"},
+	// T_lg_Einheitmuster
+	{"reg. Ausdruck fuer Einheit (leer=keine Bedingung)","reg. expr. for unit (empty=no condition)"},
 	// T_lg_Richtung
 	{"'unten' oder 'oben'","'unten' (below) or 'oben' (above)"},
 	// T_lg_Grenzwert
@@ -622,6 +624,15 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"Spaltenname in medarten, z.B. 'metf' (leer=keine Bedingung)","column name in medarten, e.g. 'metf' (empty=no condition)"},
 	// T_lg_MedVorhanden
 	{"1=Regel nur wenn Medikation vorhanden, 0=nur wenn nicht vorhanden","1=rule only if medication present, 0=only if absent"},
+	// T_lg_AlterGrenze
+	{"Kriterium Alter >= X in Jahren (leer=kein Kriterium)","criterion age >= X in years (empty=no criterion)"},
+	// T_lg_GewichtGrenze
+	{"Kriterium Gewicht <= X in kg (leer=kein Kriterium)","criterion weight <= X in kg (empty=no criterion)"},
+	// T_lg_Mindesttreffer
+	{"noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium (0=alle gesetzten)","required number of hits among value/age/weight criteria (0=all set ones)"},
+	// T_lg_Dosisgrenze
+	{"Dosisgrenze in mg/Tag; wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis (aus Medikamentenplan, Wirkstaerke aus erster Zahl im Medikamentennamen) ueberschritten sein (leer=kein Dosischeck)",
+	 "dose limit in mg/day; if set, the current daily dose (from medication plan, strength from the first number in the medication name) must additionally be exceeded (empty=no dose check)"},
 	// T_lg_Reihenfolge
 	{"Rangfolge der Auswertung je Abkuerzung und Richtung","evaluation order per abbreviation and direction"},
 	// T_lg_Hinweis
@@ -1336,6 +1347,7 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 		Feld felder[] = {
 			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
 			Feld("Abkumuster","varchar","120","",Tx[T_lg_Abkumuster],0,0,1,""),
+			Feld("Einheitmuster","varchar","60","",Tx[T_lg_Einheitmuster],0,0,1,""),
 			Feld("Richtung","varchar","5","",Tx[T_lg_Richtung],0,0,1,""),
 			Feld("Grenzwert","varchar","20","",Tx[T_lg_Grenzwert],0,0,1,""),
 			Feld("ICDMuster","varchar","60","",Tx[T_lg_ICDMuster],0,0,1,""),
@@ -1343,6 +1355,10 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 			Feld("MedMuster","varchar","120","",Tx[T_lg_MedMuster],0,0,1,""),
 			Feld("MedFlag","varchar","30","",Tx[T_lg_MedFlag],0,0,1,""),
 			Feld("MedVorhanden","int","1","",Tx[T_lg_MedVorhanden],0,0,1,"0",1),
+			Feld("AlterGrenze","varchar","10","",Tx[T_lg_AlterGrenze],0,0,1,""),
+			Feld("GewichtGrenze","varchar","10","",Tx[T_lg_GewichtGrenze],0,0,1,""),
+			Feld("Mindesttreffer","int","2","",Tx[T_lg_Mindesttreffer],0,0,1,"0"),
+			Feld("Dosisgrenze","varchar","10","",Tx[T_lg_Dosisgrenze],0,0,1,""),
 			Feld("Reihenfolge","int","3","",Tx[T_lg_Reihenfolge],0,0,1,"0"),
 			Feld("Hinweis","varchar","60","",Tx[T_lg_Hinweis],0,0,1,""),
 			Feld("Aktiv","int","1","",Tx[T_lg_Aktiv],0,0,1,"1",1),
@@ -1364,7 +1380,8 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 void hhcl::ladelabgrenz(const size_t aktc)
 {
 	labgrenzregeln.clear();
-	RS lg(My,"SELECT Abkumuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,MedMuster,MedFlag,MedVorhanden,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
+	RS lg(My,"SELECT Abkumuster,Einheitmuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,MedMuster,MedFlag,MedVorhanden,"
+			"AlterGrenze,GewichtGrenze,Mindesttreffer,Dosisgrenze,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
 	if (!lg.obqueryfehler) {
 		char ***lerg{0};
 		while (lerg=lg.HolZeile(),lerg?*lerg:0) {
@@ -1375,32 +1392,103 @@ void hhcl::ladelabgrenz(const size_t aktc)
 				fLog(rots+"labgrenz.Abkumuster ungueltig: "+blau+cjj(lerg,0)+schwarz,1,1);
 				continue;
 			}
-			r.richtung=cjj(lerg,1);
-			r.grenzwert=atof(cjj(lerg,2));
-			r.icdmuster=cjj(lerg,3);
-			r.icdvorhanden=atoi(cjj(lerg,4));
-			r.medmuster=cjj(lerg,5);
-			r.medflag=cjj(lerg,6);
-			r.medvorhanden=atoi(cjj(lerg,7));
-			r.hinweis=cjj(lerg,8);
+			r.einheitmuster=cjj(lerg,1);
+			if (!r.einheitmuster.empty()) {
+				try {
+					r.einheitre=regex(r.einheitmuster,regex::icase);
+				} catch (const regex_error&) {
+					fLog(rots+"labgrenz.Einheitmuster ungueltig: "+blau+r.einheitmuster+schwarz,1,1);
+					continue;
+				}
+			}
+			r.richtung=cjj(lerg,2);
+			r.grenzwert=atof(cjj(lerg,3));
+			r.icdmuster=cjj(lerg,4);
+			r.icdvorhanden=atoi(cjj(lerg,5));
+			r.medmuster=cjj(lerg,6);
+			r.medflag=cjj(lerg,7);
+			r.medvorhanden=atoi(cjj(lerg,8));
+			const string altergrenze{cjj(lerg,9)};
+			if ((r.obalter=!altergrenze.empty())) r.altergrenze=atof(altergrenze.c_str());
+			const string gewichtgrenze{cjj(lerg,10)};
+			if ((r.obgewicht=!gewichtgrenze.empty())) r.gewichtgrenze=atof(gewichtgrenze.c_str());
+			r.mindesttreffer=atoi(cjj(lerg,11));
+			const string dosisgrenze{cjj(lerg,12)};
+			if ((r.obdosis=!dosisgrenze.empty())) r.dosisgrenze=atof(dosisgrenze.c_str());
+			r.hinweis=cjj(lerg,13);
 			labgrenzregeln.push_back(r);
 		} // while(lerg=lg.HolZeile(),lerg?*lerg:0)
 	} // if (!lg.obqueryfehler)
 } // void hhcl::ladelabgrenz
 
+// aufgerufen in labgrenzpruef fuer die (per Reihenfolge) erstzutreffende Regel je Richtung;
+// wertet die Kriterien (Wert-, ggf. Alters- und Gewichtskriterium, per Mindesttreffer) und danach,
+// falls Dosisgrenze gesetzt, die aktuelle Tagesdosis aus dem Medikamentenplan aus
+uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc)
+{
+	unsigned treffer{0},moeglich{1};
+	if (r.richtung=="oben"?(rewert>r.grenzwert):(rewert<r.grenzwert)) treffer++;
+	if (r.obalter) {
+		moeglich++;
+		if (palter>=r.altergrenze) treffer++;
+	}
+	if (r.obgewicht) {
+		moeglich++;
+		double gew{0};
+		if (lp!=""&&lp!="0") {
+			RS gw(My,"SELECT Gewicht FROM gewicht WHERE Pat_ID="+lp+" ORDER BY ZeitPunkt DESC LIMIT 1",aktc,ZDB);
+			if (!gw.obqueryfehler) {
+				const char *const *const *const gerg{gw.HolZeile()};
+				if (gerg&&*gerg) gew=atof(cjj(gerg,0));
+			}
+		}
+		if (gew>0 && gew<=r.gewichtgrenze) treffer++;
+	}
+	if (treffer<(r.mindesttreffer?r.mindesttreffer:moeglich)) return 0;
+	if (!r.obdosis) return 1;
+	// Dosis-Kontrolle: aktuelle Tagesdosis (in Einheiten/Tag mal Wirkstaerke aus dem Medikamentennamen) gegen Dosisgrenze (mg/Tag)
+	if (lp==""||lp=="0") return 0;
+	string bed;
+	if (!r.medmuster.empty()) bed+=" AND medanfang RLIKE '"+r.medmuster+"'";
+	if (!r.medflag.empty()) bed+=" AND ma.`"+r.medflag+"`<>0";
+	RS dchk(My,"SELECT medikament,mo,mi,nm,ab FROM wmedplan mp LEFT JOIN medarten ma ON ma.medikament=mp.medanfang AND mp.medanfang<>'' "
+			"WHERE mp.pat_id="+lp+" AND rni=1"+bed+" AND bemerkung NOT RLIKE 'Paus|abges|beendet|zur Zeit nicht' ORDER BY zeitpunkt DESC LIMIT 1",aktc,ZDB);
+	if (dchk.obqueryfehler) return 0;
+	const char *const *const *const derg{dchk.HolZeile()};
+	if (!(derg&&*derg)) return 0;
+	auto zahl=[](string s)->double{
+		ersetzAlle(s,",",".");
+		ersetzAlle(s,"½",".5");
+		ersetzAlle(s,"¼",".25");
+		ersetzAlle(s,"1/2",".5");
+		ersetzAlle(s," ","");
+		return atof(s.c_str());
+	};
+	const double einheiten{zahl(cjj(derg,1))+zahl(cjj(derg,2))+zahl(cjj(derg,3))+zahl(cjj(derg,4))};
+	const string name{cjj(derg,0)};
+	smatch sm;
+	static const regex staerkere{"([0-9]+(?:[.,][0-9]+)?)"};
+	double staerke{0};
+	if (regex_search(name,sm,staerkere)) {
+		string sz{sm[1]};
+		ersetzAlle(sz,",",".");
+		staerke=atof(sz.c_str());
+	}
+	return (einheiten*staerke)>r.dosisgrenze;
+} // uchar hhcl::labgrenzfeuert
+
 // aufgerufen in wertschreib, als generischer Abschluss der labk-Fallunterscheidung
-// prueft ob labk auf eine der aus labgrenz geladenen Regeln passt und setzt ggf. hinw/hinwsp;
+// prueft ob labk (und ggf. einh) auf eine der aus labgrenz geladenen Regeln passt und setzt ggf. hinw/hinwsp;
 // Rueckgabe 1 wenn labk ueberhaupt zustaendigkeitshalber erfasst ist (unabhaengig vom Ergebnis),
 // damit der Aufrufer dies als eigenen else-if-Zweig verwenden kann
-uchar hhcl::labgrenzpruef(const string& lk, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp)
+uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp)
 {
 	uchar obgefunden{0};
-	uchar oboben{0},obunten{0};
-	double oben{0},unten{0};
-	string hinwoben,hinwunten;
+	const LGrenzRegel *roben{0},*runten{0};
 	for (const auto& r:labgrenzregeln) {
 		if (!regex_search(lk,r.abkure)) continue;
 		obgefunden=1;
+		if (!r.einheitmuster.empty() && !regex_search(einh,r.einheitre)) continue;
 		uchar obzutreffend{1};
 		if (!r.icdmuster.empty()) {
 			obzutreffend=0;
@@ -1431,11 +1519,11 @@ uchar hhcl::labgrenzpruef(const string& lk, const double rewert, const string& l
 			}
 		}
 		if (!obzutreffend) continue;
-		if (r.richtung=="oben" && !oboben) {oben=r.grenzwert;oboben=1;hinwoben=r.hinweis;}
-		else if (r.richtung=="unten" && !obunten) {unten=r.grenzwert;obunten=1;hinwunten=r.hinweis;}
+		if (r.richtung=="oben" && !roben) roben=&r;
+		else if (r.richtung=="unten" && !runten) runten=&r;
 	} // for (const auto& r:labgrenzregeln)
-	if (oboben && rewert>oben) {hinw=hinwoben;hinwsp=255;}
-	else if (obunten && rewert<unten) {hinw=hinwunten;hinwsp=255;}
+	if (roben && labgrenzfeuert(*roben,rewert,lp,aktc)) {hinw=roben->hinweis;hinwsp=255;}
+	else if (runten && labgrenzfeuert(*runten,rewert,lp,aktc)) {hinw=runten->hinweis;hinwsp=255;}
 	return obgefunden;
 } // uchar hhcl::labgrenzpruef
 
@@ -2738,7 +2826,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							} // 	if (!ni.obqueryfehler)
 						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
 						// 15. generisch aus Tabelle labgrenz, z.B. INR (siehe ladelabgrenz())
-					} else if (labgrenzpruef(labk,rewert,lpid,aktc,hinw,hinwsp)) {
+					} else if (labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp)) {
 					} // if (labk==  ...			else if (labk=="HB")
 						//									if (hinw!="") KLA
 						//																<<"Hier vor Hinweisen"<<endl;

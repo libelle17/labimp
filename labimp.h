@@ -297,6 +297,7 @@ enum T_
 	T_prueflgrenz,
 	T_Laborgrenzwerte,
 	T_lg_Abkumuster,
+	T_lg_Einheitmuster,
 	T_lg_Richtung,
 	T_lg_Grenzwert,
 	T_lg_ICDMuster,
@@ -304,6 +305,10 @@ enum T_
 	T_lg_MedMuster,
 	T_lg_MedFlag,
 	T_lg_MedVorhanden,
+	T_lg_AlterGrenze,
+	T_lg_GewichtGrenze,
+	T_lg_Mindesttreffer,
+	T_lg_Dosisgrenze,
 	T_lg_Reihenfolge,
 	T_lg_Hinweis,
 	T_lg_Aktiv,
@@ -318,6 +323,7 @@ void BDTtoDate(const string& inh,struct tm *tm,int abjahr=1900,uchar objahrzuers
 struct LGrenzRegel
 {
 	regex abkure; // kompiliert aus labgrenz.Abkumuster
+	string einheitmuster; regex einheitre; // labgrenz.Einheitmuster, reg. Ausdruck auf Einheit, leer = keine Bedingung
 	string richtung; // "unten" oder "oben"
 	double grenzwert{0};
 	string icdmuster; // labgrenz.ICDMuster, leer = keine ICD-Bedingung
@@ -325,6 +331,10 @@ struct LGrenzRegel
 	string medmuster; // labgrenz.MedMuster, reg. Ausdruck auf wmedplan.medanfang, leer = keine Bedingung
 	string medflag; // labgrenz.MedFlag, Spaltenname in medarten (z.B. "metf"), leer = keine Bedingung
 	int medvorhanden{0}; // labgrenz.MedVorhanden: 1=Regel nur wenn passende aktive Medikation vorhanden, 0=nur wenn nicht vorhanden
+	double altergrenze{0}; uchar obalter{0}; // labgrenz.AlterGrenze: Kriterium "Alter >= AlterGrenze", falls gesetzt
+	double gewichtgrenze{0}; uchar obgewicht{0}; // labgrenz.GewichtGrenze: Kriterium "Gewicht <= GewichtGrenze", falls gesetzt
+	unsigned mindesttreffer{0}; // labgrenz.Mindesttreffer: noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium; 0=alle gesetzten
+	double dosisgrenze{0}; uchar obdosis{0}; // labgrenz.Dosisgrenze (mg/Tag): wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis ueberschritten sein
 	string hinweis;
 };
 
@@ -422,7 +432,8 @@ class hhcl:public dhcl
 		void prueflpatel(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflgrenz(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void ladelabgrenz(const size_t aktc);
-		uchar labgrenzpruef(const string& lk, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp);
+		uchar labgrenzpruef(const string& lk, const string& einh, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp);
+		uchar labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc);
 		void prueftbl();
 		void droptables(const size_t aktc=0,uchar obumben=0);
 		void virttesterg(); //α
