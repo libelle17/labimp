@@ -602,6 +602,28 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"Berichtsdatum","report date"},
 	// T_Dateidatum
 	{"Dateidatum","date in filename"},
+	// T_prueflgrenz
+	{"prueflgrenz()","testlgrenz()"},
+	// T_Laborgrenzwerte
+	{"Grenzwerte fuer Laborpathologie-Kennzeichnung","limits for lab pathology flagging"},
+	// T_lg_Abkumuster
+	{"reg. Ausdruck fuer Abkuerzung","reg. expr. for abbreviation"},
+	// T_lg_Richtung
+	{"'unten' oder 'oben'","'unten' (below) or 'oben' (above)"},
+	// T_lg_Grenzwert
+	{"Grenzwert","limit value"},
+	// T_lg_ICDMuster
+	{"reg. Ausdruck fuer ICD (leer=keine Bedingung)","reg. expr. for ICD (empty=no condition)"},
+	// T_lg_ICDVorhanden
+	{"1=Regel nur wenn ICD vorhanden, 0=nur wenn nicht vorhanden","1=rule only if ICD present, 0=only if absent"},
+	// T_lg_Reihenfolge
+	{"Rangfolge der Auswertung je Abkuerzung und Richtung","evaluation order per abbreviation and direction"},
+	// T_lg_Hinweis
+	{"Hinweistext bei Ueberschreitung","hint text when exceeded"},
+	// T_lg_Aktiv
+	{"1=aktiv, 0=deaktiviert","1=active, 0=disabled"},
+	// T_lg_Kommentar
+	{"Erlaeuterung der Regel","explanation of the rule"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -1298,6 +1320,92 @@ void hhcl::prueflpath(DB *My, const size_t aktc, const int obverb, const int obl
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
+// wird aufgerufen in: prueftbl
+// Tabelle mit den Bedingungen fuer die Kennzeichnung von Laborwerten als pathologisch
+// (Grenzwerte, ggf. abhaengig vom Vorliegen eines ICD-Codes), s. auch ladelabgrenz() und labgrenzpruef()
+void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflgrenz]+schwarz);
+	if (!direkt) {
+		Feld felder[] = {
+			Feld("ID","int","10","",Tx[T_eindeutige_Identifikation],1,1,0,string(),1),
+			Feld("Abkumuster","varchar","120","",Tx[T_lg_Abkumuster],0,0,1,""),
+			Feld("Richtung","varchar","5","",Tx[T_lg_Richtung],0,0,1,""),
+			Feld("Grenzwert","varchar","20","",Tx[T_lg_Grenzwert],0,0,1,""),
+			Feld("ICDMuster","varchar","60","",Tx[T_lg_ICDMuster],0,0,1,""),
+			Feld("ICDVorhanden","int","1","",Tx[T_lg_ICDVorhanden],0,0,1,"0",1),
+			Feld("Reihenfolge","int","3","",Tx[T_lg_Reihenfolge],0,0,1,"0"),
+			Feld("Hinweis","varchar","60","",Tx[T_lg_Hinweis],0,0,1,""),
+			Feld("Aktiv","int","1","",Tx[T_lg_Aktiv],0,0,1,"1",1),
+			Feld("Kommentar","varchar","200","",Tx[T_lg_Kommentar],0,0,1,""),
+		};
+		Index indices[]{};
+		Tabelle taba(My,labgrenz,felder,elemzahl(felder),indices,elemzahl(indices),0,0,Tx[T_Laborgrenzwerte]
+				/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+labgrenz,1,1);
+			exit(11);
+		}
+	} // if (!direkt)
+} // void hhcl::prueflgrenz
+
+// wird aufgerufen in: prueftbl, einmalig zu Beginn jedes Einlesevorgangs
+// laedt die Tabelle labgrenz komplett in labgrenzregeln, damit labgrenzpruef() ohne
+// weitere Datenbankzugriffe (ausser der patientenbezogenen ICD-Abfrage) auskommt
+void hhcl::ladelabgrenz(const size_t aktc)
+{
+	labgrenzregeln.clear();
+	RS lg(My,"SELECT Abkumuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
+	if (!lg.obqueryfehler) {
+		char ***lerg{0};
+		while (lerg=lg.HolZeile(),lerg?*lerg:0) {
+			LGrenzRegel r;
+			try {
+				r.abkure=regex(cjj(lerg,0),regex::icase);
+			} catch (const regex_error&) {
+				fLog(rots+"labgrenz.Abkumuster ungueltig: "+blau+cjj(lerg,0)+schwarz,1,1);
+				continue;
+			}
+			r.richtung=cjj(lerg,1);
+			r.grenzwert=atof(cjj(lerg,2));
+			r.icdmuster=cjj(lerg,3);
+			r.icdvorhanden=atoi(cjj(lerg,4));
+			r.hinweis=cjj(lerg,5);
+			labgrenzregeln.push_back(r);
+		} // while(lerg=lg.HolZeile(),lerg?*lerg:0)
+	} // if (!lg.obqueryfehler)
+} // void hhcl::ladelabgrenz
+
+// aufgerufen in wertschreib, als generischer Abschluss der labk-Fallunterscheidung
+// prueft ob labk auf eine der aus labgrenz geladenen Regeln passt und setzt ggf. hinw/hinwsp;
+// Rueckgabe 1 wenn labk ueberhaupt zustaendigkeitshalber erfasst ist (unabhaengig vom Ergebnis),
+// damit der Aufrufer dies als eigenen else-if-Zweig verwenden kann
+uchar hhcl::labgrenzpruef(const string& lk, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp)
+{
+	uchar obgefunden{0};
+	uchar oboben{0},obunten{0};
+	double oben{0},unten{0};
+	string hinwoben,hinwunten;
+	for (const auto& r:labgrenzregeln) {
+		if (!regex_search(lk,r.abkure)) continue;
+		obgefunden=1;
+		uchar obzutreffend{r.icdmuster.empty()};
+		if (!obzutreffend && lp!=""&&lp!="0") {
+			RS icdchk(My,"SELECT 1 FROM diagview WHERE pat_id="+lp+" AND gicd RLIKE '"+r.icdmuster+"' AND obdauer<>0 LIMIT 1",aktc,ZDB);
+			if (!icdchk.obqueryfehler) {
+				const char *const *const *const ierg{icdchk.HolZeile()};
+				const uchar obicdda((ierg&&*ierg)?1:0);
+				obzutreffend=r.icdvorhanden?obicdda:!obicdda;
+			}
+		}
+		if (!obzutreffend) continue;
+		if (r.richtung=="oben" && !oboben) {oben=r.grenzwert;oboben=1;hinwoben=r.hinweis;}
+		else if (r.richtung=="unten" && !obunten) {unten=r.grenzwert;obunten=1;hinwunten=r.hinweis;}
+	} // for (const auto& r:labgrenzregeln)
+	if (oboben && rewert>oben) {hinw=hinwoben;hinwsp=255;}
+	else if (obunten && rewert<unten) {hinw=hinwunten;hinwsp=255;}
+	return obgefunden;
+} // uchar hhcl::labgrenzpruef
 
 // aufgerufen in /*pruefPatID*/ russchreib und prueflyus
 void hhcl::fuellpql()
@@ -1474,6 +1582,7 @@ void hhcl::tabnamen()
 	tlyqspez=vorsl+"qspez";
 	labpatel="labpatel";
 	labpath="labpath";
+	labgrenz="labgrenz";
 } // void hhcl::tabnamen
 
 // wird aufgerufen in lauf
@@ -2596,6 +2705,8 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								} // if (lerg?*lerg:0)
 							} // 	if (!ni.obqueryfehler)
 						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
+						// 15. generisch aus Tabelle labgrenz, z.B. INR (siehe ladelabgrenz())
+					} else if (labgrenzpruef(labk,rewert,lpid,aktc,hinw,hinwsp)) {
 					} // if (labk==  ...			else if (labk=="HB")
 						//									if (hinw!="") KLA
 						//																<<"Hier vor Hinweisen"<<endl;
@@ -3245,6 +3356,8 @@ void hhcl::prueftbl()
 	prueflypgl(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflpatel(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflpath(My, aktc, obverb, oblog, /*direkt*/0);
+	prueflgrenz(My, aktc, obverb, oblog, /*direkt*/0);
+	ladelabgrenz(aktc); // einmalig zu Beginn jedes Einlesevorgangs
 ////	My->usedb(dbq,aktc);
 //	ZDB=1;
 	struct {

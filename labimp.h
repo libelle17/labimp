@@ -1,4 +1,5 @@
 #define DPROG "labimp"
+#include <regex>
 // fuer verschiedene Sprachen //α
 enum T_      
 {
@@ -293,10 +294,33 @@ enum T_
 	T_Laborwert,
 	T_Berichtsdatum,
 	T_Dateidatum,
+	T_prueflgrenz,
+	T_Laborgrenzwerte,
+	T_lg_Abkumuster,
+	T_lg_Richtung,
+	T_lg_Grenzwert,
+	T_lg_ICDMuster,
+	T_lg_ICDVorhanden,
+	T_lg_Reihenfolge,
+	T_lg_Hinweis,
+	T_lg_Aktiv,
+	T_lg_Kommentar,
 	T_MAX //α
 }; // enum T_ //ω
 
 void BDTtoDate(const string& inh,struct tm *tm,int abjahr=1900,uchar objahrzuerst=0);
+
+// eine Regel aus der Tabelle labgrenz (Grenzwerte fuer die Kennzeichnung als pathologisch),
+// einmalig zu Beginn jedes Einlesevorgangs ueber ladelabgrenz() geladen
+struct LGrenzRegel
+{
+	regex abkure; // kompiliert aus labgrenz.Abkumuster
+	string richtung; // "unten" oder "oben"
+	double grenzwert{0};
+	string icdmuster; // labgrenz.ICDMuster, leer = keine ICD-Bedingung
+	int icdvorhanden{0}; // labgrenz.ICDVorhanden: 1=Regel nur wenn ICD dokumentiert, 0=nur wenn nicht dokumentiert
+	string hinweis;
+};
 
 //α
 class hhcl:public dhcl
@@ -319,6 +343,8 @@ class hhcl:public dhcl
 		string tlyqspez; /*=vorsil+"qspez"*/
 	 string labpatel;
 	 string labpath;
+	 string labgrenz;
+		vector<LGrenzRegel> labgrenzregeln; // Zwischenspeicher, s. ladelabgrenz()
 		const static tm tmnull; // {0}
 		const static tm tmmax; // {0,0,0,1,0,200,0,0,0}
 		string labind,pneuind,pnbid,hinwind,spezind;
@@ -388,6 +414,9 @@ class hhcl:public dhcl
 		void prueflyqspez(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflpath(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflpatel(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflgrenz(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void ladelabgrenz(const size_t aktc);
+		uchar labgrenzpruef(const string& lk, const double rewert, const string& lp, const size_t aktc, string& hinw, long& hinwsp);
 		void prueftbl();
 		void droptables(const size_t aktc=0,uchar obumben=0);
 		void virttesterg(); //α
