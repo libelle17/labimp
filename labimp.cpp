@@ -2750,29 +2750,8 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						// Vit B12 jetzt ueber labgrenz (Einheitmuster ^pg/ml$, ICDVorschlag E53.8, ICDPruefmuster ^E53.8|^D51), s.u.
 						// Vit D jetzt ueber labgrenz (zwei Regeln nach Abkumuster: VIT3KL/VITD01/VITD Grenzwert 20,
 						// DIHYKP/DIHYK/VID2 Grenzwert 25; ICDVorschlag E55.9, ICDPruefmuster ^E55$), s.u.
-							// 13. Parathormon
-					} else if (labk=="PTH"||labk=="PTH-E"||labk=="PTHP"||labk=="PTHI02"||labk=="PTHIT") {
-						//															caus<<rot<<"Parathoromn untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (lpid!=""&&lpid!="0" && rewert<65) {
-							RS niin(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE 'N18.[3-5]' AND obdauer<>0",aktc,ZDB);
-							if (!niin.obqueryfehler) {
-								const char *const *const *const nierg{niin.HolZeile()};
-								if (nierg?*nierg:0) {
-									if (ficd!="") ficd+=',';
-									ficd+="E21.1";
-									RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E21' AND obdauer<>0",aktc,ZDB);
-									if (!hs.obqueryfehler) {
-										const char *const *const *const lerg{hs.HolZeile()};
-										if (lerg?*lerg:0) {
-											if (ficdsp!=255) ficdsp=33023; // orange
-										} else {
-											//																		caus<<rot<<"neuer sekundärer Hyperpara!"<<schwarz<<endl;
-											ficdsp=255;
-										} // if (lerg?*lerg:0)
-									} // 	if (!ni.obqueryfehler)
-								} // 	if (nierg?*nierg:0)
-							} // 	if (!niin.obqueryfehler) 
-						} // if (lpid!=""&&lpid!="0" && rewert<65)
+							// PTH jetzt ueber labgrenz (ICDMuster N18.[3-5]/ICDVorhanden=1 als Gate, ICDVorschlag
+							// E21.1, ICDPruefmuster ^E21), s.u.
 						// MAK jetzt ueber labgrenz (ICDVorschlag E06.3, ICDPruefmuster ^E06), s.u.
 						// TRAK/TSRE* jetzt ueber labgrenz (ICDVorschlag E05.0), s. u.
 						// 15. generisch aus Tabelle labgrenz, z.B. INR, TRAK, MAK (siehe ladelabgrenz())
