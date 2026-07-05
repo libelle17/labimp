@@ -628,6 +628,11 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"Kriterium Alter >= X in Jahren (leer=kein Kriterium)","criterion age >= X in years (empty=no criterion)"},
 	// T_lg_GewichtGrenze
 	{"Kriterium Gewicht <= X in kg (leer=kein Kriterium)","criterion weight <= X in kg (empty=no criterion)"},
+	// T_lg_AlterUnter
+	{"ausschliessendes Kriterium Alter < X in Jahren (leer=kein Kriterium); waehlt im Gegensatz zu AlterGrenze exklusiv zwischen Regeln je Altersband (Regelfamilie)",
+	 "exclusive criterion age < X in years (empty=no criterion); unlike AlterGrenze, selects exclusively between rules per age band (rule family)"},
+	// T_lg_AlterUeber
+	{"ausschliessendes Kriterium Alter > X in Jahren (leer=kein Kriterium), s. AlterUnter","exclusive criterion age > X in years (empty=no criterion), see AlterUnter"},
 	// T_lg_Mindesttreffer
 	{"noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium (0=alle gesetzten)","required number of hits among value/age/weight criteria (0=all set ones)"},
 	// T_lg_Dosisgrenze
@@ -1364,6 +1369,8 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 			Feld("MedVorhanden","int","1","",Tx[T_lg_MedVorhanden],0,0,1,"0",1),
 			Feld("AlterGrenze","varchar","10","",Tx[T_lg_AlterGrenze],0,0,1,""),
 			Feld("GewichtGrenze","varchar","10","",Tx[T_lg_GewichtGrenze],0,0,1,""),
+			Feld("AlterUnter","varchar","10","",Tx[T_lg_AlterUnter],0,0,1,""),
+			Feld("AlterUeber","varchar","10","",Tx[T_lg_AlterUeber],0,0,1,""),
 			Feld("Mindesttreffer","int","2","",Tx[T_lg_Mindesttreffer],0,0,1,"0"),
 			Feld("Dosisgrenze","varchar","10","",Tx[T_lg_Dosisgrenze],0,0,1,""),
 			Feld("ICDVorschlag","varchar","20","",Tx[T_lg_ICDVorschlag],0,0,1,""),
@@ -1390,7 +1397,7 @@ void hhcl::ladelabgrenz(const size_t aktc)
 {
 	labgrenzregeln.clear();
 	RS lg(My,"SELECT Abkumuster,Einheitmuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,MedMuster,MedFlag,MedVorhanden,"
-			"AlterGrenze,GewichtGrenze,Mindesttreffer,Dosisgrenze,ICDVorschlag,ICDPruefmuster,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
+			"AlterGrenze,GewichtGrenze,AlterUnter,AlterUeber,Mindesttreffer,Dosisgrenze,ICDVorschlag,ICDPruefmuster,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
 	if (!lg.obqueryfehler) {
 		char ***lerg{0};
 		while (lerg=lg.HolZeile(),lerg?*lerg:0) {
@@ -1421,12 +1428,16 @@ void hhcl::ladelabgrenz(const size_t aktc)
 			if ((r.obalter=!altergrenze.empty())) r.altergrenze=atof(altergrenze.c_str());
 			const string gewichtgrenze{cjj(lerg,10)};
 			if ((r.obgewicht=!gewichtgrenze.empty())) r.gewichtgrenze=atof(gewichtgrenze.c_str());
-			r.mindesttreffer=atoi(cjj(lerg,11));
-			const string dosisgrenze{cjj(lerg,12)};
+			const string alterunter{cjj(lerg,11)};
+			if ((r.obalterunter=!alterunter.empty())) r.alterunter=atof(alterunter.c_str());
+			const string alterueber{cjj(lerg,12)};
+			if ((r.obalterueber=!alterueber.empty())) r.alterueber=atof(alterueber.c_str());
+			r.mindesttreffer=atoi(cjj(lerg,13));
+			const string dosisgrenze{cjj(lerg,14)};
 			if ((r.obdosis=!dosisgrenze.empty())) r.dosisgrenze=atof(dosisgrenze.c_str());
-			r.icdvorschlag=cjj(lerg,13);
-			r.icdpruefmuster=cjj(lerg,14);
-			r.hinweis=cjj(lerg,15);
+			r.icdvorschlag=cjj(lerg,15);
+			r.icdpruefmuster=cjj(lerg,16);
+			r.hinweis=cjj(lerg,17);
 			labgrenzregeln.push_back(r);
 		} // while(lerg=lg.HolZeile(),lerg?*lerg:0)
 	} // if (!lg.obqueryfehler)
@@ -1569,8 +1580,14 @@ uchar hhcl::labgrenzpruef(const string& lk, const string& einh, const double rew
 				}
 			}
 		}
+		// Altersband-Bedingung (AlterUnter/AlterUeber): im Gegensatz zu AlterGrenze/GewichtGrenze
+		// ausschliessend, also Teil der Bedingungsfamilie (sig), nicht additiv ueber Mindesttreffer
+		if (obzutreffend && (r.obalterunter||r.obalterueber)) {
+			obzutreffend=(!r.obalterunter||palter<r.alterunter)&&(!r.obalterueber||palter>r.alterueber);
+		}
 		if (!obzutreffend) continue;
-		const string sig{r.icdmuster+"\x01"+to_string(r.icdvorhanden)+"\x01"+r.medmuster+"\x01"+r.medflag+"\x01"+to_string(r.medvorhanden)};
+		const string sig{r.icdmuster+"\x01"+to_string(r.icdvorhanden)+"\x01"+r.medmuster+"\x01"+r.medflag+"\x01"+to_string(r.medvorhanden)
+				+"\x01"+to_string(r.obalterunter)+"\x01"+to_string(r.alterunter)+"\x01"+to_string(r.obalterueber)+"\x01"+to_string(r.alterueber)};
 		if (r.richtung=="oben") {
 			if (obenkand.empty()) obensig=sig;
 			if (sig==obensig) obenkand.push_back(&r);
@@ -2602,40 +2619,34 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						// CK jetzt ueber labgrenz, s.u.
 						// 4. TSH
 					} else if (labk=="tsh"||iinstr(labk,string("tsh-"))!=-1||iinstr(labk,string("tsh<"))!=-1||iinstr(labk,string("tshe"))!=-1||iinstr(labk,string("xtsh"))!=-1||iinstr(labk,string("tsbl"))!=-1||iinstr(labk,string("ts1e01"))!=-1||iinstr(labk,string("tsbf"))!=-1) {
-						// (iinstr(labk,string("tsh"))!=-1 || iinstr(labk,string("tsbf"))!=-1|| iinstr(labk,string("tsbl"))!=-1) {
-						if (rewert>(palter<25?2.5:palter>65?8:5)||rewert<0.25) {
-							if (rewert<0.25) {
-								hinw="V.a. zu viel SD-Hormon";
-								hinwsp=255;
-							} else {
-								hinw="mögl.unzur.SD-Substitution";
-								hinwsp=255;
-							} // if (rewert<0.25)
-							if (lpid!=""&&lpid!="0") {
-								RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü='fT4' AND zeitpunkt>now()-INTERVAL 5 DAY "
-										"GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
-								char ***gerg{0};
-								if (!llb.obqueryfehler) {
-									gerg=llb.HolZeile();
-									if (gerg?*gerg:0) {
-										hinw+=" (";
-										hinw+=cjj(gerg,11); // fT4
-										hinw+=" ";
-										hinw+=cjj(gerg,10); // (lwert)
-										hinw+=" ";
-										hinw+=cjj(gerg,12); // pmol/l
-										hinw+=" ";
-										hinw+=cjj(gerg,14)[8]; // 2021-04-29
-										hinw+=cjj(gerg,14)[9]; // 2021-04-29
-										hinw+='.';
-										hinw+=cjj(gerg,14)[5]; // 2021-04-29
-										hinw+=cjj(gerg,14)[6]; // 2021-04-29
-										hinw+='.';
-										hinw+=")";
-									} // 													if (gerg?*gerg:0)
-								} // 												if (!llb.obqueryfehler)
-							} // 											if (lpid!=""&&lpid!="0")
-						} // 										if (rewert>(palter<25?2.5:palter>65?8:5)||rewert<0.25)
+						// Schwellwerte (altersgestuft oben: <25->2.5, >65->8, sonst 5; fix unten: 0.25) jetzt ueber
+						// labgrenz (AlterUnter/AlterUeber), s.u.; der fT4-Kontext-Lookup bleibt hartkodiert
+						// (dynamische Fremdwert-Abfrage, kein generischer Mechanismus dafuer)
+						labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp,ficd,ficdsp);
+						if (hinw!="" && lpid!=""&&lpid!="0") {
+							RS llb(My,"CALL geslabneu("+lpid+",\"\",\"AND abkü='fT4' AND zeitpunkt>now()-INTERVAL 5 DAY "
+									"GROUP BY zeitpunkt DESC LIMIT 1)i\")",aktc,ZDB);
+							char ***gerg{0};
+							if (!llb.obqueryfehler) {
+								gerg=llb.HolZeile();
+								if (gerg?*gerg:0) {
+									hinw+=" (";
+									hinw+=cjj(gerg,11); // fT4
+									hinw+=" ";
+									hinw+=cjj(gerg,10); // (lwert)
+									hinw+=" ";
+									hinw+=cjj(gerg,12); // pmol/l
+									hinw+=" ";
+									hinw+=cjj(gerg,14)[8]; // 2021-04-29
+									hinw+=cjj(gerg,14)[9]; // 2021-04-29
+									hinw+='.';
+									hinw+=cjj(gerg,14)[5]; // 2021-04-29
+									hinw+=cjj(gerg,14)[6]; // 2021-04-29
+									hinw+='.';
+									hinw+=")";
+								} // 													if (gerg?*gerg:0)
+							} // 												if (!llb.obqueryfehler)
+						} // 											if (hinw!="" && lpid!=""&&lpid!="0")
 							// 5. fT4
 					} else if (iinstr(labk,string("ft4"))!=-1) {
 						if (rewert<12||rewert>22) {

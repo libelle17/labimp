@@ -307,6 +307,8 @@ enum T_
 	T_lg_MedVorhanden,
 	T_lg_AlterGrenze,
 	T_lg_GewichtGrenze,
+	T_lg_AlterUnter,
+	T_lg_AlterUeber,
 	T_lg_Mindesttreffer,
 	T_lg_Dosisgrenze,
 	T_lg_ICDVorschlag,
@@ -335,6 +337,11 @@ struct LGrenzRegel
 	int medvorhanden{0}; // labgrenz.MedVorhanden: 1=Regel nur wenn passende aktive Medikation vorhanden, 0=nur wenn nicht vorhanden
 	double altergrenze{0}; uchar obalter{0}; // labgrenz.AlterGrenze: Kriterium "Alter >= AlterGrenze", falls gesetzt
 	double gewichtgrenze{0}; uchar obgewicht{0}; // labgrenz.GewichtGrenze: Kriterium "Gewicht <= GewichtGrenze", falls gesetzt
+	double alterunter{0}; uchar obalterunter{0}; // labgrenz.AlterUnter: ausschliessendes Kriterium "Alter < AlterUnter", falls gesetzt;
+	                                              // im Unterschied zu AlterGrenze/GewichtGrenze (additive Zusatzkriterien via
+	                                              // Mindesttreffer) ist dies wie ICDMuster Teil der Regelfamilie (s. labgrenzpruef)
+	                                              // und waehlt so exklusiv zwischen Regeln fuer verschiedene Altersbaender
+	double alterueber{0}; uchar obalterueber{0}; // labgrenz.AlterUeber: ausschliessendes Kriterium "Alter > AlterUeber", falls gesetzt (s. AlterUnter)
 	unsigned mindesttreffer{0}; // labgrenz.Mindesttreffer: noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium; 0=alle gesetzten
 	double dosisgrenze{0}; uchar obdosis{0}; // labgrenz.Dosisgrenze (mg/Tag): wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis ueberschritten sein
 	string icdvorschlag; // labgrenz.ICDVorschlag: bei Feuern vorgeschlagener ICD (an fICD angehaengt), leer = kein Vorschlag;
