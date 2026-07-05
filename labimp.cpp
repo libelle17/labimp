@@ -2719,11 +2719,15 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						// die bisherige Bedingung obs=="0" (kein gelbes Kachel-Icon) entfaellt dabei
 						// 10. Nephropathie
 						// s. Zieldbfunktionen obLabI
-					} else if (((labk=="ALBCRE"||labk=="ALBKRE"||labk=="ALBQ"||labk=="ALBUM"||labk=="ALBUP") 
+					} else if (((labk=="ALBCRE"||labk=="ALBKRE"||labk=="ALBQ"||labk=="ALBUM"||labk=="ALBUP")
 								&&(koreinh.substr(0,5)=="mg/g "||koreinh==""||koreinh=="kA"||koreinh=="'kA'"))
 							||((labk=="ALBU"||labk=="ALBUMU")&&(koreinh=="mg/l"))){
+						// Nephropathie-Vorschlag (N08.3) jetzt ueber labgrenz (zwei Regeln nach Abkumuster/
+						// Einheitmuster fuer die beiden Abkuerzungs-/Einheitengruppen, ICDPruefmuster ^N08.3$,
+						// exakt wie zuvor gicd='N08.3'); die Bedingung "erst beim zweiten Albuminurienachweis"
+						// (voralb-Abfrage gegen labor1a) bleibt hartkodiert, da kein generisches Kriterium fuer
+						// "bereits fruehere positive Messung desselben Parameters" existiert
 						if (lpid!=""&&lpid!="0" && rewert>30) {
-							// die Diagnose mit 'gesichert' erst beim zweiten Albuminurienachweis verlangen
 							RS voralb(My,"SELECT 0 FROM labor1a WHERE pat_id="+lpid+" AND zeitpunkt<STR_TO_DATE('"+berzt+"','%Y%m%d')"
 									"AND (((abkü IN ('ALBCRE','ALBKRE','ALBQ','ALBUM','ALBUP'))"
 									"&&(einheit LIKE 'mg/g %'||einheit IN ('','kA','\\'kA\\'')))"
@@ -2732,18 +2736,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							if (!voralb.obqueryfehler) {
 								const char *const *const *const aerg{voralb.HolZeile()};
 								if (aerg?*aerg:0) {
-									if (ficd!="") ficd+=',';
-									ficd+="N08.3";
-									RS hi(My,"SELECT gicd FROM diagview WHERE pat_id="+lpid+" AND gicd='N08.3' AND obdauer<>0",aktc,ZDB);
-									if (!hi.obqueryfehler) {
-										const char *const *const *const lerg{hi.HolZeile()};
-										if (lerg?*lerg:0) {
-											if (ficdsp!=255) ficdsp=33023; // orange
-										} else {
-											// caus<<rot<<"neue Nephropathie!"<<schwarz<<endl;
-											ficdsp=255;
-										}
-									} // 	if (!ni.obqueryfehler)
+									labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp,ficd,ficdsp);
 								} // aerg?*aerg:0
 							} // !voralb.obqueryfehler
 						} // if (lpid!=""&&lpid!="0" && rewert>30)
