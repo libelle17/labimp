@@ -2701,20 +2701,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 							labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp,ficd,ficdsp);
 						} //										if (vorwert!=0 && vorwert-rewert>1.5)    else
 							// 8. Harnsäure
-					} else if (labk=="HS") {
-						if (lpid!=""&&lpid!="0" && rewert>7) {
-							if (ficd!="") ficd+=',';
-							ficd+="E79.0";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E79.0' AND obdauer<>0",aktc,ZDB);
-							if (!hs.obqueryfehler) {
-								const char *const *const *const lerg{hs.HolZeile()};
-								if (lerg?*lerg:0) {
-									if (ficdsp!=255) ficdsp=33023; // orange
-								} else {
-									ficdsp=255;
-								}
-							} // 	if (!ni.obqueryfehler)
-						}
+						// HS jetzt ueber labgrenz (ICDVorschlag E79.0), s.u.
 						// LDL jetzt ueber labgrenz (ICDVorschlag E78.0, ICDPruefmuster ^E78), s.u.;
 						// die bisherige Bedingung obs=="0" (kein gelbes Kachel-Icon) entfaellt dabei
 						// 10. Nephropathie
