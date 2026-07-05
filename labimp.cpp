@@ -2833,25 +2833,8 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								} // if (lerg?*lerg:0)
 							} // 	if (!ni.obqueryfehler)
 						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
-							// 11. TRAK
-					} else if (labk=="TRAKKM"||labk=="TRAKPM"||labk=="TRAKPR"||labk=="TRAK"||labk=="TRAK_K"
-							||labk=="TSRE01"||labk=="TSRE") {
-						//															caus<<rot<<"Basedow untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (lpid!=""&&lpid!="0" && rewert>1.58) {
-							if (ficd!="") ficd+=',';
-							ficd+="E05.0";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E05.0' AND obdauer<>0",aktc,ZDB);
-							if (!hs.obqueryfehler) {
-								const char *const *const *const lerg{hs.HolZeile()};
-								if (lerg?*lerg:0) {
-									if (ficdsp!=255) ficdsp=33023; // orange
-								} else {
-									//																			caus<<rot<<"neuer Basedow"<<schwarz<<endl;
-									ficdsp=255;
-								} // if (lerg?*lerg:0)
-							} // 	if (!ni.obqueryfehler)
-						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
-						// 15. generisch aus Tabelle labgrenz, z.B. INR (siehe ladelabgrenz())
+						// TRAK/TSRE* jetzt ueber labgrenz (ICDVorschlag E05.0), s. u.
+						// 15. generisch aus Tabelle labgrenz, z.B. INR, TRAK (siehe ladelabgrenz())
 					} else if (labgrenzpruef(labk,koreinh,rewert,lpid,aktc,hinw,hinwsp,ficd,ficdsp)) {
 					} // if (labk==  ...			else if (labk=="HB")
 						//									if (hinw!="") KLA
