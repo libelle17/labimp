@@ -2747,23 +2747,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 								} // aerg?*aerg:0
 							} // !voralb.obqueryfehler
 						} // if (lpid!=""&&lpid!="0" && rewert>30)
-							// 11. Vit B12
-					} else if (labk=="B12N"||labk=="VB12"||labk=="VI1201") {
-						//															caus<<rot<<"Vit-B12 untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
-						if (lpid!=""&&lpid!="0" && (koreinh=="pg/ml" && rewert<197)) {
-							if (ficd!="") ficd+=',';
-							ficd+="E53.8";
-							RS hs(My,"SELECT icd FROM diagview WHERE pat_id="+lpid+" AND gicd RLIKE '^E53.8|^D51' AND obdauer<>0",aktc,ZDB);
-							if (!hs.obqueryfehler) {
-								const char *const *const *const lerg{hs.HolZeile()};
-								if (lerg?*lerg:0) {
-									if (ficdsp!=255) ficdsp=33023; // orange
-								} else {
-									// caus<<rot<<"neuer Vit-B12-Mangel!"<<schwarz<<endl;
-									ficdsp=255;
-								} // if (lerg?*lerg:0)
-							} // 	if (!ni.obqueryfehler)
-						} // 	if (lpid!=""&&lpid!="0" && (einh=="pg/ml" && rewert<197))
+						// Vit B12 jetzt ueber labgrenz (Einheitmuster ^pg/ml$, ICDVorschlag E53.8, ICDPruefmuster ^E53.8|^D51), s.u.
 							// 12. Vit D
 					} else if (labk=="VIT3KL"||labk=="VITD01"||labk=="VITD"||labk=="DIHYKP"||labk=="DIHYK"||labk=="VID2") {
 						//															caus<<rot<<"Vit-D untersucht: "<<rewert<<" "<<einh<<schwarz<<endl;
