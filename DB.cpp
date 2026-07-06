@@ -2341,7 +2341,7 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 					exitp(36);
 					break;
 			} // switch (dbp->DBS) 
-		} // if (obanfangen)
+		} // if (obeinfuegen)
 
 		if (obeinfuegen) {
 			switch (dbp->DBS) {
