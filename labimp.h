@@ -522,6 +522,8 @@ class hhcl:public dhcl
 		void virtschlussanzeige(); //ω
 	public: //α
 		hhcl(const int argc, const char *const *const argv);
+		// TEMP-Fix 2026-07-06: schliesst alle offenen DB-Verbindungen sauber vor exit() (sonst "Aborted connection" im MariaDB-Log)
+		void kexit(int code);
 		~hhcl();
 		// doc.net-Erweiterung (docnet.cpp)
 		int dverarbeit_public(const string& datei,string *datidp,string *patelidp)

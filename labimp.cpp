@@ -715,7 +715,7 @@ void hhcl::prueflyhinw(DB *My, const size_t aktc, const int obverb, const int ob
 		Tabelle taba(My,tlyhinw,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Hinweise]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyhinw,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 		if (taba.tbneu) {
 			// "Labor 20051127 224528.dat": kein Labor angegeben
@@ -742,7 +742,7 @@ void hhcl::prueflyqspez(DB *My, const size_t aktc, const int obverb, const int o
 		Tabelle taba(My,tlyqspez,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Spezifikation]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyqspez,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 		if (taba.tbneu) {
 			// "Labor 20051127 224528.dat": kein Labor angegeben
@@ -787,7 +787,7 @@ void hhcl::prueflyparameter(DB *My, const size_t aktc, const int obverb, const i
 		Tabelle taba(My,tlyparameter,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_LaborParameter]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyparameter,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -819,7 +819,7 @@ void hhcl::prueflydat(DB *My, const size_t aktc, const int obverb, const int obl
 		Tabelle taba(My,tlydat,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0,Tx[T_LaborEinlesungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlydat,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -841,7 +841,7 @@ void hhcl::prueflyplab(DB *My, const size_t aktc, const int obverb, const int ob
 		Tabelle taba(My,tlyplab,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Laborplab]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyplab,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 		if (taba.tbneu) {
 			// "Labor 20051127 224528.dat": kein Labor angegeben
@@ -886,7 +886,7 @@ void hhcl::prueflypneu(DB *My, const size_t aktc, const int obverb, const int ob
 		Tabelle taba(My,tlypneu,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborneu]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlypneu,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -915,7 +915,7 @@ void hhcl::prueflypnb(DB *My, const size_t aktc, const int obverb, const int obl
 		Tabelle taba(My,tlypnb,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_Labornb]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlypnb,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -944,7 +944,7 @@ void hhcl::prueflyaerzte(DB *My, const size_t aktc, const int obverb, const int 
 		Tabelle taba(My,tlyaerzte,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyaerzte,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -977,7 +977,7 @@ void hhcl::prueflysaetze(DB *My, const size_t aktc, const int obverb, const int 
 		Tabelle taba(My,tlysaetze,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborsaetze]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlysaetze,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -1089,7 +1089,7 @@ void hhcl::prueflyus(DB *My, const size_t aktc, const int obverb, const int oblo
 #endif
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyus,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -1130,7 +1130,7 @@ void hhcl::prueflybakt(DB *My, const size_t aktc, const int obverb, const int ob
 		Tabelle taba(My,tlybakt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborbakt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlybakt,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -1160,7 +1160,7 @@ void hhcl::prueflyleist(DB *My, const size_t aktc, const int obverb, const int o
 		Tabelle taba(My,tlyleist,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts, Tx[T_LaborLeistungen]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyleist,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -1211,7 +1211,7 @@ void hhcl::prueflywert(DB *My, const size_t aktc, const int obverb, const int ob
 		Tabelle taba(My,tlywert,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborwerte]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlywert,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -1233,7 +1233,7 @@ void hhcl::prueflyfehlt(DB *My, const size_t aktc, const int obverb, const int o
 		Tabelle taba(My,tlyfehlt,felder,sizeof felder/sizeof* felder,0,0,csts,sizeof csts/sizeof *csts,Tx[T_Laborfehlt]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyfehlt,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -1276,7 +1276,7 @@ void hhcl::prueflypgl(DB *My, const size_t aktc, const int obverb, const int obl
 		Tabelle taba(My,tlypgl,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,csts,sizeof csts/sizeof *csts, Tx[T_Laborpgl]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlypgl,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -1304,7 +1304,7 @@ void hhcl::prueflpatel(DB *My, const size_t aktc, const int obverb, const int ob
 		RS berind(My,"ALTER TABLE labpatel ADD INDEX IF NOT EXISTS pfadname(pfadname);",aktc,ZDB);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+labpatel,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	}
 } // prueflpath
@@ -1347,7 +1347,7 @@ void hhcl::prueflpath(DB *My, const size_t aktc, const int obverb, const int obl
 				/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+labpath,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // int pruefouttab(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
@@ -1389,7 +1389,7 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 				/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+labgrenz,1,1);
-			exit(11);
+			kexitDB(My,11);
 		}
 	} // if (!direkt)
 } // void hhcl::prueflgrenz
@@ -1825,6 +1825,20 @@ void hhcl::virtzeigversion(const string& ltiffv/*=nix*/)
 	dhcl::virtzeigversion(ltiffv); //α
 } // void hhcl::virtzeigversion
 
+// TEMP-Fix 2026-07-06: schliesst alle offenen DB-Verbindungen sauber vor exit() (sonst "Aborted connection" im MariaDB-Log)
+void hhcl::kexit(int code)
+{
+	if (My) {
+		for (size_t i=0;i<My->conz;i++) {
+			if (My->conn[i]) {
+				mysql_close(My->conn[i]);
+				My->conn[i]=0;
+			}
+		}
+	}
+	exit(code);
+} // void hhcl::kexit(int code)
+
 // wird aufgerufen in lauf
 void hhcl::pvirtvorrueckfragen()
 {
@@ -1920,7 +1934,7 @@ void hhcl::pvirtvorrueckfragen()
 				} // 				while (cerg=nw.HolZeile(),cerg?*cerg:0)
 			} // 			if (!nw.obqueryfehler)
 		} // 		} else if (!pidnachw.empty())
-		exit(0);
+		kexit(0);
 	} // 	if (listdat||!pidnachw.empty())
 	if (vorsl.empty()) vorsl=vorsilbe;
 	//α
@@ -1977,7 +1991,7 @@ void hhcl::virtpruefweiteres()
 		}
 		if (!Tippob(rots+Tx[umben.empty()?T_Soll_ich_wirklich_alle_Tabellen_mit:T_Soll_ich_wirklich_alle_Tabellen_mit___]+blau+vorsl+rot+(vonvorne?Tx[T_loeschen_und_von_vorne_anfangen]:loeschalle?Tx[T_loeschen]:Tx[T_nach___]+blaus+umben+schwarz+Tx[T_umbenennen])+schwarz,"n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
-			exit(0);
+			kexit(0);
 		}
 		if (umben.empty()) {
 			droptables(aktc);
@@ -2016,7 +2030,7 @@ void hhcl::virtpruefweiteres()
 					+tlydat+schwarz+", "+gruen+szahls+schwarz+Tx[T_Eintraege_aus]+blau+tlysaetze+schwarz+", "+gruen+uzahls+schwarz
 					+Tx[T_Eintraege_aus]+blau+tlyus+schwarz+")","n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
-			exit(0);
+			kexit(0);
 		}
 		fLog(blaus+Tx[(loeschab.empty()?T_Loescheid:T_Loescheab)]+gruen+(loeschab.empty()?loeschid:loeschab)+schwarz,1,0);
 		// ZDB=1;
@@ -2037,13 +2051,13 @@ void hhcl::virtpruefweiteres()
 		RS loe(My,"DELETE u.*,w.*,s.*,d.* FROM laboryus u LEFT JOIN laborywert w ON w.usid=u.id LEFT JOIN laborysaetze s ON s.satzid=u.satzid LEFT JOIN laborydat d ON d.datid=s.datid"+delbed,aktc,ZDB,0,0,0,&zahl); // kann lange brauchen
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
 		if (!loeschid.empty()) {
-			exit(schluss(systemrueck(befehl+" "+devtty,/*obverb=*/0,/*oblog=*/0,/*rueck=*/0,/*obsudc=*/1),Txk[T_nach__]+befehl,oblog));
+			kexit(schluss(systemrueck(befehl+" "+devtty,/*obverb=*/0,/*oblog=*/0,/*rueck=*/0,/*obsudc=*/1),Txk[T_nach__]+befehl,oblog));
 		}
-		exit(0);
+		kexit(0);
 	} else if (entleer) {
 		if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit_]+blau+vorsl+rot+Tx[T_entleeren_und_von_vorne_anfangen]+schwarz,"n")) {
 			fLog(Tx[T_Aktion_abgebrochen],1,1);
-			exit(0);
+			kexit(0);
 		}
 		if (!My) initDB();
 		RS da(My,"SET FOREIGN_KEY_CHECKS=0",aktc,ZDB);
@@ -2070,14 +2084,14 @@ void hhcl::virtpruefweiteres()
 		if (nachbneu) {
 			if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Nachbearbeitungen_von_vorne_angefangen_werden]+schwarz,"n")) {
 				fLog(Tx[T_Aktion_abgebrochen],1,1);
-				exit(0);
+				kexit(0);
 			}
 		} // 		if (nachbneu)
 		if (loeschunvollst||nachbneu) {
 			/*
 			if (!Tippob(rots+Tx[T_Soll_ich_wirklich_alle_Tabellen_mit__]+blau+vorsl+rot+Tx[T_um_Datensaetze_aus_nicht_fertig_eingelesenen_Dateien_bereinigt_werden]+schwarz,"n")) {
 				fLog(Tx[T_Aktion_abgebrochen],1,1);
-				exit(0);
+				kexit(0);
 			}
 			*/
 		} // 		if (loeschunvollst||nachbneu)
@@ -3014,7 +3028,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 						rba.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/&baktid,/*mitupd=*/1);
 						keimz=0; // "Labor 20101204 195050.dat"
 						keimzda=0; // "Labor 20101210 034422.dat"
-						exit(59);
+						kexit(59);
 					}
 					rbawep=&rba;
 				} else /*if (cd=="8410")*/ {
@@ -3284,7 +3298,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 						}
 					} else {
 						fLog(rots+Tx[T_Normbereich_ohne_bis]+violett+nbn+schwarz,1,1);
-						exit(47);
+						kexit(47);
 					}
 				} else {
 					normbereich+=" \r\n";

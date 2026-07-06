@@ -2,7 +2,7 @@
 .\" Manual page for labimp
 .\" Please write to geraldschade@gmx.de if you find errors or deficiencies
 .pc
-.TH labimp 1 "05.07.26" "labimp" "User Manual"
+.TH labimp 1 "06.07.26" "labimp" "User Manual"
 .SH NAME
 \fBlabimp\fR \- import laboratory values from LDT files (QC\-Labmessenger and doc.net) into a MariaDB database
 .br
@@ -125,7 +125,7 @@ l l.
 .SH OPTIONS
 Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 .br
-                                                                                                                                                           \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11582 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11582 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
