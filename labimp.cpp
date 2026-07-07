@@ -3524,6 +3524,7 @@ void hhcl::pvirtfuehraus()
 			// ICD-Vorschlaege bei ueber doc.net importierten Dateien aus, solange labgrenzregeln leer war);
 			// unbedingt (nicht nur bei leerer Liste), damit auch spaetere Aenderungen an der labgrenz-Tabelle
 			// noch in reinen doc.net-Zyklen (ohne prueftbl()-Aufruf unten) wirksam werden
+			if (!My) initDB(); // ladelabgrenz() braucht My; sonst hier noch nicht initialisiert (Absturz)
 			ladelabgrenz(aktc);
       // ── doc.net: Quelldateien aus qvz einlesen, verschieben, PDF extrahieren
 			systemrueck("Q="+ldatvz+"/;P="+fertigvz+";find /opt/turbomed/LaborStaber/DFUE/Update_Staber/LDTArchiv -iname '*.ldt' -newer \"$(printf $P/;ls -t $P|head -n1)\"|while read U;do cp \"$U\" \"$Q\"; find /DATA/Patientendokumente/ -mindepth 1 -maxdepth 1 -type d -regex '.*/[^/]+Labor$' -exec cp \"$U\" {} \\; ; done;",2);
