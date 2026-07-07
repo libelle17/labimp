@@ -3475,6 +3475,23 @@ void hhcl::prueftbl()
 				"LEFT JOIN `"+tlyhinw+"` e ON b.erklid=e.id "
 				"LEFT JOIN `"+tlyhinw+"` h ON b.hinwid=h.id "
 				"LEFT JOIN `"+tlyqspez+"` i ON b.qspezid=i.id "
+	}, {
+		"wmedplan",
+			"select `mp`.`FID` AS `FID`,`mp`.`Pat_ID` AS `Pat_ID`,`mp`.`MPNr` AS `MPNr`,`mp`.`ZeitPunkt` AS `ZeitPunkt`,`mp`.`Datum` AS `Datum`,"
+				"`mp`.`Medikament` AS `Medikament`,`mp`.`MedAnfang` AS `MedAnfang`,`mp`.`Wirkstoff` AS `Wirkstoff`,`mp`.`PZN` AS `PZN`,`mp`.`FeldNr` AS `FeldNr`,"
+				"`mp`.`mo` AS `mo`,`mp`.`mi` AS `mi`,`mp`.`nm` AS `nm`,`mp`.`ab` AS `ab`,`mp`.`zn` AS `zn`,`mp`.`bBed` AS `bBed`,`mp`.`Bemerkung` AS `Bemerkung`,"
+				"`mp`.`Grund` AS `Grund`,`mp`.`Stärke` AS `Stärke`,`mp`.`Einheit` AS `Einheit`,`mp`.`Form` AS `Form`,`mp`.`Menge` AS `Menge`,`mp`.`Nutzer` AS `Nutzer`,"
+				"`mp`.`AbsPos` AS `AbsPos`,`mp`.`AktZeit` AS `AktZeit`,`mp`.`StByte` AS `StByte`,`mp`.`ergaenzt` AS `ergaenzt`,`mp`.`mpart` AS `mpart`,`mp`.`tag` AS `tag`,"
+				"`mp`.`rang` AS `rang`,"
+				"rank() over ( partition by `mp`.`Pat_ID` order by `mp`.`MPNr` desc,`mp`.`ZeitPunkt` desc,`mp`.`MPNr` desc) AS `rni`,"
+				"rank() over ( partition by `mp`.`Pat_ID` order by `mp`.`MPNr`,`mp`.`ZeitPunkt`,`mp`.`MPNr`) AS `rnr` "
+				"from (select `mp`.`FID` AS `FID`,`mp`.`Pat_ID` AS `Pat_ID`,`mp`.`MPNr` AS `MPNr`,`mp`.`ZeitPunkt` AS `ZeitPunkt`,`mp`.`Datum` AS `Datum`,"
+				"`mp`.`Medikament` AS `Medikament`,`mp`.`MedAnfang` AS `MedAnfang`,`mp`.`Wirkstoff` AS `Wirkstoff`,`mp`.`PZN` AS `PZN`,`mp`.`FeldNr` AS `FeldNr`,"
+				"`mp`.`mo` AS `mo`,`mp`.`mi` AS `mi`,`mp`.`nm` AS `nm`,`mp`.`ab` AS `ab`,`mp`.`zn` AS `zn`,`mp`.`bBed` AS `bBed`,`mp`.`Bemerkung` AS `Bemerkung`,"
+				"`mp`.`Grund` AS `Grund`,`mp`.`Stärke` AS `Stärke`,`mp`.`Einheit` AS `Einheit`,`mp`.`Form` AS `Form`,`mp`.`Menge` AS `Menge`,`mp`.`Nutzer` AS `Nutzer`,"
+				"`mp`.`AbsPos` AS `AbsPos`,`mp`.`AktZeit` AS `AktZeit`,`mp`.`StByte` AS `StByte`,`mp`.`ergaenzt` AS `ergaenzt`,`mp`.`mpart` AS `mpart`,`mp`.`tag` AS `tag`,"
+				"rank() over ( partition by `mp`.`Pat_ID`,cast(`mp`.`ZeitPunkt` as date) order by `mp`.`MPNr` desc,`mp`.`ZeitPunkt` desc) AS `rang` "
+				"from `medplan` `mp`) `mp` where `mp`.`rang` = 1"
 	},
 	};
 	for(size_t i=0;i<sizeof vpaare/sizeof *vpaare;i++) {
