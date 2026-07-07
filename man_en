@@ -125,7 +125,7 @@ l l.
 .SH OPTIONS
 Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 .br
-                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11586 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11589 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -234,6 +234,8 @@ Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 \fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
 .br
 \fB -db, --database <string>\fR: uses the database <string> instead of ('\fBlabimp\fR')
+.br
+\fB -sz, --locktimeout <zahl>\fR: sets the maximum wait time for external table locks to <zahl> seconds (lock_wait_timeout) instead of (\fB180\fR)
 .br
 \fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
 .br
