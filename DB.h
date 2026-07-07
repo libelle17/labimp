@@ -411,6 +411,11 @@ struct DB
 // da direktes exit() DB::~DB() fuer bereits erfolgreich geoeffnete Slots ueberspringt)
 void kexitDB(const DB *dbp, int code);
 
+// gibt nur die lokale fd-Kopie einer von fork() geerbten Verbindung frei (kein mysql_close(),
+// s. Kommentar bei der Definition in DB.cpp) - fuer Kindprozesse, die per neueEigeneMy() eine
+// eigene Verbindung statt des geerbten Pools bekommen
+void gebGeerbteVerbindungFrei(DB *const dbp);
+
 struct Tabelle 
 {
 	const DB* dbp;
@@ -584,6 +589,8 @@ struct dhcl:public hcl
 		~dhcl();
 		int  initDB();
 		int  pruefDB(DB** testMy, const string& db);
+		// TEMP-Fix 2026-07-06: siehe DB.cpp
+		void neueEigeneMy(const size_t conz);
 #ifdef VOMHAUPTCODE
 		__attribute__((weak)) // implementationsspezifische Vorgaben, Modul vgb.cpp)
 #endif

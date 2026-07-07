@@ -1,5 +1,6 @@
 #include "kons.h"
 #include "DB.h"
+#include <unistd.h> // close()
 #define caus cout // nur zum Debuggen
 #define caup cout // zum Debuggen von Postgres
 #define exitp exit // zum Debuggen von Postgres
@@ -18,6 +19,24 @@ void kexitDB(const DB *dbp, int code)
 	}
 	exit(code);
 } // void kexitDB(const DB *dbp, int code)
+
+// Gibt nur die lokale fd-Kopie einer vom Elternprozess nach fork() geerbten Verbindung frei -
+// OHNE mysql_close() (das wuerde per COM_QUIT die mit dem Elternprozess geteilte Server-Session
+// beenden, s. TEMP-Fix 2026-07-06 / "Server has gone away"-Regression). close() auf dem rohen
+// Socket-fd ist ein rein lokaler Kernel-Vorgang: es geht nichts ueber die Leitung, der Server
+// merkt davon nichts, solange der Elternprozess seinen eigenen fd auf denselben Socket noch
+// offen haelt. Wird von neueEigeneMy() aufgerufen, bevor My ueberschrieben wird.
+void gebGeerbteVerbindungFrei(DB *const dbp)
+{
+	if (dbp) {
+		for (size_t i=0;i<dbp->conz;i++) {
+			if (dbp->conn[i]) {
+				close(mysql_get_socket(dbp->conn[i]));
+				dbp->conn[i]=0; // verhindert spaeteres versehentliches mysql_close() darauf
+			}
+		}
+	}
+} // void gebGeerbteVerbindungFrei(DB *const dbp)
 
 //const char *Txdbcl::TextC[T_dbMAX+1][SprachZahl]={
 const char *DB_T[T_dbMAX+1][SprachZahl]={
@@ -1205,7 +1224,6 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
             istr[i]=", ADD INDEX `"+felder[i].name+"`(`"+felder[i].name+"`)";
           }
         } // for(int i=0;i<feldzahl;i++)
-				// Pruefung, ob die ganze Tabelle erstellt werden muss
         MYSQL_RES *dbres=mysql_list_tables(dbp->conn[aktc],tbname.c_str());
         if (dbres && !dbres->row_count) {
 					fLog(Txd[T_erstelle_Tabelle]+blaus+tbname+schwarz,1,oblog);
@@ -1247,7 +1265,6 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
             if (gspn) sql<<" AFTER `"<<felder[gspn-1].name<<"`";
             else sql<<" FIRST";
             sql<<istr[gspn];
-						fLog("Fuege hinzu: "+blaus+sql.str()+schwarz,1,1);
             /*int erg=*/rs.Abfrage(sql.str(),aktc,obverb);
             gesfehlr+=rs.obqueryfehler;
             if (gesfehlr) fLog(string("gesfehlr 2: ")+ltoan(gesfehlr),1,1);
@@ -1851,14 +1868,12 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 ////	int altobverb=obverb; obverb=1;
 	const unsigned vlz=10; // Verl�ngerungszahl
 	const unsigned maxversuche=3;
-	const string hochzwei{'\xB2'}, hze{'2'};
 	yLog(obverb>0?obverb-1:0,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
 	int obfalsch{0};
 	geaendert=0;
 	// fuer wiederholten Abfragen
 	//// <<"in doAbfrage: "<<blau<<sql<<schwarz<<endl;
-			char obf=0; // (sql.find("1.73")!=string::npos);
 	switch (dbp->DBS) {
 		case MySQL:
 			if (!obqueryfehler)  {
@@ -1869,15 +1884,6 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 			num_fields=0;
 			////      if (sql=="select column_name from information_schema.columns where table_schema='emails' and table_name = 'lmailbody' and extra = 'auto_increment'") {mysql_commit(dbp->conn[aktc]);} // sql="select 'ID'";
 			//// <<"sql.c_str(): "<<sql.c_str()<<endl;
-			if (obf) cout<<"vor: "<<sql<<endl;
-//			ersetzAllezu(sql,hochzwei,hze);
-			if (obf) { cout<<"nach: "<<sql<<endl;
-//			  for (char const elt: sql.c_str())
-					if (obf) for(std::string::size_type i = 0; i < sql.size(); ++i) {
-    std::cout << "0x" << std::hex << std::setw(2) << std::setfill('0')
-              << static_cast<int>(sql[i]) << ' ';
-	        }
-  std::cout << '\n'; }
 			if ((obverb>0)|oblog)
 				fLog("SQL: '"+blaus+sql+schwarz+"'",obverb,oblog);
 			if (!dbp->conn[aktc]) {
@@ -2565,6 +2571,21 @@ int dhcl::initDB()
 	} //   if (My->fehnr)
 	return 0;
 } // initDB
+
+// TEMP-Fix 2026-07-06: erzeugt fuer den aufrufenden Prozess (insbesondere Kindprozesse nach fork())
+// eine NEUE, unabhaengige Verbindung und ersetzt My damit - OHNE den zuvor bestehenden,
+// mit dem Elternprozess geteilten Pool anzufassen oder zu schliessen. So teilen sich Eltern- und
+// Kindprozess nach fork() nie dieselbe MySQL-Verbindung (Ursache der 2026-07-06 beobachteten
+// "Server has gone away"-Kaskade, als Kindprozesse beim Beenden versehentlich den ganzen geerbten
+// Pool schlossen). Verwendet dieselben Zugangsdaten wie initDB(). conz ist bewusst pro Aufrufstelle
+// auf den dort tatsaechlich benoetigten hoechsten aktc-Index+1 abgestimmt (nicht pauschal maxconz),
+// um die Zahl neu aufgebauter Verbindungen je Fork zu minimieren.
+void dhcl::neueEigeneMy(const size_t conz)
+{
+	gebGeerbteVerbindungFrei(My); // fd-Kopie der geerbten Verbindung freigeben, bevor My ueberschrieben wird
+	My=new DB(myDBS,host,muser,mpwd,conz,dbq,/*port=*/0,/*unix_socket=*/0,/*client_flag=*/CLIENT_MULTI_STATEMENTS,obverb,oblog,
+			DB::defmycharset,DB::defmycollat,/*versuchzahl=*/3,/*ggferstellen=*/1,mcnfdat,/*plockwait=*/sperrzeit);
+} // dhcl::neueEigeneMy
 
 // wird aufgerufen in autofax.pvirtnachrueckfragen
 int dhcl::pruefDB(DB** testMy, const string& db)
