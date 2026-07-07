@@ -3518,6 +3518,13 @@ void hhcl::pvirtfuehraus()
 	} else if (!loeschalle && !loeschunvollst && umben.empty()) {
 		if (!nurnachb && !nachbneu && !nurusmod && !pruefauft) {
 			pruefverz(fertigvz,obverb,oblog);
+			// labgrenzregeln muss vor jedem Einlesevorgang frisch geladen sein (s. ladelabgrenz()) -
+			// insbesondere auch vor dem doc.net-Pfad unten, der unabhaengig vom weiter unten bedingt
+			// aufgerufenen prueftbl() laeuft (Regression: nach Neustart blieben labgrenz-Hinweise/
+			// ICD-Vorschlaege bei ueber doc.net importierten Dateien aus, solange labgrenzregeln leer war);
+			// unbedingt (nicht nur bei leerer Liste), damit auch spaetere Aenderungen an der labgrenz-Tabelle
+			// noch in reinen doc.net-Zyklen (ohne prueftbl()-Aufruf unten) wirksam werden
+			ladelabgrenz(aktc);
       // ── doc.net: Quelldateien aus qvz einlesen, verschieben, PDF extrahieren
 			systemrueck("Q="+ldatvz+"/;P="+fertigvz+";find /opt/turbomed/LaborStaber/DFUE/Update_Staber/LDTArchiv -iname '*.ldt' -newer \"$(printf $P/;ls -t $P|head -n1)\"|while read U;do cp \"$U\" \"$Q\"; find /DATA/Patientendokumente/ -mindepth 1 -maxdepth 1 -type d -regex '.*/[^/]+Labor$' -exec cp \"$U\" {} \\; ; done;",2);
 			sleep(2);
