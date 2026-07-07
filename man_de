@@ -2,7 +2,7 @@
 .\" Manual-Seite für labimp
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH labimp 1 "07.07.26" "labimp" "Handbuch"
+.TH labimp 1 "08.07.26" "labimp" "Handbuch"
 .SH NAME
 \fBlabimp\fR \- Laborwerte aus LDT\-Dateien (QC\-Labmessenger und doc.net) in eine MariaDB\-Datenbank einlesen
 .br
@@ -100,6 +100,26 @@ LDT\-Versionsstring (z.\,B. \fILDT3.2.19\fR) → 9212.
 Nach dem Einlesen versucht \fBlabimp\fR, die Laborwerte anhand von Name,
 Geburtsdatum, Eingangsdatum und Messwerten einem Patienten in der
 Tabelle \fBlaborneu\fR zuzuordnen (Funktion \fBusmod\fR).
+.SS Kennzeichnung pathologischer Werte
+Die meisten Laborwerte werden nicht mehr im Programmtext hart kodiert,
+sondern anhand der Tabelle \fBlabgrenz\fR auf pathologische Grenzwerte
+geprüft (Funktion \fBlabgrenzpruef\fR).
+Jede Regel in \fBlabgrenz\fR definiert u.a. ein Abkürzungsmuster für den
+Laborparameter, eine Richtung (\fBoben\fR/\fBunten\fR) und einen
+Grenzwert, sowie optional zusätzliche Kriterien (Alter, Geschlecht,
+Gewicht, ein vorausgesetzter oder ausgeschlossener ICD-Code, eine
+Medikation, eine Mindest-Tagesdosis) und eine Reihenfolge zur
+Kaskadierung mehrerer Regeln je Richtung.
+.br
+Feuert eine Regel, wird der zugehörige \fBHinweis\fR-Text (ggf. mit der
+Pseudovariable \fB%DOSIS%\fR für eine errechnete Tagesdosis) beim
+Laborwert eingetragen; ist zusätzlich ein \fBICDVorschlag\fR hinterlegt,
+wird dieser rot (noch nicht dokumentiert) oder orange (beim Patienten
+bereits dokumentiert, Prüfung anhand \fBICDPruefmuster\fR) markiert.
+.br
+Einzelne Prüfungen (u.a. Metformin/Kreatinin) sind weiterhin fest im
+Programmtext kodiert, wenn sie sich nicht sinnvoll über \fBlabgrenz\fR
+abbilden ließen.
 .SS Datenbanktabellen
 Alle Tabellen tragen einen konfigurierbaren Präfix (\fBvorsil\fR,
 Standardwert \fIlabory\fR):
@@ -125,7 +145,7 @@ l l.
 .SH OPTIONEN
 Optionen können kurz (\fB\-x\fR) oder lang (\fB\-\-xxxx\fR) angegeben werden
 .br
-                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11589 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11590 \fR (Laborimport) 
 .br
 \fBOptionen, die nicht gespeichert werden (aktueller Wert in Klammern): \fR
 .br

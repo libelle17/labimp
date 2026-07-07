@@ -2,7 +2,7 @@
 .\" Manual page for labimp
 .\" Please write to geraldschade@gmx.de if you find errors or deficiencies
 .pc
-.TH labimp 1 "07.07.26" "labimp" "User Manual"
+.TH labimp 1 "08.07.26" "labimp" "User Manual"
 .SH NAME
 \fBlabimp\fR \- import laboratory values from LDT files (QC\-Labmessenger and doc.net) into a MariaDB database
 .br
@@ -100,6 +100,25 @@ LDT version string (e.g. \fILDT3.2.19\fR) → 9212.
 After import, \fBlabimp\fR tries to assign the laboratory values to a
 patient in the table \fBlaborneu\fR based on name, date of birth,
 entry date and measured values (function \fBusmod\fR).
+.SS Flagging pathological values
+Most laboratory values are no longer hard-coded in the program text, but
+checked against pathological thresholds via the table \fBlabgrenz\fR
+(function \fBlabgrenzpruef\fR).
+Each rule in \fBlabgrenz\fR defines, among other things, a match pattern
+for the laboratory parameter, a direction (\fBoben\fR/\fBunten\fR, i.e.
+above/below) and a threshold, plus optionally further criteria (age,
+sex, weight, a required or excluded ICD code, a medication, a minimum
+daily dose) and an order for cascading several rules per direction.
+.br
+If a rule fires, its \fBHinweis\fR (hint) text (possibly containing the
+placeholder \fB%DOSIS%\fR for a computed daily dose) is recorded with
+the laboratory value; if an \fBICDVorschlag\fR (ICD suggestion) is
+configured as well, it is flagged red (not yet documented) or orange
+(already documented for the patient, checked via \fBICDPruefmuster\fR).
+.br
+A few checks (among others metformin/creatinine) remain hard-coded in
+the program text where they could not reasonably be expressed via
+\fBlabgrenz\fR.
 .SS Database tables
 All tables carry a configurable prefix (\fBvorsil\fR,
 default \fIlabory\fR):
@@ -125,7 +144,7 @@ l l.
 .SH OPTIONS
 Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 .br
-                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11589 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11590 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
