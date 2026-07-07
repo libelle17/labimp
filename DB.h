@@ -123,8 +123,11 @@ enum Txdb_
 	T_Wertma,
 	T_Tabelle,
 	T_Versuche_in_doAbfrage_mehr_als,
+	T_sz_k,
+	T_sperrzeit_l,
+	T_Setzt_maximale_Wartezeit_bei_auswaertigen_Tabellensperren,
 	T_dbMAX,
-}; // enum Txdb_ 
+}; // enum Txdb_
 
 // extern struct Txdbcl Txd;
 extern const char *DB_T[T_dbMAX+1][SprachZahl];
@@ -347,6 +350,7 @@ struct DB
 	string passwd; // kann in pruefrpw dem eingegebenen rootpw gleichgesetz werden, deshalb nicht const
 	const string dbname;
 	const string mcnfdat; // Pfad zu einer mariadb-defaults-extra-file; wenn nicht leer, ersetzt sie bei Root-CLI-Befehlen '-uroot'/'-p<rootpwd>'
+	const unsigned lockwait{180}; // maximale Wartezeit (Sekunden) bei fremden Tabellensperren, s. DB::init() (SET SESSION lock_wait_timeout/innodb_lock_wait_timeout)
 	string myloghost; // einheitliche Benennung von 'localhost' bzw. '%', zu kompliziert, um in jedem DB::DB aufzufuehren, deshalb nicht const
 	string rootpwd; // root-Passwort // wird in pruefrpw geaendert, deshalb nicht const
 	size_t conz; // Zahl der Verbindungen (s.o., conn)
@@ -382,7 +386,7 @@ struct DB
 			const size_t conz/*=1*/,
 			const string& uedb=string(), unsigned int port=0, const char* const unix_socket=NULL, unsigned long client_flag=0,
 			int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3,const uchar ggferstellen=1,
-			const string& pmcnfdat=string());
+			const string& pmcnfdat=string(), const unsigned plockwait=180);
 	void init(const string charset, const string collate,
 			unsigned int port=0, const char *const unix_socket=NULL, unsigned long client_flag=0,int obverb=0,int oblog=0,unsigned versuchzahl=3,
 			const uchar ggferstellen=1);
@@ -559,6 +563,7 @@ struct dhcl:public hcl
 		uchar ZDB{0}; // fuer Zusatz-Debugging (SQL): ZDB 1, sonst: 0
 		DB* My{0};
 		const size_t maxconz{12};//aktc: 0=... //α
+		int sperrzeit{180}; // maximale Wartezeit (Sekunden) bei fremden Tabellensperren (lock_wait_timeout), s. DB::init(); ueber Option "sperrzeit" einstellbar
 	private:
 	protected:
 		void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
