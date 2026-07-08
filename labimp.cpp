@@ -656,6 +656,15 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"1=aktiv, 0=deaktiviert","1=active, 0=disabled"},
 	// T_lg_Kommentar
 	{"Erlaeuterung der Regel","explanation of the rule"},
+	// T_prueflyviewsql
+	{"prueflyviewsql()","checklyviewsql()"},
+	// T_LaboryViewSQL
+	{"zuletzt angewandte View-Definitionen (verhindert unnoetiges DROP/CREATE VIEW bei unveraendertem SQL-Text)",
+	 "last applied view definitions (avoids unnecessary DROP/CREATE VIEW when the SQL text is unchanged)"},
+	// T_ViewName
+	{"Name der View","name of the view"},
+	// T_ViewSQLText
+	{"zuletzt angewandter SQL-Text (SELECT-Teil) der View","last applied SQL text (SELECT part) of the view"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -710,7 +719,12 @@ void hhcl::prueflyhinw(DB *My, const size_t aktc, const int obverb, const int ob
 			Feld("Text","LONGTEXT","","",Tx[T_Auftragshinweis_Kommentar_oder_Erklaerung],0,0,1,string()),
 		};
 		Index indices[]{
-			Index("Text",new Feld[1]{Feld("Text",string(),"767")},1,/*unique*/0)
+			// typ hier "LONGTEXT" (wie die eigentliche Spalte), sonst haelt machind() diese
+			// nicht fuer eine LONGTEXT-Spalte und setzt die Praefixlaenge bei jedem CREATE INDEX
+			// auf 50 statt 767 zurueck - das erzeugt einen dauerhaften Soll/Ist-Unterschied (Soll:
+			// 767 aus diesem Literal, Ist: 50 aus der DB) und damit bei jedem Start ein unnoetiges
+			// DROP+CREATE INDEX, das mit fremden Tabellensperren kollidieren kann (s. sperrzeit)
+			Index("Text",new Feld[1]{Feld("Text","LONGTEXT","767")},1,/*unique*/0)
 		};
 		Tabelle taba(My,tlyhinw,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_Hinweise]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
@@ -753,6 +767,29 @@ void hhcl::prueflyqspez(DB *My, const size_t aktc, const int obverb, const int o
 		}
 	} // if (!direkt)
 } // int prueflyqspez
+
+// wird aufgerufen in: prueftbl; haelt fest, mit welchem SQL-Text eine View zuletzt angelegt wurde,
+// damit prueftbl() DROP/CREATE VIEW nur bei tatsaechlicher Aenderung ausfuehrt statt bei jedem Start
+// unbedingt (s. Kommentar dort zu den mit fremden Tabellensperren kollidierenden DDL-Befehlen)
+void hhcl::prueflyviewsql(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt/*=0*/)
+{
+	hLog(violetts+Tx[T_prueflyviewsql]+schwarz);
+	if (!direkt) {
+		Feld felder[] = {
+			Feld(/*name*/"ID",/*typ*/"int",/*lenge*/"10",/*prec*/string(),/*comment*/Tx[T_eindeutige_Identifikation],/*obind*/1,/*obaut*/1,/*nnull*/0,/*defa*/string(),/*unsig*/1),
+			Feld("Name","varchar","64","",Tx[T_ViewName],0,0,1),
+			Feld("SQL","LONGTEXT","","",Tx[T_ViewSQLText],0,0,1),
+		};
+		Index indices[]{
+			Index("Name",new Feld[1]{Feld("Name")},1,/*unique*/1)
+		};
+		Tabelle taba(My,tlyviewsql,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,0,0, Tx[T_LaboryViewSQL]);
+		if (taba.prueftab(aktc,obverb)) {
+			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tlyviewsql,1,1);
+			kexitDB(My,11);
+		}
+	} // if (!direkt)
+} // void hhcl::prueflyviewsql
 
 // wird aufgerufen in: virtpruefweiteres
 void hhcl::prueflyparameter(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt/*=0*/)
@@ -1797,6 +1834,7 @@ void hhcl::tabnamen()
 	tlyparameter=vorsl+"parameter";
 	tlyhinw=vorsl+"hinw";
 	tlyqspez=vorsl+"qspez";
+	tlyviewsql=vorsl+"viewsql";
 	labpatel="labpatel";
 	labpath="labpath";
 	labgrenz="labgrenz";
@@ -3387,6 +3425,7 @@ void hhcl::prueftbl()
 	if (!My) initDB();
 	prueflyhinw(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflyqspez(My, aktc, obverb, oblog, /*direkt*/0);
+	prueflyviewsql(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflyplab(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflyparameter(My, aktc, obverb, oblog, /*direkt*/0);
 	prueflypneu(My, aktc, obverb, oblog, /*direkt*/0);
@@ -3495,9 +3534,31 @@ void hhcl::prueftbl()
 	},
 	};
 	for(size_t i=0;i<sizeof vpaare/sizeof *vpaare;i++) {
-		RS delv(My,"DROP VIEW IF EXISTS `"+vpaare[i].name+"`;",aktc,ZDB);
-		RS view(My,"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`"+muser+"`@`%` SQL SECURITY DEFINER VIEW `"+vpaare[i].name+"` AS "+
-				vpaare[i].sql,aktc,ZDB);
+		// nur DROP/CREATE VIEW ausfuehren, wenn sich der SQL-Text seit dem letzten Lauf tatsaechlich geaendert hat -
+		// sonst kollidiert das bei jedem Start unnoetig mit fremden Tabellensperren (z.B. lange offene kons-Sitzungen
+		// auf labor2a/laboryhinw), s. Kommentar bei sperrzeit/lockwait in DB.cpp
+		uchar obgleich{0};
+		RS ralt(My,"SELECT `SQL` FROM `"+tlyviewsql+"` WHERE `Name`='"+vpaare[i].name+"'",aktc,ZDB);
+		if (!ralt.obqueryfehler) {
+			char*** erg=ralt.HolZeile();
+			if (*erg && *(*erg+0) && vpaare[i].sql==*(*erg+0)) obgleich=1;
+		}
+		if (!obgleich) {
+			// kein vorheriges DROP VIEW noetig, CREATE OR REPLACE ersetzt eine bestehende View atomar -
+			// ein zusaetzliches DROP wuerde nur die Zahl der 180s-Sperren-Wartezeiten je geaenderter View verdoppeln
+			RS view(My,"CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`"+muser+"`@`%` SQL SECURITY DEFINER VIEW `"+vpaare[i].name+"` AS "+
+					vpaare[i].sql,aktc,ZDB);
+			if (!view.obqueryfehler) {
+				// Stand nur festhalten, wenn CREATE VIEW auch wirklich durchgelaufen ist - sonst wuerde ein
+				// Sperren-Timeout hier faelschlich als "erledigt" verbucht und beim naechsten Lauf nicht mehr
+				// nachgeholt, obwohl die View in der DB noch die alte Definition hat
+				svec eindfeld; eindfeld<<"Name";
+				insv rvsql(My,/*itab*/tlyviewsql,aktc,/*eindeutig*/1,eindfeld,/*asy*/0,/*csets*/0);
+				rvsql.hz("Name",vpaare[i].name);
+				rvsql.hz("SQL",vpaare[i].sql);
+				rvsql.schreib(/*sammeln*/0,/*obverb*/obverb,/*idp*/0,/*mitupd*/1);
+			}
+		}
 	}
 } // void hhcl::prueftbl
 

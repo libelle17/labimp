@@ -318,6 +318,10 @@ enum T_
 	T_lg_Hinweis,
 	T_lg_Aktiv,
 	T_lg_Kommentar,
+	T_prueflyviewsql,
+	T_LaboryViewSQL,
+	T_ViewName,
+	T_ViewSQLText,
 	T_MAX //α
 }; // enum T_ //ω
 
@@ -378,6 +382,7 @@ class hhcl:public dhcl
 		string tlyparameter; /*=vorsil+"parameter"*/
 		string tlyhinw; /*=vorsil+"hinw"*/
 		string tlyqspez; /*=vorsil+"qspez"*/
+		string tlyviewsql; /*=vorsil+"viewsql"*/
 	 string labpatel;
 	 string labpath;
 	 string labgrenz;
@@ -449,6 +454,7 @@ class hhcl:public dhcl
 		void prueflyparameter(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyhinw(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflyqspez(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
+		void prueflyviewsql(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflpath(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflpatel(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);
 		void prueflgrenz(DB *My, const size_t aktc, const int obverb, const int oblog, const uchar direkt=0);

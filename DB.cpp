@@ -1053,6 +1053,7 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 		const Index* const indx=&indices[i];
 		// steht aus: Namen nicht beruecksichtigen, nur Feldreihenfolge und ggf. -laenge
 		uchar obneu=0;
+		uchar obloeschfehl=0; // DROP INDEX unten fehlgeschlagen (z.B. Lock-Timeout) -> CREATE INDEX waere zwecklos (alter Index besteht noch, "Duplicate key name")
 		RS rind(dbp,"SHOW INDEX FROM `"+tbname+"` WHERE KEY_NAME = '"+indx->name+"'",aktc,obverb);
 		if (rind.obqueryfehler) {
 			obneu=1;
@@ -1084,11 +1085,12 @@ int Tabelle::machind(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 #ifndef abMariaDB1014				
 				if (obneu) {
 					RS rloesch(dbp,"DROP INDEX `"+indx->name +"` ON `"+tbname+"`",aktc,obverb);
+					obloeschfehl=rloesch.obqueryfehler;
 				}
-#endif				
+#endif
 			} //             if (!rind.result->row_count) else
-		} // if (obneu) 
-		if (obneu) {
+		} // if (obneu)
+		if (obneu && !obloeschfehl) {
 			RS rindins(dbp,tbname);
 			//sql.str(std::string()); sql.clear();
 			std::stringstream sql;
