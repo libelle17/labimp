@@ -144,7 +144,7 @@ l l.
 .SH OPTIONS
 Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 .br
-                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11590 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11594 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
