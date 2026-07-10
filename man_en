@@ -2,7 +2,7 @@
 .\" Manual page for labimp
 .\" Please write to geraldschade@gmx.de if you find errors or deficiencies
 .pc
-.TH labimp 1 "08.07.26" "labimp" "User Manual"
+.TH labimp 1 "10.07.26" "labimp" "User Manual"
 .SH NAME
 \fBlabimp\fR \- import laboratory values from LDT files (QC\-Labmessenger and doc.net) into a MariaDB database
 .br
@@ -144,7 +144,7 @@ l l.
 .SH OPTIONS
 Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 .br
-                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11594 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11597 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -251,6 +251,8 @@ Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 \fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
 .br
 \fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
+.br
+\fB -cmpwd, --changemariadbpwd <string>\fR: changes the MySQL/MariaDB password to <string> (stores it encrypted in the configuration) and exits afterwards without further processing\fB or not\fR
 .br
 \fB -db, --database <string>\fR: uses the database <string> instead of ('\fBlabimp\fR')
 .br
