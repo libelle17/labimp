@@ -322,6 +322,8 @@ enum T_
 	T_LaboryViewSQL,
 	T_ViewName,
 	T_ViewSQLText,
+	T_leere_Datei_nicht_uebernommen,
+	T_leere_Datei_nicht_zurueckverschoben,
 	T_MAX //α
 }; // enum T_ //ω
 

@@ -665,6 +665,10 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	{"Name der View","name of the view"},
 	// T_ViewSQLText
 	{"zuletzt angewandter SQL-Text (SELECT-Teil) der View","last applied SQL text (SELECT part) of the view"},
+	// T_leere_Datei_nicht_uebernommen
+	{"Datei mit 0 Byte, wird verschoben, aber nicht in die Tabelle aufgenommen: ","file with 0 bytes, will be moved, but not added to the table: "},
+	// T_leere_Datei_nicht_zurueckverschoben
+	{"Datei mit 0 Byte, wird nicht zurueck nach ","file with 0 bytes, will not be moved back to "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -2054,7 +2058,7 @@ void hhcl::virtpruefweiteres()
 		if (!My) initDB();
     my_ulonglong dzahl{0},szahl{0},uzahl{0};
 		char ***cerg{0};
-		RS datzahl(My,"SELECT datid p0, name p1 FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",
+		RS datzahl(My,"SELECT datid p0, name p1, größe p2 FROM `"+tlydat+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",
 				aktc,ZDB,0,0,0,&dzahl);
     RS satzzahl(My,"SELECT datid FROM `"+tlysaetze+"` WHERE datid"+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'",
 				aktc,ZDB,0,0,0,&szahl);
@@ -2074,6 +2078,11 @@ void hhcl::virtpruefweiteres()
 		// ZDB=1;
 		string verschobenedatei,befehl;
 		while (cerg=datzahl.HolZeile(),cerg?*cerg:0) {
+			// 0-Byte-Datei: gilt nicht als fertig verarbeitet, daher nicht zurueck nach ldatvz (backup) verschieben
+			if (!cjj(cerg,2)||!atoll(cjj(cerg,2))) {
+				fLog(gelbs+Tx[T_leere_Datei_nicht_zurueckverschoben]+blau+fertigvz+'/'+cjj(cerg,1)+schwarz,1,0);
+				continue;
+			}
 			verschobenedatei=ldatvz+'/'+cjj(cerg,1);
 			if (rename((fertigvz+'/'+cjj(cerg,1)).c_str(),verschobenedatei.c_str())) {
 				fLog(rots+Tx[T_Fehler_beim_Verschieben_von]+blau+fertigvz+'/'+cjj(cerg,1)+rot+Tx[T_nach_]+blau+ldatvz+'/'+cjj(cerg,1)+schwarz+": "+rot+strerror(errno)+schwarz,1,1);
@@ -2085,10 +2094,13 @@ void hhcl::virtpruefweiteres()
 		const string delbed{string(" WHERE d.datid")+(loeschab.empty()?"":">")+"='"+(loeschab.empty()?loeschid:loeschab)+"'"},
 								 delaus2{" FROM `"+labpatel+"` WHERE CONCAT(Pfad,'/',Name) IN (SELECT Pfad FROM `"+tlydat+"`d"+delbed+")"};
 		RS lo2(My,"DELETE FROM `"+labpath+"` WHERE elID IN (SELECT ID"+delaus2+")",aktc,ZDB,0,0,0,&zahl);
-		RS lol(My,"DELETE"+delaus2,aktc,ZDB,0,0,0,&zahl); 
+		RS lol(My,"DELETE"+delaus2,aktc,ZDB,0,0,0,&zahl);
 		RS loe(My,"DELETE u.*,w.*,s.*,d.* FROM laboryus u LEFT JOIN laborywert w ON w.usid=u.id LEFT JOIN laborysaetze s ON s.satzid=u.satzid LEFT JOIN laborydat d ON d.datid=s.datid"+delbed,aktc,ZDB,0,0,0,&zahl); // kann lange brauchen
+		// obiges "loe" loescht laborydat nur ueber den Umweg laboryus/laborysaetze; ohne solche verknuepften Datensaetze
+		// (z.B. bei 0-Byte-Dateien, die nie gelesen wurden) muss der laborydat-Datensatz selbst noch geloescht werden
+		RS lod(My,"DELETE FROM `"+tlydat+"` d"+delbed,aktc,ZDB,0,0,0,&zahl);
 		fLog(gruens+ltoan(zahl)+blau+" "+Tx[T_Datensaetze_geloescht]+schwarz,1,0);
-		if (!loeschid.empty()) {
+		if (!loeschid.empty() && !befehl.empty()) {
 			kexit(schluss(systemrueck(befehl+" "+devtty,/*obverb=*/0,/*oblog=*/0,/*rueck=*/0,/*obsudc=*/1),Txk[T_nach__]+befehl,oblog));
 		}
 		kexit(0);
@@ -2909,6 +2921,7 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 	reing.hz("Pfad",datei);
 	rpatel.hz("Pfad",dir_name(datei));
 	struct stat pfst{0};
+	uchar obleer{0};
 	if (!lstat(datei.c_str(),&pfst)) {
 		reing.hz("geändert",&pfst.st_mtime);
 		reing.hz("Dateidat",dateidat);
@@ -2916,6 +2929,14 @@ int hhcl::dverarbeit(const string& datei,string *datidp, string* patelidp)
 		rpatel.hz("Dateidat",dateidat);
 		reing.hz("Größe",pfst.st_size);
 		rpatel.hz("Größe",pfst.st_size);
+		obleer=!pfst.st_size;
+	}
+	if (obleer) {
+		// Datei soll zwar (vom Aufrufer) nach fertigvz verschoben, aber nicht in die Tabelle aufgenommen werden
+		fLog(gelbs+Tx[T_leere_Datei_nicht_uebernommen]+blau+datei+schwarz,1,0);
+		if (datidp) datidp->clear();
+		if (patelidp) patelidp->clear();
+		return 0;
 	}
 	reing.hz("Zp",&jetzt);
 	rpatel.hz("Datum",&jetzt);
