@@ -540,4 +540,5 @@ class hhcl:public dhcl
 		const string& getFertigvz() const { return fertigvz; }
 		void initDB_public() { if (!My) initDB(); }
 			void setDateidat(const string& d) { dateidat=d; }
+		string schoneingelesen_public(const string& name);
 }; // class hhcl //ω

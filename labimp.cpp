@@ -3786,6 +3786,18 @@ void hhcl::pvirtfuehraus()
 	ZDB=altZDB;
 } // void hhcl::pvirtfuehraus  //α
 
+// liefert die datid, wenn eine Datei dieses Namens schon fertig in tlydat eingetragen ist, sonst ""
+// (wie die Namenspruefung in pvirtfuehraus; 5.10.26: sonst wurde eine erneut in qvz gelandete Datei doppelt eingelesen)
+// aufgerufen in hhcl_docnet_verarbeitqvz (docnet.cpp)
+string hhcl::schoneingelesen_public(const string& name)
+{
+	if (!My) initDB();
+	RS rs(My,"SELECT datid FROM `"+tlydat+"` WHERE name="+sqlft(My->DBS,name)+" AND fertig=1 ORDER BY datid LIMIT 1",0,ZDB);
+	char ***cerg{0};
+	if (!rs.obqueryfehler && (cerg=rs.HolZeile()) && *cerg) return cjj(cerg,0);
+	return string();
+} // string hhcl::schoneingelesen_public
+
 int hhcl::vverarbeit(const string& datei)
 {
 	mdatei mdat(datei,ios::in);

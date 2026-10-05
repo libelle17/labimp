@@ -843,6 +843,24 @@ void docnet_extrahierePDF(const std::string &ldtpfad,
 //   5. Quelldatei nach fertigvz verschieben
 // Rueckgabewert: Anzahl erfolgreich verarbeiteter Dateien.
 // ================================================================
+// verschiebt die nach ldatvz verschobene Quelldatei weiter nach fertigvz
+// aufgerufen in hhcl_docnet_verarbeitqvz
+static void nachFertigvz(hhcl *h, const string &ldatvz, const string &zpfad, const string &zname)
+{
+	const string &fertigvz = h->getFertigvz();
+	if (!fertigvz.empty() && fertigvz != ldatvz) {
+		string ziel = fertigvz + "/" + zname;
+		error_code ec2;
+		fs::rename(zpfad, ziel, ec2);
+		if (ec2) {
+			try {
+				fs::copy_file(zpfad, ziel, fs::copy_options::overwrite_existing);
+				fs::remove(zpfad);
+			} catch (...) {} // try
+		} // if (ec2...)
+	} // if (!fertigvz.empty(...)
+} // static void nachFertigvz
+
 int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 {
 	int _verarbeitet = 0;
@@ -919,6 +937,17 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 			} // try
 		} // if (ec...)
 
+		// 5.10.26: schon fertig eingelesene Datei (gleicher Name in tlydat, wie in der find-Schleife von pvirtfuehraus)
+		// nicht nochmal einlesen (sonst doppelte Eintraege, z.B. wenn die Datei erneut in qvz landet), nur nach fertigvz
+		{
+			string altdatid = h->schoneingelesen_public(zname);
+			if (!altdatid.empty()) {
+				fLog(rots + "docnet: " + zname + " war schon eingelesen (datid " + blau + altdatid + rot + "), nur nach fertigvz verschoben" + schwarz, 1, oblog);
+				nachFertigvz(h, ldatvz, zpfad, zname);
+				continue;
+			} // if (!altdatid.empty())
+		}
+
 		// 3. Kopieren in Zielverzeichnisse zvz1..zvz4
 		for (int i = 0; i < 4; ++i) {
 			const string &z = docnet::zvz[i];
@@ -979,18 +1008,7 @@ int hhcl_docnet_verarbeitqvz(hhcl *h, const int obverb, const int oblog)
 
 		// Original-LDT3-Datei nach fertigvz verschieben damit
 		// die normale find-Schleife sie nicht nochmal verarbeitet
-		const string &fertigvz = h->getFertigvz();
-		if (!fertigvz.empty() && fertigvz != ldatvz) {
-			string ziel = fertigvz + "/" + zname;
-			error_code ec2;
-			fs::rename(zpfad, ziel, ec2);
-			if (ec2) {
-				try {
-					fs::copy_file(zpfad, ziel, fs::copy_options::overwrite_existing);
-					fs::remove(zpfad);
-				} catch (...) {} // try
-			} // if (ec2...)
-		} // if (!fertigvz.empty(...)
+		nachFertigvz(h, ldatvz, zpfad, zname);
 	} // for
 	return _verarbeitet;
 }
