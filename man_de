@@ -2,7 +2,7 @@
 .\" Manual-Seite für labimp
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH labimp 1 "11.07.26" "labimp" "Handbuch"
+.TH labimp 1 "12.10.26" "labimp" "Handbuch"
 .SH NAME
 \fBlabimp\fR \- Laborwerte aus LDT\-Dateien (QC\-Labmessenger und doc.net) in eine MariaDB\-Datenbank einlesen
 .br
@@ -145,7 +145,7 @@ l l.
 .SH OPTIONEN
 Optionen können kurz (\fB\-x\fR) oder lang (\fB\-\-xxxx\fR) angegeben werden
 .br
-                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11597 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11599 \fR (Laborimport) 
 .br
 \fBOptionen, die nicht gespeichert werden (aktueller Wert in Klammern): \fR
 .br
@@ -268,5 +268,7 @@ Optionen können kurz (\fB\-x\fR) oder lang (\fB\-\-xxxx\fR) angegeben werden
 \fB -l, --log <zahl>\fR: protokolliert ausfuehrlich in Datei '\fB/var/log/labimp.log\fR' (sonst knapper) (\fB0\fR)
 .br
 \fB -cm, --cronminuten <string>\fR: alle wieviel Minuten soll \fBlabimp\fR ueber crontab aufgerufen werden (0=gar nicht), anstatt  ('\fB0\fR')
+.br
+\fB -cr, --cronrechner <string>\fR: kommagetrennte Kurz-Rechnernamen (vor dem ersten Punkt), auf denen der Crontab-Eintrag selbst gepflegt wird ('\fBlinux1\fR')
 .br
 \fB -autoakt, --autoaktual <zahl>\fR: Programm automatisch aktualisieren (\fB1\fR)

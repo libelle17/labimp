@@ -2,7 +2,7 @@
 .\" Manual page for labimp
 .\" Please write to geraldschade@gmx.de if you find errors or deficiencies
 .pc
-.TH labimp 1 "11.07.26" "labimp" "User Manual"
+.TH labimp 1 "12.10.26" "labimp" "User Manual"
 .SH NAME
 \fBlabimp\fR \- import laboratory values from LDT files (QC\-Labmessenger and doc.net) into a MariaDB database
 .br
@@ -144,7 +144,7 @@ l l.
 .SH OPTIONS
 Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 .br
-                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11597 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11599 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -267,5 +267,7 @@ Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 \fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/labimp.log\fR' (otherwise shorter) (\fB0\fR)
 .br
 \fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBlabimp\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
+.br
+\fB -cr, --cronhosts <string>\fR: comma-separated short host names (before the first dot) on which the crontab entry is self-maintained ('\fBlinux1\fR')
 .br
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
