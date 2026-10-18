@@ -2,7 +2,7 @@
 .\" Manual page for labimp
 .\" Please write to geraldschade@gmx.de if you find errors or deficiencies
 .pc
-.TH labimp 1 "12.10.26" "labimp" "User Manual"
+.TH labimp 1 "18.10.26" "labimp" "User Manual"
 .SH NAME
 \fBlabimp\fR \- import laboratory values from LDT files (QC\-Labmessenger and doc.net) into a MariaDB database
 .br
@@ -108,7 +108,10 @@ Each rule in \fBlabgrenz\fR defines, among other things, a match pattern
 for the laboratory parameter, a direction (\fBoben\fR/\fBunten\fR, i.e.
 above/below) and a threshold, plus optionally further criteria (age,
 sex, weight, a required or excluded ICD code, a medication, a minimum
-daily dose) and an order for cascading several rules per direction.
+daily dose, a minimum number \fBVortreffer\fR of earlier equally
+pathological measurements) and an order for cascading several rules per
+direction (e.g. pancreatic elastase < 200: first time suspected K86.83V,
+with earlier hit confirmed K86.83).
 .br
 If a rule fires, its \fBHinweis\fR (hint) text (possibly containing the
 placeholder \fB%DOSIS%\fR for a computed daily dose) is recorded with
@@ -144,7 +147,7 @@ l l.
 .SH OPTIONS
 Options can be given in short form (\fB\-x\fR) or long form (\fB\-\-xxxx\fR)
 .br
-                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11599 \fR (Laborimport) 
+                                                                              \fRProgramm: \fB/root/labimp/labimp\fR, V: \fB0.11600 \fR (Laborimport) 
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br

@@ -638,6 +638,9 @@ char const *DPROG_T[T_MAX+1][SprachZahl]=
 	 "exclusive criterion: 'w'=female only, 'm'=not female, empty=no criterion (rule family like AlterUnter/AlterUeber)"},
 	// T_lg_Mindesttreffer
 	{"noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium (0=alle gesetzten)","required number of hits among value/age/weight criteria (0=all set ones)"},
+	// T_lg_Vortreffer
+	{"Mindestzahl frueherer Messungen desselben Parameters, die den Grenzwert ebenfalls verletzt haben (0=keine Bedingung), z.B. 1 fuer gesicherte statt V.a.-Diagnose",
+	 "minimum number of earlier measurements of the same parameter that also violated the threshold (0=no condition), e.g. 1 for confirmed instead of suspected diagnosis"},
 	// T_lg_Dosisgrenze
 	{"Dosisgrenze in mg/Tag; wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis (aus Medikamentenplan, Wirkstaerke aus erster Zahl im Medikamentennamen) ueberschritten sein (leer=kein Dosischeck)",
 	 "dose limit in mg/day; if set, the current daily dose (from medication plan, strength from the first number in the medication name) must additionally be exceeded (empty=no dose check)"},
@@ -1417,6 +1420,7 @@ void hhcl::prueflgrenz(DB *My, const size_t aktc, const int obverb, const int ob
 			Feld("AlterUeber","varchar","10","",Tx[T_lg_AlterUeber],0,0,1,""),
 			Feld("Geschlecht","varchar","1","",Tx[T_lg_Geschlecht],0,0,1,""),
 			Feld("Mindesttreffer","int","2","",Tx[T_lg_Mindesttreffer],0,0,1,"0"),
+			Feld("Vortreffer","int","2","",Tx[T_lg_Vortreffer],0,0,1,"0"),
 			Feld("Dosisgrenze","varchar","10","",Tx[T_lg_Dosisgrenze],0,0,1,""),
 			Feld("ICDVorschlag","varchar","20","",Tx[T_lg_ICDVorschlag],0,0,1,""),
 			Feld("ICDPruefmuster","varchar","60","",Tx[T_lg_ICDPruefmuster],0,0,1,""),
@@ -1442,13 +1446,14 @@ void hhcl::ladelabgrenz(const size_t aktc)
 {
 	labgrenzregeln.clear();
 	RS lg(My,"SELECT Abkumuster,Einheitmuster,Richtung,Grenzwert,ICDMuster,ICDVorhanden,MedMuster,MedFlag,MedVorhanden,"
-			"AlterGrenze,GewichtGrenze,AlterUnter,AlterUeber,Geschlecht,Mindesttreffer,Dosisgrenze,ICDVorschlag,ICDPruefmuster,Hinweis FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
+			"AlterGrenze,GewichtGrenze,AlterUnter,AlterUeber,Geschlecht,Mindesttreffer,Dosisgrenze,ICDVorschlag,ICDPruefmuster,Hinweis,Vortreffer FROM `"+labgrenz+"` WHERE Aktiv<>0 ORDER BY Reihenfolge",aktc,ZDB);
 	if (!lg.obqueryfehler) {
 		char ***lerg{0};
 		while (lerg=lg.HolZeile(),lerg?*lerg:0) {
 			LGrenzRegel r;
 			try {
-				r.abkure=regex(cjj(lerg,0),regex::icase);
+				r.abkumuster=cjj(lerg,0);
+				r.abkure=regex(r.abkumuster,regex::icase);
 			} catch (const regex_error&) {
 				fLog(rots+"labgrenz.Abkumuster ungueltig: "+blau+cjj(lerg,0)+schwarz,1,1);
 				continue;
@@ -1484,6 +1489,7 @@ void hhcl::ladelabgrenz(const size_t aktc)
 			r.icdvorschlag=cjj(lerg,16);
 			r.icdpruefmuster=cjj(lerg,17);
 			r.hinweis=cjj(lerg,18);
+			r.vortreffer=atoi(cjj(lerg,19));
 			labgrenzregeln.push_back(r);
 		} // while(lerg=lg.HolZeile(),lerg?*lerg:0)
 	} // if (!lg.obqueryfehler)
@@ -1518,7 +1524,7 @@ void hhcl::labgrenzampel(const LGrenzRegel& r, const string& lp, const size_t ak
 } // void hhcl::labgrenzampel
 
 // aufgerufen in labgrenzpruef fuer die (per Reihenfolge) erstzutreffende Regel je Richtung;
-// wertet die Kriterien (Wert-, ggf. Alters- und Gewichtskriterium, per Mindesttreffer) und danach,
+// wertet die Kriterien (Wert-, ggf. Alters- und Gewichtskriterium, per Mindesttreffer), ggf. die Vortreffer und danach,
 // falls Dosisgrenze gesetzt, die aktuelle Tagesdosis aus dem Medikamentenplan aus; setzt bei Feuern die fICD-Ampel;
 // liefert bei Dosisgrenze zusaetzlich die errechnete Tagesdosis (fuer den %DOSIS%-Platzhalter in Hinweis) nach berdosis
 uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const string& lp, const size_t aktc, string& ficd, long& ficdsp, double& berdosis)
@@ -1542,6 +1548,18 @@ uchar hhcl::labgrenzfeuert(const LGrenzRegel& r, const double rewert, const stri
 		if (gew>0 && gew<=r.gewichtgrenze) treffer++;
 	}
 	if (treffer<(r.mindesttreffer?r.mindesttreffer:moeglich)) return 0;
+	// Vortreffer: genuegend fruehere Messungen (vor dem Befunddatum) mit derselben Grenzwertverletzung?
+	if (r.vortreffer) {
+		if (lp==""||lp=="0") return 0;
+		auto sqlesc=[](string s)->string{ersetzAlle(s,"\\","\\\\");ersetzAlle(s,"'","\\'");return s;};
+		const string zahl{"CAST(REPLACE(REPLACE(REPLACE(TRIM(wert),'<',''),'>',''),',','.') AS DOUBLE)"};
+		RS vt(My,"SELECT COUNT(0) FROM labor1a WHERE pat_id="+lp+" AND zeitpunkt<STR_TO_DATE('"+berzt+"','%Y%m%d')"
+				" AND abkü RLIKE '"+sqlesc(r.abkumuster)+"'"+(r.einheitmuster.empty()?"":" AND einheit RLIKE '"+sqlesc(r.einheitmuster)+"'")+
+				" AND TRIM(wert) RLIKE '^[<>]?[[:space:]]*[0-9]' AND "+zahl+(r.richtung=="oben"?">":"<")+to_string(r.grenzwert),aktc,ZDB);
+		if (vt.obqueryfehler) return 0;
+		const char *const *const *const verg{vt.HolZeile()};
+		if (!(verg&&*verg) || (unsigned)atoi(cjj(verg,0))<r.vortreffer) return 0;
+	}
 	if (!r.obdosis) {
 		labgrenzampel(r,lp,aktc,ficd,ficdsp);
 		return 1;

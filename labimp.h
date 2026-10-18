@@ -311,6 +311,7 @@ enum T_
 	T_lg_AlterUeber,
 	T_lg_Geschlecht,
 	T_lg_Mindesttreffer,
+	T_lg_Vortreffer,
 	T_lg_Dosisgrenze,
 	T_lg_ICDVorschlag,
 	T_lg_ICDPruefmuster,
@@ -333,7 +334,7 @@ void BDTtoDate(const string& inh,struct tm *tm,int abjahr=1900,uchar objahrzuers
 // einmalig zu Beginn jedes Einlesevorgangs ueber ladelabgrenz() geladen
 struct LGrenzRegel
 {
-	regex abkure; // kompiliert aus labgrenz.Abkumuster
+	string abkumuster; regex abkure; // labgrenz.Abkumuster, kompiliert nach abkure; abkumuster selbst fuer die RLIKE-Abfrage bei vortreffer
 	string einheitmuster; regex einheitre; // labgrenz.Einheitmuster, reg. Ausdruck auf Einheit, leer = keine Bedingung
 	string richtung; // "unten" oder "oben"
 	double grenzwert{0};
@@ -353,6 +354,9 @@ struct LGrenzRegel
 	                   // uebrigen Code, der alles ausser 'w'/'W' als maennlich behandelt), leer=keine Bedingung;
 	                   // ebenfalls ausschliessend, Teil der Regelfamilie wie AlterUnter/AlterUeber
 	unsigned mindesttreffer{0}; // labgrenz.Mindesttreffer: noetige Trefferzahl unter Wert-/Alter-/Gewichtskriterium; 0=alle gesetzten
+	unsigned vortreffer{0}; // labgrenz.Vortreffer: Regel feuert nur, wenn mindestens so viele fruehere Messungen (labor1a, vor dem
+	                        // Befunddatum, gleiches Abkumuster/Einheitmuster) den Grenzwert in derselben Richtung ebenfalls verletzt haben; 0=keine Bedingung;
+	                        // nicht Teil der Regelfamilie, so dass z.B. eine Regel mit Vortreffer 1 (gesichert) vor einer mit 0 (V.a.) kaskadieren kann
 	double dosisgrenze{0}; uchar obdosis{0}; // labgrenz.Dosisgrenze (mg/Tag): wenn gesetzt, muss zusaetzlich die aktuelle Tagesdosis ueberschritten sein
 	string icdvorschlag; // labgrenz.ICDVorschlag: bei Feuern vorgeschlagener ICD (an fICD angehaengt), leer = kein Vorschlag;
 	                     // dient, falls icdpruefmuster leer ist, zugleich als RLIKE-Praefixmuster gegen diagview,
