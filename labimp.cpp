@@ -2814,7 +2814,7 @@ void hhcl::wertschreib(const int aktc,uchar *usoffenp,insv *rusp,string *usidp,i
 						} // if (lpid!=""&&lpid!="0" && rewert>30)
 						// Vit B12 jetzt ueber labgrenz (Einheitmuster ^pg/ml$, ICDVorschlag E53.8, ICDPruefmuster ^E53.8|^D51), s.u.
 						// Vit D jetzt ueber labgrenz (zwei Regeln nach Abkumuster: VIT3KL/VITD01/VITD Grenzwert 20,
-						// DIHYKP/DIHYK/VID2 Grenzwert 25; ICDVorschlag E55.9, ICDPruefmuster ^E55$), s.u.
+						// DIHYKP/DIHYK/VID2 Grenzwert 25; ICDVorschlag E55.9, ICDPruefmuster ^E55), s.u.
 							// PTH jetzt ueber labgrenz (ICDMuster N18.[3-5]/ICDVorhanden=1 als Gate, ICDVorschlag
 							// E21.1, ICDPruefmuster ^E21), s.u.
 						// MAK jetzt ueber labgrenz (ICDVorschlag E06.3, ICDPruefmuster ^E06), s.u.
